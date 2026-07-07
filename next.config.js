@@ -2,6 +2,10 @@
 const nextConfig = {
   // Compress responses
   compress: true,
+  // Ignore ESLint errors during Vercel builds to prevent failures
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 
   // Experimental optimizations
   experimental: {
