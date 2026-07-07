@@ -1,0 +1,522 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import {
+  Heart,
+  ShoppingCart,
+  Share2,
+  Star,
+  Truck,
+  Shield,
+  Package,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
+  Check,
+} from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/hooks/useWishlist';
+import { formatCurrency, cn } from '@/lib/utils';
+import type { Product, PosterSize, Review } from '@/types';
+import { toast } from 'sonner';
+
+interface ProductDetailProps {
+  product: Product;
+  reviews: Review[];
+}
+
+export function ProductDetail({ product, reviews }: ProductDetailProps) {
+  const router = useRouter();
+  const { addItem } = useCart();
+  const { isWishlisted, toggle } = useWishlist();
+
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedSize, setSelectedSize] = useState<PosterSize | null>(
+    product.sizes?.[0] || null
+  );
+  const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+  // Adaptive aspect ratio: tracks the natural width/height of the loaded image
+  const [imgAspect, setImgAspect] = useState<number | null>(null);
+
+  const handleMainImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const el = e.currentTarget as HTMLImageElement;
+    if (el.naturalWidth && el.naturalHeight) {
+      setImgAspect(el.naturalWidth / el.naturalHeight);
+    }
+  }, []);
+
+  const images = product.images || [];
+  const wishlisted = isWishlisted(product.id);
+  const currentImage = images[selectedImage];
+
+  const unitPrice =
+    product.product_type === 'poster'
+      ? (selectedSize?.price ?? 0)
+      : (product.price ?? 0);
+
+  const inStock =
+    product.product_type === 'poster'
+      ? (selectedSize ? selectedSize.stock > 0 : false)
+      : (product.stock ?? 0) > 0;
+
+  const handlePrevImage = useCallback(() => {
+    setImgAspect(null); // reset until new image loads
+    setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  }, [images.length]);
+
+  const handleNextImage = useCallback(() => {
+    setImgAspect(null); // reset until new image loads
+    setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  }, [images.length]);
+
+  const handleAddToCart = async () => {
+    if (product.product_type === 'poster' && !selectedSize) {
+      toast.error('Please select a size');
+      return;
+    }
+
+    setAddingToCart(true);
+    await addItem(
+      product.id,
+      unitPrice,
+      quantity,
+      product.product_type === 'poster' ? selectedSize?.id : undefined
+    );
+    setAddingToCart(false);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: product.name,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied!');
+    }
+  };
+
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
+
+  return (
+    <div className="page-container py-10 md:py-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+        {/* ─── Image Gallery ─── */}
+        <div className="space-y-4">
+          {/* Main image — aspect ratio adapts to the actual image (A4, A3, square, etc.) */}
+          <div
+            className="relative rounded-2xl overflow-hidden bg-luxe-dark cursor-zoom-in"
+            style={{
+              // Use detected image aspect ratio; fall back to 4/5 portrait until image loads
+              aspectRatio: imgAspect ? String(imgAspect) : '4/5',
+              // Cap very tall images (e.g. A4 portrait) so they don't overflow the screen
+              maxHeight: '85vh',
+            }}
+            onClick={() => setZoomed(!zoomed)}
+          >
+            {currentImage ? (
+              <Image
+                src={currentImage.url}
+                alt={currentImage.alt_text || product.name}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className={cn(
+                  'object-contain transition-transform duration-500',
+                  zoomed && 'scale-125'
+                )}
+                onLoad={handleMainImageLoad}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-white/10 text-8xl">✦</span>
+              </div>
+            )}
+
+            {/* Navigation arrows */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-black/70 transition-all"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-black/70 transition-all"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            {/* Zoom hint */}
+            <div className="absolute top-3 right-3 p-2 rounded-full bg-black/40 backdrop-blur-sm text-white/60">
+              <ZoomIn className="w-4 h-4" />
+            </div>
+
+            {/* Image counter */}
+            {images.length > 1 && (
+              <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white/60 text-xs">
+                {selectedImage + 1} / {images.length}
+              </div>
+            )}
+          </div>
+
+          {/* Thumbnails */}
+          {images.length > 1 && (
+            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+              {images.map((img, i) => (
+                <button
+                  key={img.id}
+                  onClick={() => setSelectedImage(i)}
+                  className={cn(
+                    'flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all',
+                    selectedImage === i
+                      ? 'border-luxe-accent'
+                      : 'border-white/10 hover:border-white/30'
+                  )}
+                  aria-label={`View image ${i + 1}`}
+                >
+                  <Image
+                    src={img.url}
+                    alt={img.alt_text || `View ${i + 1}`}
+                    width={80}
+                    height={80}
+                    className="object-cover w-full h-full"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ─── Product Info ─── */}
+        <div className="flex flex-col">
+          {/* Back button */}
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-1.5 text-white/40 hover:text-white text-sm mb-5 w-fit transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+            Back
+          </button>
+
+          {/* Category + tags */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {product.category && (
+              <span className="badge-luxe text-xs">{product.category.name}</span>
+            )}
+            {product.is_best_seller && (
+              <span className="badge-gold text-xs">Best Seller</span>
+            )}
+            {product.is_trending && (
+              <span className="badge-luxe text-xs">Trending</span>
+            )}
+          </div>
+
+          {/* Name */}
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">
+            {product.name}
+          </h1>
+
+          {/* Rating */}
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={cn(
+                      'w-4 h-4',
+                      i < Math.floor(averageRating)
+                        ? 'text-luxe-accent fill-current'
+                        : 'text-white/20'
+                    )}
+                  />
+                ))}
+              </div>
+              <span className="text-white/60 text-sm">
+                {averageRating.toFixed(1)} ({reviews.length} review{reviews.length !== 1 ? 's' : ''})
+              </span>
+            </div>
+          )}
+
+          {/* Price */}
+          <div className="flex items-baseline gap-3 mb-6">
+            <span className="font-display text-3xl font-bold text-white">
+              {formatCurrency(unitPrice)}
+            </span>
+            {product.product_type === 'poster' && selectedSize && (
+              <span className="text-white/40 text-sm">for {selectedSize.label}</span>
+            )}
+          </div>
+
+          {/* Description */}
+          <p className="text-white/55 text-sm leading-relaxed mb-8">
+            {product.description}
+          </p>
+
+          {/* ── Size selector (Posters only) ── */}
+          {product.product_type === 'poster' && product.sizes && product.sizes.length > 0 && (
+            <div className="mb-8">
+              <p className="text-white/70 text-sm font-medium mb-3">
+                Select Size
+                {selectedSize && (
+                  <span className="text-white/40 ml-2">
+                    ({selectedSize.width_cm} × {selectedSize.height_cm} cm)
+                  </span>
+                )}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((size) => (
+                  <button
+                    key={size.id}
+                    onClick={() => setSelectedSize(size)}
+                    disabled={size.stock === 0}
+                    className={cn(
+                      'flex flex-col items-center px-4 py-2.5 rounded-xl border text-sm font-medium transition-all',
+                      size.stock === 0
+                        ? 'border-white/10 text-white/20 cursor-not-allowed'
+                        : selectedSize?.id === size.id
+                          ? 'border-luxe-accent bg-luxe-accent/10 text-luxe-accent'
+                          : 'border-white/15 text-white/70 hover:border-white/40'
+                    )}
+                  >
+                    <span>{size.label}</span>
+                    <span className="text-[10px] mt-0.5 opacity-70">
+                      {size.stock === 0 ? 'Out' : formatCurrency(size.price)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Attributes */}
+          <div className="grid grid-cols-2 gap-3 mb-8">
+            {product.material && (
+              <div className="glass-card-sm p-3">
+                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Material</p>
+                <p className="text-white text-sm font-medium">{product.material}</p>
+              </div>
+            )}
+            {product.product_type === 'poster' && product.finish && (
+              <div className="glass-card-sm p-3">
+                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Finish</p>
+                <p className="text-white text-sm font-medium capitalize">{product.finish}</p>
+              </div>
+            )}
+            {product.product_type === 'poster' && product.orientation && (
+              <div className="glass-card-sm p-3">
+                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Orientation</p>
+                <p className="text-white text-sm font-medium capitalize">{product.orientation}</p>
+              </div>
+            )}
+            {product.product_type === 'earring' && product.color && (
+              <div className="glass-card-sm p-3">
+                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Color</p>
+                <p className="text-white text-sm font-medium">{product.color}</p>
+              </div>
+            )}
+            {product.product_type === 'earring' && product.weight_grams && (
+              <div className="glass-card-sm p-3">
+                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Weight</p>
+                <p className="text-white text-sm font-medium">{product.weight_grams}g</p>
+              </div>
+            )}
+          </div>
+
+          {/* Quantity + Cart */}
+          <div className="flex items-center gap-3 mb-6">
+            {/* Quantity */}
+            <div className="flex items-center gap-1 glass-card-sm rounded-xl overflow-hidden">
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="px-4 py-3 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+              >
+                −
+              </button>
+              <span className="w-10 text-center text-white text-sm font-medium">{quantity}</span>
+              <button
+                onClick={() => setQuantity((q) => q + 1)}
+                className="px-4 py-3 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+              >
+                +
+              </button>
+            </div>
+
+            {/* Add to cart */}
+            <button
+              onClick={handleAddToCart}
+              disabled={!inStock || addingToCart}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all',
+                inStock
+                  ? 'bg-white text-black hover:bg-luxe-accent'
+                  : 'bg-white/10 text-white/30 cursor-not-allowed'
+              )}
+            >
+              {addingToCart ? (
+                <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+              ) : (
+                <ShoppingCart className="w-4 h-4" />
+              )}
+              {!inStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Cart'}
+            </button>
+          </div>
+
+          {/* Wishlist + Share */}
+          <div className="flex items-center gap-3 mb-8">
+            <button
+              onClick={() => toggle(product.id)}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-medium transition-all',
+                wishlisted
+                  ? 'border-red-500/40 bg-red-500/10 text-red-400'
+                  : 'border-white/15 text-white/60 hover:border-white/30 hover:text-white'
+              )}
+            >
+              <Heart className={cn('w-4 h-4', wishlisted && 'fill-current')} />
+              {wishlisted ? 'Wishlisted' : 'Add to Wishlist'}
+            </button>
+            <button
+              onClick={handleShare}
+              className="p-3 rounded-xl border border-white/15 text-white/60 hover:border-white/30 hover:text-white transition-all"
+              aria-label="Share"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Delivery info */}
+          <div className="space-y-3 py-6 border-t border-white/10">
+            <div className="flex items-center gap-3 text-sm text-white/50">
+              <Truck className="w-4 h-4 text-luxe-accent flex-shrink-0" />
+              Delivered across Tamil Nadu in 3–5 business days
+            </div>
+            <div className="flex items-center gap-3 text-sm text-white/50">
+              <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
+              Free delivery on orders above ₹999
+            </div>
+            <div className="flex items-center gap-3 text-sm text-white/50">
+              <Shield className="w-4 h-4 text-luxe-accent flex-shrink-0" />
+              Easy 7-day returns
+            </div>
+            <div className="flex items-center gap-3 text-sm text-white/50">
+              <Package className="w-4 h-4 text-luxe-accent flex-shrink-0" />
+              Securely packaged with premium materials
+            </div>
+          </div>
+
+          {/* Tags */}
+          {product.tags && product.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-4 border-t border-white/10">
+              {product.tags.map((tag) => (
+                <span key={tag} className="badge-luxe text-xs">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Reviews Section */}
+      {reviews.length > 0 && (
+        <div className="mt-20 pt-12 border-t border-white/10">
+          <h2 className="font-display text-2xl font-bold text-white mb-8">
+            Customer Reviews ({reviews.length})
+          </h2>
+
+          {/* Rating summary */}
+          <div className="flex items-center gap-6 mb-10 p-6 glass-card">
+            <div className="text-center">
+              <p className="font-display text-5xl font-bold text-white">
+                {averageRating.toFixed(1)}
+              </p>
+              <div className="flex items-center gap-1 justify-center my-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={cn(
+                      'w-4 h-4',
+                      i < Math.floor(averageRating)
+                        ? 'text-luxe-accent fill-current'
+                        : 'text-white/20'
+                    )}
+                  />
+                ))}
+              </div>
+              <p className="text-white/40 text-xs">{reviews.length} reviews</p>
+            </div>
+          </div>
+
+          {/* Review list */}
+          <div className="space-y-5">
+            {reviews.map((review) => (
+              <motion.div
+                key={review.id}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="glass-card p-5"
+              >
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-luxe-accent/20 flex items-center justify-center">
+                      <span className="text-luxe-accent text-xs font-semibold">
+                        {((review.user as any)?.name || 'U')[0].toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">
+                        {(review.user as any)?.name || 'Verified Customer'}
+                      </p>
+                      {review.is_verified && (
+                        <span className="text-green-400 text-[10px] flex items-center gap-1">
+                          <Check className="w-2.5 h-2.5" />
+                          Verified Purchase
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={cn(
+                          'w-3.5 h-3.5',
+                          i < review.rating ? 'text-luxe-accent fill-current' : 'text-white/20'
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {review.title && (
+                  <p className="text-white text-sm font-medium mb-1">{review.title}</p>
+                )}
+                {review.body && (
+                  <p className="text-white/55 text-sm leading-relaxed">{review.body}</p>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

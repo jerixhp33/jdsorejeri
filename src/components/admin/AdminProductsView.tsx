@@ -1,0 +1,250 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { Plus, Search, Edit2, Trash2, Eye, EyeOff, Star, Package } from 'lucide-react';
+import { formatCurrency, cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import type { Product, Category } from '@/types';
+import { ProductFormModal } from './ProductFormModal';
+
+interface AdminProductsViewProps {
+  initialProducts: Product[];
+  categories: Category[];
+}
+
+export function AdminProductsView({ initialProducts, categories }: AdminProductsViewProps) {
+  const [products, setProducts] = useState(initialProducts);
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'poster' | 'earring'>('all');
+  const [showModal, setShowModal] = useState(false);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
+
+  const filtered = products.filter((p) => {
+    const matchesType = typeFilter === 'all' || p.product_type === typeFilter;
+    const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
+    return matchesType && matchesSearch;
+  });
+
+  const toggleActive = async (product: Product) => {
+    const res = await fetch('/api/admin/products', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: product.id, is_active: !product.is_active }) });
+    if (res.ok) {
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_active: !p.is_active } : p));
+      toast.success(product.is_active ? 'Product hidden' : 'Product visible');
+    } else {
+      toast.error('Failed to update product');
+    }
+  };
+
+  const toggleFeatured = async (product: Product) => {
+    const res = await fetch('/api/admin/products', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: product.id, is_featured: !product.is_featured }) });
+    if (res.ok) {
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_featured: !p.is_featured } : p));
+      toast.success(product.is_featured ? 'Removed from featured' : 'Added to featured');
+    } else {
+      toast.error('Failed to update product');
+    }
+  };
+
+  const deleteProduct = async (productId: string) => {
+    if (!confirm('Delete this product? This cannot be undone.')) return;
+    try {
+      // Delete related images first (FK constraint)
+      await fetch('/api/admin/product-images', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId }),
+      });
+      // Delete poster sizes (FK constraint)
+      await fetch('/api/admin/poster-sizes', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId }),
+      });
+      // Delete order_items referencing this product (FK constraint: order_items_product_id_fkey)
+      await fetch('/api/admin/order-items', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId }),
+      });
+      // Delete collection_products referencing this product (FK constraint)
+      await fetch('/api/admin/products', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _type: 'collection_products_by_product', product_id: productId }),
+      });
+      // Now delete the product itself
+      const res = await fetch('/api/admin/products', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: productId }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || 'Failed to delete product');
+      }
+      setProducts(prev => prev.filter(p => p.id !== productId));
+      toast.success('Product deleted');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete product');
+    }
+  };
+
+  const handleSaved = (savedProduct: Product) => {
+    if (editProduct) {
+      setProducts(prev => prev.map(p => p.id === savedProduct.id ? savedProduct : p));
+    } else {
+      setProducts(prev => [savedProduct, ...prev]);
+    }
+    setShowModal(false);
+    setEditProduct(null);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-3xl font-bold text-white">Products</h1>
+        <button
+          onClick={() => { setEditProduct(null); setShowModal(true); }}
+          className="btn-gold flex items-center gap-2 text-sm"
+        >
+          <Plus className="w-4 h-4" />
+          Add Product
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="glass-card p-4 flex flex-wrap items-center gap-4">
+        <div className="relative flex-1 min-w-48">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input-luxe pl-9 text-sm w-full"
+          />
+        </div>
+        <div className="flex gap-2">
+          {(['all', 'poster', 'earring'] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTypeFilter(t)}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all',
+                typeFilter === t ? 'bg-luxe-accent text-black' : 'bg-white/5 text-white/50 hover:bg-white/10'
+              )}
+            >
+              {t === 'all' ? 'All Types' : t === 'poster' ? 'Posters' : 'Earrings'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Products grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {filtered.length === 0 ? (
+          <div className="col-span-full glass-card p-16 text-center">
+            <Package className="w-8 h-8 text-white/20 mx-auto mb-3" />
+            <p className="text-white/30">No products found</p>
+          </div>
+        ) : (
+          filtered.map((product, i) => {
+            const images = product.images as Array<{ url: string; is_primary: boolean }> | undefined;
+            const img = images?.find((im) => im.is_primary) || images?.[0];
+            const posterSizes = product.sizes as Array<{ label: string; price: number }> | undefined;
+            const displayPrice =
+              product.product_type === 'earring'
+                ? product.price
+                : posterSizes && posterSizes.length > 0
+                  ? Math.min(...posterSizes.map((s) => s.price))
+                  : null;
+
+            return (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+                className={cn('glass-card overflow-hidden', !product.is_active && 'opacity-60')}
+              >
+                <div className="relative aspect-video bg-luxe-dark">
+                  {img ? (
+                    <Image src={img.url} alt={product.name} fill className="object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-white/10 text-4xl">✦</div>
+                  )}
+                  <div className="absolute top-2 left-2 flex gap-1 flex-wrap">
+                    <span className="badge-luxe text-[10px] capitalize">{product.product_type}</span>
+                    {product.is_featured && <span className="badge-gold text-[10px]">Featured</span>}
+                    {!product.is_active && (
+                      <span style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }} className="badge-luxe text-[10px]">Hidden</span>
+                    )}
+                  </div>
+                </div>
+                <div className="p-4">
+                  <p className="text-white/40 text-xs mb-1">
+                    {(product.category as { name: string } | undefined)?.name || 'Uncategorised'}
+                  </p>
+                  <h3 className="text-white text-sm font-medium mb-2 line-clamp-2">{product.name}</h3>
+                  {displayPrice !== null && displayPrice !== undefined && (
+                    <p className="text-luxe-accent font-semibold text-sm mb-2">
+                      {product.product_type === 'poster' && posterSizes && posterSizes.length > 1 ? 'from ' : ''}
+                      {formatCurrency(displayPrice)}
+                    </p>
+                  )}
+                  {product.product_type === 'poster' && (
+                    <p className="text-white/30 text-xs mb-3">
+                      {(product.sizes as Array<{ label: string }> | undefined)?.length || 0} size{((product.sizes as Array<unknown> | undefined)?.length || 0) !== 1 ? 's' : ''}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => { setEditProduct(product); setShowModal(true); }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-xs transition-all"
+                    >
+                      <Edit2 className="w-3 h-3" />Edit
+                    </button>
+                    <button
+                      onClick={() => toggleActive(product)}
+                      className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all"
+                      title={product.is_active ? 'Hide' : 'Show'}
+                    >
+                      {product.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    </button>
+                    <button
+                      onClick={() => toggleFeatured(product)}
+                      className={cn(
+                        'p-2 rounded-lg transition-all',
+                        product.is_featured ? 'bg-luxe-accent/20 text-luxe-accent' : 'bg-white/5 text-white/60 hover:bg-white/10'
+                      )}
+                      title={product.is_featured ? 'Unfeature' : 'Feature'}
+                    >
+                      <Star className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => deleteProduct(product.id)}
+                      className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })
+        )}
+      </div>
+
+      {showModal && (
+        <ProductFormModal
+          product={editProduct}
+          categories={categories}
+          onClose={() => { setShowModal(false); setEditProduct(null); }}
+          onSaved={handleSaved}
+        />
+      )}
+    </div>
+  );
+}
