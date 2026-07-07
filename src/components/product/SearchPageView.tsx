@@ -73,7 +73,7 @@ export function SearchPageView({ initialQuery }: SearchPageViewProps) {
       .eq('is_active', true);
 
     let searchType = type;
-    let words = [];
+    let words: string[] = [];
 
     // 1. Text Search & Natural Language Parsing
     if (q.trim()) {
