@@ -51,15 +51,15 @@ function NotificationItem({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className={cn('text-sm font-medium leading-snug', notification.is_read ? 'text-white/60' : 'text-white')}>
+          <p className={cn('text-sm md:text-base font-medium leading-snug', notification.is_read ? 'text-white/60' : 'text-white')}>
             {notification.title}
           </p>
           {!notification.is_read && (
-            <Circle className="w-2 h-2 text-luxe-accent fill-luxe-accent flex-shrink-0 mt-1" />
+            <Circle className="w-2.5 h-2.5 text-luxe-accent fill-luxe-accent flex-shrink-0 mt-1" />
           )}
         </div>
-        <p className="text-xs text-white/40 mt-0.5 leading-relaxed">{notification.body}</p>
-        <p className="text-[11px] text-white/25 mt-1.5">{formatRelativeTime(notification.created_at)}</p>
+        <p className="text-xs md:text-sm text-white/50 mt-1 leading-relaxed">{notification.body}</p>
+        <p className="text-[11px] md:text-xs text-white/30 mt-1.5">{formatRelativeTime(notification.created_at)}</p>
       </div>
     </div>
   );
@@ -71,8 +71,8 @@ export function NotificationsView() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6">
-        <div className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
           <div className="flex items-center gap-3">
             <Bell className="w-5 h-5 text-luxe-accent" />
             <div>
@@ -99,7 +99,7 @@ export function NotificationsView() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="glass-card p-5"
+        className="glass-card p-3 sm:p-5"
       >
         {loading ? (
           <div className="space-y-3">

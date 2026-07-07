@@ -5,28 +5,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { JDLogo } from '@/components/shared/JDLogo';
 
 export function PageLoader() {
-  // Only show on first visit per session — not on client-side navigations
-  const [visible, setVisible] = useState(false);
+  // Start visible so it covers the page immediately on load without flashing
+  const [visible, setVisible] = useState(true);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Check if we've already shown the loader this session
-    const hasLoaded = sessionStorage.getItem('jd-loaded');
-    if (hasLoaded) {
-      setVisible(false);
-      return;
-    }
-    // First visit — show loader
-    sessionStorage.setItem('jd-loaded', '1');
-    setVisible(true);
 
-    // Animate progress bar
-    const t1 = setTimeout(() => setProgress(40), 100);
-    const t2 = setTimeout(() => setProgress(70), 500);
-    const t3 = setTimeout(() => setProgress(90), 900);
-    const t4 = setTimeout(() => setProgress(100), 1300);
+    // Animate progress bar (sped up)
+    const t1 = setTimeout(() => setProgress(40), 50);
+    const t2 = setTimeout(() => setProgress(70), 200);
+    const t3 = setTimeout(() => setProgress(90), 400);
+    const t4 = setTimeout(() => setProgress(100), 550);
     // Dismiss after progress completes
-    const t5 = setTimeout(() => setVisible(false), 1700);
+    const t5 = setTimeout(() => setVisible(false), 800);
 
     return () => { [t1,t2,t3,t4,t5].forEach(clearTimeout); };
   }, []);
@@ -85,7 +76,7 @@ export function PageLoader() {
 
               {/* Logo */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.7 }}
+                initial={{ opacity: 1, scale: 1 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               >
@@ -95,7 +86,7 @@ export function PageLoader() {
 
             {/* Brand name */}
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 1, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
               className="text-center"
@@ -104,7 +95,7 @@ export function PageLoader() {
                 JD Store
               </p>
               <motion.p
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
                 className="text-white/30 text-[11px] tracking-[0.3em] uppercase mt-1"
@@ -115,7 +106,7 @@ export function PageLoader() {
 
             {/* Progress bar */}
             <motion.div
-              initial={{ opacity: 0, scaleX: 0.8 }}
+              initial={{ opacity: 1, scaleX: 1 }}
               animate={{ opacity: 1, scaleX: 1 }}
               transition={{ delay: 0.4 }}
               className="w-48 h-px bg-white/10 rounded-full overflow-hidden relative"
@@ -140,7 +131,7 @@ export function PageLoader() {
 
           {/* Bottom tag */}
           <motion.p
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0.2 }}
             animate={{ opacity: 0.2 }}
             transition={{ delay: 0.8 }}
             className="absolute bottom-8 text-white/40 text-[10px] tracking-[0.25em] uppercase"

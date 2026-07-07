@@ -22,6 +22,7 @@ import {
   Tag,
   Star,
   Info,
+  ArrowRight,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
@@ -110,6 +111,9 @@ export function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -120,10 +124,83 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    setMobileOpen(false);
     setProfileOpen(false);
     setNotifOpen(false);
+    setMobileOpen(false);
+    setSearchOpen(false);
   }, [pathname]);
+
+  // Search suggestions debouncer
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setLoadingSuggestions(true);
+      try {
+        let dbQuery = searchQuery.trim().toLowerCase();
+        if (dbQuery.endsWith('s') && dbQuery.length > 3) {
+          dbQuery = dbQuery.slice(0, -1);
+        }
+
+        let words = dbQuery.split(/\s+/).filter(w => w.length > 2);
+        let searchType = 'all';
+        
+        ['poster', 'earring'].forEach(t => {
+          if (words.includes(t)) {
+            searchType = t;
+            words = words.filter(w => w !== t);
+          }
+        });
+
+        let queryBuilder = supabase
+          .from('products')
+          .select('slug, name, product_type, price, images:product_images(url, is_primary)')
+          .eq('is_active', true)
+          .limit(5);
+
+        if (searchType !== 'all') {
+          queryBuilder = queryBuilder.eq('product_type', searchType);
+        }
+
+        if (words.length > 0) {
+          const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%`).join(',');
+          queryBuilder = queryBuilder.or(orConditions);
+        } else if (searchType === 'all') {
+          queryBuilder = queryBuilder.or(`name.ilike.%${dbQuery}%,description.ilike.%${dbQuery}%`);
+        }
+
+        const { data } = await queryBuilder;
+        
+        if (data) {
+          setSuggestions(data);
+        }
+      } catch (err) {
+        console.error('Error fetching suggestions:', err);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 300);
+
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
   // Close notif dropdown on outside click
   useEffect(() => {
@@ -148,6 +225,7 @@ export function Navbar() {
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchOpen(false);
+      setSearchQuery('');
     }
   };
 
@@ -162,11 +240,11 @@ export function Navbar() {
         )}
       >
         <div className="page-container">
-          <div className="flex items-center justify-between h-16 md:h-20">
+          <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 group" aria-label="JD Store home">
-              <JDLogo size={38} />
-              <span className="font-display text-xl font-bold tracking-tight text-white group-hover:text-luxe-accent transition-colors">
+            <Link prefetch={true} href="/" className="flex items-center gap-2 group" aria-label="JD Store home">
+              <JDLogo size={32} />
+              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-white group-hover:text-luxe-accent transition-colors">
                 JD Store
               </span>
             </Link>
@@ -177,6 +255,7 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch
                   className={cn(
                     'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
                     pathname === link.href
@@ -190,11 +269,11 @@ export function Navbar() {
             </nav>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {/* Search */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
                 aria-label="Search"
               >
                 <Search className="w-5 h-5" />
@@ -202,14 +281,14 @@ export function Navbar() {
 
               {!loading && user ? (
                 <>
-                  {/* Notifications Dropdown */}
-                  <div className="relative" ref={notifRef}>
+                  {/* Notifications — desktop only */}
+                  <div className="relative hidden sm:block" ref={notifRef}>
                     <button
                       onClick={() => {
                         setNotifOpen(!notifOpen);
                         setProfileOpen(false);
                       }}
-                      className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                      className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
                       aria-label="Notifications"
                     >
                       <Bell className="w-5 h-5" />
@@ -226,10 +305,9 @@ export function Navbar() {
                           initial={{ opacity: 0, y: 8, scale: 0.95 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
+                          transition={{ duration: 0.1 }}
                           className="absolute right-0 top-full mt-2 w-80 glass-card overflow-hidden"
                         >
-                          {/* Header */}
                           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
                             <div className="flex items-center gap-2">
                               <Bell className="w-3.5 h-3.5 text-luxe-accent" />
@@ -250,8 +328,6 @@ export function Navbar() {
                               </button>
                             )}
                           </div>
-
-                          {/* Notification list */}
                           <div className="max-h-72 overflow-y-auto divide-y divide-white/5">
                             {recentNotifs.length === 0 ? (
                               <div className="flex flex-col items-center justify-center py-8 text-center px-4">
@@ -269,11 +345,8 @@ export function Navbar() {
                               ))
                             )}
                           </div>
-
-                          {/* Footer — View all */}
                           <div className="border-t border-white/10">
-                            <Link
-                              href="/dashboard/notifications"
+                            <Link prefetch={true} href="/dashboard/notifications"
                               onClick={() => setNotifOpen(false)}
                               className="flex items-center justify-center gap-1.5 py-3 text-xs font-medium text-luxe-accent hover:bg-white/5 transition-all"
                             >
@@ -286,19 +359,17 @@ export function Navbar() {
                     </AnimatePresence>
                   </div>
 
-                  {/* Wishlist */}
-                  <Link
-                    href="/wishlist"
-                    className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                  {/* Wishlist — desktop only */}
+                  <Link prefetch={true} href="/wishlist"
+                    className="hidden sm:flex p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] items-center justify-center"
                     aria-label="Wishlist"
                   >
                     <Heart className="w-5 h-5" />
                   </Link>
 
                   {/* Cart */}
-                  <Link
-                    href="/cart"
-                    className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                  <Link prefetch={true} href="/cart"
+                    className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
                     aria-label="Cart"
                   >
                     <ShoppingCart className="w-5 h-5" />
@@ -309,14 +380,14 @@ export function Navbar() {
                     )}
                   </Link>
 
-                  {/* Profile */}
-                  <div className="relative">
+                  {/* Profile — desktop only */}
+                  <div className="relative hidden sm:block">
                     <button
                       onClick={() => {
                         setProfileOpen(!profileOpen);
                         setNotifOpen(false);
                       }}
-                      className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-all"
+                      className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-all min-h-[40px]"
                       aria-label="Profile menu"
                     >
                       {profile?.profile_picture ? (
@@ -348,7 +419,7 @@ export function Navbar() {
                           initial={{ opacity: 0, y: 8, scale: 0.95 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
+                          transition={{ duration: 0.1 }}
                           className="absolute right-0 top-full mt-2 w-56 glass-card overflow-hidden"
                         >
                           <div className="p-3 border-b border-white/10">
@@ -360,32 +431,20 @@ export function Navbar() {
                             </p>
                           </div>
                           <div className="p-1">
-                            <Link
-                              href="/dashboard"
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all"
-                            >
+                            <Link prefetch={true} href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
                               <User className="w-4 h-4" />
                               My Profile
                             </Link>
-                            <Link
-                              href="/dashboard/orders"
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all"
-                            >
+                            <Link prefetch={true} href="/dashboard/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
                               <Package className="w-4 h-4" />
                               My Orders
                             </Link>
-                            <Link
-                              href="/dashboard/settings"
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all"
-                            >
+                            <Link prefetch={true} href="/dashboard/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
                               <Settings className="w-4 h-4" />
                               Settings
                             </Link>
                             {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
-                              <Link
-                                href="/admin"
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-luxe-accent hover:bg-white/10 transition-all"
-                              >
+                              <Link prefetch={true} href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-luxe-accent hover:bg-white/10 transition-all">
                                 <Settings className="w-4 h-4" />
                                 Admin Panel
                               </Link>
@@ -405,7 +464,7 @@ export function Navbar() {
                   </div>
                 </>
               ) : !loading ? (
-                <Link href="/login" className="btn-gold !py-2 !px-5 text-sm">
+                <Link prefetch={true} href="/login" className="btn-gold !py-2 !px-4 text-sm">
                   Sign In
                 </Link>
               ) : null}
@@ -413,70 +472,146 @@ export function Navbar() {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                aria-label="Menu"
+                className="md:hidden p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               >
                 {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Navigation */}
-        <AnimatePresence>
-          {mobileOpen && (
+      {/* Mobile Navigation — full-screen slide-in drawer */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Overlay */}
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden glass-nav border-t border-white/10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="fixed inset-0 z-40 bg-black/60 md:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed top-0 right-0 bottom-0 z-50 w-72 max-w-[85vw] bg-[#0d0d0d] border-l border-white/10 flex flex-col md:hidden overflow-y-auto"
             >
-              <div className="page-container py-4 space-y-1">
+              {/* Drawer header */}
+              <div className="flex items-center justify-between p-4 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <JDLogo size={28} />
+                  <span className="font-display text-base font-bold text-white">JD Store</span>
+                </div>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Nav links */}
+              <nav className="p-3 space-y-1">
                 {NAV_LINKS.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
+                    prefetch
                     className={cn(
-                      'block px-4 py-3 rounded-xl text-sm font-medium transition-all',
+                      'flex items-center px-4 py-3.5 rounded-xl text-sm font-medium transition-all',
                       pathname === link.href
                         ? 'text-white bg-white/10'
                         : 'text-white/60 hover:text-white hover:bg-white/5'
                     )}
+                    onClick={() => setMobileOpen(false)}
                   >
                     {link.label}
                   </Link>
                 ))}
-                {user && (
-                  <div className="pt-2 border-t border-white/10">
+              </nav>
+
+              {/* User section */}
+              {user && (
+                <div className="p-3 border-t border-white/10 space-y-1">
+                  <p className="px-4 py-2 text-white/30 text-[11px] uppercase tracking-widest">My Account</p>
+
+                  {/* Profile info */}
+                  {profile && (
+                    <div className="flex items-center gap-3 px-4 py-3 mb-1">
+                      {profile.profile_picture ? (
+                        <Image src={profile.profile_picture} alt={profile.name} width={36} height={36} className="rounded-full" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-luxe-accent flex items-center justify-center flex-shrink-0">
+                          <span className="text-black text-xs font-bold">{getInitials(profile.name)}</span>
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-white text-sm font-medium truncate">{profile.name}</p>
+                        <p className="text-white/40 text-xs truncate">{profile.email}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {[
+                    { href: '/dashboard', label: 'My Profile', icon: User },
+                    { href: '/dashboard/orders', label: 'My Orders', icon: Package },
+                    { href: '/dashboard/notifications', label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, icon: Bell },
+                    { href: '/cart', label: `Cart${itemCount > 0 ? ` (${itemCount})` : ''}`, icon: ShoppingCart },
+                    { href: '/wishlist', label: 'Wishlist', icon: Heart },
+                    { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+                  ].map((item) => (
                     <Link
-                      href="/dashboard/notifications"
+                      key={item.href}
+                      href={item.href}
                       className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                      onClick={() => setMobileOpen(false)}
                     >
-                      <Bell className="w-4 h-4" />
-                      Notifications {unreadCount > 0 && `(${unreadCount})`}
+                      <item.icon className="w-4 h-4 flex-shrink-0" />
+                      {item.label}
                     </Link>
-                    <Link
-                      href="/cart"
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                  ))}
+
+                  {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
+                    <Link prefetch={true} href="/admin"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-luxe-accent hover:bg-white/5 transition-all"
+                      onClick={() => setMobileOpen(false)}
                     >
-                      <ShoppingCart className="w-4 h-4" />
-                      Cart {itemCount > 0 && `(${itemCount})`}
+                      <Settings className="w-4 h-4 flex-shrink-0" />
+                      Admin Panel
                     </Link>
-                    <Link
-                      href="/wishlist"
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <Heart className="w-4 h-4" />
-                      Wishlist
-                    </Link>
-                  </div>
-                )}
-              </div>
+                  )}
+
+                  <button
+                    onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-all"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </div>
+              )}
+
+              {!loading && !user && (
+                <div className="p-4 border-t border-white/10">
+                  <Link prefetch={true} href="/login"
+                    className="btn-gold w-full text-center text-sm"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                </div>
+              )}
             </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Search Modal */}
       <AnimatePresence>
@@ -485,10 +620,10 @@ export function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-start justify-center pt-20 px-4"
+            className="fixed inset-0 z-[60] flex items-start justify-center pt-16 sm:pt-20 px-3 sm:px-4"
             onClick={(e) => e.target === e.currentTarget && setSearchOpen(false)}
           >
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSearchOpen(false)} />
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -496,39 +631,86 @@ export function Navbar() {
               className="relative w-full max-w-2xl"
             >
               <form onSubmit={handleSearch} className="glass-card !rounded-2xl overflow-hidden">
-                <div className="flex items-center gap-3 px-4 py-4">
+                <div className="flex items-center gap-3 px-4 py-3.5 sm:py-4">
                   <Search className="w-5 h-5 text-white/40 flex-shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search posters, earrings, collections..."
-                    className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none text-lg"
+                    placeholder="Search posters, earrings..."
+                    className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none text-base sm:text-lg min-w-0"
                     autoFocus
                   />
                   <button
                     type="button"
                     onClick={() => setSearchOpen(false)}
-                    className="p-1 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                    className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="px-4 pb-4 flex flex-wrap gap-2">
-                  {['Wall Posters', 'Gold Earrings', 'A4 Print', 'Minimalist'].map((term) => (
-                    <button
-                      key={term}
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery(term);
-                        router.push(`/search?q=${encodeURIComponent(term)}`);
-                        setSearchOpen(false);
-                      }}
-                      className="badge-luxe hover:bg-white/15 transition-all cursor-pointer"
-                    >
-                      {term}
-                    </button>
-                  ))}
+                <div className="px-4 pb-4">
+                  {!searchQuery.trim() ? (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {['Poster', 'Earring', 'A4', 'Gold'].map((term) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery(term);
+                            router.push(`/search?q=${encodeURIComponent(term)}`);
+                            setSearchOpen(false);
+                            setSearchQuery('');
+                          }}
+                          className="badge-luxe hover:bg-white/15 transition-all cursor-pointer text-xs py-1.5"
+                        >
+                          {term}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-2 space-y-1">
+                      {loadingSuggestions ? (
+                        <div className="py-4 flex justify-center">
+                           <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-luxe-accent animate-spin" />
+                        </div>
+                      ) : suggestions.length > 0 ? (
+                        suggestions.map((item) => {
+                          const primaryImg = item.images?.find((img: any) => img.is_primary) || item.images?.[0];
+                          return (
+                            <Link
+                              key={item.slug}
+                              href={`/product/${item.slug}`}
+                              onClick={() => {
+                                setSearchOpen(false);
+                                setSearchQuery('');
+                              }}
+                              className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors group"
+                            >
+                              <div className="w-10 h-10 rounded-lg bg-white/5 overflow-hidden flex-shrink-0 relative">
+                                {primaryImg ? (
+                                  <Image src={primaryImg.url} alt={item.name} fill className="object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">✦</div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0 flex items-center justify-between">
+                                <div>
+                                  <p className="text-sm font-medium text-white/80 group-hover:text-luxe-accent truncate transition-colors">{item.name}</p>
+                                  <p className="text-xs text-white/40 capitalize">{item.product_type}</p>
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-luxe-accent transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
+                              </div>
+                            </Link>
+                          );
+                        })
+                      ) : (
+                        <div className="py-4 text-center text-sm text-white/40">
+                          No products found for "{searchQuery}"
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </form>
             </motion.div>

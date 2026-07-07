@@ -51,7 +51,7 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
       </div>
 
       {addresses.length === 0 ? (
-        <div className="glass-card p-16 text-center">
+        <div className="glass-card p-8 sm:p-16 text-center">
           <MapPin className="w-10 h-10 text-white/20 mx-auto mb-4" />
           <p className="text-white/50 mb-2">No saved addresses</p>
           <p className="text-white/30 text-sm">
@@ -66,9 +66,9 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass-card p-5"
+              className="glass-card p-4 sm:p-5"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-xl bg-luxe-accent/10 flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-4 h-4 text-luxe-accent" />
@@ -92,7 +92,7 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
                     <p className="text-white/50 text-sm mt-1">📞 {address.phone}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto w-full sm:w-auto justify-end sm:justify-start border-t border-white/5 sm:border-0 pt-3 sm:pt-0 mt-2 sm:mt-0">
                   {!address.is_default && (
                     <button
                       onClick={() => setDefault(address.id)}

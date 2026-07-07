@@ -82,10 +82,11 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
         body: JSON.stringify({ _type: 'products', collection_id: collectionId }),
       });
       if (selectedProducts.length > 0) {
-        await fetch('/api/admin/collection-products', {
+        await fetch('/api/admin/collections', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            _type: 'collection_products',
             items: selectedProducts.map((pid, i) => ({
               collection_id: collectionId,
               product_id: pid,
@@ -106,12 +107,22 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
   };
 
   const toggleActive = async (col: any) => {
-    const r = await fetch('/api/admin/collections', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: col.id, is_active: !col.is_active }),
-    });
-    if (r.ok) setCollections(prev => prev.map(c => c.id === col.id ? { ...c, is_active: !c.is_active } : c));
+    try {
+      const r = await fetch('/api/admin/collections', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: col.id, is_active: !col.is_active }),
+      });
+      if (r.ok) {
+        setCollections(prev => prev.map(c => c.id === col.id ? { ...c, is_active: !c.is_active } : c));
+        toast.success(col.is_active ? 'Collection hidden' : 'Collection visible');
+      } else {
+        const data = await r.json();
+        toast.error(data.error || 'Failed to toggle status');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error toggling status');
+    }
   };
 
   const deleteCollection = async (id: string) => {

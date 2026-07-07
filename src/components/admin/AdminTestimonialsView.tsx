@@ -97,15 +97,23 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
   };
 
   const toggleActive = async (t: Testimonial) => {
-    const res = await fetch('/api/admin/testimonials', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: t.id, is_active: !t.is_active }),
-    });
-    if (res.ok) {
-      setItems((prev) =>
-        prev.map((item) => (item.id === t.id ? { ...item, is_active: !item.is_active } : item))
-      );
+    try {
+      const res = await fetch('/api/admin/testimonials', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: t.id, is_active: !t.is_active }),
+      });
+      if (res.ok) {
+        setItems((prev) =>
+          prev.map((item) => (item.id === t.id ? { ...item, is_active: !item.is_active } : item))
+        );
+        toast.success(t.is_active ? 'Testimonial hidden' : 'Testimonial visible');
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to toggle status');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error toggling status');
     }
   };
 

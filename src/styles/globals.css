@@ -52,6 +52,8 @@
 @layer base {
   * {
     @apply border-border;
+    /* Prevent text from being too small on mobile */
+    -webkit-text-size-adjust: 100%;
   }
   body {
     @apply bg-background text-foreground;
@@ -63,11 +65,18 @@
   }
   body {
     overflow-x: hidden;
+    /* iOS tap highlight */
+    -webkit-tap-highlight-color: transparent;
   }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+  /* Ensure minimum tap target size on mobile */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
 }
 
 @layer components {
@@ -108,6 +117,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    min-height: 44px; /* minimum tap target */
   }
   .btn-luxe:hover {
     box-shadow: 0 0 30px rgba(200,169,110,0.3);
@@ -128,6 +138,7 @@
     align-items: center;
     justify-content: center;
     background: transparent;
+    min-height: 44px;
   }
   .btn-luxe-outline:hover {
     background: rgba(255,255,255,0.1);
@@ -147,6 +158,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    min-height: 44px;
   }
   .btn-gold:hover {
     background: #e8d5a3;
@@ -157,12 +169,6 @@
   .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
   /* ─── Edge light + adaptive ambient glow shared by all cards ─── */
-
-  /*
-   * .card-glow-wrapper — place this on the motion.div OUTSIDE the card.
-   * It is overflow:visible so the box-shadow bloom spills into the background.
-   * The inner card clips images with overflow:hidden.
-   */
   .card-glow-wrapper {
     position: relative;
     border-radius: 1rem;
@@ -177,9 +183,7 @@
     background: #1a1a1a;
     border: 1px solid rgba(255,255,255,0.07);
     transition: border-color 0.7s, box-shadow 0.7s;
-    /* No transform here — caller's motion.div or whileHover handles it */
   }
-  /* Top-edge shimmer line */
   .card-edge-light::before {
     content: '';
     pointer-events: none;
@@ -206,25 +210,16 @@
   .card-edge-light:hover::before { opacity: 1; }
   .card-edge-light:hover {
     border-color: rgba(200,169,110,0.3);
-    /* No transform — let the parent motion.div handle lifting */
   }
 
   .product-card {
     position: relative;
-    /*
-     * overflow:hidden clips images correctly at the rounded corners.
-     * The ::before edge-light (using the padding/mask trick) still renders
-     * because it lives at z-index:2 inside the card.
-     * The outer motion.div wrapper (overflow:visible) handles the glow bloom.
-     */
     overflow: hidden;
     border-radius: 1rem;
     background: #1a1a1a;
     border: 1px solid rgba(255,255,255,0.07);
-    /* No transform here — the motion.div wrapper handles whileHover translateY */
     transition: border-color 0.5s, box-shadow 0.5s;
   }
-  /* Top-edge gold shimmer on product cards */
   .product-card::before {
     content: '';
     pointer-events: none;
@@ -252,7 +247,6 @@
   .product-card:hover {
     border-color: rgba(200,169,110,0.28);
     box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    /* NO transform here — motion.div whileHover handles it cleanly */
   }
 
   .skeleton {
@@ -274,7 +268,7 @@
 
   .section-title {
     font-family: var(--font-playfair, Georgia, serif);
-    font-size: clamp(1.875rem, 4vw, 3rem);
+    font-size: clamp(1.5rem, 4vw, 3rem);
     font-weight: 700;
     letter-spacing: -0.025em;
     color: white;
@@ -282,7 +276,7 @@
 
   .section-subtitle {
     color: #888888;
-    font-size: 1.125rem;
+    font-size: clamp(0.875rem, 2.5vw, 1.125rem);
     line-height: 1.75;
     max-width: 42rem;
   }
@@ -296,6 +290,8 @@
     color: white;
     outline: none;
     transition: all 0.2s;
+    font-size: 1rem; /* prevents iOS zoom on focus */
+    min-height: 44px; /* minimum tap target */
   }
   .input-luxe::placeholder { color: rgba(255,255,255,0.3); }
   .input-luxe:focus {
@@ -343,6 +339,7 @@
     padding-left: 1rem;
     padding-right: 1rem;
     max-width: 80rem;
+    width: 100%;
   }
   @media (min-width: 640px) {
     .page-container { padding-left: 1.5rem; padding-right: 1.5rem; }
@@ -366,6 +363,7 @@
     font-size: 0.75rem; font-weight: 500;
     background: rgba(234,179,8,0.2); color: #facc15;
     border: 1px solid rgba(234,179,8,0.3);
+    white-space: nowrap;
   }
   .status-confirmed {
     display: inline-flex; align-items: center;
@@ -373,6 +371,7 @@
     font-size: 0.75rem; font-weight: 500;
     background: rgba(59,130,246,0.2); color: #60a5fa;
     border: 1px solid rgba(59,130,246,0.3);
+    white-space: nowrap;
   }
   .status-packed {
     display: inline-flex; align-items: center;
@@ -380,6 +379,7 @@
     font-size: 0.75rem; font-weight: 500;
     background: rgba(168,85,247,0.2); color: #c084fc;
     border: 1px solid rgba(168,85,247,0.3);
+    white-space: nowrap;
   }
   .status-ready {
     display: inline-flex; align-items: center;
@@ -387,6 +387,7 @@
     font-size: 0.75rem; font-weight: 500;
     background: rgba(99,102,241,0.2); color: #818cf8;
     border: 1px solid rgba(99,102,241,0.3);
+    white-space: nowrap;
   }
   .status-delivered {
     display: inline-flex; align-items: center;
@@ -394,6 +395,7 @@
     font-size: 0.75rem; font-weight: 500;
     background: rgba(34,197,94,0.2); color: #4ade80;
     border: 1px solid rgba(34,197,94,0.3);
+    white-space: nowrap;
   }
   .status-cancelled {
     display: inline-flex; align-items: center;
@@ -401,6 +403,7 @@
     font-size: 0.75rem; font-weight: 500;
     background: rgba(239,68,68,0.2); color: #f87171;
     border: 1px solid rgba(239,68,68,0.3);
+    white-space: nowrap;
   }
 }
 
@@ -419,6 +422,10 @@
   }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  /* Safe area utilities for notch/home bar devices */
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 }
 
 @keyframes float {
@@ -488,3 +495,8 @@ html {
   100% { transform: translateY(250%); opacity: 0; }
 }
 .animate-scroll-drop { animation: scroll-drop 1.6s ease-in-out infinite; }
+
+/* ── Spinner ── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

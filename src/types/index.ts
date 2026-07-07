@@ -447,6 +447,7 @@ export interface ProductFilters {
 // ============================================================
 
 export interface WhatsAppOrderPayload {
+  order_number?: string;
   customer_name: string;
   phone: string;
   address: string;
@@ -456,9 +457,12 @@ export interface WhatsAppOrderPayload {
     size?: string;
     quantity: number;
     price: number;
+    image?: string;
   }>;
   subtotal: number;
   delivery_charge: number;
+  discount_amount?: number;
+  coupon_code?: string;
   total: number;
   notes?: string;
 }

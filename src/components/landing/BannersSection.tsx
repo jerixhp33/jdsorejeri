@@ -173,8 +173,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.45 }}
             >
-              <Link
-                href={banner.cta_url}
+              <Link prefetch={true} href={banner.cta_url}
                 className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300"
                 style={{
                   background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
@@ -345,8 +344,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
                 </p>
               )}
               {banner.cta_text && banner.cta_url && (
-                <Link
-                  href={banner.cta_url}
+                <Link prefetch={true} href={banner.cta_url}
                   className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300"
                   style={{
                     background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
@@ -512,8 +510,7 @@ function SidebarBannerCard({ banner, priority }: { banner: Banner; priority: boo
         )}
 
         {banner.cta_text && banner.cta_url && (
-          <Link
-            href={banner.cta_url}
+          <Link prefetch={true} href={banner.cta_url}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium text-xs transition-all duration-300 self-start"
             style={{
               background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
@@ -645,8 +642,7 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
         )}
 
         {banner.cta_text && banner.cta_url && (
-          <Link
-            href={banner.cta_url}
+          <Link prefetch={true} href={banner.cta_url}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-[11px] self-start"
             style={{
               background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',

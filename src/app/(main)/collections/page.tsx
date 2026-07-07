@@ -20,18 +20,19 @@ export default async function CollectionsPage() {
     .order('display_order');
 
   return (
-    <div className="page-container py-10 md:py-16">
-      <div className="mb-12">
-        <p className="text-luxe-accent text-sm tracking-widest uppercase mb-3">Curated</p>
+    <div className="page-container py-8 sm:py-10 md:py-16">
+      <div className="mb-8 sm:mb-12">
+        <p className="text-luxe-accent text-xs sm:text-sm tracking-widest uppercase mb-2 sm:mb-3">Curated</p>
         <h1 className="section-title">Collections</h1>
       </div>
 
       {collections && collections.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {collections.map((collection) => (
             <Link
               key={collection.id}
               href={`/collections/${collection.slug}`}
+              prefetch
               className="group block relative overflow-hidden rounded-2xl bg-luxe-dark border border-white/5 hover:border-white/20 transition-all duration-500"
             >
               <div className="aspect-[4/3] relative overflow-hidden">
@@ -52,10 +53,10 @@ export default async function CollectionsPage() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <h2 className="text-white font-display text-xl font-bold mb-1">{collection.name}</h2>
+              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+                <h2 className="text-white font-display text-lg sm:text-xl font-bold mb-1">{collection.name}</h2>
                 {collection.description && (
-                  <p className="text-white/50 text-sm line-clamp-2 mb-3">{collection.description}</p>
+                  <p className="text-white/50 text-sm line-clamp-2 mb-2 sm:mb-3">{collection.description}</p>
                 )}
                 <div className="flex items-center gap-1 text-luxe-accent text-sm font-medium">
                   View collection
@@ -66,7 +67,7 @@ export default async function CollectionsPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-24">
+        <div className="text-center py-20 sm:py-24">
           <p className="text-white/30">No collections yet. Check back soon.</p>
         </div>
       )}

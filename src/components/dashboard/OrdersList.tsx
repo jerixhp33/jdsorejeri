@@ -26,11 +26,11 @@ export function OrdersList({ orders }: OrdersListProps) {
 
   if (orders.length === 0) {
     return (
-      <div className="glass-card p-16 text-center">
+      <div className="glass-card p-8 sm:p-16 text-center">
         <Package className="w-12 h-12 text-white/20 mx-auto mb-4" />
         <h2 className="text-white font-semibold text-lg mb-2">No orders yet</h2>
         <p className="text-white/40 text-sm mb-6">Start shopping and your orders will appear here</p>
-        <Link href="/" className="btn-gold text-sm">Start Shopping</Link>
+        <Link prefetch={true} href="/" className="btn-gold text-sm">Start Shopping</Link>
       </div>
     );
   }
@@ -49,21 +49,21 @@ export function OrdersList({ orders }: OrdersListProps) {
         >
           {/* Order header */}
           <div
-            className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition-colors"
+            className="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition-colors gap-2"
             onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                 <Package className="w-4 h-4 text-white/50" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-white font-medium text-sm">Order #{order.order_number}</p>
                 <p className="text-white/40 text-xs">{formatDate(order.created_at)}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <span className={cn('status-' + order.status)}>{STATUS_LABELS[order.status]}</span>
+            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+              <span className={cn('status-' + order.status, 'text-[10px] sm:text-xs')}>{STATUS_LABELS[order.status]}</span>
               <p className="text-white font-semibold text-sm hidden sm:block">
                 {formatCurrency(order.total)}
               </p>
@@ -77,7 +77,7 @@ export function OrdersList({ orders }: OrdersListProps) {
 
           {/* Expanded details */}
           {expandedId === order.id && (
-            <div className="border-t border-white/10 p-5 space-y-5">
+            <div className="border-t border-white/10 p-4 sm:p-5 space-y-5">
               {/* Items */}
               <div>
                 <p className="text-white/50 text-xs uppercase tracking-wide mb-3">Items</p>

@@ -7,6 +7,7 @@ import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Profile', icon: User, exact: true },
   { href: '/dashboard/orders', label: 'My Orders', icon: Package },
+  { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
   { href: '/wishlist', label: 'Wishlist', icon: Heart },
   { href: '/dashboard/addresses', label: 'Addresses', icon: MapPin },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },

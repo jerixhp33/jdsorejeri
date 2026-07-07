@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingCart, Eye, Star } from 'lucide-react';
+import { Heart, ShoppingCart, Star } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -96,13 +96,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
-      whileHover={{ y: -6 }}
-      /* 
-        overflow:visible so the adaptive glow bloom bleeds into the background.
-        The inner Link/.product-card handles overflow:hidden for image clipping.
-        We move the border + edge-light onto this wrapper instead of product-card
-        so the ::before mask works correctly without being clipped.
-      */
+      whileHover={{ y: -4 }}
       style={{
         position: 'relative',
         borderRadius: '1rem',
@@ -119,8 +113,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         }),
       }}
     >
-      <Link
-        href={`/product/${product.slug}`}
+      <Link prefetch={true} href={`/product/${product.slug}`}
         className="block product-card group"
         style={glowColor ? {
           borderColor: `rgba(${glowColor},0.4)`,
@@ -179,60 +172,48 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           )}
 
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+          <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
             {product.is_best_seller && (
-              <span className="badge-luxe text-[10px]">Best Seller</span>
+              <span className="badge-luxe text-[10px] !px-2 !py-0.5">Best Seller</span>
             )}
             {product.is_trending && (
-              <span className="badge-luxe text-[10px]">Trending</span>
+              <span className="badge-luxe text-[10px] !px-2 !py-0.5">Trending</span>
             )}
             {!isInStock && (
-              <span className="badge-luxe !bg-red-500/20 !text-red-400 !border-red-500/30 text-[10px]">
+              <span className="badge-luxe !bg-red-500/20 !text-red-400 !border-red-500/30 text-[10px] !px-2 !py-0.5">
                 Out of Stock
               </span>
             )}
           </div>
 
-          {/* Action buttons */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-            <button
-              onClick={handleWishlist}
-              className={cn(
-                'p-2 rounded-full backdrop-blur-md border transition-all duration-200',
-                wishlisted
-                  ? 'bg-red-500/20 border-red-500/40 text-red-400'
-                  : 'bg-black/40 border-white/20 text-white hover:bg-white/20'
-              )}
-              aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-            >
-              <Heart className={cn('w-4 h-4', wishlisted && 'fill-current')} />
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                router.push(`/product/${product.slug}`);
-              }}
-              className="p-2 rounded-full backdrop-blur-md bg-black/40 border border-white/20 text-white hover:bg-white/20 transition-all duration-200"
-              aria-label="Quick view"
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Wishlist button — always visible on mobile (top right), hover on desktop */}
+          <button
+            onClick={handleWishlist}
+            className={cn(
+              'absolute top-2 right-2 z-10 p-2 rounded-full backdrop-blur-md border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center',
+              'sm:opacity-0 sm:translate-x-2 sm:group-hover:opacity-100 sm:group-hover:translate-x-0',
+              wishlisted
+                ? 'bg-red-500/20 border-red-500/40 text-red-400'
+                : 'bg-black/40 border-white/20 text-white hover:bg-white/20'
+            )}
+            aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart className={cn('w-3.5 h-3.5', wishlisted && 'fill-current')} />
+          </button>
 
-          {/* Add to cart button */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 z-10 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          {/* Add to cart — bottom slide on desktop, always visible on mobile */}
+          <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300">
             <button
               onClick={handleAddToCart}
               disabled={!isInStock || addingToCart}
               className={cn(
-                'w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200',
+                'w-full py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 transition-all duration-200 min-h-[36px]',
                 isInStock
                   ? 'bg-white text-black hover:bg-luxe-accent'
                   : 'bg-white/20 text-white/40 cursor-not-allowed'
               )}
             >
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className="w-3.5 h-3.5" />
               {addingToCart
                 ? 'Adding...'
                 : !isInStock
@@ -245,23 +226,23 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
 
         {/* Product Info */}
-        <div className="p-4">
-          <p className="text-white/40 text-xs mb-1">{product.category?.name}</p>
-          <h3 className="text-white text-sm font-medium leading-snug mb-2 line-clamp-2 group-hover:text-luxe-accent transition-colors">
+        <div className="p-3 sm:p-4">
+          <p className="text-white/40 text-[11px] mb-0.5">{product.category?.name}</p>
+          <h3 className="text-white text-xs sm:text-sm font-medium leading-snug mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-luxe-accent transition-colors">
             {product.name}
           </h3>
 
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-white font-semibold text-base">
+              <span className="text-white font-semibold text-sm sm:text-base">
                 {formatCurrency(displayPrice)}
               </span>
               {product.product_type === 'poster' && (
-                <span className="text-white/30 text-xs ml-1">from</span>
+                <span className="text-white/30 text-[11px] ml-1">from</span>
               )}
             </div>
             {(product.average_rating ?? 0) > 0 && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5">
                 <Star className="w-3 h-3 text-luxe-accent fill-current" />
                 <span className="text-white/50 text-xs">
                   {(product.average_rating ?? 0).toFixed(1)}

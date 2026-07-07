@@ -17,8 +17,8 @@ export function ProfileView({ profile, loginLogs, orderCount }: ProfileViewProps
   return (
     <div className="space-y-6">
       {/* Header card */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6">
-        <div className="flex items-start gap-5">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 text-center sm:text-left">
           {profile.profile_picture ? (
             <Image src={profile.profile_picture} alt={profile.name} width={80} height={80} className="rounded-2xl" />
           ) : (
@@ -29,7 +29,7 @@ export function ProfileView({ profile, loginLogs, orderCount }: ProfileViewProps
           <div className="flex-1">
             <h1 className="font-display text-2xl font-bold text-white mb-1">{profile.name}</h1>
             <p className="text-white/50 text-sm">{profile.email}</p>
-            <div className="flex items-center gap-3 mt-3">
+            <div className="flex flex-col sm:flex-row items-center gap-3 mt-3">
               <span className="badge-luxe text-xs capitalize">{profile.role}</span>
               <span className="text-white/30 text-xs">Member since {formatDate(profile.created_at)}</span>
             </div>
@@ -39,15 +39,15 @@ export function ProfileView({ profile, loginLogs, orderCount }: ProfileViewProps
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10">
           <div className="text-center">
-            <p className="font-display text-2xl font-bold text-white">{orderCount}</p>
+            <p className="font-display text-xl sm:text-2xl font-bold text-white">{orderCount}</p>
             <p className="text-white/40 text-xs mt-1">Orders</p>
           </div>
           <div className="text-center border-x border-white/10">
-            <p className="font-display text-2xl font-bold text-white">{loginLogs.length}</p>
+            <p className="font-display text-xl sm:text-2xl font-bold text-white">{loginLogs.length}</p>
             <p className="text-white/40 text-xs mt-1">Logins</p>
           </div>
           <div className="text-center">
-            <p className="font-display text-2xl font-bold text-luxe-accent">✓</p>
+            <p className="font-display text-xl sm:text-2xl font-bold text-luxe-accent">✓</p>
             <p className="text-white/40 text-xs mt-1">Verified</p>
           </div>
         </div>
@@ -58,7 +58,7 @@ export function ProfileView({ profile, loginLogs, orderCount }: ProfileViewProps
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
         {[
           { href: '/dashboard/orders', icon: Package, label: 'My Orders', sub: `${orderCount} total` },
@@ -79,7 +79,7 @@ export function ProfileView({ profile, loginLogs, orderCount }: ProfileViewProps
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="glass-card p-6"
+          className="glass-card p-4 sm:p-6"
         >
           <div className="flex items-center gap-2 mb-5">
             <Shield className="w-4 h-4 text-luxe-accent" />

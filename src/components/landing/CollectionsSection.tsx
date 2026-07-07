@@ -80,8 +80,7 @@ function CollectionCard({ collection, index }: { collection: Collection; index: 
       }}
       whileHover={{ y: -6 }}
     >
-      <Link
-        href={`/collections/${collection.slug}`}
+      <Link prefetch={true} href={`/collections/${collection.slug}`}
         className="group block relative overflow-hidden card-edge-light"
         style={glowColor ? {
           borderColor: `rgba(${glowColor},0.45)`,
@@ -175,7 +174,7 @@ export function CollectionsSection({ collections }: CollectionsSectionProps) {
         </div>
 
         <div className="text-center mt-10">
-          <Link href="/collections" className="btn-luxe-outline text-sm">
+          <Link prefetch={true} href="/collections" className="btn-luxe-outline text-sm">
             View All Collections
           </Link>
         </div>

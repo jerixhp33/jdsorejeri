@@ -3,13 +3,76 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, X } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
+import { useCouponStore } from '@/hooks/useCouponStore';
 import { formatCurrency, cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export function CartView() {
   const { items, itemCount, subtotal, deliveryCharge, total, loading, updateQuantity, removeItem } =
     useCart();
+    
+  const { appliedCoupon, setAppliedCoupon } = useCouponStore();
+  const [couponCode, setCouponCode] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
+  
+  const supabase = createClient();
+  
+  useEffect(() => {
+    supabase.from('coupons').select('*').eq('is_active', true).then(({ data }) => {
+      if (data) setAvailableCoupons(data);
+    });
+  }, [supabase]);
+
+  const applyCoupon = async (code: string = couponCode) => {
+    if (!code) return;
+    setApplyingCoupon(true);
+    setCouponError('');
+    try {
+      const { data: coupon, error } = await supabase.from('coupons').select('*').eq('code', code.toUpperCase()).single();
+      if (error || !coupon) throw new Error('Invalid coupon code');
+      if (!coupon.is_active) throw new Error('This coupon is no longer active');
+      if (subtotal < coupon.min_order_amount) throw new Error(`Minimum order of ₹${coupon.min_order_amount} required`);
+      if (coupon.usage_limit && coupon.used_count >= coupon.usage_limit) throw new Error('Coupon usage limit reached');
+      
+      setAppliedCoupon(coupon);
+      setCouponCode('');
+      toast.success('Coupon applied!');
+    } catch (err: any) {
+      setCouponError(err.message);
+      setAppliedCoupon(null);
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError('');
+    toast.success('Coupon removed');
+  };
+
+  const discountAmount = appliedCoupon 
+    ? (appliedCoupon.discount_type === 'percentage' 
+        ? Math.round((subtotal * appliedCoupon.discount_value) / 100) 
+        : appliedCoupon.discount_value)
+    : 0;
+  
+  const finalTotal = Math.max(0, total - discountAmount);
+
+  // Auto-remove coupon if subtotal drops below minimum order amount
+  useEffect(() => {
+    if (appliedCoupon && subtotal < appliedCoupon.min_order_amount) {
+      setAppliedCoupon(null);
+      setCouponError('');
+      toast.error(`Coupon removed: Minimum order of ₹${appliedCoupon.min_order_amount} required`);
+    }
+  }, [subtotal, appliedCoupon, setAppliedCoupon]);
 
   if (loading) {
     return (
@@ -52,10 +115,10 @@ export function CartView() {
             Browse our collections and add something you love
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/posters" className="btn-luxe text-sm">
+            <Link prefetch={true} href="/posters" className="btn-luxe text-sm">
               Shop Posters
             </Link>
-            <Link href="/earrings" className="btn-luxe-outline text-sm">
+            <Link prefetch={true} href="/earrings" className="btn-luxe-outline text-sm">
               Shop Earrings
             </Link>
           </div>
@@ -66,7 +129,7 @@ export function CartView() {
 
   return (
     <div className="page-container py-10 md:py-16">
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
         <h1 className="font-display text-3xl font-bold text-white mb-2">Shopping Cart</h1>
         <p className="text-white/40 text-sm mb-10">
           {itemCount} item{itemCount !== 1 ? 's' : ''} in your cart
@@ -89,12 +152,12 @@ export function CartView() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10, height: 0 }}
+                    transition={{ duration: 0.2 }}
                     className="glass-card p-4 md:p-5"
                   >
                     <div className="flex gap-4">
                       {/* Image */}
-                      <Link
-                        href={`/product/${item.product?.slug}`}
+                      <Link prefetch={true} href={`/product/${item.product?.slug}`}
                         className="flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-luxe-dark"
                       >
                         {primaryImage ? (
@@ -114,8 +177,7 @@ export function CartView() {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <Link
-                          href={`/product/${item.product?.slug}`}
+                        <Link prefetch={true} href={`/product/${item.product?.slug}`}
                           className="text-white text-sm font-medium hover:text-luxe-accent transition-colors line-clamp-2 mb-1"
                         >
                           {item.product?.name}
@@ -138,7 +200,7 @@ export function CartView() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="w-7 h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center"
+                              className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center"
                               aria-label="Decrease quantity"
                             >
                               <Minus className="w-3 h-3" />
@@ -153,7 +215,7 @@ export function CartView() {
                                   item.poster_size?.stock ?? item.product?.stock ?? 0
                                 )
                               }
-                              className="w-7 h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
                               aria-label="Increase quantity"
                             >
                               <Plus className="w-3 h-3" />
@@ -169,7 +231,7 @@ export function CartView() {
                       {/* Remove */}
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="flex-shrink-0 p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                        className="flex-shrink-0 p-3 sm:p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all"
                         aria-label="Remove item"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -182,8 +244,7 @@ export function CartView() {
 
             {/* Continue shopping */}
             <div className="flex gap-3 pt-2">
-              <Link
-                href="/posters"
+              <Link prefetch={true} href="/posters"
                 className="text-white/50 text-sm hover:text-white transition-colors flex items-center gap-1"
               >
                 ← Continue Shopping
@@ -219,16 +280,87 @@ export function CartView() {
                   </p>
                 )}
               </div>
+              
+              {appliedCoupon && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-green-400 flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5" />
+                    Discount ({appliedCoupon.code})
+                  </span>
+                  <span className="text-green-400">-{formatCurrency(discountAmount)}</span>
+                </div>
+              )}
 
               <div className="border-t border-white/10 pt-4 mb-6">
                 <div className="flex justify-between">
                   <span className="text-white font-semibold">Total</span>
-                  <span className="text-white font-bold text-lg">{formatCurrency(total)}</span>
+                  <span className="text-white font-bold text-lg">{formatCurrency(finalTotal)}</span>
                 </div>
               </div>
+              
+              {/* Coupon Input */}
+              <div className="mb-6 pt-5" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                {!appliedCoupon ? (
+                  <div>
+                    <div className="flex gap-2 mb-3">
+                      <input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        placeholder="Discount code"
+                        className="input-luxe flex-1 uppercase font-mono text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => applyCoupon()}
+                        disabled={applyingCoupon || !couponCode}
+                        className="px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all disabled:opacity-50"
+                      >
+                        {applyingCoupon ? '...' : 'Apply'}
+                      </button>
+                    </div>
+                    {couponError && <p className="text-red-400 text-xs mb-3">{couponError}</p>}
+                    
+                    {availableCoupons.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-white/40 text-[10px] uppercase tracking-wider mb-2">Available Coupons</p>
+                        {availableCoupons.map(c => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => { setCouponCode(c.code); applyCoupon(c.code); }}
+                            className="w-full text-left p-2.5 rounded-xl border border-white/10 hover:border-luxe-accent/50 hover:bg-white/5 transition-all flex justify-between items-center group"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Tag className="w-3.5 h-3.5 text-luxe-accent group-hover:scale-110 transition-transform" />
+                              <div>
+                                <span className="text-white text-sm font-mono block">{c.code}</span>
+                                <span className="text-white/40 text-[10px] block">
+                                  Min order: {formatCurrency(c.min_order_amount)}
+                                </span>
+                              </div>
+                            </div>
+                            <span className="text-luxe-accent text-xs font-semibold">
+                              {c.discount_type === 'percentage' ? `${c.discount_value}% OFF` : `-${formatCurrency(c.discount_value)}`}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-green-500/10 border border-green-500/20">
+                    <div className="flex items-center gap-2 text-green-400">
+                      <Tag className="w-4 h-4" />
+                      <span className="text-sm font-medium font-mono">{appliedCoupon.code}</span>
+                    </div>
+                    <button type="button" onClick={removeCoupon} className="text-white/40 hover:text-white transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
 
-              <Link
-                href="/checkout"
+              <Link prefetch={true} href="/checkout"
                 className="w-full btn-gold flex items-center justify-center gap-2 text-sm"
               >
                 Proceed to Order

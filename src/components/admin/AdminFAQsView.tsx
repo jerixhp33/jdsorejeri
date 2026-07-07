@@ -94,15 +94,23 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
   };
 
   const toggleActive = async (f: FAQ) => {
-    const res = await fetch('/api/admin/faqs', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: f.id, is_active: !f.is_active }),
-    });
-    if (res.ok) {
-      setItems((prev) =>
-        prev.map((item) => (item.id === f.id ? { ...item, is_active: !item.is_active } : item))
-      );
+    try {
+      const res = await fetch('/api/admin/faqs', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: f.id, is_active: !f.is_active }),
+      });
+      if (res.ok) {
+        setItems((prev) =>
+          prev.map((item) => (item.id === f.id ? { ...item, is_active: !item.is_active } : item))
+        );
+        toast.success(f.is_active ? 'FAQ hidden' : 'FAQ visible');
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to toggle status');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error toggling status');
     }
   };
 

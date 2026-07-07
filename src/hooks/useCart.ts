@@ -7,6 +7,13 @@ import { calculateDeliveryCharge } from '@/lib/utils';
 import type { Cart, CartItem } from '@/types';
 import { toast } from 'sonner';
 
+const CART_UPDATED_EVENT = 'CART_UPDATED';
+const dispatchCartUpdate = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(CART_UPDATED_EVENT));
+  }
+};
+
 interface CartState {
   cart: Cart | null;
   items: CartItem[];
@@ -35,6 +42,8 @@ export function useCart(): CartState {
   // a new client on every render
   const supabaseRef = useRef(createClient());
   const supabase = supabaseRef.current;
+  
+  const [deliverySettings, setDeliverySettings] = useState({ charge: 60, threshold: 999 });
 
   const fetchCart = useCallback(async () => {
     if (!profile) {
@@ -85,6 +94,22 @@ export function useCart(): CartState {
         ...cartData,
         items: (items as CartItem[]) || [],
       });
+
+      // Fetch delivery settings
+      const { data: settingsData } = await supabase
+        .from('settings')
+        .select('key, value')
+        .in('key', ['delivery_charge', 'free_delivery_threshold']);
+
+      if (settingsData) {
+        const chargeStr = settingsData.find(s => s.key === 'delivery_charge')?.value;
+        const thresholdStr = settingsData.find(s => s.key === 'free_delivery_threshold')?.value;
+        setDeliverySettings({
+          charge: chargeStr ? parseInt(String(chargeStr).replace(/"/g, ''), 10) : 60,
+          threshold: thresholdStr ? parseInt(String(thresholdStr).replace(/"/g, ''), 10) : 999,
+        });
+      }
+
     } catch (err) {
       console.error('Error fetching cart:', err);
     } finally {
@@ -94,18 +119,18 @@ export function useCart(): CartState {
 
   useEffect(() => {
     fetchCart();
+    
+    // Listen for cart updates from other component instances
+    const handleCartUpdate = () => {
+      fetchCart();
+    };
+    
+    window.addEventListener(CART_UPDATED_EVENT, handleCartUpdate);
+    return () => window.removeEventListener(CART_UPDATED_EVENT, handleCartUpdate);
   }, [fetchCart]);
 
-  // No realtime subscription here — every mutation (addItem, removeItem,
-  // updateQuantity, clearCart) calls fetchCart() directly after the DB write,
-  // so the UI stays in sync without a persistent channel.
-  //
-  // Why removed: useCart is called from multiple components at once
-  // (e.g. Navbar + FeaturedPosters). Each mount created a channel with
-  // the same name (`cart:<id>`), and Supabase threw:
-  //   "cannot add postgres_changes callbacks after subscribe()"
-  // because the second subscriber tried to attach a listener to an
-  // already-subscribed channel.
+  // No realtime subscription here — every mutation calls fetchCart() locally,
+  // and then dispatches CART_UPDATED_EVENT so other components sync up.
 
   const addItem = async (
     productId: string,
@@ -199,6 +224,7 @@ export function useCart(): CartState {
         .eq('id', cartId);
 
       await fetchCart();
+      dispatchCartUpdate();
       toast.success('Added to cart');
     } catch (err) {
       toast.error('Failed to add to cart');
@@ -213,11 +239,13 @@ export function useCart(): CartState {
 
     await supabase.from('cart_items').update({ quantity }).eq('id', cartItemId);
     await fetchCart();
+    dispatchCartUpdate();
   };
 
   const removeItem = async (cartItemId: string) => {
     await supabase.from('cart_items').delete().eq('id', cartItemId);
     await fetchCart();
+    dispatchCartUpdate();
     toast.success('Removed from cart');
   };
 
@@ -225,6 +253,7 @@ export function useCart(): CartState {
     if (!cart?.id) return;
     await supabase.from('cart_items').delete().eq('cart_id', cart.id);
     await fetchCart();
+    dispatchCartUpdate();
   };
 
   const items = cart?.items || [];
@@ -233,7 +262,7 @@ export function useCart(): CartState {
     (sum, item) => sum + item.unit_price * item.quantity,
     0
   );
-  const deliveryCharge = calculateDeliveryCharge(subtotal);
+  const deliveryCharge = subtotal >= deliverySettings.threshold ? 0 : deliverySettings.charge;
   const total = subtotal + deliveryCharge;
 
   return {

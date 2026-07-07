@@ -10,8 +10,8 @@ export default function NotFound() {
         <h1 className="font-display text-3xl font-bold text-white mb-3">Page not found</h1>
         <p className="text-white/40 mb-8">The page you're looking for doesn't exist or has been moved.</p>
         <div className="flex gap-3 justify-center">
-          <Link href="/" className="btn-gold text-sm">Back to Home</Link>
-          <Link href="/search" className="btn-luxe-outline text-sm">Search Products</Link>
+          <Link prefetch={true} href="/" className="btn-gold text-sm">Back to Home</Link>
+          <Link prefetch={true} href="/search" className="btn-luxe-outline text-sm">Search Products</Link>
         </div>
       </div>
     </div>

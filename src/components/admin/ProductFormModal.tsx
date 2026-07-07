@@ -288,7 +288,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
           className="p-5 space-y-5"
         >
           {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Product Name *</label>
               <input {...register('name')} className="input-luxe" placeholder="Product name" />
@@ -335,7 +335,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
           {/* Poster-specific */}
           {productType === 'poster' && (
             <>
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-xl border border-white/10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl border border-white/10">
                 <p className="col-span-2 text-white/50 text-xs uppercase tracking-wide">Poster Details</p>
                 <div>
                   <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Finish</label>
@@ -419,7 +419,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
 
           {/* Earring-specific */}
           {productType === 'earring' && (
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-xl border border-white/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl border border-white/10">
               <p className="col-span-2 text-white/50 text-xs uppercase tracking-wide">Earring Details</p>
               <div>
                 <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Price (₹) *</label>

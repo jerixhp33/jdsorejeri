@@ -97,8 +97,7 @@ export function Footer() {
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
+                    <Link prefetch={true} href={link.href}
                       className="text-white/40 text-sm hover:text-white transition-colors"
                     >
                       {link.label}
@@ -119,14 +118,12 @@ export function Footer() {
               © {new Date().getFullYear()} JD Store. All rights reserved.
             </p>
             <div className="flex items-center gap-5">
-              <Link
-                href="/about#privacy"
+              <Link prefetch={true} href="/about#privacy"
                 className="text-white/30 text-xs hover:text-white/60 transition-colors"
               >
                 Privacy Policy
               </Link>
-              <Link
-                href="/about#terms"
+              <Link prefetch={true} href="/about#terms"
                 className="text-white/30 text-xs hover:text-white/60 transition-colors"
               >
                 Terms of Service

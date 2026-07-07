@@ -111,7 +111,8 @@ export function AdminLogsView({ activityLogs, auditLogs, loginLogs }: AdminLogsV
 
   const renderLogin = () => (
     <div className="glass-card overflow-hidden">
-      <table className="w-full">
+      <div className="overflow-x-auto">
+        <table className="w-full">
         <thead>
           <tr className="border-b border-white/10">
             {['User', 'Device', 'Browser', 'IP Address', 'Time'].map((h) => (
@@ -141,7 +142,8 @@ export function AdminLogsView({ activityLogs, auditLogs, loginLogs }: AdminLogsV
             </tr>
           )}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 

@@ -63,7 +63,7 @@ export function LoginPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-luxe-accent/8 blur-[100px]" />
 
         <div className="relative z-10 p-12 max-w-lg">
-          <Link href="/" className="flex items-center gap-2.5 mb-12">
+          <Link prefetch={true} href="/" className="flex items-center gap-2.5 mb-12">
             <JDLogo size={42} />
             <span className="font-display text-2xl font-bold text-white">JD Store</span>
           </Link>
@@ -100,7 +100,7 @@ export function LoginPage() {
           className="w-full max-w-sm"
         >
           {/* Mobile logo */}
-          <Link href="/" className="flex items-center gap-2.5 mb-10 lg:hidden">
+          <Link prefetch={true} href="/" className="flex items-center gap-2.5 mb-10 lg:hidden">
             <JDLogo size={34} />
             <span className="font-display text-xl font-bold text-white">JD Store</span>
           </Link>
@@ -156,17 +156,17 @@ export function LoginPage() {
 
           <p className="text-white/30 text-xs text-center mt-8 leading-relaxed">
             By signing in, you agree to our{' '}
-            <Link href="/about#terms" className="text-white/50 hover:text-white underline">
+            <Link prefetch={true} href="/about#terms" className="text-white/50 hover:text-white underline">
               Terms
             </Link>{' '}
             and{' '}
-            <Link href="/about#privacy" className="text-white/50 hover:text-white underline">
+            <Link prefetch={true} href="/about#privacy" className="text-white/50 hover:text-white underline">
               Privacy Policy
             </Link>
           </p>
 
           <div className="mt-8 pt-8 border-t border-white/10 text-center">
-            <Link href="/" className="text-white/40 text-sm hover:text-white transition-colors">
+            <Link prefetch={true} href="/" className="text-white/40 text-sm hover:text-white transition-colors">
               ← Back to store
             </Link>
           </div>

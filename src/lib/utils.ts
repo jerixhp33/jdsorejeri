@@ -79,36 +79,41 @@ export function calculateDeliveryCharge(subtotal: number): number {
 export function generateWhatsAppMessage(payload: WhatsAppOrderPayload): string {
   const itemsList = payload.items
     .map(
-      (item) =>
-        `  • ${item.name}${item.size ? ` (${item.size})` : ''} × ${item.quantity} — ${formatCurrency(item.price * item.quantity)}`
+      (item, i) =>
+        `*${i + 1}. ${item.name}*${item.size ? `\n   ↳ Size: ${item.size}` : ''}\n   ↳ ${item.quantity} × ${formatCurrency(item.price)} = *${formatCurrency(item.price * item.quantity)}*`
     )
-    .join('\n');
+    .join('\n-------------------------\n');
 
-  const message = `🛍️ *New Order from JD Store*\n
-━━━━━━━━━━━━━━━━━━━━━━
-👤 *Customer Details*
-━━━━━━━━━━━━━━━━━━━━━━
+  const message = `✨ *NEW ORDER - JD STORE* ✨
+${payload.order_number ? `*Order ID:* #${payload.order_number}\n` : ''}=========================
+
+👤 *CUSTOMER INFO*
 Name: ${payload.customer_name}
 Phone: ${payload.phone}
 
-📍 *Delivery Address*
-━━━━━━━━━━━━━━━━━━━━━━
+🏠 *DELIVERY DETAILS*
 ${payload.address}
 District: ${payload.district}
 
-🛒 *Order Items*
-━━━━━━━━━━━━━━━━━━━━━━
+🛒 *ITEMS ORDERED*
+-------------------------
 ${itemsList}
+-------------------------
 
-💰 *Order Summary*
-━━━━━━━━━━━━━━━━━━━━━━
+🧾 *BILLING SUMMARY*
 Subtotal: ${formatCurrency(payload.subtotal)}
-Delivery: ${payload.delivery_charge === 0 ? 'FREE' : formatCurrency(payload.delivery_charge)}
-*Total: ${formatCurrency(payload.total)}*
+Delivery: ${payload.delivery_charge === 0 ? 'FREE' : formatCurrency(payload.delivery_charge)}${payload.discount_amount ? `\nDiscount (${payload.coupon_code}): -${formatCurrency(payload.discount_amount)}` : ''}
+-------------------------
+💰 *GRAND TOTAL: ${formatCurrency(payload.total)}*
+=========================
+${payload.notes ? `\n📝 *SPECIAL INSTRUCTIONS*\n_${payload.notes}_\n=========================\n` : ''}
+🛑 *IMPORTANT PAYMENT INFO*
+1️⃣ We do NOT accept Cash on Delivery (COD).
+2️⃣ We accept UPI payments only.
+3️⃣ Send this exact message to us. Our team will verify and reply with a UPI Scanner / ID.
+4️⃣ Reply with your payment screenshot to confirm the order.
 
-${payload.notes ? `📝 *Notes*\n${payload.notes}\n` : ''}
-━━━━━━━━━━━━━━━━━━━━━━
-_Order placed via JD Store_`;
+✅ *Send this message now to proceed!*`;
 
   return encodeURIComponent(message);
 }

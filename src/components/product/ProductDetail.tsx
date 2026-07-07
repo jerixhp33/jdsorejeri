@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -60,10 +60,23 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
       ? (selectedSize?.price ?? 0)
       : (product.price ?? 0);
 
-  const inStock =
+  // How many of this exact item (and size) are already in the cart?
+  const { items: cartItems } = useCart();
+  const cartQuantity = cartItems
+    .filter(
+      (item) =>
+        item.product_id === product.id &&
+        (product.product_type === 'poster' ? item.poster_size_id === selectedSize?.id : true)
+    )
+    .reduce((sum, item) => sum + item.quantity, 0);
+
+  const dbStock =
     product.product_type === 'poster'
-      ? (selectedSize ? selectedSize.stock > 0 : false)
-      : (product.stock ?? 0) > 0;
+      ? (selectedSize?.stock ?? 0)
+      : (product.stock ?? 0);
+
+  const availableStock = Math.max(0, dbStock - cartQuantity);
+  const inStock = availableStock > 0;
 
   const handlePrevImage = useCallback(() => {
     setImgAspect(null); // reset until new image loads
@@ -74,6 +87,13 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     setImgAspect(null); // reset until new image loads
     setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   }, [images.length]);
+  
+  // Ensure quantity doesn't exceed newly selected size stock
+  useEffect(() => {
+    if (quantity > availableStock && availableStock > 0) {
+      setQuantity(availableStock);
+    }
+  }, [availableStock, quantity]);
 
   const handleAddToCart = async () => {
     if (product.product_type === 'poster' && !selectedSize) {
@@ -341,42 +361,63 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
           </div>
 
           {/* Quantity + Cart */}
-          <div className="flex items-center gap-3 mb-6">
-            {/* Quantity */}
-            <div className="flex items-center gap-1 glass-card-sm rounded-xl overflow-hidden">
+          <div className="flex flex-col gap-2 mb-6">
+            <div className="flex items-center gap-3">
+              {/* Quantity */}
+              <div className="flex items-center gap-1 glass-card-sm rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="px-4 py-3 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  −
+                </button>
+                <span className="w-10 text-center text-white text-sm font-medium">{quantity}</span>
+                <button
+                  onClick={() => {
+                    if (quantity >= availableStock) {
+                      toast.error(`Only ${availableStock} left in stock`);
+                    } else {
+                      setQuantity((q) => Math.min(availableStock, q + 1));
+                    }
+                  }}
+                  className="px-4 py-3 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Add to cart */}
               <button
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="px-4 py-3 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                onClick={handleAddToCart}
+                disabled={!inStock || addingToCart}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all',
+                  inStock
+                    ? 'bg-white text-black hover:bg-luxe-accent'
+                    : 'bg-white/10 text-white/30 cursor-not-allowed'
+                )}
               >
-                −
-              </button>
-              <span className="w-10 text-center text-white text-sm font-medium">{quantity}</span>
-              <button
-                onClick={() => setQuantity((q) => q + 1)}
-                className="px-4 py-3 text-white/60 hover:text-white hover:bg-white/10 transition-all"
-              >
-                +
+                {addingToCart ? (
+                  <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+                ) : (
+                  <ShoppingCart className="w-4 h-4" />
+                )}
+                {dbStock === 0
+                  ? 'Out of Stock'
+                  : !inStock
+                  ? 'Max Stock in Cart'
+                  : addingToCart
+                  ? 'Adding...'
+                  : 'Add to Cart'}
               </button>
             </div>
-
-            {/* Add to cart */}
-            <button
-              onClick={handleAddToCart}
-              disabled={!inStock || addingToCart}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all',
-                inStock
-                  ? 'bg-white text-black hover:bg-luxe-accent'
-                  : 'bg-white/10 text-white/30 cursor-not-allowed'
-              )}
-            >
-              {addingToCart ? (
-                <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
-              ) : (
-                <ShoppingCart className="w-4 h-4" />
-              )}
-              {!inStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Cart'}
-            </button>
+            
+            {/* Low stock warning */}
+            {inStock && availableStock <= 10 && (
+              <p className="text-red-400 text-xs font-medium ml-1">
+                ⏳ Hurry! Only {availableStock} item{availableStock !== 1 ? 's' : ''} left in stock.
+              </p>
+            )}
           </div>
 
           {/* Wishlist + Share */}

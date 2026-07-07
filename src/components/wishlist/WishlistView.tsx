@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import { Heart, ChevronLeft } from 'lucide-react';
 import { useWishlist } from '@/hooks/useWishlist';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
@@ -10,10 +11,21 @@ import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
 export function WishlistView() {
   const { items, loading } = useWishlist();
 
+  const router = useRouter();
+
   return (
     <div className="page-container py-10 md:py-16">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-display text-3xl font-bold text-white mb-2">My Wishlist</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <button 
+            onClick={() => router.back()}
+            className="p-1.5 -ml-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-95"
+            aria-label="Go back"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <h1 className="font-display text-3xl font-bold text-white">My Wishlist</h1>
+        </div>
         <p className="text-white/40 text-sm mb-10">
           {items.length} saved item{items.length !== 1 ? 's' : ''}
         </p>
@@ -28,7 +40,7 @@ export function WishlistView() {
             </div>
             <h2 className="text-white font-semibold text-lg mb-2">Your wishlist is empty</h2>
             <p className="text-white/40 text-sm mb-6">Save items you love and find them here later</p>
-            <Link href="/" className="btn-gold text-sm">Explore Products</Link>
+            <Link prefetch={true} href="/" className="btn-gold text-sm">Explore Products</Link>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">

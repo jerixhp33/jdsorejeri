@@ -77,12 +77,12 @@ export function SettingsView() {
       <h1 className="font-display text-2xl font-bold text-white">Account Settings</h1>
 
       {/* Account Information */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Shield className="w-4 h-4 text-luxe-accent" />
           <h2 className="text-white font-semibold">Account Information</h2>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-white/40 text-xs uppercase tracking-wide mb-1 block">Name</label>
             <p className="text-white text-sm p-3 rounded-xl bg-white/5" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -102,8 +102,8 @@ export function SettingsView() {
       </motion.div>
 
       {/* Notifications */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6">
-        <div className="flex items-center justify-between mb-5">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-5">
           <div className="flex items-center gap-2">
             <Bell className="w-4 h-4 text-luxe-accent" />
             <h2 className="text-white font-semibold">Notifications</h2>
@@ -151,7 +151,7 @@ export function SettingsView() {
       </motion.div>
 
       {/* Danger Zone */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6"
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-4 sm:p-6"
         style={{ borderColor: 'rgba(239,68,68,0.2)' }}>
         <div className="flex items-center gap-2 mb-4">
           <Trash2 className="w-4 h-4 text-red-400" />

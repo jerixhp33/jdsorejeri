@@ -28,7 +28,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
   const { data: collectionProducts } = await supabase
     .from('collection_products')
-    .select('product_id, display_order, product:products(*, category:product_categories(*), images:product_images(*))')
+    .select('product_id, display_order, product:products(*, category:product_categories(*), images:product_images(*), sizes:poster_sizes(*))')
     .eq('collection_id', collection.id)
     .order('display_order');
 
