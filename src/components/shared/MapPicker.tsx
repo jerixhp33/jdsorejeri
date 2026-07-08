@@ -73,16 +73,25 @@ function LocationMarker({ onLocationSelect, searchQuery }: MapPickerProps) {
       const res = await fetch(`https://us1.locationiq.com/v1/reverse?key=${API_KEY}&lat=${lat}&lon=${lng}&format=json&accept-language=en`);
       const data = await res.json();
       if (data && data.address) {
+        const addr = data.address;
+        let street = addr.road || addr.pedestrian || addr.path || addr.footway || '';
+        const area = addr.suburb || addr.neighbourhood || addr.residential || addr.village || addr.hamlet || '';
+        const city = addr.city || addr.town || addr.city_district || addr.county || addr.state_district || '';
+        const district = addr.state_district || addr.state || '';
+        const pincode = addr.postcode || '';
+
+        // Smart Fallback for India: If OSM doesn't have a 'road' tag, grab the most specific local name
+        if (!street && data.display_name) {
+          const parts = data.display_name.split(',').map((p: string) => p.trim());
+          if (parts.length > 0 && parts[0] !== area && parts[0] !== city) {
+            street = parts[0]; // e.g. "Sri Ramakrishna Temple" or a local unmapped street
+          }
+        }
+
         onLocationSelect({
           lat,
           lng,
-          address: {
-            street: data.address.road || data.address.pedestrian || data.address.path || data.address.footway || '',
-            area: data.address.suburb || data.address.neighbourhood || data.address.residential || data.address.village || data.address.hamlet || '',
-            city: data.address.city || data.address.town || data.address.city_district || data.address.county || data.address.state_district || '',
-            district: data.address.state_district || data.address.state || '',
-            pincode: data.address.postcode || '',
-          },
+          address: { street, area, city, district, pincode },
         });
       }
     } catch (error) {
