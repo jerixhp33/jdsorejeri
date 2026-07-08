@@ -9,6 +9,8 @@ export async function GET() {
   return NextResponse.json(data);
 }
 
+import { sendWebPushToUser } from '@/lib/web-push-helper';
+
 export async function POST(req: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -22,6 +24,14 @@ export async function POST(req: NextRequest) {
   // Handle order notification
   if (body._notify) {
     await admin.from('notifications').insert({ user_id: body.user_id, title: `Order #${body.order_number} Update`, body: body.message, type: 'order', action_url: '/dashboard/orders' });
+    
+    // Also send web push notification
+    await sendWebPushToUser(body.user_id, {
+      title: `Order #${body.order_number} Update`,
+      body: body.message,
+      url: '/dashboard/orders'
+    });
+    
     return NextResponse.json({ success: true });
   }
   const { data, error } = await admin.from('orders').insert(body).select().single();

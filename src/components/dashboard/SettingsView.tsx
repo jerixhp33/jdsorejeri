@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Shield, Trash2, Save } from 'lucide-react';
+import { Bell, Shield, Trash2, Smartphone } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useWebPush } from '@/hooks/useWebPush';
 import { toast } from 'sonner';
 
 interface NotificationPrefs {
@@ -24,6 +25,8 @@ export function SettingsView() {
   const [savingNotifs, setSavingNotifs] = useState(false);
 
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
+
+  const { isSupported, isSubscribed, subscribe } = useWebPush();
 
   useEffect(() => {
     const stored = (profile as any)?.notification_preferences;
@@ -123,7 +126,6 @@ export function SettingsView() {
                 <p className="text-white text-sm">{item.label}</p>
                 <p className="text-white/40 text-xs">{item.sub}</p>
               </div>
-              {/* Proper toggle */}
               <button
                 type="button"
                 role="switch"
@@ -145,6 +147,36 @@ export function SettingsView() {
               </button>
             </div>
           ))}
+
+          {isSupported && !isSubscribed && (
+            <div className="flex items-center justify-between py-4 mt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <div>
+                <p className="text-white text-sm flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-luxe-accent" />
+                  Push Notifications
+                </p>
+                <p className="text-white/40 text-xs">Receive updates on your device even when closed</p>
+              </div>
+              <button
+                onClick={() => subscribe()}
+                className="px-4 py-1.5 rounded-xl bg-luxe-accent text-black text-xs font-bold hover:bg-[#b5952f] transition-all"
+              >
+                Enable
+              </button>
+            </div>
+          )}
+          {isSupported && isSubscribed && (
+            <div className="flex items-center justify-between py-4 mt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <div>
+                <p className="text-white text-sm flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-green-400" />
+                  Push Notifications
+                </p>
+                <p className="text-white/40 text-xs">Enabled on this device</p>
+              </div>
+              <span className="text-green-400 text-xs font-bold px-2 py-1 bg-green-400/10 rounded-lg">Active</span>
+            </div>
+          )}
         </div>
       </motion.div>
 
