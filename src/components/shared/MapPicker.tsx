@@ -12,14 +12,17 @@ const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
 
 // Fix for default Leaflet marker icons in Next.js
 import L from 'leaflet';
-let DefaultIcon: L.Icon;
+let DefaultIcon: L.DivIcon;
 if (typeof window !== 'undefined') {
-  DefaultIcon = L.icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
+  DefaultIcon = L.divIcon({
+    html: `<div style="transform: translate(-50%, -100%); width: 32px; height: 32px;">
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ef4444" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-lg">
+               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+               <circle cx="12" cy="10" r="3" fill="white"></circle>
+             </svg>
+           </div>`,
+    className: '',
+    iconSize: [0, 0], // Anchor is handled by translate in the div
   });
   L.Marker.prototype.options.icon = DefaultIcon;
 }
