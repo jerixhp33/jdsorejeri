@@ -4,27 +4,17 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
-// Dynamically import Leaflet components (must be client-side only)
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const useMapEvents = dynamic(() => import('react-leaflet').then(mod => mod.useMapEvents), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 
 // Fix for default Leaflet marker icons in Next.js
 import L from 'leaflet';
-let DefaultIcon: L.DivIcon;
+let DefaultIcon: any;
 if (typeof window !== 'undefined') {
   DefaultIcon = L.divIcon({
-    html: `<div style="transform: translate(-50%, -100%); width: 32px; height: 32px;">
-             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ef4444" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-lg">
-               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-               <circle cx="12" cy="10" r="3" fill="white"></circle>
-             </svg>
-           </div>`,
+    html: '<div style="transform: translate(-50%, -100%); width: 32px; height: 32px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ef4444" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="white"></circle></svg></div>',
     className: '',
-    iconSize: [0, 0], // Anchor is handled by translate in the div
+    iconSize: [0, 0],
   });
-  L.Marker.prototype.options.icon = DefaultIcon;
 }
 
 interface MapPickerProps {
