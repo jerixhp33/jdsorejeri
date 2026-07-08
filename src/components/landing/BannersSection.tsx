@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Banner } from '@/types';
 
@@ -554,22 +554,34 @@ export function SidebarBannersPanel({ banners }: BannersSectionProps) {
 // positioned right after the hero, not buried below all products.
 
 export function MobileSidebarBanners({ banners }: BannersSectionProps) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
   if (!banners.length) return null;
 
   return (
-    <section className="px-4 py-6 max-w-[1400px] mx-auto">
-      {/* Gold accent line */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mb-5" />
+    <>
+      <section className="px-4 py-6 max-w-[1400px] mx-auto">
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mb-5" />
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+          {banners.map((banner, i) => (
+            <div key={banner.id} onClick={() => setSelectedIndex(i)} className="cursor-pointer">
+              <MobileSidebarCard banner={banner} priority={i === 0} />
+            </div>
+          ))}
+        </div>
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mt-5" />
+      </section>
 
-      {/* Horizontal scroll strip — one card per banner */}
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-        {banners.map((banner, i) => (
-          <MobileSidebarCard key={banner.id} banner={banner} priority={i === 0} />
-        ))}
-      </div>
-
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mt-5" />
-    </section>
+      <AnimatePresence>
+        {selectedIndex !== null && (
+          <MobileBannerViewer
+            banners={banners}
+            initialIndex={selectedIndex}
+            onClose={() => setSelectedIndex(null)}
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -591,8 +603,7 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
         boxShadow: '0 0 0 1px rgba(200,169,110,0.08)',
       }}
     >
-      {/* Image */}
-      <div className="relative w-full aspect-[3/4] overflow-hidden rounded-2xl">
+      <div className="relative w-full aspect-[3/4] overflow-hidden rounded-2xl pointer-events-none">
         <Image
           src={banner.image_url}
           alt={banner.title}
@@ -603,11 +614,7 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
           priority={priority}
           onLoad={handleImageLoad}
         />
-
-        {/* Overlays */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/5" />
-
-        {/* Adaptive inner glow */}
         {glowColor && (
           <div
             className="absolute inset-0 pointer-events-none"
@@ -616,16 +623,12 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
             }}
           />
         )}
-
-        {/* Gold shimmer lines */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e]/50 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e]/30 to-transparent" />
       </div>
 
-      {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-end p-4">
+      <div className="absolute inset-0 flex flex-col justify-end p-4 pointer-events-none">
         <div className="w-5 h-0.5 bg-[#c8a96e] mb-2" />
-
         {banner.title && (
           <h3
             className="font-display text-base font-bold text-white leading-snug mb-1"
@@ -634,15 +637,13 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
             {banner.title}
           </h3>
         )}
-
         {banner.subtitle && (
           <p className="text-white/60 text-[11px] mb-3 leading-relaxed line-clamp-2">
             {banner.subtitle}
           </p>
         )}
-
-        {banner.cta_text && banner.cta_url && (
-          <Link prefetch={true} href={banner.cta_url}
+        {banner.cta_text && (
+          <div
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-[11px] self-start"
             style={{
               background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
@@ -651,9 +652,122 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
           >
             {banner.cta_text}
             <ArrowRight className="w-3 h-3" />
-          </Link>
+          </div>
         )}
       </div>
     </div>
+  );
+}
+
+function MobileBannerViewer({ banners, initialIndex, onClose }: { banners: Banner[], initialIndex: number, onClose: () => void }) {
+  const [current, setCurrent] = useState(initialIndex);
+  const [direction, setDirection] = useState(0);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = 'auto'; };
+  }, []);
+
+  const next = () => {
+    setDirection(1);
+    setCurrent((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
+  };
+  const prev = () => {
+    setDirection(-1);
+    setCurrent((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
+  };
+
+  const banner = banners[current];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col"
+    >
+      <div className="flex-1 relative overflow-hidden flex items-center justify-center pt-4 pb-28" onClick={onClose}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={current}
+            initial={{ opacity: 0, x: direction > 0 ? 100 : -100, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: direction > 0 ? -100 : 100, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="relative w-[85%] max-w-sm aspect-[4/5] rounded-3xl overflow-hidden"
+            style={{ boxShadow: '0 0 0 1px rgba(200,169,110,0.15), 0 20px 40px rgba(0,0,0,0.5)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={banner.image_url}
+              alt={banner.title}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+            
+            <div className="absolute inset-0 flex flex-col justify-end p-6">
+              <div className="w-8 h-1 bg-[#c8a96e] mb-4" />
+              {banner.title && (
+                <h2 className="font-display text-2xl font-bold text-white mb-2 leading-tight">
+                  {banner.title}
+                </h2>
+              )}
+              {banner.subtitle && (
+                <p className="text-white/70 text-sm mb-6 leading-relaxed">
+                  {banner.subtitle}
+                </p>
+              )}
+              {banner.cta_text && banner.cta_url && (
+                <Link
+                  href={banner.cta_url}
+                  onClick={onClose}
+                  className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+                  style={{
+                    background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
+                    color: '#0a0a0a',
+                  }}
+                >
+                  {banner.cta_text}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-[100px] pb-safe bg-white/5 backdrop-blur-3xl border-t border-white/10 flex items-center justify-between px-8">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+          <span className="font-display font-black text-[3.5rem] text-white/[0.04] tracking-widest select-none">
+            JD STORE
+          </span>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="relative z-10 w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 text-white transition-all active:scale-95"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="relative z-10 flex items-center gap-4">
+          <button
+            onClick={prev}
+            className="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 text-white transition-all active:scale-95"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={next}
+            className="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 text-white transition-all active:scale-95"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
