@@ -8,7 +8,7 @@ import { Search, X, Mic, MicOff, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function SearchBar() {
-  const { query, setQuery, setOpen, isAIParsing } = useSearchStore();
+  const { query, setQuery, setOpen } = useSearchStore();
   const inputRef = useRef<HTMLInputElement>(null);
   
   // Initialize the orchestrator hook
@@ -31,18 +31,9 @@ export function SearchBar() {
       
       <div className="relative flex items-center bg-[#111] border border-white/10 rounded-2xl p-2 shadow-2xl overflow-hidden transition-all duration-300 focus-within:border-luxe-accent/50 focus-within:bg-[#151515]">
         
-        {/* Search Icon / AI Loader */}
+        {/* Search Icon */}
         <div className="pl-4 pr-2 flex items-center justify-center text-white/40">
-          {isAIParsing ? (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-            >
-              <Loader2 className="w-5 h-5 text-luxe-accent" />
-            </motion.div>
-          ) : (
-            <Search className="w-5 h-5" />
-          )}
+          <Search className="w-5 h-5" />
         </div>
 
         {/* Input */}
@@ -88,18 +79,6 @@ export function SearchBar() {
         </div>
       </div>
       
-      {/* AI Parsing Indicator Text */}
-      <div className="absolute -bottom-6 left-6 text-xs text-luxe-accent/60 font-medium tracking-wide h-4">
-        {isAIParsing && (
-          <motion.span
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            AI is analyzing your request...
-          </motion.span>
-        )}
-      </div>
     </div>
   );
 }

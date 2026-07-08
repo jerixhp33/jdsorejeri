@@ -12,7 +12,6 @@ export function useSearch() {
       if (!debouncedQuery.trim()) {
         store.setResults([]);
         store.setIsSearching(false);
-        store.setIsAIParsing(false);
         return;
       }
 
@@ -24,41 +23,26 @@ export function useSearch() {
       const signal = abortControllerRef.current.signal;
 
       try {
-        store.setIsAIParsing(true);
         store.setIsSearching(true);
         
         const startTime = Date.now();
 
-        // 1. Fetch AI Intent
-        const intentRes = await fetch('/api/search/intent', {
+        // 1. Fetch from Supabase via API directly (Fast path)
+        const execRes = await fetch('/api/search/execute', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: debouncedQuery }),
           signal
         });
         
-        if (!intentRes.ok) throw new Error('Failed to fetch intent');
-        const intent = await intentRes.json();
-        const aiMs = Date.now() - startTime;
-
-        if (signal.aborted) return;
-        store.setIsAIParsing(false);
-
-        // 2. Fetch from Supabase via API to bypass RLS
-        const execRes = await fetch('/api/search/execute', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(intent),
-          signal
-        });
-        
         if (!execRes.ok) throw new Error('Failed to execute search');
         const results = await execRes.json();
+        const dbMs = Date.now() - startTime;
         
         if (signal.aborted) return;
         store.setResults(results);
 
-        // 3. Log Analytics (Fire and forget)
+        // 2. Log Analytics (Fire and forget)
         fetch('/api/search/analytics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -66,7 +50,7 @@ export function useSearch() {
             action: 'log',
             query: debouncedQuery,
             resultsCount: results.length,
-            aiProcessingMs: aiMs
+            aiProcessingMs: dbMs
           })
         }).catch(() => {});
 
@@ -76,7 +60,6 @@ export function useSearch() {
         store.setResults([]);
       } finally {
         if (!signal.aborted) {
-          store.setIsAIParsing(false);
           store.setIsSearching(false);
         }
       }

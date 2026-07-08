@@ -6,7 +6,7 @@ import { ProductCard } from '../product/ProductCard';
 import { Sparkles } from 'lucide-react';
 
 export function SearchResults() {
-  const { results, isAIParsing } = useSearchStore();
+  const { results } = useSearchStore();
 
   return (
     <div className="flex flex-col gap-6">
@@ -14,12 +14,6 @@ export function SearchResults() {
         <h3 className="text-white/60 font-medium tracking-wide">
           {results.length} {results.length === 1 ? 'Result' : 'Results'} Found
         </h3>
-        {isAIParsing && (
-          <div className="flex items-center gap-2 text-luxe-accent text-xs">
-            <Sparkles className="w-3 h-3 animate-pulse" />
-            AI filtering...
-          </div>
-        )}
       </div>
 
       <motion.div 

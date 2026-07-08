@@ -7,7 +7,6 @@ export const useSearchStore = create<SearchState>((set) => ({
   query: '',
   isTyping: false,
   isSearching: false,
-  isAIParsing: false,
   isVoiceListening: false,
 
   // Data
@@ -20,7 +19,6 @@ export const useSearchStore = create<SearchState>((set) => ({
   setQuery: (query) => set({ query }),
   setIsTyping: (isTyping) => set({ isTyping }),
   setIsSearching: (isSearching) => set({ isSearching }),
-  setIsAIParsing: (isAIParsing) => set({ isAIParsing }),
   setIsVoiceListening: (isVoiceListening) => set({ isVoiceListening }),
 
   setResults: (results) => set({ results }),
@@ -32,6 +30,5 @@ export const useSearchStore = create<SearchState>((set) => ({
     results: [], 
     suggestions: [], 
     isSearching: false,
-    isAIParsing: false,
   }),
 }));

@@ -9,7 +9,7 @@ import { SearchResults } from './SearchResults';
 import { NoResults } from './NoResults';
 
 export function SearchOverlay() {
-  const { isOpen, setOpen, query, results, isSearching, isAIParsing } = useSearchStore();
+  const { isOpen, setOpen, query, results, isSearching } = useSearchStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,7 +48,7 @@ export function SearchOverlay() {
                 <SearchSuggestions />
               ) : results.length > 0 ? (
                 <SearchResults />
-              ) : isSearching || isAIParsing ? (
+              ) : isSearching ? (
                 <div className="flex items-center justify-center h-64">
                    <div className="w-8 h-8 rounded-full border-2 border-luxe-accent border-t-transparent animate-spin" />
                 </div>

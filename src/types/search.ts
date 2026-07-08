@@ -37,7 +37,6 @@ export interface SearchState {
   query: string;
   isTyping: boolean;
   isSearching: boolean;
-  isAIParsing: boolean;
   isVoiceListening: boolean;
 
   // Data
@@ -50,7 +49,6 @@ export interface SearchState {
   setQuery: (query: string) => void;
   setIsTyping: (isTyping: boolean) => void;
   setIsSearching: (isSearching: boolean) => void;
-  setIsAIParsing: (isAIParsing: boolean) => void;
   setIsVoiceListening: (isListening: boolean) => void;
   
   setResults: (results: SearchResult[]) => void;
