@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
                           <table width="100%" border="0" cellspacing="0" cellpadding="0">
                             <tr>
                               <td align="center">
-                                <a href="${siteUrl}/products/${data.slug}" style="display: inline-block; background-color: #D4AF37; color: #000000; font-size: 14px; font-weight: 700; text-decoration: none; padding: 16px 36px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase;">
+                                <a href="${siteUrl}/product/${data.slug}" style="display: inline-block; background-color: #D4AF37; color: #000000; font-size: 14px; font-weight: 700; text-decoration: none; padding: 16px 36px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase;">
                                   Discover Now
                                 </a>
                               </td>
