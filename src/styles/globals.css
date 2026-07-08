@@ -155,15 +155,16 @@
   .btn-glass {
     position: relative;
     overflow: hidden;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    color: rgba(255,255,255,0.9);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    color: rgba(255, 255, 255, 0.95);
     font-weight: 500;
     padding: 0.75rem 2rem;
     border-radius: 9999px;
-    transition: all 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -172,13 +173,13 @@
     cursor: pointer;
   }
   .btn-glass:hover {
-    background: rgba(255,255,255,0.12);
-    border-color: rgba(255,255,255,0.25);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
     color: white;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
   }
-  .btn-glass:active { transform: scale(0.98); }
+  .btn-glass:active { transform: scale(0.97); }
 
   .btn-gold {
     position: relative;
