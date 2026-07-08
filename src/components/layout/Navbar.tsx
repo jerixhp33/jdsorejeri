@@ -523,7 +523,7 @@ export function Navbar() {
                     className={cn(
                       'flex items-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all',
                       pathname === link.href
-                        ? 'text-luxe-accent bg-white/10 shadow-sm'
+                        ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
                         : 'text-white/60 hover:text-white hover:bg-white/5'
                     )}
                     onClick={() => setMobileOpen(false)}
@@ -540,7 +540,7 @@ export function Navbar() {
 
                   {/* Profile info */}
                   {profile && (
-                    <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-white/5 rounded-2xl border border-white/5">
+                    <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-white/[0.08] backdrop-blur-md rounded-2xl border border-white/10 shadow-lg">
                       {profile.profile_picture ? (
                         <Image src={profile.profile_picture} alt={profile.name} width={40} height={40} className="rounded-full ring-2 ring-white/10" />
                       ) : (
@@ -568,7 +568,12 @@ export function Navbar() {
                         prefetch={true}
                         key={item.href}
                         href={item.href}
-                        className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all group"
+                        className={cn(
+                          'flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all group',
+                          pathname === item.href
+                            ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
+                            : 'text-white/60 hover:text-white hover:bg-white/5'
+                        )}
                         onClick={() => setMobileOpen(false)}
                       >
                         <item.icon className="w-4 h-4 flex-shrink-0 transition-colors group-hover:text-luxe-accent" />
