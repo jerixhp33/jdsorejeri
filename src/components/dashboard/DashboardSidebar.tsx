@@ -38,9 +38,9 @@ export function DashboardSidebar() {
       {/* ── Mobile: horizontal tab bar ── */}
       <div className="md:hidden">
         {/* Back button */}
-        <div className="flex items-center mb-3">
-          <Link prefetch={true} href="/" className="inline-flex items-center gap-1.5 text-xs font-medium text-white/50 hover:text-white transition-all active:scale-95 px-2 py-1 -ml-2 rounded-lg hover:bg-white/10">
-            <ChevronLeft className="w-4 h-4" />
+        <div className="flex items-center mb-4">
+          <Link prefetch={true} href="/" className="btn-glass !py-2 !px-4 text-xs group">
+            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             Back to Home
           </Link>
         </div>
@@ -101,8 +101,8 @@ export function DashboardSidebar() {
 
       {/* ── Desktop: vertical sidebar ── */}
       <div className="hidden md:block md:col-span-1">
-        <div className="mb-4">
-          <Link prefetch={true} href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-white/50 hover:text-white transition-all group">
+        <div className="mb-6">
+          <Link prefetch={true} href="/" className="btn-glass !py-2 !px-4 text-sm group">
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             Back to Home
           </Link>

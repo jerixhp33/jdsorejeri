@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { JDLogo } from '@/components/shared/JDLogo';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { Shield, Star, Truck, Chrome } from 'lucide-react';
+import { Shield, Star, Truck, Chrome, ChevronLeft } from 'lucide-react';
 
 const TRUST_ITEMS = [
   { icon: Shield, text: 'Secure Google Sign-In' },
@@ -166,8 +166,9 @@ export function LoginPage() {
           </p>
 
           <div className="mt-8 pt-8 border-t border-white/10 text-center">
-            <Link prefetch={true} href="/" className="text-white/40 text-sm hover:text-white transition-colors">
-              ← Back to store
+            <Link prefetch={true} href="/" className="btn-glass !py-2 !px-4 text-xs group mt-4">
+              <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              Back to store
             </Link>
           </div>
         </motion.div>

@@ -369,7 +369,10 @@ export function CheckoutForm() {
     return (
       <div className="page-container py-24 text-center">
         <p className="text-white/50 mb-6">Your cart is empty</p>
-        <Link prefetch={true} href="/" className="btn-gold">Back to Shop</Link>
+        <Link prefetch={true} href="/" className="btn-glass !w-auto !px-8">
+          <ChevronLeft className="w-4 h-4" />
+          Back to Shop
+        </Link>
       </div>
     );
   }

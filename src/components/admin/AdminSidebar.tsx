@@ -78,9 +78,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       <div className="p-3 border-t border-white/10">
         <Link prefetch={true} href="/"
           onClick={onClose}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/40 hover:text-white hover:bg-white/5 transition-all mb-1"
+          className="btn-glass w-full justify-center group mb-2"
         >
-          ← Back to Store
+          <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          Back to Store
         </Link>
         <button
           onClick={async () => { await supabase.auth.signOut(); window.location.href = '/'; }}
