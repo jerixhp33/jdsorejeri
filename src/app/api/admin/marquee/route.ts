@@ -1,18 +1,13 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/admin-api';
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient();
-    
-    // Check if user is admin
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    if (profile?.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const body = await request.json();
-    const { data, error } = await supabase.from('marquee_labels').insert([body]).select().single();
+    const body = await req.json();
+    const { data, error } = await admin.from('marquee_labels').insert([body]).select().single();
     
     if (error) throw error;
     return NextResponse.json(data);
@@ -21,22 +16,17 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(req: NextRequest) {
   try {
-    const supabase = createClient();
-    
-    // Check if user is admin
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    if (profile?.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const body = await request.json();
+    const body = await req.json();
     const { id, ...updates } = body;
     
     if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
-    const { data, error } = await supabase.from('marquee_labels').update(updates).eq('id', id).select().single();
+    const { data, error } = await admin.from('marquee_labels').update(updates).eq('id', id).select().single();
     
     if (error) throw error;
     return NextResponse.json(data);
@@ -45,22 +35,17 @@ export async function PATCH(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(req: NextRequest) {
   try {
-    const supabase = createClient();
-    
-    // Check if user is admin
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    if (profile?.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const body = await request.json();
+    const body = await req.json();
     const { id } = body;
     
     if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
-    const { error } = await supabase.from('marquee_labels').delete().eq('id', id);
+    const { error } = await admin.from('marquee_labels').delete().eq('id', id);
     
     if (error) throw error;
     return NextResponse.json({ success: true });
