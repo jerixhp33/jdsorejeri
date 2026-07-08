@@ -193,6 +193,8 @@ export interface Order {
   subtotal: number;
   delivery_charge: number;
   total: number;
+  discount_amount?: number;
+  coupon_code?: string;
   delivery_notes?: string;
   delivery_instructions?: string;
   whatsapp_sent: boolean;
