@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { ProductGridSkeleton } from './ProductGridSkeleton';
@@ -23,6 +23,62 @@ const SORT_OPTIONS = [
 ];
 
 const LIMIT = 12;
+
+function CustomSelect({ value, onChange, options, minWidth = 150 }: {
+  value: string;
+  onChange: (val: string) => void;
+  options: { value: string; label: string }[];
+  minWidth?: number | string;
+}) {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <div className="relative" style={{ minWidth }}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors focus:outline-none focus:border-white/20"
+      >
+        <span className="truncate pr-4">{options.find(o => o.value === value)?.label || 'Select'}</span>
+        <ChevronDown className="w-4 h-4 text-white/30 flex-shrink-0 transition-transform duration-200" style={{ transform: open ? 'rotate(180deg)' : 'none' }} />
+      </button>
+      
+      <AnimatePresence>
+        {open && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.15 }}
+              className="absolute top-full mt-2 left-0 w-full z-50 rounded-2xl border border-white/10 bg-black/60 backdrop-blur-xl overflow-hidden shadow-2xl"
+            >
+              <div className="max-h-60 overflow-y-auto">
+                {options.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      onChange(opt.value);
+                      setOpen(false);
+                    }}
+                    className={cn(
+                      "w-full text-left px-4 py-2.5 text-sm transition-colors",
+                      value === opt.value
+                        ? "bg-luxe-accent/20 text-luxe-accent font-medium"
+                        : "text-white/70 hover:bg-white/10 hover:text-white"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function ProductsPage({ productType, title, subtitle }: ProductsPageProps) {
   const [products, setProducts]           = useState<Product[]>([]);
@@ -138,19 +194,12 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
             </div>
 
             {/* Sort */}
-            <div className="relative">
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                className="rounded-full border border-white/10 bg-white/5 backdrop-blur-md pr-8 pl-4 py-2 text-sm text-white appearance-none cursor-pointer hover:bg-white/10 transition-colors focus:outline-none focus:border-white/20"
-                style={{ minWidth: 150 }}
-              >
-                {SORT_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none z-10" />
-            </div>
+            <CustomSelect
+              value={sort}
+              onChange={setSort}
+              options={SORT_OPTIONS}
+              minWidth={160}
+            />
 
             {/* Filters toggle */}
             <button
@@ -178,10 +227,15 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
           >
             <div>
               <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Category</label>
-              <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)} className="input-luxe text-sm">
-                <option value="">All Categories</option>
-                {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-              </select>
+              <CustomSelect
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                options={[
+                  { value: '', label: 'All Categories' },
+                  ...categories.map(cat => ({ value: cat.id, label: cat.name }))
+                ]}
+                minWidth="100%"
+              />
             </div>
             <div>
               <label className="text-white/50 text-xs uppercase tracking-wide mb-2 flex justify-between">
