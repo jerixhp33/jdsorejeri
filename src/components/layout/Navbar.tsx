@@ -144,42 +144,14 @@ export function Navbar() {
       setLoadingSuggestions(true);
       try {
         const q = searchQuery.trim().toLowerCase();
-        const words = q.split(/\s+/).filter(w => w.length >= 2);
-
-        let queryBuilder = supabase
-          .from('products')
-          .select('slug, name, product_type, price, material, color, tags, images:product_images(url, is_primary)')
-          .eq('is_active', true)
-          .limit(12);
-
-        if (words.length > 0) {
-          // Search across name, description, product_type, material, color
-          const orConditions = words.map(w =>
-            `name.ilike.%${w}%,description.ilike.%${w}%,product_type.ilike.%${w}%,material.ilike.%${w}%,color.ilike.%${w}%`
-          ).join(',');
-          queryBuilder = queryBuilder.or(orConditions);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+        
+        if (!res.ok) {
+          throw new Error('Search failed');
         }
 
-        const { data } = await queryBuilder;
-
-        // Client-side: also boost results that match tags
-        if (data && words.length > 0) {
-          const scored = data.map(item => {
-            let score = 0;
-            const nameLower = (item.name || '').toLowerCase();
-            const typeLower = (item.product_type || '').toLowerCase();
-            words.forEach(w => {
-              if (nameLower.includes(w)) score += 10;
-              if (typeLower.includes(w)) score += 5;
-              if (item.tags?.some((t: string) => t.toLowerCase().includes(w))) score += 3;
-            });
-            return { ...item, _score: score };
-          });
-          scored.sort((a: any, b: any) => b._score - a._score);
-          setSuggestions(scored);
-        } else if (data) {
-          setSuggestions(data);
-        }
+        const data = await res.json();
+        setSuggestions(data || []);
       } catch (err) {
         console.error('Search error:', err);
       } finally {
