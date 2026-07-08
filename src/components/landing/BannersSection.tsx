@@ -207,7 +207,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(next, 1500); // 1.5s loop
+    timerRef.current = setInterval(next, 4000); // 4s normal loop
   }, [next]);
 
   useEffect(() => {
@@ -538,7 +538,7 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(next, 1500); // 1.5s auto-shift loop
+    timerRef.current = setInterval(next, 4000); // 4s auto-shift loop
   }, [next]);
 
   useEffect(() => {
