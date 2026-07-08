@@ -38,6 +38,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
   return (
     <div className="page-container py-10 md:py-16">
+      <div className="mb-12">
         <Link href="/" className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm mb-8">
           <ArrowLeft className="w-4 h-4" />
           Back to Home
