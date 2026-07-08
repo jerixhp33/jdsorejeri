@@ -48,12 +48,21 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
   });
 
   const updateStatus = async (orderId: string, newStatus: OrderStatus) => {
+    let trackingNumber = null;
+    if (newStatus === 'packed' || newStatus === 'ready') {
+      trackingNumber = window.prompt('Enter ST Courier Tracking Number (AWB) if available:');
+    }
     setUpdatingId(orderId);
     try {
+      const payload: any = { id: orderId, status: newStatus, updated_at: new Date().toISOString() };
+      if (trackingNumber) {
+        payload.tracking_number = trackingNumber;
+        payload.courier_name = 'ST Courier';
+      }
       const res = await fetch('/api/admin/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: orderId, status: newStatus, updated_at: new Date().toISOString() }),
+        body: JSON.stringify(payload),
       });
       const result = await res.json();
 

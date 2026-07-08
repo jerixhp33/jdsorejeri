@@ -120,6 +120,25 @@ export function OrdersList({ orders }: OrdersListProps) {
                 </div>
               )}
 
+              {/* Tracking */}
+              {((order as any).tracking_number) && (
+                <div className="bg-white/5 border border-luxe-accent/20 rounded-lg p-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-white/50 text-xs uppercase tracking-wide mb-0.5">Tracking Information</p>
+                    <p className="text-white text-sm font-medium">{(order as any).courier_name || 'ST Courier'}</p>
+                    <p className="text-white/70 text-xs">AWB: {(order as any).tracking_number}</p>
+                  </div>
+                  <a
+                    href={`https://stcourier.com/track/status/${(order as any).tracking_number}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-semibold bg-luxe-accent text-black px-4 py-2 rounded-xl hover:bg-white transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+                  >
+                    Track Package
+                  </a>
+                </div>
+              )}
+
               {/* Total */}
               <div className="flex justify-between items-center pt-3 border-t border-white/10">
                 <div className="text-sm text-white/50">
