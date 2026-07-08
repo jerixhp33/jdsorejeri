@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
 
     let effectiveProductType = productType;
     let sizeFilter = '';
+    let query: any;
     
     // Use AI parser if search is provided
     if (search) {
