@@ -32,8 +32,6 @@ import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import type { Notification } from '@/types';
 import { JDLogo } from '@/components/shared/JDLogo';
-import { useSearchStore } from '@/store/useSearchStore';
-import { SearchOverlay } from '@/components/search/SearchOverlay';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -113,7 +111,6 @@ export function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
-  const setGlobalSearchOpen = useSearchStore(state => state.setOpen);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -197,15 +194,6 @@ export function Navbar() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-1">
-              {/* Search */}
-              <button
-                onClick={() => setGlobalSearchOpen(true)}
-                className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
-                aria-label="Search"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-
               {!loading && user ? (
                 <>
                   {/* Notifications — desktop only */}
@@ -540,10 +528,6 @@ export function Navbar() {
           </>
         )}
       </AnimatePresence>
-
-      {/* Search Modal */}
-      {/* AI Search Overlay */}
-      <SearchOverlay />
 
       {/* Overlay for profile dropdown */}
       {profileOpen && (
