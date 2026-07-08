@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = await createAdminClient();
-    const words = q.split(/\s+/).filter((w: string) => w.length >= 2);
+    // Strip trailing 's' from words to handle basic plurals (e.g. posters -> poster)
+    const words = q.split(/\s+/)
+      .map((w: string) => w.endsWith('s') && w.length > 3 ? w.slice(0, -1) : w)
+      .filter((w: string) => w.length >= 2);
 
     let query = supabase
       .from('products')
