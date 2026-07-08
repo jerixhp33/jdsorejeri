@@ -32,6 +32,8 @@ import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import type { Notification } from '@/types';
 import { JDLogo } from '@/components/shared/JDLogo';
+import { useSearchStore } from '@/store/useSearchStore';
+import { SearchOverlay } from '@/components/search/SearchOverlay';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -109,13 +111,9 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+  const setGlobalSearchOpen = useSearchStore(state => state.setOpen);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -127,104 +125,7 @@ export function Navbar() {
     setProfileOpen(false);
     setNotifOpen(false);
     setMobileOpen(false);
-    setSearchOpen(false);
   }, [pathname]);
-
-  // Search suggestions debouncer
-  useEffect(() => {
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    
-    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
-      setSuggestions([]);
-      return;
-    }
-
-    searchTimeoutRef.current = setTimeout(async () => {
-      setLoadingSuggestions(true);
-      try {
-        let dbQuery = searchQuery.trim();
-        
-        try {
-          const res = await fetch('/api/search/intent', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: dbQuery }),
-          });
-          
-          if (!res.ok) throw new Error("AI parser failed");
-          const aiIntent = await res.json();
-          
-          let queryBuilder = supabase
-            .from('products')
-            .select('slug, name, product_type, price, images:product_images(url, is_primary)')
-            .eq('is_active', true)
-            .limit(5);
-
-          if (aiIntent.productType && aiIntent.productType !== 'all') {
-            queryBuilder = queryBuilder.eq('product_type', aiIntent.productType);
-          }
-          if (aiIntent.minPrice !== undefined && aiIntent.minPrice !== null) {
-            queryBuilder = queryBuilder.gte('price', aiIntent.minPrice);
-          }
-          if (aiIntent.maxPrice !== undefined && aiIntent.maxPrice !== null) {
-            queryBuilder = queryBuilder.lte('price', aiIntent.maxPrice);
-          }
-
-          if (aiIntent.keywords && aiIntent.keywords.length > 0) {
-            const orConditions = aiIntent.keywords.map((w: string) => `name.ilike.%${w}%,description.ilike.%${w}%`).join(',');
-            queryBuilder = queryBuilder.or(orConditions);
-          } else if (aiIntent.productType === 'all') {
-            queryBuilder = queryBuilder.or(`name.ilike.%${dbQuery}%,description.ilike.%${dbQuery}%`);
-          }
-
-          const { data } = await queryBuilder;
-          
-          if (data) {
-            setSuggestions(data);
-          }
-        } catch (error) {
-          // Fallback
-          let fallbackQuery = dbQuery.toLowerCase();
-          if (fallbackQuery.endsWith('s') && fallbackQuery.length > 3) fallbackQuery = fallbackQuery.slice(0, -1);
-          let words = fallbackQuery.split(/\s+/).filter(w => w.length > 2);
-          let searchType = 'all';
-          ['poster', 'earring'].forEach(t => {
-            if (words.includes(t)) {
-              searchType = t;
-              words = words.filter(w => w !== t);
-            }
-          });
-
-          let queryBuilder = supabase
-            .from('products')
-            .select('slug, name, product_type, price, images:product_images(url, is_primary)')
-            .eq('is_active', true)
-            .limit(5);
-
-          if (searchType !== 'all') queryBuilder = queryBuilder.eq('product_type', searchType);
-
-          if (words.length > 0) {
-            const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%`).join(',');
-            queryBuilder = queryBuilder.or(orConditions);
-          } else if (searchType === 'all') {
-            queryBuilder = queryBuilder.or(`name.ilike.%${fallbackQuery}%,description.ilike.%${fallbackQuery}%`);
-          }
-
-          const { data } = await queryBuilder;
-          if (data) setSuggestions(data);
-        }
-      } catch (err) {
-        console.error('Error fetching suggestions:', err);
-      } finally {
-        setLoadingSuggestions(false);
-      }
-    }, 300);
-
-    return () => {
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -254,14 +155,6 @@ export function Navbar() {
     router.refresh();
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchOpen(false);
-      setSearchQuery('');
-    }
-  };
 
   const recentNotifs = notifications.slice(0, 5);
 
@@ -306,7 +199,7 @@ export function Navbar() {
             <div className="flex items-center gap-1">
               {/* Search */}
               <button
-                onClick={() => setSearchOpen(true)}
+                onClick={() => setGlobalSearchOpen(true)}
                 className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
                 aria-label="Search"
               >
@@ -648,109 +541,8 @@ export function Navbar() {
       </AnimatePresence>
 
       {/* Search Modal */}
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-start justify-center pt-16 sm:pt-20 px-3 sm:px-4"
-            onClick={(e) => e.target === e.currentTarget && setSearchOpen(false)}
-          >
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSearchOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="relative w-full max-w-2xl"
-            >
-              <form onSubmit={handleSearch} className="glass-card !rounded-2xl overflow-hidden">
-                <div className="flex items-center gap-3 px-4 py-3.5 sm:py-4">
-                  <Search className="w-5 h-5 text-white/40 flex-shrink-0" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search posters, earrings..."
-                    className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none text-base sm:text-lg min-w-0"
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setSearchOpen(false)}
-                    className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="px-4 pb-4">
-                  {!searchQuery.trim() ? (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {['Poster', 'Earring', 'A4', 'Gold'].map((term) => (
-                        <button
-                          key={term}
-                          type="button"
-                          onClick={() => {
-                            setSearchQuery(term);
-                            router.push(`/search?q=${encodeURIComponent(term)}`);
-                            setSearchOpen(false);
-                            setSearchQuery('');
-                          }}
-                          className="badge-luxe hover:bg-white/15 transition-all cursor-pointer text-xs py-1.5"
-                        >
-                          {term}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-2 space-y-1">
-                      {loadingSuggestions ? (
-                        <div className="py-4 flex justify-center">
-                           <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-luxe-accent animate-spin" />
-                        </div>
-                      ) : suggestions.length > 0 ? (
-                        suggestions.map((item) => {
-                          const primaryImg = item.images?.find((img: any) => img.is_primary) || item.images?.[0];
-                          return (
-                            <Link
-                              key={item.slug}
-                              href={`/product/${item.slug}`}
-                              onClick={() => {
-                                setSearchOpen(false);
-                                setSearchQuery('');
-                              }}
-                              className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors group"
-                            >
-                              <div className="w-10 h-10 rounded-lg bg-white/5 overflow-hidden flex-shrink-0 relative">
-                                {primaryImg ? (
-                                  <Image src={primaryImg.url} alt={item.name} fill className="object-cover" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">✦</div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0 flex items-center justify-between">
-                                <div>
-                                  <p className="text-sm font-medium text-white/80 group-hover:text-luxe-accent truncate transition-colors">{item.name}</p>
-                                  <p className="text-xs text-white/40 capitalize">{item.product_type}</p>
-                                </div>
-                                <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-luxe-accent transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
-                              </div>
-                            </Link>
-                          );
-                        })
-                      ) : (
-                        <div className="py-4 text-center text-sm text-white/40">
-                          No products found for "{searchQuery}"
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* AI Search Overlay */}
+      <SearchOverlay />
 
       {/* Overlay for profile dropdown */}
       {profileOpen && (
