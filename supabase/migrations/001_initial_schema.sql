@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   profile_picture TEXT,
   role        user_role NOT NULL DEFAULT 'user',
   phone       TEXT,
+  notification_preferences JSONB DEFAULT '{"order_updates": true, "new_arrivals": false, "offers_discounts": true}'::jsonb,
   last_active TIMESTAMPTZ,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
