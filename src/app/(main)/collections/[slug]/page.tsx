@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic';
 
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { ProductCard } from '@/components/product/ProductCard';
 
@@ -36,7 +38,10 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
   return (
     <div className="page-container py-10 md:py-16">
-      <div className="mb-12">
+        <Link href="/" className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm mb-8">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </Link>
         <p className="text-luxe-accent text-sm tracking-widest uppercase mb-3">Collection</p>
         <h1 className="section-title mb-3">{collection.name}</h1>
         {collection.description && (
