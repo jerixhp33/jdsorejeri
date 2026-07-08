@@ -98,7 +98,7 @@ function LocationMarker({ onLocationSelect, searchQuery }: MapPickerProps) {
   };
 
   return position === null ? null : (
-    <Marker position={position} />
+    <Marker position={position} icon={DefaultIcon} />
   );
 }
 
