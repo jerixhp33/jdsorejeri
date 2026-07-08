@@ -75,31 +75,58 @@ export function SearchPageView({ initialQuery }: SearchPageViewProps) {
     let searchType = type;
     let words: string[] = [];
 
-    // 1. Text Search & Natural Language Parsing
+    // 1. Text Search & Natural Language Parsing (AI-Powered)
     if (q.trim()) {
-      let qText = q.trim().toLowerCase();
-      // Forgiving plurals
-      if (qText.endsWith('s') && qText.length > 3) {
-        qText = qText.slice(0, -1);
-      }
-      
-      words = qText.split(/\s+/).filter(w => w.length > 2);
-      
-      // Auto-detect product type from query (e.g. "gold earrings" -> type: earring, query: gold)
-      const validTypes = ['poster', 'earring'];
-      validTypes.forEach(t => {
-        if (words.includes(t)) {
-          searchType = t;
-          words = words.filter(w => w !== t); // Remove from text search to broaden results
+      try {
+        // Call the Groq AI Intent Parser
+        const res = await fetch('/api/search/intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: q.trim() }),
+        });
+        
+        if (!res.ok) throw new Error("AI parser failed");
+        const aiIntent = await res.json();
+        
+        words = aiIntent.keywords || [];
+        if (aiIntent.productType && aiIntent.productType !== 'all') {
+          searchType = aiIntent.productType;
         }
-      });
+        // AI can also detect price ranges automatically!
+        if (aiIntent.minPrice !== undefined && aiIntent.minPrice !== null) {
+          minP = aiIntent.minPrice.toString();
+        }
+        if (aiIntent.maxPrice !== undefined && aiIntent.maxPrice !== null) {
+          maxP = aiIntent.maxPrice.toString();
+        }
 
-      if (words.length > 0) {
-        const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
-        dbQuery = dbQuery.or(orConditions);
-      } else if (searchType === 'all') {
-        // If they just searched something that didn't match a type and was too short, fallback
-        dbQuery = dbQuery.or(`name.ilike.%${qText}%,description.ilike.%${qText}%`);
+        if (words.length > 0) {
+          const orConditions = words.map((w: string) => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
+          dbQuery = dbQuery.or(orConditions);
+        } else if (searchType === 'all' && words.length === 0) {
+           // Fallback if AI didn't find any keywords but query exists
+           dbQuery = dbQuery.or(`name.ilike.%${q.trim()}%,description.ilike.%${q.trim()}%`);
+        }
+      } catch (error) {
+        console.error("Using fallback parser:", error);
+        // Fallback to simple parser
+        let qText = q.trim().toLowerCase();
+        if (qText.endsWith('s') && qText.length > 3) qText = qText.slice(0, -1);
+        words = qText.split(/\s+/).filter(w => w.length > 2);
+        
+        ['poster', 'earring'].forEach(t => {
+          if (words.includes(t)) {
+            searchType = t;
+            words = words.filter(w => w !== t);
+          }
+        });
+
+        if (words.length > 0) {
+          const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
+          dbQuery = dbQuery.or(orConditions);
+        } else if (searchType === 'all') {
+          dbQuery = dbQuery.or(`name.ilike.%${qText}%,description.ilike.%${qText}%`);
+        }
       }
     }
 

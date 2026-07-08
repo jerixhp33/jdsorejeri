@@ -33,6 +33,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
   const [page, setPage]                   = useState(1);
   const [filtersOpen, setFiltersOpen]     = useState(false);
   const [search, setSearch]               = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sort, setSort]                   = useState('newest');
   const [maxPrice, setMaxPrice]           = useState(10000);
@@ -46,6 +47,14 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
       .catch(() => setCategories([]));
   }, [productType]);
 
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [search]);
+
   const fetchProducts = useCallback(async (currentPage = 1, append = false) => {
     if (!append) setLoading(true); else setLoadingMore(true);
 
@@ -57,7 +66,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
         sort,
       });
       if (selectedCategory) params.set('category', selectedCategory);
-      if (search)           params.set('search', search);
+      if (debouncedSearch)  params.set('search', debouncedSearch);
       if (inStockOnly)      params.set('inStock', '1');
       if (productType === 'earring' && maxPrice < 10000)
         params.set('maxPrice', String(maxPrice));
@@ -75,7 +84,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [productType, selectedCategory, search, sort, maxPrice, inStockOnly]);
+  }, [productType, selectedCategory, debouncedSearch, sort, maxPrice, inStockOnly]);
 
   useEffect(() => {
     setPage(1);
@@ -94,7 +103,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
     if (key === 'inStock')  setInStockOnly(false);
   };
 
-  const hasActiveFilters = !!(selectedCategory || search || inStockOnly);
+  const hasActiveFilters = !!(selectedCategory || debouncedSearch || inStockOnly);
 
   return (
     <div className="min-h-screen">

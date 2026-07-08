@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
+import { parseSearchIntent } from '@/lib/groq';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -28,11 +29,40 @@ export async function GET(request: NextRequest) {
       `, { count: 'exact' })
       .eq('is_active', true);
 
-    if (productType) query = query.eq('product_type', productType);
+    let effectiveProductType = productType;
+    
+    // Use AI parser if search is provided
+    if (search) {
+      const intent = await parseSearchIntent(search);
+      
+      // Override productType if AI detected one
+      if (intent.productType && intent.productType !== 'all') {
+        effectiveProductType = intent.productType;
+      }
+      
+      // Add keyword search
+      if (intent.keywords && intent.keywords.length > 0) {
+        const orConditions = intent.keywords.map(w => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
+        query = query.or(orConditions);
+      } else {
+        // Fallback
+        query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+      }
+      
+      // Override max price if AI detected one
+      if (intent.maxPrice !== null) {
+        query = query.lte('price', intent.maxPrice);
+      }
+      if (intent.minPrice !== null) {
+        query = query.gte('price', intent.minPrice);
+      }
+    }
+
+    if (effectiveProductType) query = query.eq('product_type', effectiveProductType);
     if (categoryId) query = query.eq('category_id', categoryId);
-    if (search) query = query.ilike('name', `%${search}%`);
     if (inStock) query = query.gt('stock', 0);
-    if (maxPrice !== null) query = query.lte('price', maxPrice);
+    // Apply URL maxPrice only if AI didn't already override it
+    if (maxPrice !== null && (!search || !(await parseSearchIntent(search)).maxPrice)) query = query.lte('price', maxPrice);
 
     switch (sort) {
       case 'price_asc': query = query.order('price', { ascending: true }); break;

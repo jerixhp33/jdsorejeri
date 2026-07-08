@@ -142,42 +142,76 @@ export function Navbar() {
     searchTimeoutRef.current = setTimeout(async () => {
       setLoadingSuggestions(true);
       try {
-        let dbQuery = searchQuery.trim().toLowerCase();
-        if (dbQuery.endsWith('s') && dbQuery.length > 3) {
-          dbQuery = dbQuery.slice(0, -1);
-        }
-
-        let words = dbQuery.split(/\s+/).filter(w => w.length > 2);
-        let searchType = 'all';
+        let dbQuery = searchQuery.trim();
         
-        ['poster', 'earring'].forEach(t => {
-          if (words.includes(t)) {
-            searchType = t;
-            words = words.filter(w => w !== t);
+        try {
+          const res = await fetch('/api/search/intent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: dbQuery }),
+          });
+          
+          if (!res.ok) throw new Error("AI parser failed");
+          const aiIntent = await res.json();
+          
+          let queryBuilder = supabase
+            .from('products')
+            .select('slug, name, product_type, price, images:product_images(url, is_primary)')
+            .eq('is_active', true)
+            .limit(5);
+
+          if (aiIntent.productType && aiIntent.productType !== 'all') {
+            queryBuilder = queryBuilder.eq('product_type', aiIntent.productType);
           }
-        });
+          if (aiIntent.minPrice !== undefined && aiIntent.minPrice !== null) {
+            queryBuilder = queryBuilder.gte('price', aiIntent.minPrice);
+          }
+          if (aiIntent.maxPrice !== undefined && aiIntent.maxPrice !== null) {
+            queryBuilder = queryBuilder.lte('price', aiIntent.maxPrice);
+          }
 
-        let queryBuilder = supabase
-          .from('products')
-          .select('slug, name, product_type, price, images:product_images(url, is_primary)')
-          .eq('is_active', true)
-          .limit(5);
+          if (aiIntent.keywords && aiIntent.keywords.length > 0) {
+            const orConditions = aiIntent.keywords.map((w: string) => `name.ilike.%${w}%,description.ilike.%${w}%`).join(',');
+            queryBuilder = queryBuilder.or(orConditions);
+          } else if (aiIntent.productType === 'all') {
+            queryBuilder = queryBuilder.or(`name.ilike.%${dbQuery}%,description.ilike.%${dbQuery}%`);
+          }
 
-        if (searchType !== 'all') {
-          queryBuilder = queryBuilder.eq('product_type', searchType);
-        }
+          const { data } = await queryBuilder;
+          
+          if (data) {
+            setSuggestions(data);
+          }
+        } catch (error) {
+          // Fallback
+          let fallbackQuery = dbQuery.toLowerCase();
+          if (fallbackQuery.endsWith('s') && fallbackQuery.length > 3) fallbackQuery = fallbackQuery.slice(0, -1);
+          let words = fallbackQuery.split(/\s+/).filter(w => w.length > 2);
+          let searchType = 'all';
+          ['poster', 'earring'].forEach(t => {
+            if (words.includes(t)) {
+              searchType = t;
+              words = words.filter(w => w !== t);
+            }
+          });
 
-        if (words.length > 0) {
-          const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%`).join(',');
-          queryBuilder = queryBuilder.or(orConditions);
-        } else if (searchType === 'all') {
-          queryBuilder = queryBuilder.or(`name.ilike.%${dbQuery}%,description.ilike.%${dbQuery}%`);
-        }
+          let queryBuilder = supabase
+            .from('products')
+            .select('slug, name, product_type, price, images:product_images(url, is_primary)')
+            .eq('is_active', true)
+            .limit(5);
 
-        const { data } = await queryBuilder;
-        
-        if (data) {
-          setSuggestions(data);
+          if (searchType !== 'all') queryBuilder = queryBuilder.eq('product_type', searchType);
+
+          if (words.length > 0) {
+            const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%`).join(',');
+            queryBuilder = queryBuilder.or(orConditions);
+          } else if (searchType === 'all') {
+            queryBuilder = queryBuilder.or(`name.ilike.%${fallbackQuery}%,description.ilike.%${fallbackQuery}%`);
+          }
+
+          const { data } = await queryBuilder;
+          if (data) setSuggestions(data);
         }
       } catch (err) {
         console.error('Error fetching suggestions:', err);
