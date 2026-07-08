@@ -150,10 +150,12 @@ export function Navbar() {
           .from('products')
           .select('slug, name, product_type, price, images:product_images(url, is_primary)')
           .eq('is_active', true)
-          .limit(8);
+          .limit(12);
 
         if (words.length > 0) {
-          const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%`).join(',');
+          const orConditions = words.map(w => 
+            `name.ilike.%${w}%,description.ilike.%${w}%,product_type.ilike.%${w}%,tags.cs.{"${w}"}`
+          ).join(',');
           queryBuilder = queryBuilder.or(orConditions);
         }
 
