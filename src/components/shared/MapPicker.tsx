@@ -112,8 +112,8 @@ export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerPr
         const lng = pos.coords.longitude;
         if (mapRef) {
           mapRef.flyTo([lat, lng], 16);
-          // We can't directly trigger a map click event cleanly, so we just pan there.
-          // The user can click to drop the exact pin once it arrives at their GPS location.
+          // Force drop the pin by simulating a click on the map at the GPS coordinates!
+          mapRef.fire('click', { latlng: L.latLng(lat, lng) });
         }
       },
       (error) => {
