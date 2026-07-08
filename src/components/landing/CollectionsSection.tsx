@@ -44,7 +44,7 @@ function sampleColor(imgEl: HTMLImageElement): string | null {
   }
 }
 
-function CollectionCard({ collection, index }: { collection: Collection; index: number }) {
+export function CollectionCard({ collection, index }: { collection: Collection; index: number }) {
   const [glowColor, setGlowColor] = useState<string | null>(null);
 
   const onImgLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {

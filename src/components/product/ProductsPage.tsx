@@ -127,7 +127,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
           <div className="flex items-center gap-3 flex-wrap">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none z-10" />
               <input
                 type="text"
                 placeholder="Search..."
@@ -149,7 +149,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none z-10" />
             </div>
 
             {/* Filters toggle */}
