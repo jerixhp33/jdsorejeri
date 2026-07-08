@@ -81,11 +81,13 @@ function CollectionCard({ collection, index }: { collection: Collection; index: 
       whileHover={{ y: -6 }}
     >
       <Link prefetch={true} href={`/collections/${collection.slug}`}
-        className="group block relative overflow-hidden card-edge-light"
+        className="group block relative overflow-hidden rounded-2xl border"
         style={glowColor ? {
           borderColor: `rgba(${glowColor},0.45)`,
           transition: 'border-color 0.7s ease',
-        } : undefined}
+        } : {
+          borderColor: 'rgba(200,169,110,0.12)',
+        }}
       >
         {/* Image */}
         <div className="aspect-[3/4] relative overflow-hidden">

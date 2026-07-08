@@ -627,7 +627,7 @@ export function Navbar() {
               {/* Glow effect */}
               <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-luxe-accent/20 via-transparent to-transparent pointer-events-none" />
 
-              <div className="relative bg-[#0c0c0c] border border-white/10 rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+              <div className="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl shadow-black/50">
                 {/* Search Input */}
                 <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
                   {loadingSuggestions ? (

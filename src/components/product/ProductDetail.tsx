@@ -450,10 +450,10 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             <button
               onClick={() => toggle(product.id)}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-medium transition-all',
+                'flex-1 flex items-center justify-center gap-2 py-3 rounded-full border text-sm font-medium transition-all backdrop-blur-md',
                 wishlisted
                   ? 'border-red-500/40 bg-red-500/10 text-red-400'
-                  : 'border-white/15 text-white/60 hover:border-white/30 hover:text-white'
+                  : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:bg-white/10 hover:text-white'
               )}
             >
               <Heart className={cn('w-4 h-4', wishlisted && 'fill-current')} />
@@ -461,7 +461,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             </button>
             <button
               onClick={handleShare}
-              className="p-3 rounded-xl border border-white/15 text-white/60 hover:border-white/30 hover:text-white transition-all"
+              className="p-3 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-white/60 hover:border-white/20 hover:bg-white/10 hover:text-white transition-all"
               aria-label="Share"
             >
               <Share2 className="w-4 h-4" />

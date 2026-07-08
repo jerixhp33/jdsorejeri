@@ -133,7 +133,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="input-luxe pl-9 pr-4 py-2 text-sm w-40 md:w-56"
+                className="rounded-full border border-white/10 bg-white/5 backdrop-blur-md pl-9 pr-4 py-2 text-sm text-white w-40 md:w-56 hover:bg-white/10 transition-colors placeholder-white/40 focus:outline-none focus:border-white/20"
               />
             </div>
 
@@ -142,7 +142,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="input-luxe pr-8 py-2 text-sm appearance-none cursor-pointer"
+                className="rounded-full border border-white/10 bg-white/5 backdrop-blur-md pr-8 pl-4 py-2 text-sm text-white appearance-none cursor-pointer hover:bg-white/10 transition-colors focus:outline-none focus:border-white/20"
                 style={{ minWidth: 150 }}
               >
                 {SORT_OPTIONS.map(opt => (
@@ -156,12 +156,11 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
             <button
               onClick={() => setFiltersOpen(!filtersOpen)}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-xl border text-sm transition-all',
+                'flex items-center gap-2 px-5 py-2 rounded-full border text-sm transition-all backdrop-blur-md',
                 filtersOpen
-                  ? 'border-luxe-accent text-luxe-accent'
-                  : 'border-white/15 text-white/60 hover:border-white/30'
+                  ? 'border-luxe-accent bg-luxe-accent/10 text-luxe-accent'
+                  : 'border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10'
               )}
-              style={filtersOpen ? { background: 'rgba(200,169,110,0.1)' } : {}}
             >
               <SlidersHorizontal className="w-4 h-4" />
               Filters

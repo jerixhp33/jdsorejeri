@@ -167,9 +167,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   )}
                   onLoad={(e) => {
                     setImageLoaded(true);
-                    if (imageIndex === 0) {
-                      sampleImageColor(e.currentTarget as unknown as HTMLImageElement);
-                    }
+                    sampleImageColor(e.currentTarget as unknown as HTMLImageElement);
                   }}
                 />
               </motion.div>
@@ -266,7 +264,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 : !isInStock
                   ? 'Out of Stock'
                   : product.product_type === 'poster'
-                    ? 'Select Size'
+                    ? 'Select Poster'
                     : 'Add to Cart'}
             </button>
           </div>
