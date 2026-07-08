@@ -26,7 +26,7 @@ export function SettingsView() {
 
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
 
-  const { isSupported, isSubscribed, subscribe } = useWebPush();
+  const { isSupported, isSubscribed, subscribe, unsubscribe } = useWebPush();
 
   useEffect(() => {
     const stored = (profile as any)?.notification_preferences;
@@ -174,7 +174,12 @@ export function SettingsView() {
                 </p>
                 <p className="text-white/40 text-xs">Enabled on this device</p>
               </div>
-              <span className="text-green-400 text-xs font-bold px-2 py-1 bg-green-400/10 rounded-lg">Active</span>
+              <button
+                onClick={() => unsubscribe()}
+                className="px-4 py-1.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold hover:bg-red-500/20 transition-all"
+              >
+                Disable
+              </button>
             </div>
           )}
         </div>

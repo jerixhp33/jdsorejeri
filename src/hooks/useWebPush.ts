@@ -64,7 +64,11 @@ export function useWebPush() {
         body: JSON.stringify({ subscription })
       });
 
-      if (!res.ok) throw new Error('Failed to save subscription on server');
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Server returned an error:', errorText);
+        throw new Error(`Failed to save subscription on server: ${errorText}`);
+      }
       
       setIsSubscribed(true);
       return true;
@@ -74,5 +78,21 @@ export function useWebPush() {
     }
   };
 
-  return { isSupported, isSubscribed, subscribe };
+  const unsubscribe = async () => {
+    if (!isSupported) return false;
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) {
+        await subscription.unsubscribe();
+      }
+      setIsSubscribed(false);
+      return true;
+    } catch (err) {
+      console.error('Error unsubscribing:', err);
+      return false;
+    }
+  };
+
+  return { isSupported, isSubscribed, subscribe, unsubscribe };
 }
