@@ -7,8 +7,6 @@ const FOOTER_LINKS = {
     { label: 'Wall Posters', href: '/posters' },
     { label: 'Earrings', href: '/earrings' },
     { label: 'Collections', href: '/collections' },
-    { label: 'New Arrivals', href: '/posters' },
-    { label: 'Best Sellers', href: '/posters' },
   ],
   Help: [
     { label: 'About Us', href: '/about' },
@@ -96,7 +94,7 @@ export function Footer() {
               <h3 className="text-white font-semibold text-sm mb-4">{section}</h3>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link.href}>
+                  <li key={link.label}>
                     <Link prefetch={true} href={link.href}
                       className="text-white/40 text-sm hover:text-white transition-colors"
                     >
