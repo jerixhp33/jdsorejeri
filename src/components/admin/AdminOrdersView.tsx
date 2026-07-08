@@ -30,6 +30,10 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
   const [search, setSearch] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [printingOrder, setPrintingOrder] = useState<Order | null>(null);
+  const [dispatchOrder, setDispatchOrder] = useState<Order | null>(null);
+  const [dispatchCourier, setDispatchCourier] = useState('SD Courier');
+  const [dispatchCustomCourier, setDispatchCustomCourier] = useState('');
+  const [dispatchAwb, setDispatchAwb] = useState('');
 
   const handlePrint = (order: Order) => {
     setPrintingOrder(order);
@@ -47,17 +51,13 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
     return matchesFilter && matchesSearch;
   });
 
-  const updateStatus = async (orderId: string, newStatus: OrderStatus) => {
-    let trackingNumber = null;
-    if (newStatus === 'packed' || newStatus === 'ready') {
-      trackingNumber = window.prompt('Enter ST Courier Tracking Number (AWB) if available:');
-    }
+  const updateStatus = async (orderId: string, newStatus: OrderStatus, trackingInfo?: { courier: string; awb: string }) => {
     setUpdatingId(orderId);
     try {
       const payload: any = { id: orderId, status: newStatus, updated_at: new Date().toISOString() };
-      if (trackingNumber) {
-        payload.tracking_number = trackingNumber;
-        payload.courier_name = 'ST Courier';
+      if (trackingInfo?.awb) {
+        payload.tracking_number = trackingInfo.awb;
+        payload.courier_name = trackingInfo.courier;
       }
       const res = await fetch('/api/admin/orders', {
         method: 'PATCH',
@@ -69,7 +69,12 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
       if (!res.ok || result?.error) {
         toast.error('Failed to update status');
       } else {
-        setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
+        setOrders((prev) => prev.map((o) => o.id === orderId ? { 
+          ...o, 
+          status: newStatus,
+          tracking_number: trackingInfo?.awb || (o as any).tracking_number,
+          courier_name: trackingInfo?.courier || (o as any).courier_name
+        } : o));
 
         // Notify user
         const order = orders.find(o => o.id === orderId);
@@ -80,26 +85,39 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
             ready: 'Your order is out for delivery! 🚚',
             delivered: 'Your order has been delivered. Enjoy! 😊',
           };
-          if (messages[newStatus]) {
-            await fetch('/api/admin/notifications', {
+          let notifyMsg = messages[newStatus] || '';
+          if ((newStatus === 'packed' || newStatus === 'ready') && trackingInfo?.awb) {
+            notifyMsg += ` Shipped via ${trackingInfo.courier} (AWB: ${trackingInfo.awb}).`;
+          }
+
+          if (notifyMsg) {
+            await fetch('/api/admin/orders', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                _notify: true,
                 user_id: order.user_id,
-                title: `Order #${order.order_number} Update`,
-                body: messages[newStatus],
-                type: 'order',
-                action_url: `/dashboard/orders`,
+                order_number: order.order_number,
+                message: notifyMsg,
+                // Email notification details
+                _send_email: true,
+                email: (order.user as any)?.email,
+                customer_name: (order.user as any)?.name || 'Valued Customer',
+                courier_name: trackingInfo?.courier,
+                tracking_number: trackingInfo?.awb,
+                status: newStatus,
               }),
             });
           }
         }
-        toast.success(`Status updated to ${newStatus}`);
+        toast.success(`Order status updated to ${newStatus}`);
       }
-    } catch (err) {
-      toast.error('Failed to update status');
+    } catch (error) {
+      console.error(error);
+      toast.error('Something went wrong');
+    } finally {
+      setUpdatingId(null);
     }
-    setUpdatingId(null);
   };
 
   const cancelOrder = async (orderId: string) => {
@@ -194,7 +212,17 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                       <div className="flex items-center gap-2">
                         {NEXT_STATUS[order.status as OrderStatus] && (
                           <button
-                            onClick={() => updateStatus(order.id, NEXT_STATUS[order.status as OrderStatus]!)}
+                            onClick={() => {
+                              const next = NEXT_STATUS[order.status as OrderStatus]!;
+                              if (next === 'packed' || next === 'ready') {
+                                setDispatchOrder(order);
+                                setDispatchCourier('SD Courier');
+                                setDispatchCustomCourier('');
+                                setDispatchAwb('');
+                              } else {
+                                updateStatus(order.id, next);
+                              }
+                            }}
                             disabled={updatingId === order.id}
                             className="px-3 py-1.5 rounded-lg bg-luxe-accent/20 text-luxe-accent text-xs hover:bg-luxe-accent/30 transition-all disabled:opacity-50"
                           >
@@ -208,6 +236,25 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                           >
                             Cancel
                           </button>
+                        )}
+                        {/* Send AWB via WhatsApp */}
+                        {(order.status === 'packed' || order.status === 'ready') && (order as any).tracking_number && (order.user as any)?.phone && (
+                          <a
+                            href={`https://wa.me/91${(order.user as any).phone}?text=${encodeURIComponent(
+                              `Hi ${(order.user as any).name || 'Customer'}, your JD Store order #${order.order_number} has been shipped via ${(order as any).courier_name || 'SD Courier'} (AWB: ${(order as any).tracking_number}). Track here: ${
+                                ((order as any).courier_name || 'SD Courier').toLowerCase().includes('st')
+                                  ? `https://stcourier.com/track/status/${(order as any).tracking_number}`
+                                  : `https://sdcouriers.com/track/${(order as any).tracking_number}`
+                              }`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs hover:bg-emerald-500/20 transition-all flex items-center gap-1"
+                            title="Send Tracking Info via WhatsApp"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span>Send AWB</span>
+                          </a>
                         )}
                         {/* WhatsApp contact */}
                         {(order.user as any)?.phone && (
@@ -330,6 +377,87 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
             <p className="font-serif italic text-lg text-black mb-1">Thank you for shopping with JD Store!</p>
             <p>For support or queries, contact us via WhatsApp.</p>
             <p className="mt-4 text-xs text-gray-400">Admin generated on {new Date().toLocaleString('en-IN')}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Dispatch Details Modal */}
+      {dispatchOrder && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div className="glass-card max-w-md w-full p-6 border border-white/15 space-y-6">
+            <div>
+              <h3 className="text-lg font-bold text-white mb-1">Dispatch Details</h3>
+              <p className="text-white/50 text-xs font-sans">Enter courier tracking information for Order #{dispatchOrder.order_number}</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wider block mb-1.5">Courier Partner</label>
+                <select
+                  value={dispatchCourier}
+                  onChange={(e) => setDispatchCourier(e.target.value)}
+                  className="input-luxe w-full"
+                >
+                  <option value="SD Courier">SD Courier</option>
+                  <option value="ST Courier">ST Courier</option>
+                  <option value="Other">Other (Custom)</option>
+                </select>
+              </div>
+
+              {dispatchCourier === 'Other' && (
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wider block mb-1.5">Custom Courier Name</label>
+                  <input
+                    type="text"
+                    value={dispatchCustomCourier}
+                    onChange={(e) => setDispatchCustomCourier(e.target.value)}
+                    placeholder="Enter courier name"
+                    className="input-luxe w-full"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wider block mb-1.5">Tracking Number (AWB)</label>
+                <input
+                  type="text"
+                  value={dispatchAwb}
+                  onChange={(e) => setDispatchAwb(e.target.value)}
+                  placeholder="Enter tracking number"
+                  className="input-luxe w-full"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setDispatchOrder(null)}
+                className="px-4 py-2 rounded-xl border border-white/10 text-white/70 text-xs hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const courier = dispatchCourier === 'Other' ? dispatchCustomCourier : dispatchCourier;
+                  if (!courier.trim()) {
+                    toast.error('Please enter a courier name');
+                    return;
+                  }
+                  if (!dispatchAwb.trim()) {
+                    toast.error('Please enter a tracking number');
+                    return;
+                  }
+                  const next = NEXT_STATUS[dispatchOrder.status as OrderStatus]!;
+                  updateStatus(dispatchOrder.id, next, { courier, awb: dispatchAwb });
+                  setDispatchOrder(null);
+                }}
+                className="px-4 py-2 rounded-xl bg-luxe-accent text-black font-semibold text-xs hover:bg-white transition-all"
+              >
+                Confirm Dispatch
+              </button>
+            </div>
           </div>
         </div>
       )}

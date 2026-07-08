@@ -23,6 +23,17 @@ const STATUS_LABELS: Record<string, string> = {
 
 export function OrdersList({ orders }: OrdersListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedTrackingId, setExpandedTrackingId] = useState<string | null>(null);
+
+  const getTimelineSteps = (status: string, courierName?: string, trackingNumber?: string) => {
+    return [
+      { label: 'Order Placed', desc: 'We have received your order.', active: true },
+      { label: 'Confirmed', desc: 'Your order has been verified and confirmed.', active: ['confirmed', 'packed', 'ready', 'delivered'].includes(status) },
+      { label: 'Packed', desc: 'Your package has been prepared and boxed.', active: ['packed', 'ready', 'delivered'].includes(status) },
+      { label: 'Dispatched', desc: courierName ? `Shipped via ${courierName}` : 'Handed over to courier.', active: ['ready', 'delivered'].includes(status) },
+      { label: 'Delivered', desc: 'Package successfully delivered.', active: status === 'delivered' },
+    ];
+  };
 
   if (orders.length === 0) {
     return (
@@ -122,20 +133,78 @@ export function OrdersList({ orders }: OrdersListProps) {
 
               {/* Tracking */}
               {((order as any).tracking_number) && (
-                <div className="bg-white/5 border border-luxe-accent/20 rounded-lg p-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-white/50 text-xs uppercase tracking-wide mb-0.5">Tracking Information</p>
-                    <p className="text-white text-sm font-medium">{(order as any).courier_name || 'ST Courier'}</p>
-                    <p className="text-white/70 text-xs">AWB: {(order as any).tracking_number}</p>
+                <div className="space-y-4">
+                  <div className="bg-white/5 border border-luxe-accent/20 rounded-lg p-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-white/50 text-xs uppercase tracking-wide mb-0.5">Tracking Information</p>
+                      <p className="text-white text-sm font-medium">{(order as any).courier_name || 'ST Courier'}</p>
+                      <p className="text-white/70 text-xs">AWB: {(order as any).tracking_number}</p>
+                    </div>
+                    <button
+                      onClick={() => setExpandedTrackingId(expandedTrackingId === order.id ? null : order.id)}
+                      className="text-xs font-semibold bg-luxe-accent text-black px-4 py-2 rounded-xl hover:bg-white transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)] flex items-center gap-1"
+                    >
+                      <span>Track Order</span>
+                      {expandedTrackingId === order.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
-                  <a
-                    href={`https://stcourier.com/track/status/${(order as any).tracking_number}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs font-semibold bg-luxe-accent text-black px-4 py-2 rounded-xl hover:bg-white transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)]"
-                  >
-                    Track Package
-                  </a>
+
+                  {expandedTrackingId === order.id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="glass-card p-5 border border-white/10 space-y-6 overflow-hidden"
+                    >
+                      <h4 className="text-white font-semibold text-xs uppercase tracking-wider mb-2">Live Tracking Timeline</h4>
+                      
+                      {/* Timeline Steps */}
+                      <div className="relative pl-6 space-y-6">
+                        {/* Connecting Line */}
+                        <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-white/10" />
+
+                        {getTimelineSteps(order.status, (order as any).courier_name, (order as any).tracking_number).map((step, idx) => (
+                          <div key={idx} className="relative flex gap-4">
+                            {/* Circle Node */}
+                            <div className={cn(
+                              "absolute left-[-24px] top-1.5 w-3.5 h-3.5 rounded-full border-2 transition-all duration-300",
+                              step.active 
+                                ? "bg-luxe-accent border-luxe-accent shadow-[0_0_8px_#d4af37]" 
+                                : "bg-luxe-black border-white/20"
+                            )} />
+                            
+                            <div>
+                              <p className={cn(
+                                "text-xs font-semibold uppercase tracking-wider",
+                                step.active ? "text-luxe-accent" : "text-white/30"
+                              )}>
+                                {step.label}
+                              </p>
+                              <p className="text-xs text-white/50 mt-0.5">{step.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Direct Courier Tracking Link */}
+                      <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row gap-3 items-center justify-between">
+                        <span className="text-[10px] text-white/40 font-mono">Carrier: {(order as any).courier_name || 'ST Courier'} AWB#{(order as any).tracking_number}</span>
+                        <a
+                          href={
+                            ((order as any).courier_name || '').toLowerCase().includes('st')
+                              ? `https://stcourier.com/track/status/${(order as any).tracking_number}`
+                              : ((order as any).courier_name || '').toLowerCase().includes('sd')
+                              ? `https://sdcouriers.com/track/${(order as any).tracking_number}`
+                              : `https://www.google.com/search?q=${encodeURIComponent(`${(order as any).courier_name} tracking ${(order as any).tracking_number}`)}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-semibold border border-luxe-accent text-luxe-accent hover:bg-luxe-accent hover:text-black transition-all px-4 py-2 rounded-xl text-center w-full sm:w-auto"
+                        >
+                          Go to Official Courier Portal
+                        </a>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               )}
 
