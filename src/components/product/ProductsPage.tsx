@@ -36,8 +36,11 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sort, setSort]                   = useState('newest');
-  const [maxPrice, setMaxPrice]           = useState(10000);
+  const [maxPrice, setMaxPrice]           = useState(productType === 'poster' ? 2000 : 10000);
   const [inStockOnly, setInStockOnly]     = useState(false);
+  
+  const sliderMax = productType === 'poster' ? 2000 : 10000;
+  const sliderStep = productType === 'poster' ? 50 : 100;
 
   // Fetch categories via API route (server-side, bypasses anon RLS issue)
   useEffect(() => {
@@ -68,7 +71,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
       if (selectedCategory) params.set('category', selectedCategory);
       if (debouncedSearch)  params.set('search', debouncedSearch);
       if (inStockOnly)      params.set('inStock', '1');
-      if (maxPrice < 10000) params.set('maxPrice', String(maxPrice));
+      if (maxPrice < sliderMax) params.set('maxPrice', String(maxPrice));
 
       const res = await fetch(`/api/products?${params.toString()}`);
       const json = await res.json();
@@ -185,7 +188,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
               <label className="text-white/50 text-xs uppercase tracking-wide mb-2 flex justify-between">
                 Max Price <span className="text-white">{formatCurrency(maxPrice)}</span>
               </label>
-              <input type="range" min={100} max={10000} step={100} value={maxPrice}
+              <input type="range" min={100} max={sliderMax} step={sliderStep} value={maxPrice}
                 onChange={e => setMaxPrice(Number(e.target.value))}
                 className="w-full" style={{ accentColor: '#c8a96e' }} />
             </div>
@@ -240,7 +243,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
             <h3 className="text-white font-semibold text-lg mb-2">No products found</h3>
             <p className="text-white/40 text-sm mb-6">Try adjusting your filters or search term</p>
             <button
-              onClick={() => { setSearch(''); setSelectedCategory(''); setInStockOnly(false); setMaxPrice(10000); }}
+              onClick={() => { setSearch(''); setSelectedCategory(''); setInStockOnly(false); setMaxPrice(sliderMax); }}
               className="btn-luxe-outline text-sm"
             >
               Clear All Filters

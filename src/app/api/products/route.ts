@@ -22,10 +22,12 @@ export async function GET(request: NextRequest) {
     let effectiveProductType = productType;
     let sizeFilter = '';
     let query: any;
+    let aiIntent: any = null;
     
     // Use AI parser if search is provided
     if (search) {
-      const intent = await parseSearchIntent(search);
+      aiIntent = await parseSearchIntent(search);
+      const intent = aiIntent;
       
       // Override productType ONLY if we are in global search (productType was not explicitly provided in the URL)
       if (!productType && intent.productType && intent.productType !== 'all') {
@@ -80,7 +82,7 @@ export async function GET(request: NextRequest) {
     if (categoryId) query = query.eq('category_id', categoryId);
     if (inStock) query = query.gt('stock', 0);
     // Apply URL maxPrice only if AI didn't already override it
-    if (maxPrice !== null && (!search || !(await parseSearchIntent(search)).maxPrice)) query = query.lte('price', maxPrice);
+    if (maxPrice !== null && (!aiIntent || aiIntent.maxPrice === null)) query = query.lte('price', maxPrice);
 
     switch (sort) {
       case 'price_asc': query = query.order('price', { ascending: true }); break;
