@@ -77,7 +77,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     if (images.length <= 1) return;
     const timer = setInterval(() => {
       setImageIndex((prev) => (prev + 1) % images.length);
-    }, 3500);
+    }, 2500);
     return () => clearInterval(timer);
   }, [images.length]);
 

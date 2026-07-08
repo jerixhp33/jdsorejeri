@@ -92,7 +92,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     if (images.length <= 1) return;
     const timer = setInterval(() => {
       handleNextImage();
-    }, 4000);
+    }, 2800);
     return () => clearInterval(timer);
   }, [images.length, handleNextImage]);
   
