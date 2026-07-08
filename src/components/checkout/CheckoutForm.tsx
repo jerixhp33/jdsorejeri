@@ -68,9 +68,6 @@ export function CheckoutForm() {
   const [couponError, setCouponError] = useState('');
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   
-  // Track the total for the success screen
-  const [placedOrderTotal, setPlacedOrderTotal] = useState(0);
-  
   const supabase = createClient();
   
   // Available Coupons
