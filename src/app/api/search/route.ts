@@ -11,20 +11,45 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = await createAdminClient();
+    
+    let maxPrice: number | null = null;
+    let minPrice: number | null = null;
+    let cleanQ = q;
+
+    // Detect "under X", "below X", "< X"
+    const maxMatch = q.match(/(?:under|below|less than|<)\s*(?:rs|inr|₹|r)?\s*(\d+)/i);
+    if (maxMatch) {
+      maxPrice = parseInt(maxMatch[1], 10);
+      cleanQ = cleanQ.replace(maxMatch[0], '').trim();
+    }
+
+    // Detect "above X", "over X", "> X"
+    const minMatch = cleanQ.match(/(?:above|over|more than|>)\s*(?:rs|inr|₹|r)?\s*(\d+)/i);
+    if (minMatch) {
+      minPrice = parseInt(minMatch[1], 10);
+      cleanQ = cleanQ.replace(minMatch[0], '').trim();
+    }
+
     // Strip trailing 's' from words to handle basic plurals (e.g. posters -> poster)
-    const words = q.split(/\s+/)
+    const words = cleanQ.split(/\s+/)
       .map((w: string) => w.endsWith('s') && w.length > 3 ? w.slice(0, -1) : w)
       .filter((w: string) => w.length >= 2);
 
     // Fetch product IDs that match the searched size (e.g. "A4")
-    const sizeMatch = await supabase.from('poster_sizes').select('product_id').ilike('label', `%${q}%`);
-    const sizeProductIds = sizeMatch.data?.map((s: any) => s.product_id) || [];
+    let sizeProductIds: string[] = [];
+    if (words.length > 0) {
+      const sizeMatch = await supabase.from('poster_sizes').select('product_id').ilike('label', `%${cleanQ}%`);
+      sizeProductIds = sizeMatch.data?.map((s: any) => s.product_id) || [];
+    }
 
     let query = supabase
       .from('products')
       .select('id, slug, name, product_type, price, material, color, tags, images:product_images(url, is_primary), sizes:poster_sizes(label)')
       .eq('is_active', true)
-      .limit(15);
+      .limit(maxPrice !== null || minPrice !== null ? 24 : 15);
+
+    if (maxPrice !== null) query = query.lte('price', maxPrice);
+    if (minPrice !== null) query = query.gte('price', minPrice);
 
     if (words.length > 0) {
       const orConditions = words.map((w: string) => {
