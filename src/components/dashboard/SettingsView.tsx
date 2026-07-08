@@ -36,22 +36,23 @@ export function SettingsView() {
     return DEFAULT_PREFS;
   });
 
-  const handleToggle = (key: keyof NotificationPrefs) => {
-    setNotifPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const handleSaveNotifications = async () => {
+  const handleToggle = async (key: keyof NotificationPrefs) => {
+    const newPrefs = { ...notifPrefs, [key]: !notifPrefs[key] };
+    setNotifPrefs(newPrefs);
+    
     setSavingNotifs(true);
     try {
       const res = await fetch('/api/profile/notifications', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notification_preferences: notifPrefs }),
+        body: JSON.stringify({ notification_preferences: newPrefs }),
       });
       if (!res.ok) throw new Error('Failed to save');
-      toast.success('Notification preferences saved');
+      toast.success('Preferences updated');
     } catch {
       toast.error('Could not save preferences. Please try again.');
+      // Revert on failure
+      setNotifPrefs(notifPrefs);
     } finally {
       setSavingNotifs(false);
     }
@@ -103,20 +104,17 @@ export function SettingsView() {
 
       {/* Notifications */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-5">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <Bell className="w-4 h-4 text-luxe-accent" />
             <h2 className="text-white font-semibold">Notifications</h2>
           </div>
-          <button
-            onClick={handleSaveNotifications}
-            disabled={savingNotifs}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-luxe-accent transition-all disabled:opacity-50"
-            style={{ border: '1px solid rgba(var(--luxe-accent-rgb, 212,175,55),0.3)', background: 'rgba(var(--luxe-accent-rgb, 212,175,55),0.08)' }}
-          >
-            <Save className="w-3 h-3" />
-            {savingNotifs ? 'Saving…' : 'Save'}
-          </button>
+          {savingNotifs && (
+            <span className="text-xs text-white/40 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-luxe-accent animate-pulse" />
+              Saving...
+            </span>
+          )}
         </div>
         <div className="space-y-4">
           {NOTIF_ITEMS.map((item) => (
