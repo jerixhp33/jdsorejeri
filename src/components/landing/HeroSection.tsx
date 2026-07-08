@@ -380,7 +380,7 @@ export function HeroSection() {
       <div className="absolute bottom-0 left-0 right-0 z-30 border-t border-white/[0.08] bg-black/60 backdrop-blur-md overflow-hidden py-3 sm:py-3.5">
         <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-black/80 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-black/80 to-transparent z-10 pointer-events-none" />
-        <div className="flex whitespace-nowrap animate-marquee">
+        <div className="flex whitespace-nowrap animate-marquee w-max">
           {/* First identical half */}
           <div className="flex shrink-0">
             {itemsToRender.map((item, i) => (
