@@ -528,7 +528,7 @@
   width: 300%;
   height: 300%;
   transform: translate(-50%, -50%);
-  background: conic-gradient(from var(--border-angle) at 50% 50%, transparent 60%, #ff4545, #00ff99, #006aff, #ff0095 100%);
+  background: conic-gradient(from var(--border-angle) at 50% 50%, transparent 70%, rgba(255, 255, 255, 0.4), #ffffff 100%);
   animation: border-spin 60s linear infinite;
 }
 @keyframes marquee {
