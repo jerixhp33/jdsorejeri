@@ -7,7 +7,7 @@ import { JDLogo } from '@/components/shared/JDLogo';
 import {
   LayoutDashboard, Package, ShoppingBag, Users, BarChart3,
   Image as ImageIcon, Layers, Mail, Settings, FileText, LogOut,
-  Star, HelpCircle, Menu, X, Ticket
+  Star, HelpCircle, Menu, X, Ticket, ChevronLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
