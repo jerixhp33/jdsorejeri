@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import {
   motion,
@@ -196,6 +197,28 @@ export function HeroSection() {
   const scale = useTransform(scrollYProgress, [0, 0.6], [1, 0.97]);
   const springY = useSpring(y, { stiffness: 80, damping: 22 });
 
+  const [marqueeItems, setMarqueeItems] = useState<string[]>(MARQUEE_ITEMS);
+
+  useEffect(() => {
+    async function fetchMarquee() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('marquee_labels')
+          .select('text')
+          .eq('is_active', true)
+          .order('order_index', { ascending: true });
+        
+        if (data && data.length > 0) {
+          setMarqueeItems(data.map(d => d.text));
+        }
+      } catch (e) {
+        console.error('Failed to fetch marquee texts', e);
+      }
+    }
+    fetchMarquee();
+  }, []);
+
   return (
     <section
       ref={containerRef}
@@ -353,7 +376,7 @@ export function HeroSection() {
         <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-black/80 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-black/80 to-transparent z-10 pointer-events-none" />
         <div className="flex whitespace-nowrap animate-marquee">
-          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
+          {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
             <span
               key={i}
               className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-white/40 text-[11px] sm:text-xs tracking-[0.25em] uppercase font-semibold"
