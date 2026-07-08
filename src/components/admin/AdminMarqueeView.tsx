@@ -190,22 +190,20 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
 
       <AnimatePresence>
         {modal.open && (
-          <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={(e) => e.target === e.currentTarget && closeModal()}
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-              onClick={closeModal}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
+              className="glass-card w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto"
             >
-              <div className="glass-card p-6 md:p-8 m-4 max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-2">
                   <h2 className="text-xl font-bold text-white">
                     {modal.data.id ? 'Edit Label' : 'Add Label'}
                   </h2>
@@ -261,9 +259,8 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
                     {saving ? 'Saving...' : 'Save Label'}
                   </button>
                 </div>
-              </div>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
