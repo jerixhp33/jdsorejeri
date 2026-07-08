@@ -11,7 +11,7 @@ export default function NotFound() {
         <p className="text-white/40 mb-8">The page you're looking for doesn't exist or has been moved.</p>
         <div className="flex gap-3 justify-center">
           <Link prefetch={true} href="/" className="btn-gold text-sm">Back to Home</Link>
-          <Link prefetch={true} href="/search" className="btn-luxe-outline text-sm">Search Products</Link>
+          <Link prefetch={true} href="/posters" className="btn-luxe-outline text-sm">View Posters</Link>
         </div>
       </div>
     </div>

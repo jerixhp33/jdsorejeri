@@ -7,8 +7,8 @@ const FOOTER_LINKS = {
     { label: 'Wall Posters', href: '/posters' },
     { label: 'Earrings', href: '/earrings' },
     { label: 'Collections', href: '/collections' },
-    { label: 'New Arrivals', href: '/search?sort=newest' },
-    { label: 'Best Sellers', href: '/search?sort=popular' },
+    { label: 'New Arrivals', href: '/posters' },
+    { label: 'Best Sellers', href: '/posters' },
   ],
   Help: [
     { label: 'About Us', href: '/about' },
