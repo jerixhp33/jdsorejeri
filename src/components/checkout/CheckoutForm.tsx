@@ -66,26 +66,7 @@ export function CheckoutForm() {
   const [placedOrderData, setPlacedOrderData] = useState<any>(null);
   const [mapLocation, setMapLocation] = useState<{lat: number, lng: number} | null>(null);
 
-  const watchStreet = watch('street');
-  const watchArea = watch('area');
-  const watchCity = watch('city');
-  const watchDistrict = watch('district');
-  const watchPincode = watch('pincode');
-  
-  const typedAddress = [watchStreet, watchArea, watchCity, watchDistrict, watchPincode].filter(Boolean).join(', ');
 
-  const handleLocationSelect = (location: any) => {
-    setMapLocation({ lat: location.lat, lng: location.lng });
-    if (location.address.street) setValue('street', location.address.street, { shouldValidate: true });
-    if (location.address.area) setValue('area', location.address.area, { shouldValidate: true });
-    if (location.address.city) setValue('city', location.address.city, { shouldValidate: true });
-    if (location.address.district) {
-      const match = TAMIL_NADU_DISTRICTS.find(d => d.toLowerCase() === location.address.district?.toLowerCase());
-      if (match) setValue('district', match as typeof TAMIL_NADU_DISTRICTS[number], { shouldValidate: true });
-    }
-    if (location.address.pincode) setValue('pincode', location.address.pincode, { shouldValidate: true });
-  };
-  
   // Coupon States
   const [couponCode, setCouponCode] = useState('');
   const { appliedCoupon, setAppliedCoupon } = useCouponStore();
@@ -109,6 +90,26 @@ export function CheckoutForm() {
       email: profile?.email || '',
     },
   });
+
+  const watchStreet = watch('street');
+  const watchArea = watch('area');
+  const watchCity = watch('city');
+  const watchDistrict = watch('district');
+  const watchPincode = watch('pincode');
+  
+  const typedAddress = [watchStreet, watchArea, watchCity, watchDistrict, watchPincode].filter(Boolean).join(', ');
+
+  const handleLocationSelect = (location: any) => {
+    setMapLocation({ lat: location.lat, lng: location.lng });
+    if (location.address.street) setValue('street', location.address.street, { shouldValidate: true });
+    if (location.address.area) setValue('area', location.address.area, { shouldValidate: true });
+    if (location.address.city) setValue('city', location.address.city, { shouldValidate: true });
+    if (location.address.district) {
+      const match = TAMIL_NADU_DISTRICTS.find(d => d.toLowerCase() === location.address.district?.toLowerCase());
+      if (match) setValue('district', match as typeof TAMIL_NADU_DISTRICTS[number], { shouldValidate: true });
+    }
+    if (location.address.pincode) setValue('pincode', location.address.pincode, { shouldValidate: true });
+  };
 
   const currentPincode = watch('pincode');
 
