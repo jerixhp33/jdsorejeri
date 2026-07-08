@@ -109,6 +109,12 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -122,7 +128,72 @@ export function Navbar() {
     setProfileOpen(false);
     setNotifOpen(false);
     setMobileOpen(false);
+    setSearchOpen(false);
   }, [pathname]);
+
+  // Fast database search with debounce
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setLoadingSuggestions(true);
+      try {
+        const q = searchQuery.trim().toLowerCase();
+        const words = q.split(/\s+/).filter(w => w.length >= 2);
+
+        let queryBuilder = supabase
+          .from('products')
+          .select('slug, name, product_type, price, images:product_images(url, is_primary)')
+          .eq('is_active', true)
+          .limit(8);
+
+        if (words.length > 0) {
+          const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%`).join(',');
+          queryBuilder = queryBuilder.or(orConditions);
+        }
+
+        const { data } = await queryBuilder;
+        if (data) setSuggestions(data);
+      } catch (err) {
+        console.error('Search error:', err);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 200);
+
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
+
+  // Focus search input when modal opens
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    } else {
+      setSearchQuery('');
+      setSuggestions([]);
+    }
+  }, [searchOpen]);
+
+  // Escape key closes search
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && searchOpen) setSearchOpen(false);
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [searchOpen]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -194,6 +265,14 @@ export function Navbar() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-1">
+              {/* Search */}
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                aria-label="Search"
+              >
+                <Search className="w-5 h-5" />
+              </button>
               {!loading && user ? (
                 <>
                   {/* Notifications — desktop only */}
@@ -526,6 +605,108 @@ export function Navbar() {
               )}
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Search Modal */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-start justify-center pt-16 sm:pt-24 px-3 sm:px-4"
+            onClick={(e) => e.target === e.currentTarget && setSearchOpen(false)}
+          >
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSearchOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="relative w-full max-w-2xl"
+            >
+              <div className="glass-card !rounded-2xl overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3.5 sm:py-4 border-b border-white/5">
+                  <Search className="w-5 h-5 text-white/40 flex-shrink-0" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search posters, earrings, collections..."
+                    className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none text-base sm:text-lg min-w-0"
+                  />
+                  <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/5 text-white/30 text-[11px] font-mono border border-white/10">ESC</kbd>
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen(false)}
+                    className="sm:hidden p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="px-4 pb-4 max-h-[60vh] overflow-y-auto">
+                  {!searchQuery.trim() ? (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {['Poster', 'Earring', 'A4', 'Gold', 'Minimal'].map((term) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => setSearchQuery(term)}
+                          className="badge-luxe hover:bg-white/15 transition-all cursor-pointer text-xs py-1.5"
+                        >
+                          {term}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-2 space-y-1">
+                      {loadingSuggestions ? (
+                        <div className="py-6 flex justify-center">
+                          <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-luxe-accent animate-spin" />
+                        </div>
+                      ) : suggestions.length > 0 ? (
+                        suggestions.map((item) => {
+                          const primaryImg = item.images?.find((img: any) => img.is_primary) || item.images?.[0];
+                          return (
+                            <Link
+                              key={item.slug}
+                              href={`/product/${item.slug}`}
+                              onClick={() => {
+                                setSearchOpen(false);
+                                setSearchQuery('');
+                              }}
+                              className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors group"
+                            >
+                              <div className="w-10 h-10 rounded-lg bg-white/5 overflow-hidden flex-shrink-0 relative">
+                                {primaryImg ? (
+                                  <Image src={primaryImg.url} alt={item.name} fill className="object-cover" sizes="40px" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">✦</div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0 flex items-center justify-between">
+                                <div>
+                                  <p className="text-sm font-medium text-white/80 group-hover:text-luxe-accent truncate transition-colors">{item.name}</p>
+                                  <p className="text-xs text-white/40 capitalize">{item.product_type} · ₹{item.price}</p>
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-luxe-accent transition-all flex-shrink-0 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
+                              </div>
+                            </Link>
+                          );
+                        })
+                      ) : (
+                        <div className="py-6 text-center text-sm text-white/40">
+                          No products found for "{searchQuery}"
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 

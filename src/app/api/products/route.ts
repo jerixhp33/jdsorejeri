@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
-import { parseSearchIntent } from '@/lib/groq';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -13,76 +12,33 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') || 'newest';
   const inStock = searchParams.get('inStock') === '1';
   const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : null;
+  const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : null;
   const offset = (page - 1) * limit;
 
   try {
-    // Use admin client to bypass RLS — products with is_active=true are public anyway
     const supabase = await createAdminClient();
 
-    let effectiveProductType = productType;
-    let sizeFilter = '';
-    let query: any;
-    let aiIntent: any = null;
-    
-    // Use AI parser if search is provided
+    const selectStr = `*, category:product_categories(id, name, slug), images:product_images(url, is_primary, display_order), sizes:poster_sizes(id, label, price, stock, width_cm, height_cm)`;
+
+    let query = supabase
+      .from('products')
+      .select(selectStr, { count: 'exact' })
+      .eq('is_active', true);
+
+    // Text search — split into words, match against name/description/tags
     if (search) {
-      aiIntent = await parseSearchIntent(search);
-      const intent = aiIntent;
-      
-      // Override productType ONLY if we are in global search (productType was not explicitly provided in the URL)
-      if (!productType && intent.productType && intent.productType !== 'all') {
-        effectiveProductType = intent.productType;
+      const words = search.trim().toLowerCase().split(/\s+/).filter(w => w.length >= 2);
+      if (words.length > 0) {
+        const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
+        query = query.or(orConditions);
       }
-      
-      // If AI detected a size, enforce sizes!inner, but ONLY if we aren't strictly in the earrings section
-      if (intent.sizes && intent.sizes.length > 0 && productType !== 'earring') {
-        effectiveProductType = 'poster';
-        sizeFilter = intent.sizes[0];
-      }
-
-      let selectStr = `*, category:product_categories(id, name, slug), images:product_images(url, is_primary, display_order)`;
-      if (sizeFilter) {
-        selectStr += `, sizes:poster_sizes!inner(id, label, price, stock, width_cm, height_cm)`;
-      } else {
-        selectStr += `, sizes:poster_sizes(id, label, price, stock, width_cm, height_cm)`;
-      }
-
-      let queryBuilder = supabase.from('products').select(selectStr, { count: 'exact' }).eq('is_active', true);
-      
-      if (sizeFilter) {
-        queryBuilder = queryBuilder.ilike('sizes.label', `%${sizeFilter}%`);
-      }
-      
-      // Add keyword search
-      if (intent.keywords && intent.keywords.length > 0) {
-        const orConditions = intent.keywords.map((w: string) => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
-        queryBuilder = queryBuilder.or(orConditions);
-      } else {
-        // Fallback
-        queryBuilder = queryBuilder.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
-      }
-      
-      // Override max price if AI detected one
-      if (intent.maxPrice !== null) {
-        queryBuilder = queryBuilder.lte('price', intent.maxPrice);
-      }
-      if (intent.minPrice !== null) {
-        queryBuilder = queryBuilder.gte('price', intent.minPrice);
-      }
-      
-      query = queryBuilder;
-    } else {
-      query = supabase
-        .from('products')
-        .select(`*, category:product_categories(id, name, slug), images:product_images(url, is_primary, display_order), sizes:poster_sizes(id, label, price, stock, width_cm, height_cm)`, { count: 'exact' })
-        .eq('is_active', true);
     }
 
-    if (effectiveProductType) query = query.eq('product_type', effectiveProductType);
+    if (productType) query = query.eq('product_type', productType);
     if (categoryId) query = query.eq('category_id', categoryId);
     if (inStock) query = query.gt('stock', 0);
-    // Apply URL maxPrice only if AI didn't already override it
-    if (maxPrice !== null && (!aiIntent || aiIntent.maxPrice === null)) query = query.lte('price', maxPrice);
+    if (maxPrice !== null) query = query.lte('price', maxPrice);
+    if (minPrice !== null) query = query.gte('price', minPrice);
 
     switch (sort) {
       case 'price_asc': query = query.order('price', { ascending: true }); break;
