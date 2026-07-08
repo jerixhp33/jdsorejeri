@@ -20,10 +20,10 @@ const MARQUEE_ITEMS = [
 
 // Subtext split into lyric phrases
 const LYRIC_WORDS = [
-  'Museum-quality', 'wall', 'posters', 'and',
-  'handcrafted', 'earrings.', 'Curated', 'for',
-  'those', 'who', 'see', 'beauty', 'as', 'an',
-  'essential,', 'not', 'a', 'luxury.',
+  'Trending', 'wall', 'posters', 'and',
+  'trending', 'earrings', 'with', 'a',
+  'stylish,', 'modern', 'theme.', 'Art',
+  'that', 'transforms', 'your', 'space.',
 ];
 
 // ─── Colour-shifting headline word ───────────────────────────
@@ -273,7 +273,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.7, delay: 0.15 }}
-          className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 mb-6 sm:mb-8 md:mb-10 rounded-full border border-luxe-accent/20 bg-luxe-accent/[0.07]"
+          className="inline-flex items-center gap-2 px-5 py-2 mb-6 sm:mb-8 md:mb-10 rounded-full border border-white/10 bg-white/5 backdrop-blur-md"
         >
           <motion.span
             animate={{ rotate: [0, 18, -18, 0] }}
@@ -289,7 +289,7 @@ export function HeroSection() {
         {/* Headline */}
         <div className="relative inline-block mb-3 sm:mb-4" style={{ perspective: '1200px' }}>
           <Brackets />
-          <h1 className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.08] tracking-tight px-6 sm:px-8 py-2 sm:py-3">
+          <h1 className="font-display italic text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.1] tracking-tight px-6 sm:px-8 py-2 sm:py-3">
             <motion.span
               className="block"
               initial={{ opacity: 0, y: 28 }}

@@ -57,7 +57,7 @@ export function FAQSection({ faqs }: FAQSectionProps) {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
                 className={cn(
-                  'glass-card overflow-hidden transition-all duration-300',
+                  'rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden transition-all duration-500 hover:bg-white/10 hover:border-white/20',
                   openIndex === i && 'border-white/20'
                 )}
               >

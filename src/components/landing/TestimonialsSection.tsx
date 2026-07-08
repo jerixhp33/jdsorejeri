@@ -47,7 +47,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
               viewport={{ once: true }}
               transition={{ delay: i * 0.07 }}
               className={cn(
-                'glass-card p-6',
+                'rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group',
                 i === 0 && 'md:col-span-2 lg:col-span-1'
               )}
             >

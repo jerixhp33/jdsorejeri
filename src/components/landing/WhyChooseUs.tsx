@@ -78,7 +78,7 @@ export function WhyChooseUs() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="glass-card p-6 hover:border-white/20 transition-all duration-300 group"
+              className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group"
             >
               <div className="w-12 h-12 rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex items-center justify-center mb-5 group-hover:bg-luxe-accent/20 transition-colors">
                 <feature.icon className="w-5 h-5 text-luxe-accent" />
