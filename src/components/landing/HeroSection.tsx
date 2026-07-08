@@ -134,11 +134,7 @@ function ShimmerButton({
   return (
     <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
       <Link prefetch={true} href={href}
-        className={`relative group inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-sm font-semibold overflow-hidden ${
-          gold
-            ? 'bg-luxe-accent text-black'
-            : 'border border-white/20 text-white hover:border-white/40 hover:bg-white/5'
-        }`}
+        className={`relative group inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-sm font-semibold overflow-hidden border border-white/20 bg-white/5 backdrop-blur-md text-white hover:border-white/40 hover:bg-white/10 transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)]`}
       >
         <span className="absolute inset-0 translate-x-[-110%] group-hover:translate-x-[110%] bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out" />
         <span className="relative z-10 flex items-center gap-2">{children}</span>
@@ -340,7 +336,7 @@ export function HeroSection() {
             </motion.span>
           </ShimmerButton>
           <ShimmerButton href="/earrings">
-            <Sparkles className="w-4 h-4 text-luxe-accent/70" />
+            <Sparkles className="w-4 h-4 text-white/70" />
             Explore Earrings
           </ShimmerButton>
         </motion.div>
@@ -353,14 +349,14 @@ export function HeroSection() {
       />
 
       {/* Marquee strip */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-white/[0.05] bg-black/50 backdrop-blur-sm overflow-hidden py-2.5 sm:py-3">
-        <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-14 bg-gradient-to-r from-black/70 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-14 bg-gradient-to-l from-black/70 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 z-30 border-t border-white/[0.08] bg-black/60 backdrop-blur-md overflow-hidden py-3 sm:py-3.5">
+        <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-black/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-black/80 to-transparent z-10 pointer-events-none" />
         <div className="flex whitespace-nowrap animate-marquee">
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
             <span
               key={i}
-              className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-white/22 text-[10px] sm:text-[11px] tracking-[0.2em] uppercase font-medium"
+              className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-white/40 text-[11px] sm:text-xs tracking-[0.25em] uppercase font-semibold"
             >
               {item}
               <span className="text-luxe-accent/40 text-[7px]">✦</span>
