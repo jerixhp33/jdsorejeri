@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     let selectStr = `*, category:product_categories(id, name, slug), images:product_images(url, is_primary, display_order)`;
     
     if (intent.sizes.length > 0 && intent.productType !== 'earring') {
-      selectStr += `, sizes!inner(id, label, price, stock, width_cm, height_cm)`;
+      selectStr += `, sizes:poster_sizes!inner(id, label, price, stock, width_cm, height_cm)`;
     } else {
       selectStr += `, sizes:poster_sizes(id, label, price, stock, width_cm, height_cm)`;
     }

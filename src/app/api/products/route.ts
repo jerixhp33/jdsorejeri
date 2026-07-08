@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
       let selectStr = `*, category:product_categories(id, name, slug), images:product_images(url, is_primary, display_order)`;
       if (sizeFilter) {
-        selectStr += `, sizes!inner(id, label, price, stock, width_cm, height_cm)`;
+        selectStr += `, sizes:poster_sizes!inner(id, label, price, stock, width_cm, height_cm)`;
       } else {
         selectStr += `, sizes:poster_sizes(id, label, price, stock, width_cm, height_cm)`;
       }

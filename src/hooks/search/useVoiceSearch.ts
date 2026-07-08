@@ -1,9 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 export function useVoiceSearch(onResult: (text: string) => void) {
   const [isListening, setIsListening] = useState(false);
   const [supported, setSupported] = useState(true);
   const [recognition, setRecognition] = useState<any>(null);
+  const onResultRef = useRef(onResult);
+
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -20,7 +25,7 @@ export function useVoiceSearch(onResult: (text: string) => void) {
             .join('');
           
           if (event.results[0].isFinal) {
-            onResult(text);
+            onResultRef.current(text);
             setIsListening(false);
           }
         };
@@ -38,7 +43,7 @@ export function useVoiceSearch(onResult: (text: string) => void) {
         setSupported(false);
       }
     }
-  }, [onResult]);
+  }, []);
 
   const startListening = useCallback(() => {
     if (recognition && !isListening) {
