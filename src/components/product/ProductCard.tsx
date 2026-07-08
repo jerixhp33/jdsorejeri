@@ -197,8 +197,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
-              {/* Dots indicator */}
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+              {/* Dots indicator - moves up when cart button slides up */}
+              <div className="absolute bottom-16 sm:bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 transition-all duration-300 sm:group-hover:bottom-16">
                 {images.map((_, idx) => (
                   <div key={idx} className={cn("transition-all duration-300 rounded-full", idx === imageIndex ? "w-2 h-2 bg-white" : "w-1.5 h-1.5 bg-white/40")} />
                 ))}
@@ -221,17 +221,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           )}
 
           {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10 max-w-[75%]">
             {product.is_best_seller && (
-              <span className="badge-luxe text-[10px] !px-2 !py-0.5">Best Seller</span>
+              <span className="inline-block px-2 py-0.5 rounded-full bg-luxe-accent/20 border border-luxe-accent/30 text-luxe-accent text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md">Best Seller</span>
             )}
             {product.is_trending && (
-              <span className="badge-luxe text-[10px] !px-2 !py-0.5">Trending</span>
+              <span className="inline-block px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md">Trending</span>
             )}
             {!isInStock && (
-              <span className="badge-luxe !bg-red-500/20 !text-red-400 !border-red-500/30 text-[10px] !px-2 !py-0.5">
-                Out of Stock
-              </span>
+              <span className="inline-block px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md">Out of Stock</span>
             )}
           </div>
 
@@ -259,7 +257,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 'w-full py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 transition-all duration-200 min-h-[36px]',
                 isInStock
                   ? 'bg-white text-black hover:bg-luxe-accent'
-                  : 'bg-white/20 text-white/40 cursor-not-allowed'
+                  : 'bg-black/60 backdrop-blur-md border border-white/10 text-white/50 cursor-not-allowed'
               )}
             >
               <ShoppingCart className="w-3.5 h-3.5" />
@@ -282,13 +280,13 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </h3>
 
           <div className="flex items-center justify-between">
-            <div>
-              <span className="text-white font-semibold text-sm sm:text-base">
-                {formatCurrency(displayPrice)}
-              </span>
-              {product.product_type === 'poster' && (
-                <span className="text-white/30 text-[11px] ml-1">from</span>
+            <div className="flex items-baseline gap-1">
+              {product.product_type === 'poster' && displayPrice > 0 && (
+                <span className="text-white/40 text-[10px] uppercase tracking-widest">From</span>
               )}
+              <span className="text-white font-semibold text-sm sm:text-base">
+                {displayPrice > 0 ? formatCurrency(displayPrice) : 'Coming Soon'}
+              </span>
             </div>
             {(product.average_rating ?? 0) > 0 && (
               <div className="flex items-center gap-0.5">
