@@ -16,11 +16,15 @@ export async function GET(request: NextRequest) {
       .map((w: string) => w.endsWith('s') && w.length > 3 ? w.slice(0, -1) : w)
       .filter((w: string) => w.length >= 2);
 
+    // Fetch product IDs that match the searched size (e.g. "A4")
+    const sizeMatch = await supabase.from('poster_sizes').select('product_id').ilike('label', `%${q}%`);
+    const sizeProductIds = sizeMatch.data?.map((s: any) => s.product_id) || [];
+
     let query = supabase
       .from('products')
-      .select('slug, name, product_type, price, material, color, tags, images:product_images(url, is_primary)')
+      .select('id, slug, name, product_type, price, material, color, tags, images:product_images(url, is_primary), sizes:poster_sizes(label)')
       .eq('is_active', true)
-      .limit(12);
+      .limit(15);
 
     if (words.length > 0) {
       const orConditions = words.map((w: string) => {
@@ -30,8 +34,15 @@ export async function GET(request: NextRequest) {
           condition += `,product_type.eq.${w}`;
         }
         return condition;
-      }).join(',');
-      query = query.or(orConditions);
+      });
+      
+      let finalOrString = orConditions.join(',');
+      
+      if (sizeProductIds.length > 0) {
+        finalOrString += `,id.in.(${sizeProductIds.join(',')})`;
+      }
+
+      query = query.or(finalOrString);
     }
 
     const { data, error } = await query;
@@ -48,9 +59,10 @@ export async function GET(request: NextRequest) {
       words.forEach((w: string) => {
         if (nameLower.includes(w)) score += 10;
         if (typeLower.includes(w)) score += 5;
-        if (item.tags?.some((t: string) => t.toLowerCase().includes(w))) score += 3;
+        if (item.tags?.some((t: string) => t.toLowerCase().includes(w))) score += 5;
         if ((item.material || '').toLowerCase().includes(w)) score += 3;
         if ((item.color || '').toLowerCase().includes(w)) score += 3;
+        if (item.sizes?.some((s: any) => s.label.toLowerCase().includes(w))) score += 5;
       });
       return { ...item, _score: score };
     });
