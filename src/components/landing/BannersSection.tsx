@@ -524,106 +524,178 @@ export function SidebarBannersPanel({ banners }: BannersSectionProps) {
 // positioned right after the hero, not buried below all products.
 
 export function MobileSidebarBanners({ banners }: BannersSectionProps) {
-  if (!banners.length) return null;
+  const [current, setCurrent] = useState(0);
+  const [glowColors, setGlowColors] = useState<Record<number, string>>({});
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  return (
-    <section className="px-4 py-6 max-w-[1400px] mx-auto">
-      {/* Gold accent line */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mb-5" />
+  const next = useCallback(() => {
+    setCurrent((c) => (c + 1) % banners.length);
+  }, [banners.length]);
 
-      {/* Horizontal scroll strip — one card per banner */}
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-        {banners.map((banner, i) => (
-          <MobileSidebarCard key={banner.id} banner={banner} priority={i === 0} />
-        ))}
-      </div>
+  const prev = useCallback(() => {
+    setCurrent((c) => (c - 1 + banners.length) % banners.length);
+  }, [banners.length]);
 
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mt-5" />
-    </section>
-  );
-}
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(next, 1500); // 1.5s auto-shift loop
+  }, [next]);
 
-function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boolean }) {
-  const [glowColor, setGlowColor] = useState<string | null>(null);
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    resetTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [resetTimer, banners.length]);
 
-  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
     const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
-    if (color) setGlowColor(color);
+    if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
   }, []);
 
+  if (!banners.length) return null;
+
+  // If only 1 banner, render static card
+  if (banners.length === 1) {
+    return (
+      <section className="px-4 py-8 max-w-[1400px] mx-auto flex justify-center">
+        <MobileSidebarCard banner={banners[0]} priority={true} />
+      </section>
+    );
+  }
+
+  const activeGlow = glowColors[current];
+
+  const getDiff = (i: number) => {
+    let diff = i - current;
+    const half = banners.length / 2;
+    if (diff < -half) diff += banners.length;
+    else if (diff > half) diff -= banners.length;
+    return diff;
+  };
+
   return (
-    <div
-      className="relative flex-shrink-0 w-[72vw] max-w-[280px] overflow-hidden rounded-2xl group"
-      style={glowColor ? {
-        boxShadow: `0 0 0 1px rgba(${glowColor},0.18), 0 4px 16px rgba(${glowColor},0.08)`,
-        transition: 'box-shadow 0.7s ease',
-      } : {
-        boxShadow: '0 0 0 1px rgba(200,169,110,0.08)',
-      }}
-    >
-      {/* Image */}
-      <div className="relative w-full aspect-[3/4] overflow-hidden rounded-2xl">
-        <Image
-          src={banner.image_url}
-          alt={banner.title}
-          fill
-          crossOrigin="anonymous"
-          className="object-cover transition-transform duration-700 group-active:scale-105"
-          sizes="280px"
-          priority={priority}
-          onLoad={handleImageLoad}
-        />
+    <section className="relative w-full py-12 overflow-hidden">
+      {/* Gold accent line */}
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mb-8" />
 
-        {/* Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/5" />
-
-        {/* Adaptive inner glow */}
-        {glowColor && (
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `radial-gradient(ellipse at 50% 95%, rgba(${glowColor},0.05) 0%, transparent 55%)`,
-            }}
-          />
-        )}
-
-        {/* Gold shimmer lines */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e]/50 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e]/30 to-transparent" />
+      {/* Ambient background glow */}
+      <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
+        <AnimatePresence>
+          {activeGlow && (
+            <motion.div
+              key={current}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: 'easeInOut' }}
+              className="absolute w-full h-[150%] max-w-[600px]"
+              style={{
+                background: `radial-gradient(circle at 50% 50%, rgba(${activeGlow}, 0.15) 0%, transparent 60%)`,
+                filter: 'blur(60px)',
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-end p-4">
-        <div className="w-5 h-0.5 bg-[#c8a96e] mb-2" />
+      {/* 3D Coverflow Container */}
+      <div className="relative w-full h-[400px] flex items-center justify-center z-10 perspective-[1000px]">
+        {banners.map((banner, i) => {
+          const diff = getDiff(i);
+          const isCenter = diff === 0;
+          const absDiff = Math.abs(diff);
+          
+          // Mobile coverflow math
+          const xOffset = diff * 55; // percentage shift horizontally
+          const scale = isCenter ? 1 : Math.max(0.7, 0.85 - (absDiff * 0.05));
+          const zIndex = 50 - absDiff;
+          const opacity = isCenter ? 1 : absDiff <= 2 ? 1 - (absDiff * 0.35) : 0;
+          const pointerEvents = opacity === 0 ? 'none' : 'auto';
 
-        {banner.title && (
-          <h3
-            className="font-display text-base font-bold text-white leading-snug mb-1"
-            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}
-          >
-            {banner.title}
-          </h3>
-        )}
-
-        {banner.subtitle && (
-          <p className="text-white/60 text-[11px] mb-3 leading-relaxed line-clamp-2">
-            {banner.subtitle}
-          </p>
-        )}
-
-        {banner.cta_text && banner.cta_url && (
-          <Link prefetch={true} href={banner.cta_url}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-[11px] self-start"
-            style={{
-              background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
-              color: '#0a0a0a',
-            }}
-          >
-            {banner.cta_text}
-            <ArrowRight className="w-3 h-3" />
-          </Link>
-        )}
+          return (
+            <motion.div
+              key={banner.id}
+              className="absolute w-[65vw] max-w-[280px] aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer"
+              animate={{
+                x: `${xOffset}%`,
+                scale,
+                opacity,
+                zIndex,
+                filter: isCenter ? 'blur(0px)' : 'blur(4px)',
+              }}
+              transition={{
+                duration: 0.6,
+                ease: [0.22, 1, 0.36, 1]
+              }}
+              onClick={() => {
+                if (!isCenter) setCurrent(i);
+              }}
+              style={{
+                pointerEvents: pointerEvents as any,
+                boxShadow: isCenter 
+                  ? '0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(200,169,110,0.2)'
+                  : '0 10px 20px rgba(0,0,0,0.4)',
+              }}
+            >
+              <Image
+                src={banner.image_url}
+                alt={banner.title}
+                fill
+                crossOrigin="anonymous"
+                className="object-cover"
+                sizes="280px"
+                priority={isCenter}
+                onLoad={(e) => handleImageLoad(e, i)}
+              />
+              
+              <motion.div 
+                className="absolute inset-0 bg-black"
+                animate={{ opacity: isCenter ? 0 : 0.4 }}
+                transition={{ duration: 0.6 }}
+              />
+              
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/5" />
+              
+              <motion.div 
+                className="absolute inset-0 flex flex-col justify-end p-5"
+                animate={{ opacity: isCenter ? 1 : 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                 <div className="w-6 h-0.5 bg-[#c8a96e] mb-3" />
+                 {banner.title && (
+                   <h3 className="font-display text-lg font-bold text-white mb-2 leading-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}>
+                     {banner.title}
+                   </h3>
+                 )}
+                 {banner.subtitle && (
+                   <p className="text-white/70 text-xs mb-4 line-clamp-2">
+                     {banner.subtitle}
+                   </p>
+                 )}
+                 {banner.cta_text && banner.cta_url && (
+                   <Link prefetch={true} href={banner.cta_url}
+                     onClick={(e) => {
+                       if (!isCenter) e.preventDefault();
+                       else e.stopPropagation();
+                     }}
+                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs self-start"
+                     style={{
+                       background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
+                       color: '#0a0a0a',
+                       pointerEvents: isCenter ? 'auto' : 'none',
+                     }}
+                   >
+                     {banner.cta_text}
+                     <ArrowRight className="w-3 h-3" />
+                   </Link>
+                 )}
+              </motion.div>
+            </motion.div>
+          );
+        })}
       </div>
-    </div>
+
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mt-8" />
+    </section>
   );
 }
