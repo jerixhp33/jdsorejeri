@@ -39,8 +39,8 @@ function LocationMarker({ onLocationSelect }: MapPickerProps) {
 
   const fetchAddress = async (lat: number, lng: number) => {
     try {
-      // Force English results to prevent local scripts like Tamil
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=en`);
+      // Prefer English, but fallback to Tamil if the local street is only mapped in Tamil
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=en,ta`);
       const data = await res.json();
       if (data && data.address) {
         onLocationSelect({
