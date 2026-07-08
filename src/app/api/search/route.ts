@@ -23,9 +23,14 @@ export async function GET(request: NextRequest) {
       .limit(12);
 
     if (words.length > 0) {
-      const orConditions = words.map((w: string) =>
-        `name.ilike.%${w}%,description.ilike.%${w}%,material.ilike.%${w}%,color.ilike.%${w}%`
-      ).join(',');
+      const orConditions = words.map((w: string) => {
+        let condition = `name.ilike.%${w}%,description.ilike.%${w}%,material.ilike.%${w}%,color.ilike.%${w}%,tags.cs.{${w}}`;
+        // Exact match for enums if the search word happens to be the enum value
+        if (w === 'poster' || w === 'earring') {
+          condition += `,product_type.eq.${w}`;
+        }
+        return condition;
+      }).join(',');
       query = query.or(orConditions);
     }
 
