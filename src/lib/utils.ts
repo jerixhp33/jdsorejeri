@@ -82,38 +82,40 @@ export function generateWhatsAppMessage(payload: WhatsAppOrderPayload): string {
       (item, i) =>
         `*${i + 1}. ${item.name}*${item.size ? `\n   ↳ Size: ${item.size}` : ''}\n   ↳ ${item.quantity} × ${formatCurrency(item.price)} = *${formatCurrency(item.price * item.quantity)}*`
     )
-    .join('\n-------------------------\n');
+    .join('\n\n');
 
-  const message = `✨ *NEW ORDER - JD STORE* ✨
-${payload.order_number ? `*Order ID:* #${payload.order_number}\n` : ''}=========================
+  const message = `🌟 *NEW ORDER | JD STORE* 🌟
+━━━━━━━━━━━━━━━━━━━━━━━━
 
-👤 *CUSTOMER INFO*
-Name: ${payload.customer_name}
-Phone: ${payload.phone}
+📦 *ORDER ID:* #${payload.order_number || 'PENDING'}
 
-🏠 *DELIVERY DETAILS*
+👤 *CUSTOMER DETAILS*
+▪️ *Name:* ${payload.customer_name}
+▪️ *Phone:* ${payload.phone}
+
+📍 *DELIVERY ADDRESS*
 ${payload.address}
-District: ${payload.district}
+*District:* ${payload.district}
 
-🛒 *ITEMS ORDERED*
--------------------------
+━━━━━━━━━━━━━━━━━━━━━━━━
+🛍️ *ORDER SUMMARY*
+
 ${itemsList}
--------------------------
+━━━━━━━━━━━━━━━━━━━━━━━━
 
-🧾 *BILLING SUMMARY*
-Subtotal: ${formatCurrency(payload.subtotal)}
-Delivery: ${payload.delivery_charge === 0 ? 'FREE' : formatCurrency(payload.delivery_charge)}${payload.discount_amount ? `\nDiscount (${payload.coupon_code}): -${formatCurrency(payload.discount_amount)}` : ''}
--------------------------
+🧾 *BILLING DETAILS*
+▫️ *Subtotal:* ${formatCurrency(payload.subtotal)}
+▫️ *Delivery:* ${payload.delivery_charge === 0 ? 'FREE' : formatCurrency(payload.delivery_charge)}${payload.discount_amount ? `\n▫️ *Discount (${payload.coupon_code}):* -${formatCurrency(payload.discount_amount)}` : ''}
+
 💰 *GRAND TOTAL: ${formatCurrency(payload.total)}*
-=========================
-${payload.notes ? `\n📝 *SPECIAL INSTRUCTIONS*\n_${payload.notes}_\n=========================\n` : ''}
-🛑 *IMPORTANT PAYMENT INFO*
-1️⃣ We do NOT accept Cash on Delivery (COD).
-2️⃣ We accept UPI payments only.
-3️⃣ Send this exact message to us. Our team will verify and reply with a UPI Scanner / ID.
-4️⃣ Reply with your payment screenshot to confirm the order.
+━━━━━━━━━━━━━━━━━━━━━━━━
+${payload.notes ? `\n📝 *SPECIAL INSTRUCTIONS*\n_${payload.notes}_\n━━━━━━━━━━━━━━━━━━━━━━━━\n` : ''}
+⚠️ *PAYMENT INSTRUCTIONS*
+1️⃣ We accept UPI payments only (No COD).
+2️⃣ Send this message to us.
+3️⃣ Return to the website, complete the UPI payment using the QR code, and send us the screenshot!
 
-✅ *Send this message now to proceed!*`;
+✅ *Please send this message to proceed!*`;
 
   return encodeURIComponent(message);
 }

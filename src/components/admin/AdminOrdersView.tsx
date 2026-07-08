@@ -29,6 +29,14 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all');
   const [search, setSearch] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [printingOrder, setPrintingOrder] = useState<Order | null>(null);
+
+  const handlePrint = (order: Order) => {
+    setPrintingOrder(order);
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
 
   const filtered = orders.filter((o) => {
     const matchesFilter = filter === 'all' || o.status === filter;
@@ -200,8 +208,18 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                             className="p-1.5 rounded-lg text-green-400 hover:bg-green-500/10 transition-all"
                             title="Contact via WhatsApp"
                           >
-                            <MessageCircle className="w-3.5 h-3.5" />
+                            <MessageCircle className="w-4 h-4" />
                           </a>
+                        )}
+                        {/* Print Receipt Button */}
+                        {order.status !== 'cancelled' && (
+                          <button
+                            onClick={() => handlePrint(order)}
+                            className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10 transition-all"
+                            title="Download PDF Receipt"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                          </button>
                         )}
                       </div>
                     </td>
@@ -212,6 +230,98 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
           </table>
         </div>
       </div>
+
+      {/* Printable Receipt for Admin (Hidden on Screen, Visible on Print) */}
+      {printingOrder && (
+        <div className="hidden print-receipt-container bg-white text-black p-8 min-h-screen">
+          <div className="text-center mb-8 border-b-2 border-gray-200 pb-6">
+            <h1 className="text-4xl font-serif font-bold text-black tracking-tight mb-2">JD Store</h1>
+            <p className="text-gray-500 font-medium tracking-wide">OFFICIAL ORDER RECEIPT</p>
+          </div>
+          
+          <div className="flex justify-between mb-10">
+            <div>
+              <h3 className="font-bold text-lg mb-2 text-black uppercase tracking-wider text-xs">Billed To</h3>
+              <p className="font-semibold text-lg text-black">{(printingOrder.delivery_address as any)?.full_name || (printingOrder.user as any)?.name}</p>
+              <p className="text-gray-700">{(printingOrder.delivery_address as any)?.phone || (printingOrder.user as any)?.phone}</p>
+              <p className="max-w-xs text-gray-700 mt-1">
+                {[(printingOrder.delivery_address as any)?.house_no, (printingOrder.delivery_address as any)?.street, (printingOrder.delivery_address as any)?.area, (printingOrder.delivery_address as any)?.city, (printingOrder.delivery_address as any)?.district, (printingOrder.delivery_address as any)?.pincode].filter(Boolean).join(', ')}
+              </p>
+            </div>
+            <div className="text-right">
+              <h3 className="font-bold text-lg mb-2 text-black uppercase tracking-wider text-xs">Order Info</h3>
+              <p className="text-gray-700">Order ID: <strong className="text-black">#{printingOrder.order_number}</strong></p>
+              <p className="text-gray-700">Date: <span className="font-medium text-black">{new Date(printingOrder.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span></p>
+              <p className="text-gray-700">Status: <span className="text-amber-600 font-semibold uppercase">{printingOrder.status}</span></p>
+            </div>
+          </div>
+
+          <table className="w-full text-left mb-10 border-collapse">
+            <thead>
+              <tr className="border-b-2 border-black/80">
+                <th className="py-3 text-black uppercase text-xs tracking-wider font-bold w-[50%]">Item Description</th>
+                <th className="py-3 text-center text-black uppercase text-xs tracking-wider font-bold">Qty</th>
+                <th className="py-3 text-right text-black uppercase text-xs tracking-wider font-bold">Price</th>
+                <th className="py-3 text-right text-black uppercase text-xs tracking-wider font-bold">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {printingOrder.items?.map((item: any, idx: number) => {
+                const img = item.product?.images?.[0]?.url;
+                return (
+                  <tr key={idx} className="border-b border-gray-200/60">
+                    <td className="py-5 pr-4">
+                      <div className="flex items-center gap-4">
+                        {img && (
+                          <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                            <img src={img} alt={item.product?.name} className="w-full h-full object-cover" crossOrigin="anonymous" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-bold text-base text-black leading-snug">{item.product?.name || 'Item'}</p>
+                          {item.poster_size?.label && <p className="text-sm text-gray-500 mt-0.5">Size: {item.poster_size.label}</p>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-5 text-center text-black font-medium">{item.quantity}</td>
+                    <td className="py-5 text-right text-gray-700">{formatCurrency(item.unit_price)}</td>
+                    <td className="py-5 text-right font-bold text-black">{formatCurrency(item.total_price)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          <div className="flex justify-end mb-16">
+            <div className="w-72 space-y-3 bg-gray-50/50 p-6 rounded-xl border border-gray-100">
+              <div className="flex justify-between items-center text-gray-600 text-sm">
+                <span>Subtotal</span>
+                <span className="font-medium text-black">{formatCurrency(printingOrder.subtotal)}</span>
+              </div>
+              <div className="flex justify-between items-center text-gray-600 text-sm">
+                <span>Delivery</span>
+                <span className="font-medium text-black">{printingOrder.delivery_charge === 0 ? 'FREE' : formatCurrency(printingOrder.delivery_charge)}</span>
+              </div>
+              {(printingOrder.discount_amount || 0) > 0 && (
+                <div className="flex justify-between items-center text-green-600 text-sm font-medium">
+                  <span>Discount</span>
+                  <span>-{formatCurrency(printingOrder.discount_amount || 0)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-end text-xl font-black border-t-2 border-black/80 pt-4 mt-2 text-black">
+                <span className="text-base uppercase tracking-wider text-black">Grand Total</span>
+                <span>{formatCurrency(printingOrder.total)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center text-gray-500 text-sm pt-8 border-t border-gray-200">
+            <p className="font-serif italic text-lg text-black mb-1">Thank you for shopping with JD Store!</p>
+            <p>For support or queries, contact us via WhatsApp.</p>
+            <p className="mt-4 text-xs text-gray-400">Admin generated on {new Date().toLocaleString('en-IN')}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
