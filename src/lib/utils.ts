@@ -117,7 +117,7 @@ ${payload.notes ? `\n📝 *SPECIAL INSTRUCTIONS*\n_${payload.notes}_\n━━━�
 
 ✅ *Please send this message to proceed!*`;
 
-  return encodeURIComponent(message);
+  return message;
 }
 
 // Open WhatsApp with pre-filled message
