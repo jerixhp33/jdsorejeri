@@ -4,8 +4,8 @@ import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Heart, ShoppingCart, Star } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -23,6 +23,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [glowColor, setGlowColor] = useState<string | null>(null);
+  const [imageIndex, setImageIndex] = useState(0);
 
   const sampleImageColor = useCallback((imgEl: HTMLImageElement) => {
     try {
@@ -57,8 +58,20 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     }
   }, []);
 
-  const primaryImage = product.images?.find((img) => img.is_primary) || product.images?.[0];
-  const secondaryImage = product.images?.[1];
+  const images = product.images || [];
+  const currentImage = images.length > 0 ? images[imageIndex] : null;
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
   const wishlisted = isWishlisted(product.id);
 
   const activeSizes = product.sizes?.filter((s) => s.is_active !== false) ?? [];
@@ -123,38 +136,65 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       >
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden rounded-t-[1rem] bg-luxe-gray">
-          {primaryImage ? (
-            <>
-              <Image
-                src={primaryImage.url}
-                alt={primaryImage.alt_text || product.name}
-                fill
-                crossOrigin="anonymous"
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className={cn(
-                  'object-cover transition-all duration-700',
-                  imageLoaded ? 'opacity-100' : 'opacity-0',
-                  secondaryImage && 'group-hover:opacity-0'
-                )}
-                onLoad={(e) => {
-                  setImageLoaded(true);
-                  sampleImageColor(e.currentTarget as unknown as HTMLImageElement);
-                }}
-              />
-              {secondaryImage && (
+          {images.length > 0 ? (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={imageIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="absolute inset-0"
+              >
                 <Image
-                  src={secondaryImage.url}
-                  alt={secondaryImage.alt_text || product.name}
+                  src={images[imageIndex].url}
+                  alt={images[imageIndex].alt_text || product.name}
                   fill
+                  crossOrigin="anonymous"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                  className={cn(
+                    'object-cover transition-all duration-700',
+                    imageLoaded ? 'opacity-100' : 'opacity-0'
+                  )}
+                  onLoad={(e) => {
+                    setImageLoaded(true);
+                    if (imageIndex === 0) {
+                      sampleImageColor(e.currentTarget as unknown as HTMLImageElement);
+                    }
+                  }}
                 />
-              )}
-            </>
+              </motion.div>
+            </AnimatePresence>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-luxe-gray">
               <span className="text-white/20 text-4xl">✦</span>
             </div>
+          )}
+
+          {/* Slideshow Arrows (visible on hover) */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 z-20"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 z-20"
+                aria-label="Next image"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              {/* Dots indicator */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+                {images.map((_, idx) => (
+                  <div key={idx} className={cn("transition-all duration-300 rounded-full", idx === imageIndex ? "w-2 h-2 bg-white" : "w-1.5 h-1.5 bg-white/40")} />
+                ))}
+              </div>
+            </>
           )}
 
           {/* Overlay */}

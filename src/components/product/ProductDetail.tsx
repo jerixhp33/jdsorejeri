@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart,
   ShoppingCart,
@@ -144,24 +144,41 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             }}
             onClick={() => setZoomed(!zoomed)}
           >
-            {currentImage ? (
-              <Image
-                src={currentImage.url}
-                alt={currentImage.alt_text || product.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className={cn(
-                  'object-contain transition-transform duration-500',
-                  zoomed && 'scale-125'
-                )}
-                onLoad={handleMainImageLoad}
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-white/10 text-8xl">✦</span>
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {currentImage ? (
+                <motion.div
+                  key={currentImage.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={currentImage.url}
+                    alt={currentImage.alt_text || product.name}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className={cn(
+                      'object-contain transition-transform duration-500',
+                      zoomed && 'scale-125'
+                    )}
+                    onLoad={handleMainImageLoad}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <span className="text-white/10 text-8xl">✦</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Navigation arrows */}
             {images.length > 1 && (
