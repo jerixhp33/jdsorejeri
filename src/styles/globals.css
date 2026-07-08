@@ -181,6 +181,8 @@
   }
   .btn-glass:active { transform: scale(0.97); }
 
+
+
   .btn-gold {
     position: relative;
     overflow: hidden;
@@ -545,4 +547,39 @@ html {
 a, button, [role="button"], input[type="submit"], input[type="button"], input[type="reset"] {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+@media print {
+  /* Hide navigation and extra UI */
+  nav, footer {
+    display: none !important;
+  }
+  
+  /* specifically make sure background color stays white */
+  html, body {
+    background: white !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Make the print container visible */
+  .print-receipt-container {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 9999 !important;
+  }
+
+  /* Ensure contents of receipt print nicely */
+  .print-receipt-container * {
+    color: black !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }

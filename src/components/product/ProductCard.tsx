@@ -72,6 +72,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.stopPropagation();
     setImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      setImageIndex((prev) => (prev + 1) % images.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
   const wishlisted = isWishlisted(product.id);
 
   const activeSizes = product.sizes?.filter((s) => s.is_active !== false) ?? [];

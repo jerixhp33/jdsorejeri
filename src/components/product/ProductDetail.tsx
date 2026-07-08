@@ -78,15 +78,23 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
   const availableStock = Math.max(0, dbStock - cartQuantity);
   const inStock = availableStock > 0;
 
+  const handleNextImage = useCallback(() => {
+    setImgAspect(null); // reset until new image loads
+    setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  }, [images.length]);
+
   const handlePrevImage = useCallback(() => {
     setImgAspect(null); // reset until new image loads
     setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   }, [images.length]);
 
-  const handleNextImage = useCallback(() => {
-    setImgAspect(null); // reset until new image loads
-    setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  }, [images.length]);
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      handleNextImage();
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [images.length, handleNextImage]);
   
   // Ensure quantity doesn't exceed newly selected size stock
   useEffect(() => {
