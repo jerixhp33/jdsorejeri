@@ -76,9 +76,12 @@ function parseAddress(data: any): { street: string; area: string; city: string; 
   }
 
   // City: Prefer actual city, then city_district. 
-  // Avoid using "town" as city if it's just a taluk name (like Poonamallee)
+  // Custom Indian rule: Pincodes starting with 600 are in the Chennai Metropolitan Area.
+  const pincode = addr.postcode || '';
   let city = addr.city || addr.city_district || '';
-  if (!city) {
+  if (pincode.startsWith('600')) {
+    city = 'Chennai';
+  } else if (!city) {
     // If no city found, use town but only if there's no better option
     city = addr.town || '';
   }
@@ -86,14 +89,18 @@ function parseAddress(data: any): { street: string; area: string; city: string; 
   // District
   const district = addr.state_district || addr.county || '';
 
-  // Pincode
-  const pincode = addr.postcode || '';
-
   // ── Smart Street Fallback ──
   // If still no street, extract the first unique part from display_name
   if (!street && data?.display_name) {
+    // Exclude any known administrative/locality tags so they aren't treated as street names
     const knownValues = new Set(
-      [area, city, district, pincode, addr.state, addr.country, addr.country_code, addr.ISO3166, addr.town, addr.county]
+      [
+        area, city, district, pincode, 
+        addr.state, addr.country, addr.country_code, addr.ISO3166, 
+        addr.town, addr.county, addr.village, addr.suburb, 
+        addr.neighbourhood, addr.residential, addr.hamlet, 
+        addr.municipality, addr.state_district
+      ]
         .filter(Boolean)
         .map((v: string) => v.toLowerCase().trim())
     );
