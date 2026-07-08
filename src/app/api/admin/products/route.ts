@@ -26,6 +26,55 @@ export async function POST(req: NextRequest) {
   }
   const { data, error } = await admin.from('products').insert(body).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Background task to send New Arrivals emails
+  (async () => {
+    try {
+      // Find all users who opted in to new_arrivals
+      const { data: users } = await admin
+        .from('user_profiles')
+        .select('email, name')
+        .contains('notification_preferences', { new_arrivals: true });
+
+      if (users && users.length > 0) {
+        const { sendEmail } = await import('@/lib/email');
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app';
+        
+        await Promise.all(users.map(async (u) => {
+          const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="color: #D4AF37; margin-bottom: 5px;">New Arrival at JD Store!</h1>
+                <p style="color: #666;">We just added something special.</p>
+              </div>
+              <p>Hi ${u.name || 'there'},</p>
+              <p>We've just published a brand new product that we think you'll love: <strong>${data.name}</strong></p>
+              ${data.description ? `<p style="color: #444; line-height: 1.6;">${data.description}</p>` : ''}
+              <div style="text-align: center; margin-top: 35px; margin-bottom: 35px;">
+                <a href="${siteUrl}/products/${data.slug}" style="background-color: #000; color: #D4AF37; padding: 14px 28px; text-decoration: none; border-radius: 4px; font-weight: bold; border: 1px solid #D4AF37;">
+                  Shop New Arrival
+                </a>
+              </div>
+              <hr style="border: 0; border-top: 1px solid #eee; margin-top: 40px; margin-bottom: 20px;" />
+              <p style="font-size: 11px; color: #999; text-align: center;">
+                You are receiving this because you subscribed to New Arrivals notifications.<br/>
+                To unsubscribe, log in to your JD Store account and visit Settings > Notifications.
+              </p>
+            </div>
+          `;
+          
+          await sendEmail({
+            to: u.email,
+            subject: `✨ Just In: ${data.name} is now available!`,
+            html,
+          });
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to send new arrivals broadcast:', err);
+    }
+  })();
+
   return NextResponse.json(data);
 }
 
