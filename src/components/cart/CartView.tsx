@@ -105,7 +105,7 @@ export function CartView() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-sm mx-auto"
+          className="max-w-md mx-auto glass-card p-12"
         >
           <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
             <ShoppingBag className="w-10 h-10 text-white/20" />

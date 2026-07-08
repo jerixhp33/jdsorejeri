@@ -389,11 +389,13 @@ export function CheckoutForm() {
   if (items.length === 0 && !orderPlaced && !submitting) {
     return (
       <div className="page-container py-24 text-center">
-        <p className="text-white/50 mb-6">Your cart is empty</p>
-        <Link prefetch={true} href="/" className="btn-glass !w-auto !px-8">
-          <ChevronLeft className="w-4 h-4" />
-          Back to Shop
-        </Link>
+        <div className="max-w-md mx-auto glass-card p-12">
+          <p className="text-white/50 mb-6">Your cart is empty</p>
+          <Link prefetch={true} href="/" className="btn-glass !w-auto !px-8">
+            <ChevronLeft className="w-4 h-4" />
+            Back to Shop
+          </Link>
+        </div>
       </div>
     );
   }
