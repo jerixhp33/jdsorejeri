@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
   await admin.from('poster_sizes').delete().eq('product_id', product_id);
 
   if (!sizes || sizes.length === 0) {
+    // If no sizes, nullify base price
+    await admin.from('products').update({ price: null }).eq('id', product_id);
     return NextResponse.json({ success: true, data: [] });
   }
 
@@ -44,6 +46,11 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await admin.from('poster_sizes').insert(rows).select();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  
+  // Sync the lowest size price to the main product for universal filtering/sorting
+  const minPrice = Math.min(...rows.map((r: any) => r.price));
+  await admin.from('products').update({ price: minPrice }).eq('id', product_id);
+
   return NextResponse.json({ success: true, data });
 }
 
@@ -56,6 +63,8 @@ export async function DELETE(req: NextRequest) {
     // Delete all sizes for this product (called before product delete)
     const { error } = await admin.from('poster_sizes').delete().eq('product_id', body.product_id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    // Nullify the base price
+    await admin.from('products').update({ price: null }).eq('id', body.product_id);
     return NextResponse.json({ success: true });
   }
   const { error } = await admin.from('poster_sizes').delete().eq('id', body.id);

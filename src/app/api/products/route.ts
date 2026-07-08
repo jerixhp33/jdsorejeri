@@ -19,17 +19,8 @@ export async function GET(request: NextRequest) {
     // Use admin client to bypass RLS — products with is_active=true are public anyway
     const supabase = await createAdminClient();
 
-    let query = supabase
-      .from('products')
-      .select(`
-        *,
-        category:product_categories(id, name, slug),
-        images:product_images(url, is_primary, display_order),
-        sizes:poster_sizes(id, label, price, stock, width_cm, height_cm)
-      `, { count: 'exact' })
-      .eq('is_active', true);
-
     let effectiveProductType = productType;
+    let sizeFilter = '';
     
     // Use AI parser if search is provided
     if (search) {
@@ -40,22 +31,48 @@ export async function GET(request: NextRequest) {
         effectiveProductType = intent.productType;
       }
       
+      // If AI detected a size, we will enforce sizes!inner
+      if (intent.sizes && intent.sizes.length > 0) {
+        effectiveProductType = 'poster';
+        sizeFilter = intent.sizes[0];
+      }
+
+      let selectStr = `*, category:product_categories(id, name, slug), images:product_images(url, is_primary, display_order)`;
+      if (sizeFilter) {
+        selectStr += `, sizes!inner(id, label, price, stock, width_cm, height_cm)`;
+      } else {
+        selectStr += `, sizes:poster_sizes(id, label, price, stock, width_cm, height_cm)`;
+      }
+
+      let queryBuilder = supabase.from('products').select(selectStr, { count: 'exact' }).eq('is_active', true);
+      
+      if (sizeFilter) {
+        queryBuilder = queryBuilder.ilike('sizes.label', `%${sizeFilter}%`);
+      }
+      
       // Add keyword search
       if (intent.keywords && intent.keywords.length > 0) {
         const orConditions = intent.keywords.map((w: string) => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
-        query = query.or(orConditions);
+        queryBuilder = queryBuilder.or(orConditions);
       } else {
         // Fallback
-        query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+        queryBuilder = queryBuilder.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
       }
       
       // Override max price if AI detected one
       if (intent.maxPrice !== null) {
-        query = query.lte('price', intent.maxPrice);
+        queryBuilder = queryBuilder.lte('price', intent.maxPrice);
       }
       if (intent.minPrice !== null) {
-        query = query.gte('price', intent.minPrice);
+        queryBuilder = queryBuilder.gte('price', intent.minPrice);
       }
+      
+      query = queryBuilder;
+    } else {
+      query = supabase
+        .from('products')
+        .select(`*, category:product_categories(id, name, slug), images:product_images(url, is_primary, display_order), sizes:poster_sizes(id, label, price, stock, width_cm, height_cm)`, { count: 'exact' })
+        .eq('is_active', true);
     }
 
     if (effectiveProductType) query = query.eq('product_type', effectiveProductType);

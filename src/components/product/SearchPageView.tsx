@@ -67,13 +67,14 @@ export function SearchPageView({ initialQuery }: SearchPageViewProps) {
     setLoading(true);
     setHasSearched(true);
     
-    let dbQuery = supabase
-      .from('products')
-      .select('*, category:product_categories(*), images:product_images(*), sizes:poster_sizes(*)')
-      .eq('is_active', true);
+    let dbQuery: any;
 
     let searchType = type;
     let words: string[] = [];
+    let sizeFilter = '';
+    
+    // We will build the select string based on whether we need an inner join on sizes
+    let selectStr = '*, category:product_categories(*), images:product_images(*)';
 
     // 1. Text Search & Natural Language Parsing (AI-Powered)
     if (q.trim()) {
@@ -100,6 +101,23 @@ export function SearchPageView({ initialQuery }: SearchPageViewProps) {
           maxP = aiIntent.maxPrice.toString();
         }
 
+        if (aiIntent.sizes && aiIntent.sizes.length > 0) {
+          sizeFilter = aiIntent.sizes[0];
+          searchType = 'poster';
+        }
+
+        if (sizeFilter) {
+          selectStr += ', sizes!inner(*)';
+        } else {
+          selectStr += ', sizes:poster_sizes(*)';
+        }
+
+        dbQuery = supabase.from('products').select(selectStr).eq('is_active', true);
+
+        if (sizeFilter) {
+          dbQuery = dbQuery.ilike('sizes.label', `%${sizeFilter}%`);
+        }
+
         if (words.length > 0) {
           const orConditions = words.map((w: string) => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
           dbQuery = dbQuery.or(orConditions);
@@ -120,6 +138,9 @@ export function SearchPageView({ initialQuery }: SearchPageViewProps) {
             words = words.filter(w => w !== t);
           }
         });
+        
+        selectStr += ', sizes:poster_sizes(*)';
+        dbQuery = supabase.from('products').select(selectStr).eq('is_active', true);
 
         if (words.length > 0) {
           const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
@@ -128,6 +149,10 @@ export function SearchPageView({ initialQuery }: SearchPageViewProps) {
           dbQuery = dbQuery.or(`name.ilike.%${qText}%,description.ilike.%${qText}%`);
         }
       }
+    } else {
+      // If no query text, initialize normally
+      selectStr += ', sizes:poster_sizes(*)';
+      dbQuery = supabase.from('products').select(selectStr).eq('is_active', true);
     }
 
     // 2. Product Type Filter

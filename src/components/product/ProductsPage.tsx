@@ -68,8 +68,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
       if (selectedCategory) params.set('category', selectedCategory);
       if (debouncedSearch)  params.set('search', debouncedSearch);
       if (inStockOnly)      params.set('inStock', '1');
-      if (productType === 'earring' && maxPrice < 10000)
-        params.set('maxPrice', String(maxPrice));
+      if (maxPrice < 10000) params.set('maxPrice', String(maxPrice));
 
       const res = await fetch(`/api/products?${params.toString()}`);
       const json = await res.json();
