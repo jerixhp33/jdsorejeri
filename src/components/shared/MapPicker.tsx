@@ -14,6 +14,7 @@ L.Icon.Default.mergeOptions({
 });
 
 interface MapPickerProps {
+  searchQuery?: string;
   onLocationSelect: (location: {
     lat: number;
     lng: number;
@@ -27,15 +28,37 @@ interface MapPickerProps {
   }) => void;
 }
 
-function LocationMarker({ onLocationSelect }: MapPickerProps) {
+function LocationMarker({ onLocationSelect, searchQuery }: MapPickerProps) {
   const [position, setPosition] = useState<L.LatLng | null>(null);
 
-  useMapEvents({
+  const map = useMapEvents({
     click(e) {
       setPosition(e.latlng);
       fetchAddress(e.latlng.lat, e.latlng.lng);
     },
   });
+
+  useEffect(() => {
+    if (!searchQuery) return;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(searchQuery)}&limit=1`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          const newPos = L.latLng(lat, lng);
+          map.flyTo(newPos, 15);
+          setPosition(newPos);
+          // We intentionally do NOT call onLocationSelect here to prevent an infinite loop!
+        }
+      } catch (error) {
+        console.error('Error forward geocoding:', error);
+      }
+    }, 1500); // 1.5s debounce to respect OSM API limits
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, map]);
 
   const fetchAddress = async (lat: number, lng: number) => {
     try {
@@ -65,7 +88,7 @@ function LocationMarker({ onLocationSelect }: MapPickerProps) {
   );
 }
 
-export default function MapPicker({ onLocationSelect }: MapPickerProps) {
+export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerProps) {
   // Default to Chennai, Tamil Nadu
   const defaultCenter: L.LatLngTuple = [13.0827, 80.2707];
   const [mapRef, setMapRef] = useState<L.Map | null>(null);
@@ -105,7 +128,7 @@ export default function MapPicker({ onLocationSelect }: MapPickerProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <LocationMarker onLocationSelect={onLocationSelect} />
+        <LocationMarker onLocationSelect={onLocationSelect} searchQuery={searchQuery} />
       </MapContainer>
       
       {/* Instructions */}

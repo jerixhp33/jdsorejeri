@@ -66,6 +66,14 @@ export function CheckoutForm() {
   const [placedOrderData, setPlacedOrderData] = useState<any>(null);
   const [mapLocation, setMapLocation] = useState<{lat: number, lng: number} | null>(null);
 
+  const watchStreet = watch('street');
+  const watchArea = watch('area');
+  const watchCity = watch('city');
+  const watchDistrict = watch('district');
+  const watchPincode = watch('pincode');
+  
+  const typedAddress = [watchStreet, watchArea, watchCity, watchDistrict, watchPincode].filter(Boolean).join(', ');
+
   const handleLocationSelect = (location: any) => {
     setMapLocation({ lat: location.lat, lng: location.lng });
     if (location.address.street) setValue('street', location.address.street, { shouldValidate: true });
@@ -729,8 +737,8 @@ export function CheckoutForm() {
 
             <div className="mb-6">
               <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Set Location on Map</label>
-              <MapPicker onLocationSelect={handleLocationSelect} />
-              <p className="text-white/40 text-[10px] mt-2">Dropping a pin will automatically fill your street and pincode.</p>
+              <MapPicker onLocationSelect={handleLocationSelect} searchQuery={typedAddress} />
+              <p className="text-white/40 text-[10px] mt-2">Dropping a pin will automatically fill your street and pincode. Typing an address will automatically move the map pin!</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
