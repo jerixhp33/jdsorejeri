@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, Shield, Trash2, Save } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,18 +23,18 @@ export function SettingsView() {
   const [loading, setLoading] = useState(false);
   const [savingNotifs, setSavingNotifs] = useState(false);
 
-  // Initialise from profile if stored, else use defaults
-  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(() => {
+  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
+
+  useEffect(() => {
     const stored = (profile as any)?.notification_preferences;
     if (stored && typeof stored === 'object') {
-      return {
+      setNotifPrefs({
         order_updates: stored.order_updates ?? DEFAULT_PREFS.order_updates,
         new_arrivals: stored.new_arrivals ?? DEFAULT_PREFS.new_arrivals,
         offers_discounts: stored.offers_discounts ?? DEFAULT_PREFS.offers_discounts,
-      };
+      });
     }
-    return DEFAULT_PREFS;
-  });
+  }, [profile]);
 
   const handleToggle = async (key: keyof NotificationPrefs) => {
     const newPrefs = { ...notifPrefs, [key]: !notifPrefs[key] };
