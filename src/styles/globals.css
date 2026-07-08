@@ -495,11 +495,11 @@
   1% {
     opacity: 1;
   }
-  11.66% {
+  8.33% {
     --border-angle: calc(270deg + 1turn);
     opacity: 1;
   }
-  12.66% {
+  9.33% {
     --border-angle: calc(270deg + 1turn);
     opacity: 0;
   }
@@ -531,6 +531,35 @@
   background: conic-gradient(from var(--border-angle) at 50% 50%, transparent 70%, rgba(255, 255, 255, 0.4), #ffffff 100%);
   animation: border-spin 60s linear infinite;
 }
+
+@keyframes scan-down {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+
+.side-edge-light {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.side-edge-light::before {
+  content: "";
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.5), #ffffff, rgba(255, 255, 255, 0.5), transparent);
+  animation: scan-down 3s linear forwards;
+}
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }

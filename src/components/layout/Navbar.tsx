@@ -493,8 +493,11 @@ export function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-72 max-w-[85vw] bg-[#0a0a0a]/90 backdrop-blur-2xl border-l border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-l-3xl flex flex-col md:hidden overflow-y-auto"
+              className="fixed top-0 right-0 bottom-0 z-50 w-72 max-w-[85vw] bg-black/40 backdrop-blur-3xl border-l border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-l-[2rem] flex flex-col md:hidden overflow-hidden"
             >
+              <div className="side-edge-light" />
+              
+              <div className="flex-1 flex flex-col overflow-y-auto w-full relative z-10">
               {/* Drawer header */}
               <div className="flex items-center justify-between p-5 border-b border-white/10">
                 <div className="flex items-center gap-2">
@@ -604,6 +607,7 @@ export function Navbar() {
                   </Link>
                 </div>
               )}
+              </div>
             </motion.div>
           </>
         )}
