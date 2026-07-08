@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     if (words.length > 0) {
       const orConditions = words.map((w: string) =>
-        `name.ilike.%${w}%,description.ilike.%${w}%,product_type.ilike.%${w}%,material.ilike.%${w}%,color.ilike.%${w}%`
+        `name.ilike.%${w}%,description.ilike.%${w}%,material.ilike.%${w}%,color.ilike.%${w}%`
       ).join(',');
       query = query.or(orConditions);
     }
