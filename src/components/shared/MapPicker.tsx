@@ -77,10 +77,10 @@ function LocationMarker({ onLocationSelect, searchQuery }: MapPickerProps) {
           lat,
           lng,
           address: {
-            street: data.address.road || data.address.pedestrian || data.address.path || '',
-            area: data.address.suburb || data.address.neighbourhood || data.address.residential || '',
-            city: data.address.city || data.address.town || data.address.village || data.address.county || '',
-            district: data.address.state_district || data.address.county || '',
+            street: data.address.road || data.address.pedestrian || data.address.path || data.address.footway || '',
+            area: data.address.suburb || data.address.neighbourhood || data.address.residential || data.address.village || data.address.hamlet || '',
+            city: data.address.city || data.address.town || data.address.city_district || data.address.county || data.address.state_district || '',
+            district: data.address.state_district || data.address.state || '',
             pincode: data.address.postcode || '',
           },
         });
