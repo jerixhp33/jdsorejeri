@@ -223,11 +223,13 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
-          scrolled ? 'glass-nav' : 'bg-black/30 backdrop-blur-sm'
+          'fixed z-50 transition-all duration-500 left-1/2 -translate-x-1/2 w-[calc(100%-16px)] sm:w-[calc(100%-32px)] max-w-[1400px] rounded-[2rem]',
+          scrolled
+            ? 'top-2 sm:top-4 bg-white/[0.08] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-white/20'
+            : 'top-2 sm:top-4 bg-black/40 backdrop-blur-md border border-white/[0.05] shadow-lg hover:bg-black/60 hover:border-white/10'
         )}
       >
-        <div className="page-container">
+        <div className="px-4 sm:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
             <Link prefetch={true} href="/" className="flex items-center gap-2 group" aria-label="JD Store home">
