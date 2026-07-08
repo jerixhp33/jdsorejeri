@@ -234,8 +234,6 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
   return (
     <div 
       className="relative w-full py-16 overflow-hidden group"
-      onMouseEnter={() => { if (timerRef.current) clearInterval(timerRef.current); }}
-      onMouseLeave={resetTimer}
     >
       {/* Ambient background glow (YouTube style) - soft, diffuse, less glow */}
       <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
