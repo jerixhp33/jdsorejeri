@@ -488,8 +488,24 @@
 }
 
 @keyframes border-spin {
+  0% {
+    --border-angle: 270deg;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+  11.66% {
+    --border-angle: calc(270deg + 1turn);
+    opacity: 1;
+  }
+  12.66% {
+    --border-angle: calc(270deg + 1turn);
+    opacity: 0;
+  }
   100% {
     --border-angle: calc(270deg + 1turn);
+    opacity: 0;
   }
 }
 
@@ -512,7 +528,7 @@
   width: 300%;
   height: 300%;
   transform: translate(-50%, -50%);
-  background: conic-gradient(from var(--border-angle) at 50% 50%, transparent 85%, #d4af37 100%);
+  background: conic-gradient(from var(--border-angle) at 50% 50%, transparent 60%, #ff4545, #00ff99, #006aff, #ff0095 100%);
   animation: border-spin 60s linear infinite;
 }
 @keyframes marquee {
