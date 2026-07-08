@@ -19,10 +19,10 @@ export function WishlistView() {
         <div className="flex items-center gap-3 mb-2">
           <button 
             onClick={() => router.back()}
-            className="p-1.5 -ml-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-95"
+            className="btn-glass !p-2 !min-h-0 group"
             aria-label="Go back"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
           </button>
           <h1 className="font-display text-3xl font-bold text-white">My Wishlist</h1>
         </div>

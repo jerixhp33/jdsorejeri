@@ -245,9 +245,10 @@ export function CartView() {
             {/* Continue shopping */}
             <div className="flex gap-3 pt-2">
               <Link prefetch={true} href="/posters"
-                className="text-white/50 text-sm hover:text-white transition-colors flex items-center gap-1"
+                className="btn-glass !py-2 !px-4 text-sm group w-fit"
               >
-                ← Continue Shopping
+                <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                Continue Shopping
               </Link>
             </div>
           </div>

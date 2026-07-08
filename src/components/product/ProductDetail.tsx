@@ -229,7 +229,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
           {/* Back button */}
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-1.5 text-white/40 hover:text-white text-sm mb-5 w-fit transition-colors group"
+            className="btn-glass !py-2 !px-4 text-sm mb-5 w-fit group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
             Back
