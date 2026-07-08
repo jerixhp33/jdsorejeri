@@ -99,7 +99,8 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
   };
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6 print:hidden">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-white">Orders</h1>
         <span className="badge-luxe">{orders.length} total</span>
@@ -230,6 +231,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
           </table>
         </div>
       </div>
+      </div>
 
       {/* Printable Receipt for Admin (Hidden on Screen, Visible on Print) */}
       {printingOrder && (
@@ -322,6 +324,6 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

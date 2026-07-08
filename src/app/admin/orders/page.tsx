@@ -13,7 +13,7 @@ export default async function AdminOrdersPage() {
       delivery_address:delivery_addresses(*),
       items:order_items(
         *,
-        product:products(name, slug),
+        product:products(name, slug, images:product_images(url)),
         poster_size:poster_sizes(label)
       )
     `)

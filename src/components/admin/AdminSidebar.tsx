@@ -101,7 +101,7 @@ export function AdminSidebar() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-[#111] border-b border-white/10 flex items-center px-4 gap-3">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-[#111] border-b border-white/10 flex items-center px-4 gap-3 print:hidden">
         <button
           onClick={() => setMobileOpen(true)}
           className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all"
@@ -134,7 +134,7 @@ export function AdminSidebar() {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-luxe-near-black border-r border-white/10 flex-col z-40">
+      <div className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-luxe-near-black border-r border-white/10 flex-col z-40 print:hidden">
         <SidebarContent />
       </div>
     </>
