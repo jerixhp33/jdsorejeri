@@ -19,6 +19,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  manifest: '/manifest.json',
   title: {
     default: 'JD Store — Premium Wall Posters & Earrings',
     template: '%s | JD Store',
