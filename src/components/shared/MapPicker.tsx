@@ -48,7 +48,7 @@ function LocationMarker({ onLocationSelect, searchQuery }: MapPickerProps) {
     if (!searchQuery || !API_KEY) return;
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`https://us1.locationiq.com/v1/search?key=${API_KEY}&q=${encodeURIComponent(searchQuery)}&format=json&accept-language=en&limit=1`);
+        const res = await fetch(`https://us1.locationiq.com/v1/search.php?key=${API_KEY}&q=${encodeURIComponent(searchQuery)}&format=json&accept-language=en&limit=1`);
         const data = await res.json();
         if (data && data.length > 0) {
           const lat = parseFloat(data[0].lat);
@@ -70,7 +70,7 @@ function LocationMarker({ onLocationSelect, searchQuery }: MapPickerProps) {
   const fetchAddress = async (lat: number, lng: number) => {
     if (!API_KEY) return;
     try {
-      const res = await fetch(`https://us1.locationiq.com/v1/reverse?key=${API_KEY}&lat=${lat}&lon=${lng}&format=json&accept-language=en`);
+      const res = await fetch(`https://us1.locationiq.com/v1/reverse.php?key=${API_KEY}&lat=${lat}&lon=${lng}&format=json&accept-language=en`);
       const data = await res.json();
       if (data && data.address) {
         const addr = data.address;
@@ -80,11 +80,15 @@ function LocationMarker({ onLocationSelect, searchQuery }: MapPickerProps) {
         const district = addr.state_district || addr.state || '';
         const pincode = addr.postcode || '';
 
-        // Smart Fallback for India: If OSM doesn't have a 'road' tag, grab the most specific local name
+        // Smart Fallback: If no street name, scan display_name for any part not already used
         if (!street && data.display_name) {
+          const usedValues = [area, city, district, pincode, addr.state, addr.country, addr.country_code].filter(Boolean).map((v: string) => v.toLowerCase());
           const parts = data.display_name.split(',').map((p: string) => p.trim());
-          if (parts.length > 0 && parts[0] !== area && parts[0] !== city) {
-            street = parts[0]; // e.g. "Sri Ramakrishna Temple" or a local unmapped street
+          for (const part of parts) {
+            if (part && !usedValues.includes(part.toLowerCase())) {
+              street = part;
+              break;
+            }
           }
         }
 
