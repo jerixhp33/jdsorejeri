@@ -47,7 +47,7 @@ export function WhyChooseUs() {
             viewport={{ once: true }}
             className="text-luxe-accent text-sm tracking-widest uppercase mb-3"
           >
-            Why LUXE
+            Why JD
           </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 15 }}

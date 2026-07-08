@@ -18,7 +18,8 @@ export async function getProducts(
       `
       *,
       category:product_categories(*),
-      images:product_images(*)
+      images:product_images(*),
+      sizes:poster_sizes(*)
     `,
       { count: 'exact' }
     )
@@ -145,7 +146,8 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
       `
       *,
       category:product_categories(*),
-      images:product_images(*)
+      images:product_images(*),
+      sizes:poster_sizes(*)
     `
     )
     .eq('is_active', true)
