@@ -47,7 +47,7 @@ function LocationMarker({ onLocationSelect }: MapPickerProps) {
           lat,
           lng,
           address: {
-            street: data.address.road || data.address.street || data.address.residential || data.address.pedestrian || data.address.path || (data.display_name ? data.display_name.split(',')[0] : ''),
+            street: data.address.road || data.address.street || data.address.residential || data.address.pedestrian || data.address.path || '',
             area: data.address.suburb || data.address.neighbourhood || data.address.village || data.address.residential || '',
             city: data.address.city || data.address.town || data.address.municipality || '',
             district: data.address.state_district || data.address.county || '',
