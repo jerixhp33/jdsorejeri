@@ -699,3 +699,88 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
     </section>
   );
 }
+
+function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boolean }) {
+  const [glowColor, setGlowColor] = useState<string | null>(null);
+
+  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
+    if (color) setGlowColor(color);
+  }, []);
+
+  return (
+    <div
+      className="relative flex-shrink-0 w-[72vw] max-w-[280px] overflow-hidden rounded-2xl group"
+      style={glowColor ? {
+        boxShadow: `0 0 0 1px rgba(${glowColor},0.18), 0 4px 16px rgba(${glowColor},0.08)`,
+        transition: 'box-shadow 0.7s ease',
+      } : {
+        boxShadow: '0 0 0 1px rgba(200,169,110,0.08)',
+      }}
+    >
+      {/* Image */}
+      <div className="relative w-full aspect-[3/4] overflow-hidden rounded-2xl">
+        <Image
+          src={banner.image_url}
+          alt={banner.title}
+          fill
+          crossOrigin="anonymous"
+          className="object-cover transition-transform duration-700 group-active:scale-105"
+          sizes="280px"
+          priority={priority}
+          onLoad={handleImageLoad}
+        />
+
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/5" />
+
+        {/* Adaptive inner glow */}
+        {glowColor && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `radial-gradient(ellipse at 50% 95%, rgba(${glowColor},0.05) 0%, transparent 55%)`,
+            }}
+          />
+        )}
+
+        {/* Gold shimmer lines */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e]/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e]/30 to-transparent" />
+      </div>
+
+      {/* Content */}
+      <div className="absolute inset-0 flex flex-col justify-end p-4">
+        <div className="w-5 h-0.5 bg-[#c8a96e] mb-2" />
+
+        {banner.title && (
+          <h3
+            className="font-display text-base font-bold text-white leading-snug mb-1"
+            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}
+          >
+            {banner.title}
+          </h3>
+        )}
+
+        {banner.subtitle && (
+          <p className="text-white/60 text-[11px] mb-3 leading-relaxed line-clamp-2">
+            {banner.subtitle}
+          </p>
+        )}
+
+        {banner.cta_text && banner.cta_url && (
+          <Link prefetch={true} href={banner.cta_url}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-[11px] self-start"
+            style={{
+              background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
+              color: '#0a0a0a',
+            }}
+          >
+            {banner.cta_text}
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
