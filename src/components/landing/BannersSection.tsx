@@ -207,7 +207,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(next, 4000); // 4s normal loop
+    timerRef.current = setInterval(next, 5000); // 5s loop
   }, [next]);
 
   useEffect(() => {
@@ -308,7 +308,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
               <motion.div 
                 className="absolute inset-0 bg-black"
                 animate={{ opacity: isCenter ? 0 : 0.4 }}
-                transition={{ duration: 0.7 }}
+                transition={{ duration: 1.2 }}
               />
               
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-90" />
@@ -317,7 +317,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
               <motion.div 
                 className="absolute inset-0 flex flex-col justify-end p-8 md:p-14"
                 animate={{ opacity: isCenter ? 1 : 0 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 1.0 }}
               >
                  <div className="w-10 h-1 bg-[#c8a96e] mb-5" />
                  <h3 className="font-display text-3xl md:text-5xl font-bold text-white mb-3 leading-tight" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.6)' }}>
@@ -538,7 +538,7 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(next, 4000); // 4s auto-shift loop
+    timerRef.current = setInterval(next, 5000); // 5s loop
   }, [next]);
 
   useEffect(() => {
@@ -624,7 +624,7 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
                 filter: isCenter ? 'blur(0px)' : 'blur(4px)',
               }}
               transition={{
-                duration: 0.6,
+                duration: 1.2,
                 ease: [0.22, 1, 0.36, 1]
               }}
               onClick={() => {
@@ -651,7 +651,7 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
               <motion.div 
                 className="absolute inset-0 bg-black"
                 animate={{ opacity: isCenter ? 0 : 0.4 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 1.2 }}
               />
               
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/5" />
@@ -659,7 +659,7 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
               <motion.div 
                 className="absolute inset-0 flex flex-col justify-end p-5"
                 animate={{ opacity: isCenter ? 1 : 0 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 1.0 }}
               >
                  <div className="w-6 h-0.5 bg-[#c8a96e] mb-3" />
                  {banner.title && (
