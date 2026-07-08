@@ -8,9 +8,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { MessageCircle, MapPin, User, ArrowLeft, Check, Trash2, Tag, X, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 
-const MapPicker = dynamic(() => import('@/components/shared/MapPicker'), { ssr: false });
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { useCouponStore } from '@/hooks/useCouponStore';
@@ -64,7 +62,7 @@ export function CheckoutForm() {
   const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
   const [placedOrderTotal, setPlacedOrderTotal] = useState(0);
   const [placedOrderData, setPlacedOrderData] = useState<any>(null);
-  const [mapLocation, setMapLocation] = useState<{lat: number, lng: number} | null>(null);
+
 
 
   // Coupon States
@@ -91,25 +89,7 @@ export function CheckoutForm() {
     },
   });
 
-  const watchStreet = watch('street');
-  const watchArea = watch('area');
-  const watchCity = watch('city');
-  const watchDistrict = watch('district');
-  const watchPincode = watch('pincode');
-  
-  const typedAddress = [watchStreet, watchArea, watchCity, watchDistrict, watchPincode].filter(Boolean).join(', ');
 
-  const handleLocationSelect = (location: any) => {
-    setMapLocation({ lat: location.lat, lng: location.lng });
-    if (location.address.street) setValue('street', location.address.street, { shouldValidate: true });
-    if (location.address.area) setValue('area', location.address.area, { shouldValidate: true });
-    if (location.address.city) setValue('city', location.address.city, { shouldValidate: true });
-    if (location.address.district) {
-      const match = TAMIL_NADU_DISTRICTS.find(d => d.toLowerCase() === location.address.district?.toLowerCase());
-      if (match) setValue('district', match as typeof TAMIL_NADU_DISTRICTS[number], { shouldValidate: true });
-    }
-    if (location.address.pincode) setValue('pincode', location.address.pincode, { shouldValidate: true });
-  };
 
   const currentPincode = watch('pincode');
 
@@ -280,8 +260,8 @@ export function CheckoutForm() {
             district: data.district,
             pincode: data.pincode,
             landmark: data.landmark || null,
-            latitude: mapLocation?.lat || null,
-            longitude: mapLocation?.lng || null,
+            latitude: null,
+            longitude: null,
           })
           .select().single();
         if (addrErr) throw addrErr;
@@ -736,11 +716,7 @@ export function CheckoutForm() {
               <span className="badge-gold text-[10px]">Tamil Nadu Only</span>
             </div>
 
-            <div className="mb-6">
-              <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Set Location on Map</label>
-              <MapPicker onLocationSelect={handleLocationSelect} searchQuery={typedAddress} />
-              <p className="text-white/40 text-[10px] mt-2">Dropping a pin will automatically fill your street and pincode. Typing an address will automatically move the map pin!</p>
-            </div>
+
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
