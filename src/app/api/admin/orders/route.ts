@@ -58,7 +58,8 @@ export async function POST(req: NextRequest) {
               <div style="background-color: #fcfaf6; padding: 20px; border-radius: 8px; border: 1px solid #f3ebd8; margin: 25px 0;">
                 <h3 style="color: #c8a96e; margin-top: 0; margin-bottom: 15px; font-size: 16px; text-transform: uppercase; tracking-wider;">Shipping Details</h3>
                 <p style="margin: 0 0 10px 0; font-size: 14px;"><strong>Courier Partner:</strong> ${body.courier_name}</p>
-                <p style="margin: 0 0 20px 0; font-size: 14px;"><strong>Tracking AWB:</strong> ${body.tracking_number}</p>
+                <p style="margin: 0 0 15px 0; font-size: 14px;"><strong>Tracking AWB:</strong> <code style="font-family: monospace; background-color: #eaeaea; padding: 3px 6px; border-radius: 4px; font-size: 15px; font-weight: bold; color: #111;">${body.tracking_number}</code></p>
+                <p style="margin: 0 0 15px 0; font-size: 12px; color: #666666;">Copy the AWB number above and paste it on the tracking page linked below.</p>
                 <div style="text-align: center;">
                   <a href="${trackLink}" target="_blank" style="background-color: #c8a96e; color: #000000; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block; font-size: 14px;">Track Package</a>
                 </div>

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Package, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatDate, formatCurrency, cn } from '@/lib/utils';
 import type { Order } from '@/types';
+import { toast } from 'sonner';
 
 interface OrdersListProps {
   orders: Order[];
@@ -199,6 +200,10 @@ export function OrdersList({ orders }: OrdersListProps) {
                             href="https://stcourier.com/track/shipment"
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => {
+                              navigator.clipboard.writeText((order as any).tracking_number);
+                              toast.success('AWB number copied to clipboard! Paste it on the tracking page.');
+                            }}
                             className="text-xs font-semibold border border-luxe-accent text-luxe-accent hover:bg-luxe-accent hover:text-black transition-all px-4 py-2 rounded-xl text-center w-full sm:w-auto"
                           >
                             Go to Official Courier Portal
