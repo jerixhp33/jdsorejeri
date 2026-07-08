@@ -229,7 +229,10 @@ export function Navbar() {
             : 'top-2 sm:top-4 bg-black/40 backdrop-blur-md border border-white/[0.05] shadow-lg hover:bg-black/60 hover:border-white/10'
         )}
       >
-        <div className="px-4 sm:px-6">
+        {/* 1-minute sweeping edge light effect starting from left (270deg) */}
+        <div className="nav-edge-light" />
+        
+        <div className="px-4 sm:px-6 relative z-10">
           <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
             <Link prefetch={true} href="/" className="flex items-center gap-2 group" aria-label="JD Store home">
