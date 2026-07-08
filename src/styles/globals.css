@@ -500,3 +500,9 @@ html {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Eliminate 300ms tap delay on mobile devices for instant clicks */
+a, button, [role="button"], input[type="submit"], input[type="button"], input[type="reset"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
