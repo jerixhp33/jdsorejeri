@@ -45,11 +45,7 @@ export async function POST(req: NextRequest) {
         let emailHtml = '';
 
         if (body.status === 'packed' || body.status === 'ready') {
-          const trackLink = body.courier_name?.toLowerCase().includes('st')
-            ? `https://stcourier.com/track/status/${body.tracking_number}`
-            : body.courier_name?.toLowerCase().includes('sd')
-            ? `https://sdcouriers.com/track/${body.tracking_number}`
-            : `https://www.google.com/search?q=${encodeURIComponent(`${body.courier_name} tracking ${body.tracking_number}`)}`;
+          const trackLink = 'https://stcourier.com/track/shipment';
 
           emailHtml = `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #ffffff; color: #333333;">
