@@ -9,10 +9,25 @@ const supabase = createClient(
 
 export async function sendWebPushToUser(userId: string, payload: { title: string; body: string; url?: string }) {
   try {
-    const { data: subscriptions } = await supabase
+    // The userId passed from orders is usually the profile.id, but push_subscriptions uses profile.uid
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('uid')
+      .eq('id', userId)
+      .single();
+
+    const targetUid = profile ? profile.uid : userId;
+
+    const { data: subscriptions, error } = await supabase
       .from('push_subscriptions')
       .select('*')
-      .eq('user_id', userId);
+      .eq('user_id', targetUid);
+
+    if (error) {
+      console.error('Error fetching subscriptions for push:', error);
+    }
+    
+    console.log(`Found ${subscriptions?.length || 0} push subscriptions for user ${userId}`);
 
     if (!subscriptions || subscriptions.length === 0) return;
 
