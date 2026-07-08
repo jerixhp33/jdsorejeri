@@ -238,10 +238,10 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                           </button>
                         )}
                         {/* Send AWB via WhatsApp */}
-                        {(order.status === 'packed' || order.status === 'ready') && (order as any).tracking_number && (order.user as any)?.phone && (
+                        {(order.status === 'packed' || order.status === 'ready') && (order as any).tracking_number && ((order.delivery_address as any)?.phone || (order.user as any)?.phone) && (
                           <a
-                            href={`https://wa.me/91${(order.user as any).phone}?text=${encodeURIComponent(
-                              `Hi ${(order.user as any).name || 'Customer'}, your JD Store order #${order.order_number} has been shipped via ${(order as any).courier_name || 'SD Courier'} (AWB: ${(order as any).tracking_number}). Track here: ${
+                            href={`https://wa.me/91${((order.delivery_address as any)?.phone || (order.user as any)?.phone)}?text=${encodeURIComponent(
+                              `Hi ${(order.delivery_address as any)?.full_name || (order.user as any)?.name || 'Customer'}, your JD Store order #${order.order_number} has been shipped via ${(order as any).courier_name || 'SD Courier'} (AWB: ${(order as any).tracking_number}). Track here: ${
                                 ((order as any).courier_name || 'SD Courier').toLowerCase().includes('st')
                                   ? `https://stcourier.com/track/status/${(order as any).tracking_number}`
                                   : `https://sdcouriers.com/track/${(order as any).tracking_number}`
@@ -257,9 +257,9 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                           </a>
                         )}
                         {/* WhatsApp contact */}
-                        {(order.user as any)?.phone && (
+                        {((order.delivery_address as any)?.phone || (order.user as any)?.phone) && (
                           <a
-                            href={`https://wa.me/91${(order.user as any).phone}?text=${encodeURIComponent(`Hi! Regarding your order #${order.order_number}`)}`}
+                            href={`https://wa.me/91${((order.delivery_address as any)?.phone || (order.user as any)?.phone)}?text=${encodeURIComponent(`Hi! Regarding your order #${order.order_number}`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-1.5 rounded-lg text-green-400 hover:bg-green-500/10 transition-all"
