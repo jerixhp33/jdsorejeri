@@ -38,29 +38,77 @@ export async function POST(req: NextRequest) {
 
       if (users && users.length > 0) {
         const { sendEmail } = await import('@/lib/email');
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app';
+        // Force the live site URL for emails so it never links to localhost, even when testing locally
+        const siteUrl = 'https://jdsorejeri.vercel.app';
         
         await Promise.all(users.map(async (u) => {
           const html = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="text-align: center; margin-bottom: 20px;">
-                <h1 style="color: #D4AF37; margin-bottom: 5px;">New Arrival at JD Store!</h1>
-                <p style="color: #666;">We just added something special.</p>
-              </div>
-              <p>Hi ${u.name || 'there'},</p>
-              <p>We've just published a brand new product that we think you'll love: <strong>${data.name}</strong></p>
-              ${data.description ? `<p style="color: #444; line-height: 1.6;">${data.description}</p>` : ''}
-              <div style="text-align: center; margin-top: 35px; margin-bottom: 35px;">
-                <a href="${siteUrl}/products/${data.slug}" style="background-color: #000; color: #D4AF37; padding: 14px 28px; text-decoration: none; border-radius: 4px; font-weight: bold; border: 1px solid #D4AF37;">
-                  Shop New Arrival
-                </a>
-              </div>
-              <hr style="border: 0; border-top: 1px solid #eee; margin-top: 40px; margin-bottom: 20px;" />
-              <p style="font-size: 11px; color: #999; text-align: center;">
-                You are receiving this because you subscribed to New Arrivals notifications.<br/>
-                To unsubscribe, log in to your JD Store account and visit Settings > Notifications.
-              </p>
-            </div>
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; background-color: #000000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #000000; padding: 40px 20px;">
+                <tr>
+                  <td align="center">
+                    <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #111111; border-radius: 12px; overflow: hidden; border: 1px solid #333333;">
+                      
+                      <!-- Header -->
+                      <tr>
+                        <td align="center" style="padding: 40px 20px; border-bottom: 1px solid #222222;">
+                          <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #D4AF37; letter-spacing: 4px; text-transform: uppercase;">JD STORE</h1>
+                          <p style="margin: 10px 0 0 0; font-size: 12px; color: #888888; letter-spacing: 2px; text-transform: uppercase;">Just Arrived</p>
+                        </td>
+                      </tr>
+
+                      <!-- Body -->
+                      <tr>
+                        <td style="padding: 40px 40px 20px 40px;">
+                          <p style="margin: 0 0 20px 0; font-size: 16px; color: #E5E5E5; font-weight: 500;">Hello ${u.name || 'there'},</p>
+                          <p style="margin: 0 0 30px 0; font-size: 15px; color: #AAAAAA; line-height: 1.6;">
+                            We are thrilled to unveil the latest addition to our curated collection. Discover the exceptional craftsmanship and design of our newest piece.
+                          </p>
+
+                          <div style="background-color: #1A1A1A; border: 1px solid #333333; border-radius: 8px; padding: 30px; text-align: center; margin-bottom: 40px;">
+                            <h2 style="margin: 0 0 15px 0; font-size: 22px; color: #FFFFFF; font-weight: 600; letter-spacing: 0.5px;">${data.name}</h2>
+                            ${data.description ? `<p style="margin: 0; font-size: 14px; color: #888888; line-height: 1.5; font-style: italic;">"${data.description}"</p>` : ''}
+                          </div>
+
+                          <!-- CTA Button -->
+                          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                              <td align="center">
+                                <a href="${siteUrl}/products/${data.slug}" style="display: inline-block; background-color: #D4AF37; color: #000000; font-size: 14px; font-weight: 700; text-decoration: none; padding: 16px 36px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase;">
+                                  Discover Now
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+
+                      <!-- Footer -->
+                      <tr>
+                        <td align="center" style="padding: 40px; background-color: #0A0A0A; border-top: 1px solid #222222;">
+                          <p style="margin: 0 0 15px 0; font-size: 11px; color: #666666; line-height: 1.5;">
+                            You are receiving this email because you opted into New Arrivals notifications at JD Store.<br/>
+                            We promise to only send you the good stuff.
+                          </p>
+                          <p style="margin: 0; font-size: 11px; color: #444444;">
+                            &copy; ${new Date().getFullYear()} JD Store. All rights reserved.<br/>
+                            Tamil Nadu, India
+                          </p>
+                        </td>
+                      </tr>
+                      
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
           `;
           
           await sendEmail({
