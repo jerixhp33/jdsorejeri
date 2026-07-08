@@ -132,13 +132,19 @@ export function OrdersList({ orders }: OrdersListProps) {
               )}
 
               {/* Tracking */}
-              {((order as any).tracking_number) && (
+              {order.status !== 'cancelled' && (
                 <div className="space-y-4">
-                  <div className="bg-white/5 border border-luxe-accent/20 rounded-lg p-3 flex items-center justify-between">
+                  <div className="bg-white/5 border border-white/5 rounded-lg p-3 flex items-center justify-between">
                     <div>
-                      <p className="text-white/50 text-xs uppercase tracking-wide mb-0.5">Tracking Information</p>
-                      <p className="text-white text-sm font-medium">{(order as any).courier_name || 'ST Courier'}</p>
-                      <p className="text-white/70 text-xs">AWB: {(order as any).tracking_number}</p>
+                      <p className="text-white/50 text-xs uppercase tracking-wide mb-0.5">Order Tracking</p>
+                      {((order as any).tracking_number) ? (
+                        <>
+                          <p className="text-white text-sm font-medium">{(order as any).courier_name || 'ST Courier'}</p>
+                          <p className="text-white/70 text-xs">AWB: {(order as any).tracking_number}</p>
+                        </>
+                      ) : (
+                        <p className="text-white/70 text-xs">Status: {STATUS_LABELS[order.status]}</p>
+                      )}
                     </div>
                     <button
                       onClick={() => setExpandedTrackingId(expandedTrackingId === order.id ? null : order.id)}
@@ -186,23 +192,19 @@ export function OrdersList({ orders }: OrdersListProps) {
                       </div>
 
                       {/* Direct Courier Tracking Link */}
-                      <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row gap-3 items-center justify-between">
-                        <span className="text-[10px] text-white/40 font-mono">Carrier: {(order as any).courier_name || 'ST Courier'} AWB#{(order as any).tracking_number}</span>
-                        <a
-                          href={
-                            ((order as any).courier_name || '').toLowerCase().includes('st')
-                              ? `https://stcourier.com/track/status/${(order as any).tracking_number}`
-                              : ((order as any).courier_name || '').toLowerCase().includes('sd')
-                              ? `https://sdcouriers.com/track/${(order as any).tracking_number}`
-                              : `https://www.google.com/search?q=${encodeURIComponent(`${(order as any).courier_name} tracking ${(order as any).tracking_number}`)}`
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs font-semibold border border-luxe-accent text-luxe-accent hover:bg-luxe-accent hover:text-black transition-all px-4 py-2 rounded-xl text-center w-full sm:w-auto"
-                        >
-                          Go to Official Courier Portal
-                        </a>
-                      </div>
+                      {((order as any).tracking_number) && (
+                        <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row gap-3 items-center justify-between">
+                          <span className="text-[10px] text-white/40 font-mono">Carrier: {(order as any).courier_name || 'ST Courier'} AWB#{(order as any).tracking_number}</span>
+                          <a
+                            href="https://stcourier.com/track/shipment"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-semibold border border-luxe-accent text-luxe-accent hover:bg-luxe-accent hover:text-black transition-all px-4 py-2 rounded-xl text-center w-full sm:w-auto"
+                          >
+                            Go to Official Courier Portal
+                          </a>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </div>
