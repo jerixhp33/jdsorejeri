@@ -348,8 +348,8 @@ export function CheckoutForm() {
 
       const cleanPhone = WHATSAPP_NUMBER.replace(/\D/g, '');
       const waNumber = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
-      const shortMsg = encodeURIComponent(`Here is my payment screenshot for Order #${ordNum}`);
-      const waUrl = `https://wa.me/${waNumber}?text=${shortMsg}`;
+      const fullMsgWithScreenshot = `${decodeURIComponent(whatsappMsg)}\n\n*Here is my payment screenshot for Order #${ordNum}*`;
+      const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(fullMsgWithScreenshot)}`;
       setSuccessWhatsappUrl(waUrl);
       
       // Attempt to auto-open (might be blocked by Safari/Chrome popup blockers)
