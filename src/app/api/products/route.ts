@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       
       // Add keyword search
       if (intent.keywords && intent.keywords.length > 0) {
-        const orConditions = intent.keywords.map(w => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
+        const orConditions = intent.keywords.map((w: string) => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
         query = query.or(orConditions);
       } else {
         // Fallback
