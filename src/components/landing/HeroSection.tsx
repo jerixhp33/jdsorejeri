@@ -200,9 +200,9 @@ export function HeroSection() {
   const [marqueeItems, setMarqueeItems] = useState<string[]>(MARQUEE_ITEMS);
 
   // We need to ensure we have enough items to span a large screen twice for a seamless loop.
-  // If the user only adds 2 labels, we repeat them until we have at least 10 items per half.
+  // We use 40 to mathematically guarantee the text width massively exceeds any phone or ultra-wide monitor.
   const baseItems = marqueeItems.length > 0 ? marqueeItems : MARQUEE_ITEMS;
-  const itemsToRender = Array(Math.max(1, Math.ceil(12 / baseItems.length))).fill(baseItems).flat();
+  const itemsToRender = Array(Math.max(1, Math.ceil(40 / baseItems.length))).fill(baseItems).flat();
 
   useEffect(() => {
     async function fetchMarquee() {
