@@ -27,13 +27,13 @@ export async function GET(request: NextRequest) {
     if (search) {
       const intent = await parseSearchIntent(search);
       
-      // Override productType if AI detected one
-      if (intent.productType && intent.productType !== 'all') {
+      // Override productType ONLY if we are in global search (productType was not explicitly provided in the URL)
+      if (!productType && intent.productType && intent.productType !== 'all') {
         effectiveProductType = intent.productType;
       }
       
-      // If AI detected a size, we will enforce sizes!inner
-      if (intent.sizes && intent.sizes.length > 0) {
+      // If AI detected a size, enforce sizes!inner, but ONLY if we aren't strictly in the earrings section
+      if (intent.sizes && intent.sizes.length > 0 && productType !== 'earring') {
         effectiveProductType = 'poster';
         sizeFilter = intent.sizes[0];
       }
