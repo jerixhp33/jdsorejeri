@@ -148,25 +148,44 @@ export function Navbar() {
 
         let queryBuilder = supabase
           .from('products')
-          .select('slug, name, product_type, price, images:product_images(url, is_primary)')
+          .select('slug, name, product_type, price, material, color, tags, images:product_images(url, is_primary)')
           .eq('is_active', true)
           .limit(12);
 
         if (words.length > 0) {
-          const orConditions = words.map(w => 
-            `name.ilike.%${w}%,description.ilike.%${w}%,product_type.ilike.%${w}%,tags.cs.{"${w}"}`
+          // Search across name, description, product_type, material, color
+          const orConditions = words.map(w =>
+            `name.ilike.%${w}%,description.ilike.%${w}%,product_type.ilike.%${w}%,material.ilike.%${w}%,color.ilike.%${w}%`
           ).join(',');
           queryBuilder = queryBuilder.or(orConditions);
         }
 
         const { data } = await queryBuilder;
-        if (data) setSuggestions(data);
+
+        // Client-side: also boost results that match tags
+        if (data && words.length > 0) {
+          const scored = data.map(item => {
+            let score = 0;
+            const nameLower = (item.name || '').toLowerCase();
+            const typeLower = (item.product_type || '').toLowerCase();
+            words.forEach(w => {
+              if (nameLower.includes(w)) score += 10;
+              if (typeLower.includes(w)) score += 5;
+              if (item.tags?.some((t: string) => t.toLowerCase().includes(w))) score += 3;
+            });
+            return { ...item, _score: score };
+          });
+          scored.sort((a: any, b: any) => b._score - a._score);
+          setSuggestions(scored);
+        } else if (data) {
+          setSuggestions(data);
+        }
       } catch (err) {
         console.error('Search error:', err);
       } finally {
         setLoadingSuggestions(false);
       }
-    }, 200);
+    }, 150);
 
     return () => {
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
@@ -610,36 +629,53 @@ export function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Search Modal */}
+      {/* Premium Search Modal */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-start justify-center pt-16 sm:pt-24 px-3 sm:px-4"
+            className="fixed inset-0 z-[60] flex items-start justify-center pt-[10vh] px-3 sm:px-4"
             onClick={(e) => e.target === e.currentTarget && setSearchOpen(false)}
           >
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSearchOpen(false)} />
+            <div className="absolute inset-0 bg-black/85 backdrop-blur-md" onClick={() => setSearchOpen(false)} />
             <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.98 }}
+              initial={{ opacity: 0, y: -30, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: -20, scale: 0.96 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="relative w-full max-w-2xl"
             >
-              <div className="glass-card !rounded-2xl overflow-hidden">
-                <div className="flex items-center gap-3 px-4 py-3.5 sm:py-4 border-b border-white/5">
-                  <Search className="w-5 h-5 text-white/40 flex-shrink-0" />
+              {/* Glow effect */}
+              <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-luxe-accent/20 via-transparent to-transparent pointer-events-none" />
+
+              <div className="relative bg-[#0c0c0c] border border-white/10 rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+                {/* Search Input */}
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
+                  {loadingSuggestions ? (
+                    <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-luxe-accent animate-spin flex-shrink-0" />
+                  ) : (
+                    <Search className="w-5 h-5 text-white/30 flex-shrink-0" />
+                  )}
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search posters, earrings, collections..."
-                    className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none text-base sm:text-lg min-w-0"
+                    placeholder="Search products, materials, colors..."
+                    className="flex-1 bg-transparent text-white placeholder:text-white/25 outline-none text-base sm:text-lg font-light tracking-wide min-w-0"
                   />
-                  <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/5 text-white/30 text-[11px] font-mono border border-white/10">ESC</kbd>
+                  {searchQuery && (
+                    <button
+                      onClick={() => { setSearchQuery(''); searchInputRef.current?.focus(); }}
+                      className="p-1 rounded-md text-white/30 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                  <div className="w-px h-6 bg-white/10 mx-1" />
+                  <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 rounded bg-white/5 text-white/25 text-[10px] font-mono border border-white/5 tracking-wider">ESC</kbd>
                   <button
                     type="button"
                     onClick={() => setSearchOpen(false)}
@@ -648,59 +684,82 @@ export function Navbar() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="px-4 pb-4 max-h-[60vh] overflow-y-auto">
+
+                {/* Results Area */}
+                <div className="max-h-[55vh] overflow-y-auto">
                   {!searchQuery.trim() ? (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {['Poster', 'Earring', 'A4', 'Gold', 'Minimal'].map((term) => (
-                        <button
-                          key={term}
-                          type="button"
-                          onClick={() => setSearchQuery(term)}
-                          className="badge-luxe hover:bg-white/15 transition-all cursor-pointer text-xs py-1.5"
-                        >
-                          {term}
-                        </button>
-                      ))}
+                    <div className="p-5">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-white/20 font-semibold mb-3">Quick searches</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['Posters', 'Earrings', 'Gold', 'Minimal', 'A4', 'Jhumka', 'Abstract', 'Marvel'].map((term) => (
+                          <button
+                            key={term}
+                            type="button"
+                            onClick={() => setSearchQuery(term)}
+                            className="px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-white/50 text-xs font-medium hover:bg-white/10 hover:text-white hover:border-white/15 transition-all duration-200 cursor-pointer"
+                          >
+                            {term}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   ) : (
-                    <div className="mt-2 space-y-1">
+                    <div>
                       {loadingSuggestions ? (
-                        <div className="py-6 flex justify-center">
-                          <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-luxe-accent animate-spin" />
+                        <div className="py-12 flex flex-col items-center gap-3">
+                          <div className="w-6 h-6 rounded-full border-2 border-white/10 border-t-luxe-accent animate-spin" />
+                          <p className="text-xs text-white/20 tracking-wide">Searching...</p>
                         </div>
                       ) : suggestions.length > 0 ? (
-                        suggestions.map((item) => {
-                          const primaryImg = item.images?.find((img: any) => img.is_primary) || item.images?.[0];
-                          return (
-                            <Link
-                              key={item.slug}
-                              href={`/product/${item.slug}`}
-                              onClick={() => {
-                                setSearchOpen(false);
-                                setSearchQuery('');
-                              }}
-                              className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors group"
-                            >
-                              <div className="w-10 h-10 rounded-lg bg-white/5 overflow-hidden flex-shrink-0 relative">
-                                {primaryImg ? (
-                                  <Image src={primaryImg.url} alt={item.name} fill className="object-cover" sizes="40px" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">✦</div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0 flex items-center justify-between">
-                                <div>
-                                  <p className="text-sm font-medium text-white/80 group-hover:text-luxe-accent truncate transition-colors">{item.name}</p>
-                                  <p className="text-xs text-white/40 capitalize">{item.product_type} · ₹{item.price}</p>
-                                </div>
-                                <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-luxe-accent transition-all flex-shrink-0 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
-                              </div>
-                            </Link>
-                          );
-                        })
+                        <>
+                          <div className="px-5 pt-3 pb-2 flex items-center justify-between">
+                            <p className="text-[11px] uppercase tracking-[0.2em] text-white/20 font-semibold">
+                              {suggestions.length} {suggestions.length === 1 ? 'result' : 'results'}
+                            </p>
+                          </div>
+                          <div className="px-2 pb-3">
+                            {suggestions.map((item) => {
+                              const primaryImg = item.images?.find((img: any) => img.is_primary) || item.images?.[0];
+                              return (
+                                <Link
+                                  key={item.slug}
+                                  href={`/product/${item.slug}`}
+                                  onClick={() => {
+                                    setSearchOpen(false);
+                                    setSearchQuery('');
+                                  }}
+                                  className="flex items-center gap-3.5 px-3 py-3 rounded-xl hover:bg-white/[0.04] transition-all duration-200 group"
+                                >
+                                  <div className="w-12 h-12 rounded-xl bg-white/5 overflow-hidden flex-shrink-0 relative ring-1 ring-white/5">
+                                    {primaryImg ? (
+                                      <Image src={primaryImg.url} alt={item.name} fill className="object-cover" sizes="48px" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-white/15 text-sm">✦</div>
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-white/80 group-hover:text-white truncate transition-colors">{item.name}</p>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      <span className="inline-flex px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-medium uppercase tracking-wider text-white/30 capitalize">{item.product_type}</span>
+                                      {item.price && (
+                                        <span className="text-xs font-semibold text-luxe-accent">₹{item.price}</span>
+                                      )}
+                                      {item.material && (
+                                        <span className="text-[10px] text-white/20 capitalize">{item.material}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <ArrowRight className="w-4 h-4 text-white/10 group-hover:text-luxe-accent transition-all flex-shrink-0 opacity-0 group-hover:opacity-100 -translate-x-3 group-hover:translate-x-0" />
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </>
                       ) : (
-                        <div className="py-6 text-center text-sm text-white/40">
-                          No products found for "{searchQuery}"
+                        <div className="py-12 flex flex-col items-center gap-2">
+                          <Search className="w-8 h-8 text-white/10" />
+                          <p className="text-sm text-white/30">No products found</p>
+                          <p className="text-xs text-white/15">Try a different keyword</p>
                         </div>
                       )}
                     </div>
