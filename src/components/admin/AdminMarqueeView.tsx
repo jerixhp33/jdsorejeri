@@ -54,7 +54,10 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id, ...body }),
         });
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to update label');
+        }
         const updated: MarqueeLabel = await res.json();
         setItems((prev) => prev.map((l) => (l.id === id ? updated : l)));
         toast.success('Label updated');
@@ -64,14 +67,17 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to create label');
+        }
         const created: MarqueeLabel = await res.json();
         setItems((prev) => [...prev, created]);
         toast.success('Label added');
       }
       closeModal();
-    } catch {
-      toast.error('Failed to save');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save');
     } finally {
       setSaving(false);
     }

@@ -14,7 +14,14 @@ export default async function AdminMarqueePage() {
     .order('order_index', { ascending: true });
     
   if (error) {
-    console.error('Error fetching marquee labels (table might not exist yet):', error);
+    console.error('Error fetching marquee labels:', error);
+    return (
+      <div className="p-8 text-red-400 glass-card">
+        <h2 className="font-bold text-xl mb-4">Database Error</h2>
+        <p>Failed to load marquee labels. Error details:</p>
+        <pre className="mt-4 p-4 bg-black/40 rounded-xl overflow-auto text-sm">{JSON.stringify(error, null, 2)}</pre>
+      </div>
+    );
   }
 
   return <AdminMarqueeView labels={labels || []} />;
