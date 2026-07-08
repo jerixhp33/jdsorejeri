@@ -200,9 +200,9 @@ export function HeroSection() {
   const [marqueeItems, setMarqueeItems] = useState<string[]>(MARQUEE_ITEMS);
 
   // We need to ensure we have enough items to span a large screen twice for a seamless loop.
-  // We use 40 to mathematically guarantee the text width massively exceeds any phone or ultra-wide monitor.
+  // We use 12 to guarantee enough width without making the animation path ridiculously long.
   const baseItems = marqueeItems.length > 0 ? marqueeItems : MARQUEE_ITEMS;
-  const itemsToRender = Array(Math.max(1, Math.ceil(40 / baseItems.length))).fill(baseItems).flat();
+  const itemsToRender = Array(Math.max(1, Math.ceil(12 / baseItems.length))).fill(baseItems).flat();
 
   useEffect(() => {
     async function fetchMarquee() {
@@ -380,7 +380,7 @@ export function HeroSection() {
       <div className="absolute bottom-0 left-0 right-0 z-30 border-t border-white/[0.08] bg-black/60 backdrop-blur-md overflow-hidden py-3 sm:py-3.5">
         <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-black/80 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-black/80 to-transparent z-10 pointer-events-none" />
-        <div className="flex whitespace-nowrap animate-marquee w-max">
+        <div className="flex whitespace-nowrap animate-marquee w-max" style={{ animationDuration: '40s' }}>
           {/* First identical half */}
           <div className="flex shrink-0">
             {itemsToRender.map((item, i) => (
