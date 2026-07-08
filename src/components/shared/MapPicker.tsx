@@ -1,17 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
-// Fix for default Leaflet icon not showing up correctly in Next.js
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+const containerStyle = {
+  width: '100%',
+  height: '100%'
+};
 
 interface MapPickerProps {
   searchQuery?: string;
@@ -28,70 +23,78 @@ interface MapPickerProps {
   }) => void;
 }
 
-function LocationMarker({ onLocationSelect, searchQuery }: MapPickerProps) {
-  const [position, setPosition] = useState<L.LatLng | null>(null);
-
-  const map = useMapEvents({
-    click(e) {
-      setPosition(e.latlng);
-      fetchAddress(e.latlng.lat, e.latlng.lng);
-    },
+export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerProps) {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
   });
 
+  const defaultCenter = { lat: 13.0827, lng: 80.2707 }; // Chennai
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [position, setPosition] = useState<google.maps.LatLngLiteral | null>(null);
+  
+  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
+
+  const onLoad = useCallback(function callback(map: google.maps.Map) {
+    setMap(map);
+    geocoderRef.current = new window.google.maps.Geocoder();
+  }, []);
+
+  const onUnmount = useCallback(function callback(map: google.maps.Map) {
+    setMap(null);
+    geocoderRef.current = null;
+  }, []);
+
+  // Forward Geocoding (Typing)
   useEffect(() => {
-    if (!searchQuery) return;
-    const timer = setTimeout(async () => {
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(searchQuery)}&limit=1`);
-        const data = await res.json();
-        if (data && data.length > 0) {
-          const lat = parseFloat(data[0].lat);
-          const lng = parseFloat(data[0].lon);
-          const newPos = L.latLng(lat, lng);
-          map.flyTo(newPos, 15);
-          setPosition(newPos);
-          // We intentionally do NOT call onLocationSelect here to prevent an infinite loop!
+    if (!searchQuery || !map || !geocoderRef.current) return;
+    const timer = setTimeout(() => {
+      geocoderRef.current?.geocode({ address: searchQuery }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          const lat = results[0].geometry.location.lat();
+          const lng = results[0].geometry.location.lng();
+          map.panTo({ lat, lng });
+          map.setZoom(16);
+          setPosition({ lat, lng });
         }
-      } catch (error) {
-        console.error('Error forward geocoding:', error);
-      }
-    }, 1500); // 1.5s debounce to respect OSM API limits
+      });
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [searchQuery, map]);
 
-  const fetchAddress = async (lat: number, lng: number) => {
-    try {
-      // Force strictly English results. If a street doesn't have an English name mapped, it will be skipped.
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=en`);
-      const data = await res.json();
-      if (data && data.address) {
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    if (!e.latLng || !geocoderRef.current) return;
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
+    setPosition({ lat, lng });
+    
+    geocoderRef.current.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === 'OK' && results && results[0]) {
+        // Parse Google Maps Address Components
+        const components = results[0].address_components;
+        let street = '', area = '', city = '', district = '', pincode = '';
+        
+        for (const comp of components) {
+          const types = comp.types;
+          if (types.includes('route') || types.includes('street_address') || types.includes('premise')) street = comp.long_name;
+          if (types.includes('sublocality') || types.includes('neighborhood')) area = comp.long_name;
+          if (types.includes('locality')) city = comp.long_name;
+          if (types.includes('administrative_area_level_3') || types.includes('administrative_area_level_2')) {
+            if (!district) district = comp.long_name;
+          }
+          if (types.includes('postal_code')) pincode = comp.long_name;
+        }
+
+        // Fallback: If street is missing but area is present, Google is highly accurate, but we leave street blank so user can fill.
         onLocationSelect({
           lat,
           lng,
-          address: {
-            street: data.address.road || data.address.street || data.address.residential || data.address.pedestrian || data.address.path || '',
-            area: data.address.suburb || data.address.neighbourhood || data.address.village || data.address.residential || '',
-            city: data.address.city || data.address.town || data.address.municipality || '',
-            district: data.address.state_district || data.address.county || '',
-            pincode: data.address.postcode || '',
-          }
+          address: { street, area, city, district, pincode }
         });
       }
-    } catch (error) {
-      console.error('Error fetching address:', error);
-    }
+    });
   };
-
-  return position === null ? null : (
-    <Marker position={position} />
-  );
-}
-
-export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerProps) {
-  // Default to Chennai, Tamil Nadu
-  const defaultCenter: L.LatLngTuple = [13.0827, 80.2707];
-  const [mapRef, setMapRef] = useState<L.Map | null>(null);
 
   const locateUser = () => {
     if (!navigator.geolocation) {
@@ -100,13 +103,14 @@ export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerPr
     }
     
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        if (mapRef) {
-          mapRef.flyTo([lat, lng], 16);
-          // To trigger the reverse geocode, we can dispatch a click event or just simulate the map event
-          mapRef.fire('click', { latlng: L.latLng(lat, lng) });
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        if (map) {
+          map.panTo({ lat, lng });
+          map.setZoom(16);
+          // Simulate click to reverse geocode
+          handleMapClick({ latLng: new window.google.maps.LatLng(lat, lng) } as any);
         }
       },
       (error) => {
@@ -115,25 +119,111 @@ export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerPr
     );
   };
 
+  if (!isLoaded) return <div className="w-full h-[300px] flex items-center justify-center bg-zinc-900 rounded-xl border border-white/10 text-white/50 text-sm">Loading Google Maps...</div>;
+
   return (
     <div className="w-full h-[300px] rounded-xl overflow-hidden border border-white/10 relative z-0">
-      <MapContainer 
-        center={defaultCenter} 
-        zoom={10} 
-        scrollWheelZoom={true}
-        className="w-full h-full"
-        ref={setMapRef}
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={defaultCenter}
+        zoom={10}
+        onLoad={onLoad}
+        onUnmount={onUnmount}
+        onClick={handleMapClick}
+        options={{
+          disableDefaultUI: true,
+          zoomControl: true,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          styles: [
+            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            {
+              featureType: "administrative.locality",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#d59563" }],
+            },
+            {
+              featureType: "poi",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#d59563" }],
+            },
+            {
+              featureType: "poi.park",
+              elementType: "geometry",
+              stylers: [{ color: "#263c3f" }],
+            },
+            {
+              featureType: "poi.park",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#6b9a76" }],
+            },
+            {
+              featureType: "road",
+              elementType: "geometry",
+              stylers: [{ color: "#38414e" }],
+            },
+            {
+              featureType: "road",
+              elementType: "geometry.stroke",
+              stylers: [{ color: "#212a37" }],
+            },
+            {
+              featureType: "road",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#9ca5b3" }],
+            },
+            {
+              featureType: "road.highway",
+              elementType: "geometry",
+              stylers: [{ color: "#746855" }],
+            },
+            {
+              featureType: "road.highway",
+              elementType: "geometry.stroke",
+              stylers: [{ color: "#1f2835" }],
+            },
+            {
+              featureType: "road.highway",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#f3d19c" }],
+            },
+            {
+              featureType: "transit",
+              elementType: "geometry",
+              stylers: [{ color: "#2f3948" }],
+            },
+            {
+              featureType: "transit.station",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#d59563" }],
+            },
+            {
+              featureType: "water",
+              elementType: "geometry",
+              stylers: [{ color: "#17263c" }],
+            },
+            {
+              featureType: "water",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#515c6d" }],
+            },
+            {
+              featureType: "water",
+              elementType: "labels.text.stroke",
+              stylers: [{ color: "#17263c" }],
+            },
+          ],
+        }}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <LocationMarker onLocationSelect={onLocationSelect} searchQuery={searchQuery} />
-      </MapContainer>
+        {position && <Marker position={position} />}
+      </GoogleMap>
       
       {/* Instructions */}
       <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[400] pointer-events-none">
-        <div className="bg-black/80 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/20 shadow-xl whitespace-nowrap">
+        <div className="bg-black/80 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-luxe-accent/20 shadow-xl whitespace-nowrap">
           Tap anywhere to drop a pin
         </div>
       </div>
@@ -143,7 +233,7 @@ export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerPr
         <button
           type="button"
           onClick={locateUser}
-          className="bg-black text-white p-3 rounded-full shadow-lg border border-white/20 hover:bg-zinc-900 hover:scale-105 transition-all flex items-center justify-center"
+          className="bg-black text-white p-3 rounded-full shadow-lg border border-luxe-accent/20 hover:bg-luxe-accent/20 hover:text-luxe-accent hover:scale-105 transition-all flex items-center justify-center"
           title="Use my current location"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
