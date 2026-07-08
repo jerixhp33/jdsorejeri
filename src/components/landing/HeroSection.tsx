@@ -199,6 +199,11 @@ export function HeroSection() {
 
   const [marqueeItems, setMarqueeItems] = useState<string[]>(MARQUEE_ITEMS);
 
+  // We need to ensure we have enough items to span a large screen twice for a seamless loop.
+  // If the user only adds 2 labels, we repeat them until we have at least 10 items per half.
+  const baseItems = marqueeItems.length > 0 ? marqueeItems : MARQUEE_ITEMS;
+  const itemsToRender = Array(Math.max(1, Math.ceil(12 / baseItems.length))).fill(baseItems).flat();
+
   useEffect(() => {
     async function fetchMarquee() {
       try {
@@ -376,15 +381,30 @@ export function HeroSection() {
         <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-black/80 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-black/80 to-transparent z-10 pointer-events-none" />
         <div className="flex whitespace-nowrap animate-marquee">
-          {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
-            <span
-              key={i}
-              className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-white/40 text-[11px] sm:text-xs tracking-[0.25em] uppercase font-semibold"
-            >
-              {item}
-              <span className="text-luxe-accent/40 text-[7px]">✦</span>
-            </span>
-          ))}
+          {/* First identical half */}
+          <div className="flex shrink-0">
+            {itemsToRender.map((item, i) => (
+              <span
+                key={`h1-${i}`}
+                className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-white/40 text-[11px] sm:text-xs tracking-[0.25em] uppercase font-semibold"
+              >
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-luxe-accent/50" />
+                {item}
+              </span>
+            ))}
+          </div>
+          {/* Second identical half */}
+          <div className="flex shrink-0">
+            {itemsToRender.map((item, i) => (
+              <span
+                key={`h2-${i}`}
+                className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-white/40 text-[11px] sm:text-xs tracking-[0.25em] uppercase font-semibold"
+              >
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-luxe-accent/50" />
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </section>
