@@ -393,14 +393,14 @@ export function CheckoutForm() {
           <h1 className="font-display text-3xl font-bold text-white mb-2">Order Placed!</h1>
           <p className="text-white/40 text-sm mb-6">Order #{orderNumber}</p>
           
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-xl border border-white/20 inline-block w-full max-w-xs relative group cursor-help">
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-xl border border-white/20 inline-block w-full max-w-xs relative group">
             {/* Tooltip */}
             <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-10 shadow-lg scale-95 group-hover:scale-100">
-              ✨ Amount auto-fills in your UPI app!
+              ✨ Tap QR code to pay! (Amount auto-fills)
               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
             </div>
             
-            <div className="relative aspect-square w-full mb-4">
+            <a href={upiString} className="relative aspect-square w-full mb-4 block cursor-pointer hover:scale-105 transition-transform">
               <Image 
                 src={qrUrl}
                 alt="Dynamic UPI QR Code" 
@@ -408,7 +408,7 @@ export function CheckoutForm() {
                 className="rounded-lg object-contain"
                 unoptimized
               />
-            </div>
+            </a>
             <p className="text-black font-bold mt-2 text-lg">Scan to pay: {formatCurrency(placedOrderTotal)}</p>
             <p className="text-black/60 text-xs mt-1 font-mono">UPI: {upiId}</p>
             
@@ -431,7 +431,7 @@ export function CheckoutForm() {
             </p>
             <ol className="space-y-3 list-decimal list-inside text-sm text-white/80">
               <li className="hidden sm:list-item">Scan the QR code above with any UPI app (GPay, PhonePe, Paytm).</li>
-              <li className="sm:hidden">Tap the blue button above to open your UPI app.</li>
+              <li className="sm:hidden">Tap the QR code or the blue button to open your UPI app.</li>
               <li>Pay the exact total amount: <strong>{formatCurrency(placedOrderTotal)}</strong>.</li>
               <li>Take a <strong>screenshot</strong> of your successful payment.</li>
               <li>Click the WhatsApp button below to send your order details, and <strong>attach your payment screenshot</strong>.</li>
@@ -439,10 +439,18 @@ export function CheckoutForm() {
             </ol>
           </div>
 
-          <a href={successWhatsappUrl} target="_blank" rel="noopener noreferrer" className="btn-gold w-full flex items-center justify-center gap-2 mb-8 py-4 text-base font-semibold shadow-lg shadow-green-500/20 hover:shadow-green-500/40">
-            <MessageCircle className="w-6 h-6" />
+          <a href={successWhatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full flex items-center justify-center gap-2 mb-4 py-4 text-base font-semibold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+            </svg>
             Send Order & Payment Screenshot
           </a>
+          
+          <button onClick={() => window.print()} className="btn-luxe flex w-full items-center justify-center gap-2 mb-8 py-3 text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            Download PDF Receipt
+          </button>
+
           <div className="flex flex-col sm:flex-row gap-3">
             <Link prefetch={true} href="/dashboard/orders" className="btn-gold flex-1 text-center text-sm">View My Orders</Link>
             <Link prefetch={true} href="/" className="btn-luxe-outline flex-1 text-center text-sm">Continue Shopping</Link>
