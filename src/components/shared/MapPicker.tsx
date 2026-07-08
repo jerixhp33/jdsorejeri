@@ -51,14 +51,37 @@ async function forwardGeocode(query: string) {
 function parseAddress(data: any): { street: string; area: string; city: string; district: string; pincode: string } {
   const addr = data?.address || {};
 
-  // Street: Try official road first, then nearby POI names
+  // ── Indian Address Mapping ──
+  // In India: "Nagar/Colony" names are street-level, "Suburb/Village" are area-level
+
+  // Street: Official road name first, then Nagar/Colony/Residential names
   let street = addr.road || addr.pedestrian || addr.path || addr.footway || addr.cycleway || '';
 
-  // Area: Suburb > Neighbourhood > Village > Hamlet
-  const area = addr.suburb || addr.neighbourhood || addr.residential || addr.village || addr.hamlet || '';
+  // If no official road, use neighbourhood/residential as the street (e.g. "Sathivel Nagar")
+  if (!street) {
+    street = addr.neighbourhood || addr.residential || '';
+  }
 
-  // City: Prioritize city/town, then fall back
-  const city = addr.city || addr.town || addr.city_district || '';
+  // Area: Suburb or Village name (e.g. "Thiruverkadu")
+  let area = addr.suburb || addr.village || addr.hamlet || '';
+
+  // If area is empty but neighbourhood was not used as street, use it here
+  if (!area && !street) {
+    area = addr.neighbourhood || addr.residential || '';
+  }
+  // If area ended up same as street, try the next fallback
+  if (area && area === street) {
+    area = addr.village || addr.hamlet || addr.suburb || '';
+    if (area === street) area = '';
+  }
+
+  // City: Prefer actual city, then city_district. 
+  // Avoid using "town" as city if it's just a taluk name (like Poonamallee)
+  let city = addr.city || addr.city_district || '';
+  if (!city) {
+    // If no city found, use town but only if there's no better option
+    city = addr.town || '';
+  }
 
   // District
   const district = addr.state_district || addr.county || '';
@@ -67,10 +90,10 @@ function parseAddress(data: any): { street: string; area: string; city: string; 
   const pincode = addr.postcode || '';
 
   // ── Smart Street Fallback ──
-  // If no road tag exists, extract the first unique part from display_name
+  // If still no street, extract the first unique part from display_name
   if (!street && data?.display_name) {
     const knownValues = new Set(
-      [area, city, district, pincode, addr.state, addr.country, addr.country_code, addr.ISO3166]
+      [area, city, district, pincode, addr.state, addr.country, addr.country_code, addr.ISO3166, addr.town, addr.county]
         .filter(Boolean)
         .map((v: string) => v.toLowerCase().trim())
     );
