@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, X } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, X, ChevronLeft } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useCouponStore } from '@/hooks/useCouponStore';
 import { formatCurrency, cn } from '@/lib/utils';

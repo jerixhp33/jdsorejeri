@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { MessageCircle, MapPin, User, ArrowLeft, Check, Trash2, Tag, X } from 'lucide-react';
+import { MessageCircle, MapPin, User, ArrowLeft, Check, Trash2, Tag, X, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
