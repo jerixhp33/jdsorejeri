@@ -1,12 +1,28 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import 'leaflet/dist/leaflet.css';
 
-const containerStyle = {
-  width: '100%',
-  height: '100%'
-};
+// Dynamically import Leaflet components (must be client-side only)
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const useMapEvents = dynamic(() => import('react-leaflet').then(mod => mod.useMapEvents), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+
+// Fix for default Leaflet marker icons in Next.js
+import L from 'leaflet';
+let DefaultIcon: L.Icon;
+if (typeof window !== 'undefined') {
+  DefaultIcon = L.icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+  });
+  L.Marker.prototype.options.icon = DefaultIcon;
+}
 
 interface MapPickerProps {
   searchQuery?: string;
@@ -23,78 +39,73 @@ interface MapPickerProps {
   }) => void;
 }
 
-export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerProps) {
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
+function LocationMarker({ onLocationSelect, searchQuery }: MapPickerProps) {
+  const [position, setPosition] = useState<L.LatLng | null>(null);
+  const API_KEY = process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY || '';
+
+  const map = useMapEvents({
+    click(e) {
+      setPosition(e.latlng);
+      fetchAddress(e.latlng.lat, e.latlng.lng);
+    },
   });
 
-  const defaultCenter = { lat: 13.0827, lng: 80.2707 }; // Chennai
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [position, setPosition] = useState<google.maps.LatLngLiteral | null>(null);
-  
-  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
-
-  const onLoad = useCallback(function callback(map: google.maps.Map) {
-    setMap(map);
-    geocoderRef.current = new window.google.maps.Geocoder();
-  }, []);
-
-  const onUnmount = useCallback(function callback(map: google.maps.Map) {
-    setMap(null);
-    geocoderRef.current = null;
-  }, []);
-
-  // Forward Geocoding (Typing)
+  // Forward Geocoding (Typing to find location)
   useEffect(() => {
-    if (!searchQuery || !map || !geocoderRef.current) return;
-    const timer = setTimeout(() => {
-      geocoderRef.current?.geocode({ address: searchQuery }, (results, status) => {
-        if (status === 'OK' && results && results[0]) {
-          const lat = results[0].geometry.location.lat();
-          const lng = results[0].geometry.location.lng();
-          map.panTo({ lat, lng });
-          map.setZoom(16);
-          setPosition({ lat, lng });
+    if (!searchQuery || !API_KEY) return;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://us1.locationiq.com/v1/search?key=${API_KEY}&q=${encodeURIComponent(searchQuery)}&format=json&accept-language=en&limit=1`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          const newPos = L.latLng(lat, lng);
+          map.flyTo(newPos, 16);
+          setPosition(newPos);
+          // We intentionally do NOT call onLocationSelect here to prevent an infinite loop!
         }
-      });
-    }, 1500);
+      } catch (error) {
+        console.error('Error forward geocoding:', error);
+      }
+    }, 1500); // 1.5s debounce to respect API limits
 
     return () => clearTimeout(timer);
-  }, [searchQuery, map]);
+  }, [searchQuery, map, API_KEY]);
 
-  const handleMapClick = (e: google.maps.MapMouseEvent) => {
-    if (!e.latLng || !geocoderRef.current) return;
-    const lat = e.latLng.lat();
-    const lng = e.latLng.lng();
-    setPosition({ lat, lng });
-    
-    geocoderRef.current.geocode({ location: { lat, lng } }, (results, status) => {
-      if (status === 'OK' && results && results[0]) {
-        // Parse Google Maps Address Components
-        const components = results[0].address_components;
-        let street = '', area = '', city = '', district = '', pincode = '';
-        
-        for (const comp of components) {
-          const types = comp.types;
-          if (types.includes('route') || types.includes('street_address') || types.includes('premise')) street = comp.long_name;
-          if (types.includes('sublocality') || types.includes('neighborhood')) area = comp.long_name;
-          if (types.includes('locality')) city = comp.long_name;
-          if (types.includes('administrative_area_level_3') || types.includes('administrative_area_level_2')) {
-            if (!district) district = comp.long_name;
-          }
-          if (types.includes('postal_code')) pincode = comp.long_name;
-        }
-
-        // Fallback: If street is missing but area is present, Google is highly accurate, but we leave street blank so user can fill.
+  // Reverse Geocoding (Clicking map to find address)
+  const fetchAddress = async (lat: number, lng: number) => {
+    if (!API_KEY) return;
+    try {
+      const res = await fetch(`https://us1.locationiq.com/v1/reverse?key=${API_KEY}&lat=${lat}&lon=${lng}&format=json&accept-language=en`);
+      const data = await res.json();
+      if (data && data.address) {
         onLocationSelect({
           lat,
           lng,
-          address: { street, area, city, district, pincode }
+          address: {
+            street: data.address.road || data.address.pedestrian || data.address.path || '',
+            area: data.address.suburb || data.address.neighbourhood || data.address.residential || '',
+            city: data.address.city || data.address.town || data.address.village || data.address.county || '',
+            district: data.address.state_district || data.address.county || '',
+            pincode: data.address.postcode || '',
+          },
         });
       }
-    });
+    } catch (error) {
+      console.error('Error fetching address:', error);
+    }
   };
+
+  return position === null ? null : (
+    <Marker position={position} />
+  );
+}
+
+export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerProps) {
+  // Default to Chennai, Tamil Nadu
+  const defaultCenter: L.LatLngTuple = [13.0827, 80.2707];
+  const [mapRef, setMapRef] = useState<L.Map | null>(null);
 
   const locateUser = () => {
     if (!navigator.geolocation) {
@@ -106,11 +117,10 @@ export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerPr
       (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
-        if (map) {
-          map.panTo({ lat, lng });
-          map.setZoom(16);
-          // Simulate click to reverse geocode
-          handleMapClick({ latLng: new window.google.maps.LatLng(lat, lng) } as any);
+        if (mapRef) {
+          mapRef.flyTo([lat, lng], 16);
+          // We can't directly trigger a map click event cleanly, so we just pan there.
+          // The user can click to drop the exact pin once it arrives at their GPS location.
         }
       },
       (error) => {
@@ -119,107 +129,21 @@ export default function MapPicker({ onLocationSelect, searchQuery }: MapPickerPr
     );
   };
 
-  if (!isLoaded) return <div className="w-full h-[300px] flex items-center justify-center bg-zinc-900 rounded-xl border border-white/10 text-white/50 text-sm">Loading Google Maps...</div>;
-
   return (
     <div className="w-full h-[300px] rounded-xl overflow-hidden border border-white/10 relative z-0">
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={defaultCenter}
-        zoom={10}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        onClick={handleMapClick}
-        options={{
-          disableDefaultUI: true,
-          zoomControl: true,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-          styles: [
-            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-            {
-              featureType: "administrative.locality",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#d59563" }],
-            },
-            {
-              featureType: "poi",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#d59563" }],
-            },
-            {
-              featureType: "poi.park",
-              elementType: "geometry",
-              stylers: [{ color: "#263c3f" }],
-            },
-            {
-              featureType: "poi.park",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#6b9a76" }],
-            },
-            {
-              featureType: "road",
-              elementType: "geometry",
-              stylers: [{ color: "#38414e" }],
-            },
-            {
-              featureType: "road",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#212a37" }],
-            },
-            {
-              featureType: "road",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#9ca5b3" }],
-            },
-            {
-              featureType: "road.highway",
-              elementType: "geometry",
-              stylers: [{ color: "#746855" }],
-            },
-            {
-              featureType: "road.highway",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#1f2835" }],
-            },
-            {
-              featureType: "road.highway",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#f3d19c" }],
-            },
-            {
-              featureType: "transit",
-              elementType: "geometry",
-              stylers: [{ color: "#2f3948" }],
-            },
-            {
-              featureType: "transit.station",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#d59563" }],
-            },
-            {
-              featureType: "water",
-              elementType: "geometry",
-              stylers: [{ color: "#17263c" }],
-            },
-            {
-              featureType: "water",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#515c6d" }],
-            },
-            {
-              featureType: "water",
-              elementType: "labels.text.stroke",
-              stylers: [{ color: "#17263c" }],
-            },
-          ],
-        }}
+      <MapContainer 
+        center={defaultCenter} 
+        zoom={12} 
+        scrollWheelZoom={true} 
+        style={{ width: '100%', height: '100%' }}
+        ref={setMapRef}
+        attributionControl={false}
       >
-        {position && <Marker position={position} />}
-      </GoogleMap>
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <LocationMarker onLocationSelect={onLocationSelect} searchQuery={searchQuery} />
+      </MapContainer>
       
       {/* Instructions */}
       <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[400] pointer-events-none">
