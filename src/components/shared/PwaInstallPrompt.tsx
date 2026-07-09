@@ -60,22 +60,22 @@ export function PwaInstallPrompt() {
         initial={{ opacity: 0, y: 50, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-        className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-[380px] z-[9999] glass-card p-5 border !border-luxe-accent/30 shadow-2xl rounded-2xl bg-[#0a0a0a]/90 backdrop-blur-xl"
+        className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-[380px] z-[9999] p-5 border border-white/25 shadow-[0_20px_50px_rgba(0,0,0,0.4)] rounded-2xl bg-white/10 backdrop-blur-xl"
       >
         <button 
           onClick={handleDismiss} 
-          className="absolute top-3 right-3 text-white/40 hover:text-white transition-colors"
+          className="absolute top-3 right-3 text-white/50 hover:text-white transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="flex gap-4 items-start pr-6">
-          <div className="w-12 h-12 rounded-2xl bg-luxe-accent/20 flex items-center justify-center text-luxe-accent flex-shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center text-luxe-accent flex-shrink-0">
             <Download className="w-6 h-6 animate-pulse" />
           </div>
           <div className="text-left">
             <h4 className="text-white text-sm font-semibold tracking-wide">Install JD Store App ✦</h4>
-            <p className="text-white/50 text-xs mt-1 leading-relaxed">
+            <p className="text-white/70 text-xs mt-1 leading-relaxed">
               Add JD Store to your home screen for buttery smooth 120Hz scrolling, instant order updates, and offline access.
             </p>
           </div>
@@ -84,13 +84,13 @@ export function PwaInstallPrompt() {
         <div className="flex gap-3 mt-5">
           <button
             onClick={handleDismiss}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-white text-xs font-semibold transition-all"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-white/15 hover:bg-white/10 text-white text-xs font-semibold transition-all"
           >
             Later
           </button>
           <button
             onClick={handleInstallClick}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-luxe-accent hover:bg-[#b5952f] text-black text-xs font-bold transition-all shadow-lg shadow-luxe-accent/10"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-white hover:bg-white/90 text-black text-xs font-bold transition-all shadow-lg shadow-white/5"
           >
             Install Now
           </button>
