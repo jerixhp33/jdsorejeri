@@ -43,7 +43,7 @@ export function WishlistView() {
             <Link prefetch={true} href="/" className="btn-gold text-sm">Explore Products</Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
             {items.map((item, i) =>
               item.product ? (
                 <ProductCard key={item.id} product={item.product} index={i} />

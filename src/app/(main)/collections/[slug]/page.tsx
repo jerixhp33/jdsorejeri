@@ -56,7 +56,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       </div>
 
       {products.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
           {products.map((product: any, i: number) => (
             <ProductCard key={product.id} product={product} index={i} />
           ))}
