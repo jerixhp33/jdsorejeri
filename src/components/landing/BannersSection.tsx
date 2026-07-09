@@ -53,8 +53,11 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
   const [glowColor, setGlowColor] = useState<string | null>(null);
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
-    if (color) setGlowColor(color);
+    const imgEl = e.currentTarget as unknown as HTMLImageElement;
+    setTimeout(() => {
+      const color = sampleColor(imgEl);
+      if (color) setGlowColor(color);
+    }, 100);
   }, []);
 
   return (
@@ -172,8 +175,11 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
   }, [next]);
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
-    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
-    if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
+    const imgEl = e.currentTarget as unknown as HTMLImageElement;
+    setTimeout(() => {
+      const color = sampleColor(imgEl);
+      if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
+    }, 100);
   }, []);
 
   const activeGlow = glowColors[current];
@@ -324,8 +330,11 @@ function SidebarBannerCard({ banner, priority }: { banner: Banner; priority: boo
   const [glowColor, setGlowColor] = useState<string | null>(null);
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
-    if (color) setGlowColor(color);
+    const imgEl = e.currentTarget as unknown as HTMLImageElement;
+    setTimeout(() => {
+      const color = sampleColor(imgEl);
+      if (color) setGlowColor(color);
+    }, 100);
   }, []);
 
   return (
@@ -471,8 +480,11 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
   }, [resetTimer, banners.length]);
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
-    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
-    if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
+    const imgEl = e.currentTarget as unknown as HTMLImageElement;
+    setTimeout(() => {
+      const color = sampleColor(imgEl);
+      if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
+    }, 100);
   }, []);
 
   if (!banners.length) return null;
@@ -622,8 +634,11 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
   const [glowColor, setGlowColor] = useState<string | null>(null);
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
-    if (color) setGlowColor(color);
+    const imgEl = e.currentTarget as unknown as HTMLImageElement;
+    setTimeout(() => {
+      const color = sampleColor(imgEl);
+      if (color) setGlowColor(color);
+    }, 100);
   }, []);
 
   return (
