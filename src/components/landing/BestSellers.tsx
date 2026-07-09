@@ -6,11 +6,11 @@ import { ArrowRight } from 'lucide-react';
 import { ProductCard } from '@/components/product/ProductCard';
 import type { Product } from '@/types';
 
-interface FeaturedPostersProps {
+interface BestSellersProps {
   products: Product[];
 }
 
-export function FeaturedPosters({ products }: FeaturedPostersProps) {
+export function BestSellers({ products }: BestSellersProps) {
   if (!products.length) return null;
 
   return (
@@ -25,7 +25,7 @@ export function FeaturedPosters({ products }: FeaturedPostersProps) {
               viewport={{ once: true }}
               className="text-luxe-accent text-sm tracking-widest uppercase mb-3"
             >
-              Wall Art
+              Trending Now
             </motion.p>
             <motion.h2
               initial={{ opacity: 0, y: 15 }}
@@ -34,7 +34,7 @@ export function FeaturedPosters({ products }: FeaturedPostersProps) {
               transition={{ delay: 0.1 }}
               className="section-title"
             >
-              Featured Posters
+              Best Sellers
             </motion.h2>
           </div>
           <motion.div
@@ -42,10 +42,10 @@ export function FeaturedPosters({ products }: FeaturedPostersProps) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <Link prefetch={true} href="/posters"
+            <Link prefetch={true} href="/collections"
               className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors group"
             >
-              View all posters
+              View all products
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>

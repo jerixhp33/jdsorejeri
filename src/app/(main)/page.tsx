@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import { BannersSection, SidebarBannersPanel, MobileSidebarBanners } from '@/components/landing/BannersSection';
 import { FeaturedPosters } from '@/components/landing/FeaturedPosters';
 import { FeaturedEarrings } from '@/components/landing/FeaturedEarrings';
+import { BestSellers } from '@/components/landing/BestSellers';
+import { MarqueeStrip } from '@/components/landing/MarqueeStrip';
 import { WhyChooseUs } from '@/components/landing/WhyChooseUs';
 import { CollectionsSection } from '@/components/landing/CollectionsSection';
 import { TestimonialsSection } from '@/components/landing/TestimonialsSection';
@@ -16,13 +18,15 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [featuredPosters, featuredEarrings, collections, testimonials, faqs, banners] = await Promise.all([
-    getFeaturedProducts(8).then((products) => products.filter((p) => p.product_type === 'poster')),
-    getFeaturedProducts(8).then((products) => products.filter((p) => p.product_type === 'earring')),
+  const [featuredPosters, featuredEarrings, allFeatured, collections, testimonials, faqs, banners, marqueeLabels] = await Promise.all([
+    getFeaturedProducts(20).then((products) => products.filter((p) => p.product_type === 'poster')),
+    getFeaturedProducts(20).then((products) => products.filter((p) => p.product_type === 'earring')),
+    getFeaturedProducts(8),
     supabase.from('collections').select('*').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
     supabase.from('testimonials').select('*').eq('is_active', true).order('display_order').limit(8).then(({ data }) => data || []),
     supabase.from('faqs').select('*').eq('is_active', true).order('display_order').limit(10).then(({ data }) => data || []),
     supabase.from('banners').select('*').eq('is_active', true).order('display_order').then(({ data }) => data || []),
+    supabase.from('marquee_labels').select('*').eq('is_active', true).order('order_index').then(({ data }) => data || []),
   ]);
 
   const heroBanners    = banners.filter((b: any) => b.position === 'hero');
@@ -33,24 +37,21 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero-position banners */}
-      <div className="pt-28 sm:pt-36">
-        <BannersSection banners={heroBanners} />
+      {/* Top Scrolling Label - below the floating navbar */}
+      <div className="pt-[72px] sm:pt-[88px]">
+        <MarqueeStrip labels={marqueeLabels} />
       </div>
+
+      {/* Hero-position banners */}
+      <BannersSection banners={heroBanners} />
 
       {/* Top banners */}
       <BannersSection banners={topBanners} />
 
-      {/*
-        Mobile: sidebar banners appear here as a horizontal scroll strip,
-        right after the top banners — NOT buried below all products.
-        Desktop: they appear in the sticky aside column.
-      */}
-      {sidebarBanners.length > 0 && (
-        <div className="lg:hidden">
-          <MobileSidebarBanners banners={sidebarBanners} />
-        </div>
-      )}
+      {/* Best Sellers Section */}
+      <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
+        <BestSellers products={allFeatured} />
+      </Suspense>
 
       {/* Sidebar layout — desktop only */}
       <div className={sidebarBanners.length > 0 ? 'lg:flex lg:gap-6 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto' : ''}>
@@ -65,6 +66,13 @@ export default async function HomePage() {
           <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
             <FeaturedEarrings products={featuredEarrings} />
           </Suspense>
+
+          {/* Mobile sidebar banners appear here, right after featured earrings */}
+          {sidebarBanners.length > 0 && (
+            <div className="lg:hidden mt-8">
+              <MobileSidebarBanners banners={sidebarBanners} />
+            </div>
+          )}
         </div>
 
         {/* Desktop sticky sidebar */}
@@ -75,8 +83,9 @@ export default async function HomePage() {
         )}
       </div>
 
-      <WhyChooseUs />
       <CollectionsSection collections={collections} />
+      <WhyChooseUs />
+      
       <TestimonialsSection testimonials={testimonials} />
 
       <BannersSection banners={bottomBanners} />
