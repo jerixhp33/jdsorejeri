@@ -541,6 +541,11 @@
       lastTime = time;
       requestAnimationFrame(gameLoop);
     });
+
+    // Auto-detect when connection is restored to reload page
+    window.addEventListener('online', function() {
+      window.location.reload();
+    });
   </script>
 </body>
 </html>

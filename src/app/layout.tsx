@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/components/shared/ThemeProvider';
 import { PageLoader } from '@/components/shared/PageLoader';
 import { SmoothScroll } from '@/components/shared/SmoothScroll';
 import { ServiceWorkerRegister } from '@/components/shared/ServiceWorkerRegister';
+import { OfflineStatusMonitor } from '@/components/shared/OfflineStatusMonitor';
 import { Toaster } from 'sonner';
 import '@/styles/globals.css';
 
@@ -98,6 +99,7 @@ export default function RootLayout({
         >
           <SmoothScroll />
           <ServiceWorkerRegister />
+          <OfflineStatusMonitor />
           <PageLoader />
           {children}
           <Toaster
