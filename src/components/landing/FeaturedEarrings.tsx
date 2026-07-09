@@ -15,7 +15,7 @@ export function FeaturedEarrings({ products }: FeaturedEarringsProps) {
 
   return (
     <section className="py-2">
-      <div className="page-container">
+      <div>
         {/* Decorative line */}
         <div className="flex items-center gap-4 mb-12">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -57,7 +57,7 @@ export function FeaturedEarrings({ products }: FeaturedEarringsProps) {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 items-start">
           {products.slice(0, 8).map((product, i) => (
             <ProductCard key={product.id} product={product} index={i} />
           ))}

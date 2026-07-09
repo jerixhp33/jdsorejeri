@@ -52,7 +52,7 @@ export default async function HomePage() {
       </div>
 
       {/* Sidebar layout — desktop only */}
-      <div className={sidebarBanners.length > 0 ? 'lg:flex lg:gap-6 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto mb-4 lg:mb-6' : 'mb-4 lg:mb-6'}>
+      <div className="page-container lg:flex lg:gap-6 mb-4 lg:mb-6">
         {/* Main content */}
         <div className="flex-1 min-w-0">
           <div className="mb-4 lg:mb-6">

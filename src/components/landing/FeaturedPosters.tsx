@@ -15,7 +15,7 @@ export function FeaturedPosters({ products }: FeaturedPostersProps) {
 
   return (
     <section className="py-2">
-      <div className="page-container">
+      <div>
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
           <div>
@@ -52,7 +52,7 @@ export function FeaturedPosters({ products }: FeaturedPostersProps) {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 items-start">
           {products.slice(0, 8).map((product, i) => (
             <ProductCard key={product.id} product={product} index={i} />
           ))}
