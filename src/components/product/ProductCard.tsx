@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -26,6 +26,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [glowColor, setGlowColor] = useState<string | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const imageRefs = useRef<(HTMLImageElement | null)[]>([]);
   const { ref: inViewRef, inView } = useInView({
     threshold: 0.05,
     triggerOnce: false,
@@ -86,6 +87,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     }, 2500);
     return () => clearInterval(timer);
   }, [images.length, inView]);
+
+  // Synchronize glow color when image changes
+  useEffect(() => {
+    const activeImg = imageRefs.current[imageIndex];
+    if (activeImg && activeImg.complete) {
+      sampleImageColor(activeImg);
+    }
+  }, [imageIndex, sampleImageColor]);
 
   const wishlisted = isWishlisted(product.id);
 
@@ -156,6 +165,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               {images.map((img, idx) => (
                 <div key={idx} className="relative w-full h-full flex-shrink-0">
                   <Image
+                    ref={(el) => {
+                      imageRefs.current[idx] = el;
+                    }}
                     src={img.url}
                     alt={img.alt_text || product.name}
                     fill
@@ -166,9 +178,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                       imageLoaded ? 'opacity-100' : 'opacity-0'
                     )}
                     onLoad={(e) => {
-                      if (idx === 0) {
-                        setImageLoaded(true);
-                        sampleImageColor(e.currentTarget as unknown as HTMLImageElement);
+                      if (idx === 0) setImageLoaded(true);
+                      if (idx === imageIndex) {
+                        sampleImageColor(e.currentTarget);
                       }
                     }}
                   />
