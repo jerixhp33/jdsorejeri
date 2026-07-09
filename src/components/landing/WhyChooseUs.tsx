@@ -70,7 +70,7 @@ export function WhyChooseUs() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
           {FEATURES.map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -78,13 +78,13 @@ export function WhyChooseUs() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group"
+              className="rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group"
             >
-              <div className="w-12 h-12 rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex items-center justify-center mb-5 group-hover:bg-luxe-accent/20 transition-colors">
-                <feature.icon className="w-5 h-5 text-luxe-accent" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex items-center justify-center mb-3 md:mb-5 group-hover:bg-luxe-accent/20 transition-colors">
+                <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-luxe-accent" />
               </div>
-              <h3 className="text-white font-semibold text-base mb-2">{feature.title}</h3>
-              <p className="text-white/45 text-sm leading-relaxed">{feature.body}</p>
+              <h3 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">{feature.title}</h3>
+              <p className="text-white/45 text-[11px] md:text-sm leading-relaxed">{feature.body}</p>
             </motion.div>
           ))}
         </div>
