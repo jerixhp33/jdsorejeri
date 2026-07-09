@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { JDLogo } from '@/components/shared/JDLogo';
@@ -20,6 +20,13 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+
+  // Reset loading state if user cancels the Google popup and returns to the tab
+  useEffect(() => {
+    const handleFocus = () => setLoading(false);
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
