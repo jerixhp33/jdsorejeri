@@ -6,6 +6,7 @@ import { SmoothScroll } from '@/components/shared/SmoothScroll';
 import { ServiceWorkerRegister } from '@/components/shared/ServiceWorkerRegister';
 import { OfflineStatusMonitor } from '@/components/shared/OfflineStatusMonitor';
 import { ToastSound } from '@/components/shared/ToastSound';
+import { PwaInstallPrompt } from '@/components/shared/PwaInstallPrompt';
 import { Toaster } from 'sonner';
 import '@/styles/globals.css';
 
@@ -102,6 +103,7 @@ export default function RootLayout({
           <ServiceWorkerRegister />
           <OfflineStatusMonitor />
           <ToastSound />
+          <PwaInstallPrompt />
           <PageLoader />
           {children}
           <Toaster
