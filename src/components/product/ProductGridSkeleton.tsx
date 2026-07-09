@@ -9,8 +9,13 @@ export function ProductGridSkeleton({ count = 8, className }: ProductGridSkeleto
   return (
     <div className={cn('grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6', className)}>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="rounded-[1rem] overflow-hidden bg-black/40 border border-white/5">
-          <div className="aspect-[3/4] skeleton-shimmer bg-luxe-gray" />
+        <div key={i} 
+          className="relative rounded-[1rem] overflow-hidden bg-[#1a1a1a] border border-white/5 transition-all"
+          style={{ boxShadow: `0 0 0 1px rgba(200,169,110,0.05), 0 3px 12px rgba(200,169,110,0.02)` }}
+        >
+          <div className="aspect-[3/4] skeleton-shimmer bg-white/5 relative">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+          </div>
           <div className="p-3 sm:p-4 flex flex-col justify-between h-[90px] sm:h-[104px]">
             <div className="space-y-2">
               <div className="h-2 w-16 skeleton rounded bg-white/5" />

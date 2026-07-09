@@ -54,10 +54,14 @@ export function WishlistView() {
           <ProductGridSkeleton count={4} />
         ) : items.length === 0 ? (
           <div className="text-center py-24 glass-card">
-            <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-5"
-              style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
-              <Heart className="w-8 h-8 text-white/20" />
-            </div>
+            <motion.div 
+              animate={{ y: [0, -10, 0] }} 
+              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-5 shadow-[0_0_20px_rgba(255,255,255,0.05)] relative"
+              style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+            >
+              <Heart className="w-8 h-8 text-white/30" />
+            </motion.div>
             <h2 className="text-white font-semibold text-lg mb-2">Your wishlist is empty</h2>
             <p className="text-white/40 text-sm mb-6">Save items you love and find them here later</p>
             <Link prefetch={true} href="/" className="btn-gold text-sm inline-block">Explore Products</Link>

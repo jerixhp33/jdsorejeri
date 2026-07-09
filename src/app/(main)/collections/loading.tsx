@@ -1,4 +1,4 @@
-import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
+import { CollectionGridSkeleton } from '@/components/landing/CollectionGridSkeleton';
 
 export default function CollectionsLoading() {
   return (
@@ -7,7 +7,7 @@ export default function CollectionsLoading() {
         <div className="h-10 w-48 bg-white/5 rounded-lg mb-4"></div>
         <div className="h-4 w-72 max-w-[80vw] bg-white/5 rounded"></div>
       </div>
-      <ProductGridSkeleton count={12} />
+      <CollectionGridSkeleton count={8} />
     </div>
   );
 }

@@ -107,9 +107,14 @@ export function CartView() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md mx-auto glass-card p-12"
         >
-          <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
-            <ShoppingBag className="w-10 h-10 text-white/20" />
-          </div>
+          <motion.div 
+            animate={{ y: [0, -15, 0] }} 
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="w-24 h-24 rounded-full bg-white/5 border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] flex items-center justify-center mx-auto mb-6 relative"
+          >
+            <ShoppingBag className="w-10 h-10 text-white/40" />
+            <div className="absolute inset-0 rounded-full border border-white/20 animate-ping opacity-20" style={{ animationDuration: '3s' }}></div>
+          </motion.div>
           <h2 className="font-display text-2xl font-bold text-white mb-3">Your cart is empty</h2>
           <p className="text-white/40 text-sm mb-8">
             Browse our collections and add something you love

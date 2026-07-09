@@ -31,6 +31,7 @@ export function OrdersList({ orders }: OrdersListProps) {
   
   const { addItem } = useCart();
   const [addingItem, setAddingItem] = useState<string | null>(null);
+  const [addedItem, setAddedItem] = useState<string | null>(null);
 
   const handleBuyAgain = async (item: any) => {
     setAddingItem(item.id);
@@ -41,6 +42,8 @@ export function OrdersList({ orders }: OrdersListProps) {
       item.poster_size_id
     );
     setAddingItem(null);
+    setAddedItem(item.id);
+    setTimeout(() => setAddedItem(null), 2000);
   };
 
   const handleDownloadInvoice = (order: Order) => {
@@ -83,7 +86,12 @@ export function OrdersList({ orders }: OrdersListProps) {
   if (orders.length === 0) {
     return (
       <div className="glass-card p-8 sm:p-16 text-center">
-        <Package className="w-12 h-12 text-white/20 mx-auto mb-4" />
+        <motion.div 
+          animate={{ y: [0, -10, 0] }} 
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Package className="w-12 h-12 text-white/20 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+        </motion.div>
         <h2 className="text-white font-semibold text-lg mb-2">No orders yet</h2>
         <p className="text-white/40 text-sm mb-6">Start shopping and your orders will appear here</p>
         <Link prefetch={true} href="/" className="btn-gold text-sm">Start Shopping</Link>
@@ -196,11 +204,24 @@ export function OrdersList({ orders }: OrdersListProps) {
                           </p>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleBuyAgain(item); }}
-                            disabled={addingItem === item.id}
-                            className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-luxe-accent hover:text-white transition-colors"
+                            disabled={addingItem === item.id || addedItem === item.id}
+                            className={cn(
+                              "flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold transition-all px-2 py-1 rounded-md",
+                              addedItem === item.id 
+                                ? "bg-green-500/20 text-green-400 border border-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.2)]" 
+                                : "text-luxe-accent hover:text-white hover:bg-white/5"
+                            )}
                           >
-                            <RotateCcw className="w-3 h-3" />
-                            {addingItem === item.id ? 'Adding...' : 'Buy Again'}
+                            {addingItem === item.id ? (
+                              <span className="animate-pulse">Adding...</span>
+                            ) : addedItem === item.id ? (
+                              'Added!'
+                            ) : (
+                              <>
+                                <RotateCcw className="w-3 h-3" />
+                                Buy Again
+                              </>
+                            )}
                           </button>
                         </div>
                       </div>
