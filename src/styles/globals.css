@@ -583,9 +583,16 @@
   .animate-marquee-slow { animation: none; }
 }
 
-/* ── Smooth scroll ── */
+/* ── Smooth scroll & Touch Momentum ── */
 html {
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Apply smooth momentum scrolling to all auto-overflow containers */
+.overflow-x-auto, .overflow-y-auto, [class*="overflow-x-scroll"], [class*="overflow-y-scroll"] {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ── Slow marquee variant ── */
