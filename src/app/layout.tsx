@@ -19,6 +19,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app'),
   manifest: '/manifest.json',
   title: {
     default: 'JD Store — Premium Wall Posters & Earrings',
