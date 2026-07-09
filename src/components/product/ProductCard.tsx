@@ -269,7 +269,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {product.name}
           </h3>
 
-          <div className="flex items-center justify-between mt-auto">
+          <div className="flex items-center justify-between">
             <div className="flex items-center h-6">
               {!isInStock ? (
                 <span className="inline-block px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-white/80 text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md">
