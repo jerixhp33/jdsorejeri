@@ -348,6 +348,26 @@ export function CheckoutForm() {
         action_url: '/dashboard/orders',
       });
 
+      // Send immediate web push notification with personalized time-based greeting
+      try {
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? 'Good morning' : hour < 16 ? 'Good afternoon' : 'Good evening';
+        const personalTitle = `${greeting}, ${profile?.name || 'Customer'}! 🌅`;
+        const personalBody = `Your order #${ordNum} at JD Store has been booked and is waiting for confirmation. Thank you!`;
+
+        await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: personalTitle,
+            body: personalBody,
+            url: '/dashboard/orders'
+          })
+        });
+      } catch (pushErr) {
+        console.error('Error sending checkout push:', pushErr);
+      }
+
       setOrderNumber(ordNum);
       setPlacedOrderTotal(finalTotal);
       setPlacedOrderData({

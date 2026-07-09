@@ -46,3 +46,29 @@ export async function PATCH(request: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { data: profile } = await supabase
+      .from('user_profiles').select('id').eq('uid', user.id).single();
+    if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+
+    const body = await request.json();
+    const { title, body: pushBody, url } = body;
+
+    const { sendWebPushToUser } = await import('@/lib/web-push-helper');
+    await sendWebPushToUser(profile.id, {
+      title: title || 'JD Store Update',
+      body: pushBody || '',
+      url: url || '/dashboard/orders'
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

@@ -3,8 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Package, Heart, MapPin, Shield, Monitor, Clock } from 'lucide-react';
+import { Package, Heart, MapPin, Shield, Monitor, Clock, Bell } from 'lucide-react';
 import { formatDate, formatRelativeTime, getInitials } from '@/lib/utils';
+import { useWebPush } from '@/hooks/useWebPush';
 import type { UserProfile, LoginLog } from '@/types';
 
 interface ProfileViewProps {
@@ -14,8 +15,35 @@ interface ProfileViewProps {
 }
 
 export function ProfileView({ profile, loginLogs, orderCount }: ProfileViewProps) {
+  const { isSupported, isSubscribed, subscribe } = useWebPush();
+
   return (
     <div className="space-y-6">
+      {/* Push Notification Promo Card */}
+      {isSupported && !isSubscribed && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }} 
+          animate={{ opacity: 1, y: 0 }}
+          className="p-5 rounded-2xl bg-gradient-to-r from-luxe-accent/15 to-transparent border border-luxe-accent/20 flex flex-col sm:flex-row items-center justify-between gap-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-luxe-accent/20 flex items-center justify-center text-luxe-accent flex-shrink-0">
+              <Bell className="w-5 h-5 animate-pulse" />
+            </div>
+            <div className="text-left">
+              <h3 className="text-white text-sm font-semibold">Enable Push Notifications</h3>
+              <p className="text-white/50 text-xs mt-0.5">Stay updated on your orders, packing details, and shipping status in real-time.</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => subscribe()}
+            className="px-4 py-2 rounded-xl bg-luxe-accent hover:bg-[#b5952f] text-black text-xs font-bold transition-all shadow-lg flex-shrink-0 w-full sm:w-auto"
+          >
+            Allow Notifications
+          </button>
+        </motion.div>
+      )}
+
       {/* Header card */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 text-center sm:text-left">

@@ -37,11 +37,19 @@ export async function POST(req: NextRequest) {
 
     // Send a welcome message immediately upon successful subscription
     try {
+      let customerName = 'Valued Customer';
+      const { data: profile } = await admin
+        .from('user_profiles')
+        .select('name')
+        .eq('uid', user.id)
+        .single();
+      if (profile?.name) customerName = profile.name;
+
       await webpush.sendNotification(
         subscription,
         JSON.stringify({
-          title: 'Welcome to JD Store!',
-          body: 'Your notifications are set up! You will now receive order updates instantly.',
+          title: `Welcome to JD Store, ${customerName}! 🎉`,
+          body: 'Your notifications are successfully set up! You will receive updates about your orders.',
           url: '/dashboard'
         })
       );
