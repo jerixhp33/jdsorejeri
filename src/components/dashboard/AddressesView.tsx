@@ -62,8 +62,8 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
         house_no: '',
         street: '',
         area: '',
-        city: 'Coimbatore',
-        district: 'Coimbatore',
+        city: '',
+        district: '',
         pincode: '',
         landmark: '',
       });
