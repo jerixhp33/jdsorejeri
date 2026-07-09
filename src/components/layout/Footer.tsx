@@ -59,8 +59,7 @@ export function Footer() {
             </div>
             <div className="flex items-center gap-3 mt-6">
               <a
-                href="https://www.instagram.com/wtxs_jexi?igsh=bXhldGV2ZmppMXhr"
-                target="_blank"
+                href="https://www.instagram.com/wtxs_jexi?igsh=bXhldGV2ZmppMXhy"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
                 aria-label="Instagram"
@@ -69,7 +68,6 @@ export function Footer() {
               </a>
               <a
                 href="https://twitter.com"
-                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
                 aria-label="Twitter"
@@ -78,7 +76,6 @@ export function Footer() {
               </a>
               <a
                 href="https://wa.me/919360490974"
-                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
                 aria-label="WhatsApp"

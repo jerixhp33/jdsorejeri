@@ -228,7 +228,6 @@ export function OrdersList({ orders }: OrdersListProps) {
               {order.status === 'pending' && (
                 <a
                   href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919999999999'}?text=${encodeURIComponent(`Hi! Following up on my order #${order.order_number}`)}`}
-                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-green-400 text-sm hover:text-green-300 transition-colors"
                 >

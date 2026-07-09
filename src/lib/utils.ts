@@ -121,11 +121,12 @@ ${payload.notes ? `\n📝 *SPECIAL INSTRUCTIONS*\n_${payload.notes}_\n━━━�
 }
 
 // Open WhatsApp with pre-filled message
+// Uses location.href instead of window.open to avoid popup blockers in PWA standalone mode
 export function openWhatsApp(phone: string, message: string): void {
   const cleanPhone = phone.replace(/\D/g, '');
   const whatsappNumber = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
   const url = `https://wa.me/${whatsappNumber}?text=${message}`;
-  window.open(url, '_blank');
+  window.location.href = url;
 }
 
 // Validate Indian pincode

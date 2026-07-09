@@ -52,7 +52,6 @@ export function ContactSection() {
                   <p className="text-white font-medium text-sm mb-0.5">WhatsApp</p>
                   <a
                     href="https://wa.me/919360490974"
-                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-white/50 text-sm hover:text-luxe-accent transition-colors"
                   >
@@ -136,7 +135,6 @@ export function ContactSection() {
             </p>
             <a
               href="https://wa.me/919360490974?text=Hi%20JD%20Store!%20I%20have%20a%20question."
-              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-green-500 text-white font-semibold px-8 py-3.5 rounded-full hover:bg-green-400 transition-colors w-full justify-center"
             >
