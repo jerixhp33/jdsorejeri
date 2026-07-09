@@ -23,6 +23,7 @@ import {
   Star,
   Info,
   ArrowRight,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
