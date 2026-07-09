@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Bell, Shield, Trash2, Smartphone, Download, MonitorOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Bell, Shield, Trash2, Smartphone, Download, MonitorOff, X, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWebPush } from '@/hooks/useWebPush';
 import { toast } from 'sonner';
@@ -26,6 +26,15 @@ export function SettingsView() {
   const [exporting, setExporting] = useState(false);
 
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
+
+  // Modal states
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'signout' | 'delete';
+  }>({ isOpen: false, title: '', message: '', type: 'signout' });
+  const [deleteInput, setDeleteInput] = useState('');
 
   const { isSupported, isSubscribed, subscribe, unsubscribe } = useWebPush();
 
@@ -62,13 +71,28 @@ export function SettingsView() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!confirm('Are you sure? This will permanently delete your account and all data.')) return;
-    const confirmation = prompt('Type DELETE to confirm:');
-    if (confirmation !== 'DELETE') { toast.error('Deletion cancelled'); return; }
-    setLoading(true);
-    toast.info('Account deletion requested. Our team will process this within 24 hours.');
-    setLoading(false);
+  const executeAction = () => {
+    if (confirmModal.type === 'signout') {
+      setLoading(true);
+      setTimeout(() => {
+        toast.success('Successfully signed out of all other devices');
+        setLoading(false);
+      }, 1000);
+    } else if (confirmModal.type === 'delete') {
+      if (deleteInput !== 'DELETE') {
+        toast.error('Please type DELETE to confirm');
+        return;
+      }
+      setLoading(true);
+      toast.info('Account deletion requested. Our team will process this within 24 hours.');
+      setLoading(false);
+    }
+    closeModal();
+  };
+
+  const closeModal = () => {
+    setConfirmModal({ ...confirmModal, isOpen: false });
+    setDeleteInput('');
   };
 
   const NOTIF_ITEMS: { key: keyof NotificationPrefs; label: string; sub: string }[] = [
@@ -94,17 +118,8 @@ export function SettingsView() {
     }, 800);
   };
 
-  const handleSignOutAll = async () => {
-    if (!confirm('Are you sure you want to sign out of all other devices?')) return;
-    setLoading(true);
-    setTimeout(() => {
-      toast.success('Successfully signed out of all other devices');
-      setLoading(false);
-    }, 1000);
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <h1 className="font-display text-2xl font-bold text-white">Account Settings</h1>
 
       {/* Account Information */}
@@ -244,7 +259,12 @@ export function SettingsView() {
               <p className="text-white/40 text-xs mt-1">Log out of every device except this one.</p>
             </div>
             <button
-              onClick={handleSignOutAll}
+              onClick={() => setConfirmModal({
+                isOpen: true,
+                title: 'Sign Out All Devices',
+                message: 'Are you sure you want to sign out of all other active sessions?',
+                type: 'signout'
+              })}
               disabled={loading}
               className="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-medium border border-white/10 transition-all disabled:opacity-50"
             >
@@ -264,12 +284,83 @@ export function SettingsView() {
         <p className="text-white/50 text-sm mb-4">
           Once you delete your account, all your data — orders, wishlist, addresses — will be permanently removed.
         </p>
-        <button onClick={handleDeleteAccount} disabled={loading}
-          className="px-5 py-2.5 rounded-xl text-red-400 text-sm transition-all disabled:opacity-50"
-          style={{ border: '1px solid rgba(239,68,68,0.3)' }}>
+        <button 
+          onClick={() => setConfirmModal({
+            isOpen: true,
+            title: 'Delete Account',
+            message: 'This action is irreversible. All your data will be permanently removed.',
+            type: 'delete'
+          })} 
+          disabled={loading}
+          className="px-5 py-2.5 rounded-xl text-red-400 text-sm transition-all disabled:opacity-50 hover:bg-red-500/10"
+          style={{ border: '1px solid rgba(239,68,68,0.3)' }}
+        >
           {loading ? 'Processing...' : 'Delete My Account'}
         </button>
       </motion.div>
+
+      {/* Custom Confirmation Modal */}
+      <AnimatePresence>
+        {confirmModal.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={closeModal}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-sm bg-[#111] border border-white/10 rounded-2xl shadow-2xl p-6"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl ${confirmModal.type === 'delete' ? 'bg-red-500/10 text-red-400' : 'bg-luxe-accent/10 text-luxe-accent'}`}>
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-white font-bold text-lg font-display">{confirmModal.title}</h3>
+                </div>
+                <button onClick={closeModal} className="text-white/40 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <p className="text-white/60 text-sm mb-6">{confirmModal.message}</p>
+              
+              {confirmModal.type === 'delete' && (
+                <div className="mb-6">
+                  <label className="block text-xs uppercase tracking-wide text-white/50 mb-2">Type DELETE to confirm</label>
+                  <input 
+                    type="text" 
+                    value={deleteInput}
+                    onChange={(e) => setDeleteInput(e.target.value)}
+                    placeholder="DELETE"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-400/50 transition-colors"
+                  />
+                </div>
+              )}
+              
+              <div className="flex gap-3 justify-end">
+                <button onClick={closeModal} className="px-5 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                  Cancel
+                </button>
+                <button 
+                  onClick={executeAction}
+                  disabled={confirmModal.type === 'delete' && deleteInput !== 'DELETE'}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 ${
+                    confirmModal.type === 'delete' 
+                      ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30' 
+                      : 'bg-luxe-accent text-black hover:bg-[#b5952f] shadow-[0_0_15px_rgba(212,175,55,0.2)]'
+                  }`}
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
