@@ -1,57 +1,79 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
-import { calculateDeliveryCharge } from '@/lib/utils';
 import type { Cart, CartItem } from '@/types';
 import { toast } from 'sonner';
+import { create } from 'zustand';
 
-const CART_UPDATED_EVENT = 'CART_UPDATED';
-const dispatchCartUpdate = () => {
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new Event(CART_UPDATED_EVENT));
-  }
-};
-
-interface CartState {
+interface GlobalCartState {
   cart: Cart | null;
   items: CartItem[];
-  itemCount: number;
-  subtotal: number;
-  deliveryCharge: number;
-  total: number;
+  deliverySettings: { charge: number; threshold: number };
   loading: boolean;
-  addItem: (
-    productId: string,
-    unitPrice: number,
-    quantity?: number,
-    posterSizeId?: string
-  ) => Promise<void>;
-  updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
-  removeItem: (cartItemId: string) => Promise<void>;
-  clearCart: () => Promise<void>;
-  refresh: () => Promise<void>;
+  hasFetched: boolean;
+  setCartData: (cart: Cart | null, items: CartItem[], settings?: { charge: number; threshold: number }) => void;
+  setLoading: (loading: boolean) => void;
+  setHasFetched: (fetched: boolean) => void;
+  updateLocalQuantity: (cartItemId: string, quantity: number) => void;
+  removeLocalItem: (cartItemId: string) => void;
+  addLocalItem: (item: CartItem) => void;
 }
 
-export function useCart(): CartState {
+const useCartStore = create<GlobalCartState>((set) => ({
+  cart: null,
+  items: [],
+  deliverySettings: { charge: 60, threshold: 999 },
+  loading: true,
+  hasFetched: false,
+  setCartData: (cart, items, settings) => set((state) => ({
+    cart,
+    items,
+    ...(settings ? { deliverySettings: settings } : {})
+  })),
+  setLoading: (loading) => set({ loading }),
+  setHasFetched: (hasFetched) => set({ hasFetched }),
+  updateLocalQuantity: (cartItemId, quantity) => set((state) => ({
+    items: state.items.map(i => i.id === cartItemId ? { ...i, quantity } : i)
+  })),
+  removeLocalItem: (cartItemId) => set((state) => ({
+    items: state.items.filter(i => i.id !== cartItemId)
+  })),
+  addLocalItem: (item) => set((state) => {
+    const exists = state.items.find(i => i.id === item.id);
+    if (exists) {
+      return { items: state.items.map(i => i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i) };
+    }
+    return { items: [...state.items, item] };
+  }),
+}));
+
+export function useCart() {
   const { profile } = useAuth();
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [loading, setLoading] = useState(false);
-  // Create supabase client once per component instance to prevent
-  // a new client on every render
-  const supabaseRef = useRef(createClient());
-  const supabase = supabaseRef.current;
+  const { 
+    cart, 
+    items, 
+    deliverySettings, 
+    loading, 
+    hasFetched,
+    setCartData, 
+    setLoading, 
+    setHasFetched,
+    updateLocalQuantity, 
+    removeLocalItem,
+    addLocalItem
+  } = useCartStore();
   
-  const [deliverySettings, setDeliverySettings] = useState({ charge: 60, threshold: 999 });
+  const supabase = createClient();
 
   const fetchCart = useCallback(async () => {
     if (!profile) {
-      setCart(null);
+      setCartData(null, []);
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
     try {
       // Get or create cart
       let { data: cartData } = await supabase
@@ -70,12 +92,12 @@ export function useCart(): CartState {
       }
 
       if (!cartData) {
-        setCart(null);
+        setCartData(null, []);
         return;
       }
 
       // Fetch items
-      const { data: items } = await supabase
+      const { data: fetchedItems } = await supabase
         .from('cart_items')
         .select(
           `
@@ -90,47 +112,39 @@ export function useCart(): CartState {
         .eq('cart_id', cartData.id)
         .order('created_at', { ascending: true });
 
-      setCart({
-        ...cartData,
-        items: (items as CartItem[]) || [],
-      });
-
       // Fetch delivery settings
       const { data: settingsData } = await supabase
         .from('settings')
         .select('key, value')
         .in('key', ['delivery_charge', 'free_delivery_threshold']);
 
+      let settings = { charge: 60, threshold: 999 };
       if (settingsData) {
         const chargeStr = settingsData.find(s => s.key === 'delivery_charge')?.value;
         const thresholdStr = settingsData.find(s => s.key === 'free_delivery_threshold')?.value;
-        setDeliverySettings({
+        settings = {
           charge: chargeStr ? parseInt(String(chargeStr).replace(/"/g, ''), 10) : 60,
           threshold: thresholdStr ? parseInt(String(thresholdStr).replace(/"/g, ''), 10) : 999,
-        });
+        };
       }
 
+      setCartData(cartData, (fetchedItems as CartItem[]) || [], settings);
     } catch (err) {
       console.error('Error fetching cart:', err);
     } finally {
       setLoading(false);
+      setHasFetched(true);
     }
-  }, [profile]);
+  }, [profile, supabase, setCartData, setLoading, setHasFetched]);
 
   useEffect(() => {
-    fetchCart();
-    
-    // Listen for cart updates from other component instances
-    const handleCartUpdate = () => {
+    // Only fetch on mount if we haven't fetched yet or if profile changes
+    if (profile && !hasFetched) {
       fetchCart();
-    };
-    
-    window.addEventListener(CART_UPDATED_EVENT, handleCartUpdate);
-    return () => window.removeEventListener(CART_UPDATED_EVENT, handleCartUpdate);
-  }, [fetchCart]);
-
-  // No realtime subscription here — every mutation calls fetchCart() locally,
-  // and then dispatches CART_UPDATED_EVENT so other components sync up.
+    } else if (!profile && loading) {
+      setLoading(false);
+    }
+  }, [profile, hasFetched, fetchCart, loading, setLoading]);
 
   const addItem = async (
     productId: string,
@@ -144,124 +158,84 @@ export function useCart(): CartState {
     }
 
     try {
-      // Ensure we have a cart
       let cartId = cart?.id;
       if (!cartId) {
-        const { data: newCart } = await supabase
-          .from('carts')
-          .insert({ user_id: profile.id })
-          .select()
-          .single();
+        const { data: newCart } = await supabase.from('carts').insert({ user_id: profile.id }).select().single();
         cartId = newCart?.id;
       }
-
       if (!cartId) throw new Error('Could not create cart');
 
-      // Fetch current stock for this product/size
       let availableStock = 0;
       if (posterSizeId) {
-        const { data: sizeData } = await supabase
-          .from('poster_sizes')
-          .select('stock')
-          .eq('id', posterSizeId)
-          .single();
+        const { data: sizeData } = await supabase.from('poster_sizes').select('stock').eq('id', posterSizeId).single();
         availableStock = sizeData?.stock ?? 0;
       } else {
-        const { data: productData } = await supabase
-          .from('products')
-          .select('stock')
-          .eq('id', productId)
-          .single();
+        const { data: productData } = await supabase.from('products').select('stock').eq('id', productId).single();
         availableStock = productData?.stock ?? 0;
       }
 
-      // Check for existing item
-      let existingQuery = supabase
-        .from('cart_items')
-        .select('*')
-        .eq('cart_id', cartId)
-        .eq('product_id', productId);
-
+      let existingQuery = supabase.from('cart_items').select('*').eq('cart_id', cartId).eq('product_id', productId);
       if (posterSizeId) {
         existingQuery = existingQuery.eq('poster_size_id', posterSizeId);
       } else {
         existingQuery = existingQuery.is('poster_size_id', null);
       }
-
       const { data: existing } = await existingQuery.single();
 
       const currentCartQty = existing?.quantity ?? 0;
       const newQty = currentCartQty + quantity;
 
       if (newQty > availableStock) {
-        const remaining = availableStock - currentCartQty;
-        if (remaining <= 0) {
-          toast.error(`You already have the maximum stock in your cart (${availableStock})`);
-        } else {
-          toast.error(`Only ${remaining} more available — you already have ${currentCartQty} in cart`);
-        }
+        toast.error(`Cannot add more. Max stock available: ${availableStock}`);
         return;
       }
 
+      // Optimistic visual update (number increments instantly)
       if (existing) {
-        await supabase
-          .from('cart_items')
-          .update({ quantity: newQty })
-          .eq('id', existing.id);
+        updateLocalQuantity(existing.id, newQty);
+        await supabase.from('cart_items').update({ quantity: newQty }).eq('id', existing.id);
       } else {
-        await supabase.from('cart_items').insert({
-          cart_id: cartId,
-          product_id: productId,
-          poster_size_id: posterSizeId || null,
-          quantity,
-          unit_price: unitPrice,
-        });
+        // Optimistic temporary item
+        const tempId = 'temp-' + Date.now();
+        addLocalItem({ id: tempId, cart_id: cartId, product_id: productId, quantity, unit_price: unitPrice, poster_size_id: posterSizeId || null } as any);
+        await supabase.from('cart_items').insert({ cart_id: cartId, product_id: productId, poster_size_id: posterSizeId || null, quantity, unit_price: unitPrice });
       }
 
-      await supabase
-        .from('carts')
-        .update({ updated_at: new Date().toISOString() })
-        .eq('id', cartId);
-
-      await fetchCart();
-      dispatchCartUpdate();
+      await supabase.from('carts').update({ updated_at: new Date().toISOString() }).eq('id', cartId);
+      
+      // Re-sync background silently
+      fetchCart();
       toast.success('Added to cart');
     } catch (err) {
       toast.error('Failed to add to cart');
       console.error(err);
+      fetchCart(); // Revert optimistic changes on error
     }
   };
 
   const updateQuantity = async (cartItemId: string, quantity: number) => {
-    if (quantity <= 0) {
-      return removeItem(cartItemId);
-    }
-
+    if (quantity <= 0) return removeItem(cartItemId);
+    updateLocalQuantity(cartItemId, quantity);
     await supabase.from('cart_items').update({ quantity }).eq('id', cartItemId);
-    await fetchCart();
-    dispatchCartUpdate();
+    fetchCart();
   };
 
   const removeItem = async (cartItemId: string) => {
+    removeLocalItem(cartItemId);
     await supabase.from('cart_items').delete().eq('id', cartItemId);
-    await fetchCart();
-    dispatchCartUpdate();
+    fetchCart();
     toast.success('Removed from cart');
   };
 
   const clearCartItems = async () => {
     if (!cart?.id) return;
+    setCartData(cart, []);
     await supabase.from('cart_items').delete().eq('cart_id', cart.id);
-    await fetchCart();
-    dispatchCartUpdate();
+    fetchCart();
   };
 
-  const items = cart?.items || [];
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
-    0
-  );
+  const subtotal = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
   const deliveryCharge = subtotal >= deliverySettings.threshold ? 0 : deliverySettings.charge;
   const total = subtotal + deliveryCharge;
 
@@ -273,6 +247,7 @@ export function useCart(): CartState {
     deliveryCharge,
     total,
     loading,
+    deliverySettings,
     addItem,
     updateQuantity,
     removeItem,

@@ -4,18 +4,20 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Package, Heart, MapPin, Shield, Monitor, Clock, Bell } from 'lucide-react';
-import { formatDate, formatRelativeTime, getInitials, cn } from '@/lib/utils';
+import { formatDate, formatRelativeTime, getInitials, cn, formatCurrency } from '@/lib/utils';
 import { useWebPush } from '@/hooks/useWebPush';
-import type { UserProfile, LoginLog, Order } from '@/types';
+import type { UserProfile, LoginLog, Order, Product } from '@/types';
+import { ProductCard } from '@/components/product/ProductCard';
 
 interface ProfileViewProps {
   profile: UserProfile;
   loginLogs: LoginLog[];
   orderCount: number;
   recentOrders: Order[];
+  recommendedProducts: Product[];
 }
 
-export function ProfileView({ profile, loginLogs, orderCount, recentOrders }: ProfileViewProps) {
+export function ProfileView({ profile, loginLogs, orderCount, recentOrders, recommendedProducts }: ProfileViewProps) {
   const { isSupported, isSubscribed, subscribe } = useWebPush();
 
   return (
@@ -134,6 +136,27 @@ export function ProfileView({ profile, loginLogs, orderCount, recentOrders }: Pr
                 </div>
               );
             })}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Recommended for You */}
+      {recommendedProducts && recommendedProducts.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="mt-8"
+        >
+          <div className="flex items-center justify-between mb-4 px-2">
+            <h2 className="text-white font-semibold flex items-center gap-2">
+              <span className="text-luxe-accent">✦</span> Recommended for You
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {recommendedProducts.map((product, i) => (
+              <ProductCard key={product.id} product={product} index={i} />
+            ))}
           </div>
         </motion.div>
       )}

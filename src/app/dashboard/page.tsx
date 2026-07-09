@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { ProfileView } from '@/components/dashboard/ProfileView';
+import { getTrendingProducts } from '@/lib/products';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export default async function DashboardPage() {
 
   if (!profile) redirect('/login');
 
-  const [{ data: loginLogs }, { count: orderCount }, { data: recentOrders }] = await Promise.all([
+  const [{ data: loginLogs }, { count: orderCount }, { data: recentOrders }, recommendedProducts] = await Promise.all([
     admin.from('login_logs').select('*')
       .eq('user_id', profile.id)
       .order('login_time', { ascending: false }).limit(5),
@@ -26,7 +27,8 @@ export default async function DashboardPage() {
       .eq('user_id', profile.id)
       .in('status', ['pending', 'confirmed', 'packed', 'ready'])
       .order('created_at', { ascending: false }).limit(2),
+    getTrendingProducts(4),
   ]);
 
-  return <ProfileView profile={profile} loginLogs={loginLogs || []} orderCount={orderCount || 0} recentOrders={recentOrders || []} />;
+  return <ProfileView profile={profile} loginLogs={loginLogs || []} orderCount={orderCount || 0} recentOrders={recentOrders || []} recommendedProducts={recommendedProducts || []} />;
 }

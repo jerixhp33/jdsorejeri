@@ -31,7 +31,7 @@ interface ProductDetailProps {
 
 export function ProductDetail({ product, reviews }: ProductDetailProps) {
   const router = useRouter();
-  const { addItem } = useCart();
+  const { addItem, updateQuantity, items: cartItems } = useCart();
   const { isWishlisted, toggle } = useWishlist();
 
   const [selectedImage, setSelectedImage] = useState(0);
@@ -41,6 +41,8 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [zoomed, setZoomed] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [openAccordion, setOpenAccordion] = useState<string | null>('description');
   // Adaptive aspect ratio: tracks the natural width/height of the loaded image
   const [imgAspect, setImgAspect] = useState<number | null>(null);
 
@@ -61,7 +63,6 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
       : (product.price ?? 0);
 
   // How many of this exact item (and size) are already in the cart?
-  const { items: cartItems } = useCart();
   const cartQuantity = cartItems
     .filter(
       (item) =>
@@ -113,7 +114,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     await addItem(
       product.id,
       unitPrice,
-      quantity,
+      1,
       product.product_type === 'poster' ? selectedSize?.id : undefined
     );
     setAddingToCart(false);
@@ -136,6 +137,14 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
       ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
       : 0;
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!zoomed) return;
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setMousePos({ x, y });
+  };
+
   return (
     <div className="page-container py-10 md:py-16">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
@@ -143,14 +152,15 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
         <div className="space-y-4">
           {/* Main image — aspect ratio adapts to the actual image (A4, A3, square, etc.) */}
           <div
-            className="relative rounded-2xl overflow-hidden bg-luxe-dark cursor-zoom-in"
+            className="relative rounded-2xl overflow-hidden bg-luxe-dark md:cursor-zoom-in"
             style={{
-              // Use detected image aspect ratio; fall back to 4/5 portrait until image loads
               aspectRatio: imgAspect ? String(imgAspect) : '4/5',
-              // Cap very tall images (e.g. A4 portrait) so they don't overflow the screen
               maxHeight: '85vh',
             }}
-            onClick={() => setZoomed(!zoomed)}
+            onMouseEnter={() => { if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) setZoomed(true); }}
+            onMouseLeave={() => setZoomed(false)}
+            onMouseMove={handleMouseMove}
+            onClick={() => { if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) setZoomed(!zoomed); }}
           >
             <AnimatePresence mode="wait">
               {currentImage ? (
@@ -168,9 +178,12 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                     fill
                     priority
                     sizes="(max-width: 1024px) 100vw, 50vw"
+                    style={{
+                      transformOrigin: zoomed ? `${mousePos.x}% ${mousePos.y}%` : 'center',
+                    }}
                     className={cn(
-                      'object-contain transition-transform duration-500',
-                      zoomed && 'scale-125'
+                      'object-contain transition-transform duration-200 ease-out',
+                      zoomed && 'scale-[1.75]'
                     )}
                     onLoad={handleMainImageLoad}
                   />
@@ -310,10 +323,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             )}
           </div>
 
-          {/* Description */}
-          <p className="text-white/55 text-sm leading-relaxed mb-8">
-            {product.description}
-          </p>
+          {/* Description - We'll move this to Accordion below */}
 
           {/* ── Size selector (Posters only) ── */}
           {product.product_type === 'poster' && product.sizes && product.sizes.length > 0 && (
@@ -351,94 +361,59 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             </div>
           )}
 
-          {/* Attributes */}
-          <div className="grid grid-cols-2 gap-3 mb-8">
-            {product.material && (
-              <div className="glass-card-sm p-3">
-                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Material</p>
-                <p className="text-white text-sm font-medium">{product.material}</p>
-              </div>
-            )}
-            {product.product_type === 'poster' && product.finish && (
-              <div className="glass-card-sm p-3">
-                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Finish</p>
-                <p className="text-white text-sm font-medium capitalize">{product.finish}</p>
-              </div>
-            )}
-            {product.product_type === 'poster' && product.orientation && (
-              <div className="glass-card-sm p-3">
-                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Orientation</p>
-                <p className="text-white text-sm font-medium capitalize">{product.orientation}</p>
-              </div>
-            )}
-            {product.product_type === 'earring' && product.color && (
-              <div className="glass-card-sm p-3">
-                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Color</p>
-                <p className="text-white text-sm font-medium">{product.color}</p>
-              </div>
-            )}
-            {product.product_type === 'earring' && product.weight_grams && (
-              <div className="glass-card-sm p-3">
-                <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Weight</p>
-                <p className="text-white text-sm font-medium">{product.weight_grams}g</p>
-              </div>
-            )}
-          </div>
+          {/* Attributes - Moved to Accordion */}
 
-          {/* Quantity + Cart */}
+          {/* Add to Cart / Quantity Selector */}
           <div className="flex flex-col gap-2 mb-6">
-            <div className="flex items-center gap-3">
-              {/* Quantity */}
-              <div className="flex items-center gap-1 glass-card-sm rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="px-4 py-3 text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                >
-                  −
+            <div className="flex items-center gap-3 h-[52px]">
+              {dbStock === 0 ? (
+                <button disabled className="w-full h-full rounded-xl font-semibold text-sm bg-white/10 text-white/30 cursor-not-allowed">
+                  Out of Stock
                 </button>
-                <span className="w-10 text-center text-white text-sm font-medium">{quantity}</span>
+              ) : cartQuantity === 0 ? (
                 <button
-                  onClick={() => {
-                    if (quantity >= availableStock) {
-                      toast.error(`Only ${availableStock} left in stock`);
-                    } else {
-                      setQuantity((q) => Math.min(availableStock, q + 1));
-                    }
-                  }}
-                  className="px-4 py-3 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                  onClick={handleAddToCart}
+                  disabled={addingToCart}
+                  className="w-full h-full flex items-center justify-center gap-2 rounded-xl font-semibold text-sm bg-white text-black hover:bg-luxe-accent transition-all"
                 >
-                  +
+                  {addingToCart ? (
+                    <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+                  ) : (
+                    <ShoppingCart className="w-4 h-4" />
+                  )}
+                  {addingToCart ? 'Adding...' : 'Add to Cart'}
                 </button>
-              </div>
-
-              {/* Add to cart */}
-              <button
-                onClick={handleAddToCart}
-                disabled={!inStock || addingToCart}
-                className={cn(
-                  'flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all',
-                  inStock
-                    ? 'bg-white text-black hover:bg-luxe-accent'
-                    : 'bg-white/10 text-white/30 cursor-not-allowed'
-                )}
-              >
-                {addingToCart ? (
-                  <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
-                ) : (
-                  <ShoppingCart className="w-4 h-4" />
-                )}
-                {dbStock === 0
-                  ? 'Out of Stock'
-                  : !inStock
-                  ? 'Max Stock in Cart'
-                  : addingToCart
-                  ? 'Adding...'
-                  : 'Add to Cart'}
-              </button>
+              ) : (
+                <div className="w-full h-full flex items-center justify-between glass-card rounded-xl overflow-hidden border border-luxe-accent/50 bg-luxe-accent/5 shadow-[0_0_15px_rgba(200,169,110,0.1)]">
+                  <button
+                    onClick={() => updateQuantity(cartItems.find(i => i.product_id === product.id && (product.product_type === 'poster' ? i.poster_size_id === selectedSize?.id : true))!.id, cartQuantity - 1)}
+                    className="h-full px-6 text-white hover:text-luxe-accent hover:bg-white/5 active:scale-95 transition-all text-xl"
+                  >
+                    −
+                  </button>
+                  <div className="flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-white text-base font-bold">{cartQuantity}</span>
+                    <span className="text-luxe-accent/80 text-[10px] uppercase tracking-wider font-semibold -mt-1">In Cart</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (cartQuantity >= availableStock + cartQuantity) {
+                        toast.error(`Only ${dbStock} left in stock`);
+                      } else {
+                        updateQuantity(cartItems.find(i => i.product_id === product.id && (product.product_type === 'poster' ? i.poster_size_id === selectedSize?.id : true))!.id, cartQuantity + 1);
+                      }
+                    }}
+                    disabled={cartQuantity >= dbStock}
+                    className="h-full px-6 text-white hover:text-luxe-accent hover:bg-white/5 active:scale-95 transition-all text-xl disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  >
+                    +
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Low stock warning */}
-            {inStock && availableStock <= 10 && (
+            {inStock && availableStock <= 10 && availableStock > 0 && (
               <p className="text-red-400 text-xs font-medium ml-1">
                 ⏳ Hurry! Only {availableStock} item{availableStock !== 1 ? 's' : ''} left in stock.
               </p>
@@ -468,23 +443,110 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             </button>
           </div>
 
-          {/* Delivery info */}
-          <div className="space-y-3 py-6 border-t border-white/10">
-            <div className="flex items-center gap-3 text-sm text-white/50">
-              <Truck className="w-4 h-4 text-luxe-accent flex-shrink-0" />
-              Delivered across Tamil Nadu in 3–5 business days
+          {/* Product Details Accordion */}
+          <div className="mt-8 space-y-3">
+            {/* Description Accordion */}
+            <div className="glass-card overflow-hidden">
+              <button 
+                onClick={() => setOpenAccordion(openAccordion === 'description' ? null : 'description')}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
+              >
+                <span className="font-semibold text-white">Description</span>
+                <ChevronRight className={cn('w-4 h-4 transition-transform text-white/50', openAccordion === 'description' && 'rotate-90 text-luxe-accent')} />
+              </button>
+              <AnimatePresence>
+                {openAccordion === 'description' && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <div className="p-4 pt-0 text-white/55 text-sm leading-relaxed">
+                      {product.description}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <div className="flex items-center gap-3 text-sm text-white/50">
-              <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
-              Free delivery on orders above ₹999
+
+            {/* Details Accordion */}
+            <div className="glass-card overflow-hidden">
+              <button 
+                onClick={() => setOpenAccordion(openAccordion === 'details' ? null : 'details')}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
+              >
+                <span className="font-semibold text-white">Specifications</span>
+                <ChevronRight className={cn('w-4 h-4 transition-transform text-white/50', openAccordion === 'details' && 'rotate-90 text-luxe-accent')} />
+              </button>
+              <AnimatePresence>
+                {openAccordion === 'details' && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <div className="p-4 pt-0 grid grid-cols-2 gap-3">
+                      {product.material && (
+                        <div className="glass-card-sm p-3">
+                          <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Material</p>
+                          <p className="text-white text-sm font-medium">{product.material}</p>
+                        </div>
+                      )}
+                      {product.product_type === 'poster' && product.finish && (
+                        <div className="glass-card-sm p-3">
+                          <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Finish</p>
+                          <p className="text-white text-sm font-medium capitalize">{product.finish}</p>
+                        </div>
+                      )}
+                      {product.product_type === 'poster' && product.orientation && (
+                        <div className="glass-card-sm p-3">
+                          <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Orientation</p>
+                          <p className="text-white text-sm font-medium capitalize">{product.orientation}</p>
+                        </div>
+                      )}
+                      {product.product_type === 'earring' && product.color && (
+                        <div className="glass-card-sm p-3">
+                          <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Color</p>
+                          <p className="text-white text-sm font-medium">{product.color}</p>
+                        </div>
+                      )}
+                      {product.product_type === 'earring' && product.weight_grams && (
+                        <div className="glass-card-sm p-3">
+                          <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Weight</p>
+                          <p className="text-white text-sm font-medium">{product.weight_grams}g</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <div className="flex items-center gap-3 text-sm text-white/50">
-              <Shield className="w-4 h-4 text-luxe-accent flex-shrink-0" />
-              Easy 7-day returns
-            </div>
-            <div className="flex items-center gap-3 text-sm text-white/50">
-              <Package className="w-4 h-4 text-luxe-accent flex-shrink-0" />
-              Securely packaged with premium materials
+
+            {/* Shipping Accordion */}
+            <div className="glass-card overflow-hidden">
+              <button 
+                onClick={() => setOpenAccordion(openAccordion === 'shipping' ? null : 'shipping')}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
+              >
+                <span className="font-semibold text-white">Shipping & Returns</span>
+                <ChevronRight className={cn('w-4 h-4 transition-transform text-white/50', openAccordion === 'shipping' && 'rotate-90 text-luxe-accent')} />
+              </button>
+              <AnimatePresence>
+                {openAccordion === 'shipping' && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <div className="p-4 pt-0 space-y-3">
+                      <div className="flex items-center gap-3 text-sm text-white/50">
+                        <Truck className="w-4 h-4 text-luxe-accent flex-shrink-0" />
+                        Delivered across Tamil Nadu in 3–5 business days
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-white/50">
+                        <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
+                        Free delivery on orders above ₹999
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-white/50">
+                        <Shield className="w-4 h-4 text-luxe-accent flex-shrink-0" />
+                        Easy 7-day returns
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-white/50">
+                        <Package className="w-4 h-4 text-luxe-accent flex-shrink-0" />
+                        Securely packaged with premium materials
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 

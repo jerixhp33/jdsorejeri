@@ -16,7 +16,7 @@ export default async function ContactPage() {
     .from('faqs').select('*').eq('is_active', true).order('display_order');
 
   return (
-    <div className="pt-16 sm:pt-20 md:pt-24">
+    <div className="pt-28 sm:pt-32 md:pt-36">
       <ContactSection />
       <FAQSection faqs={faqs || []} />
     </div>

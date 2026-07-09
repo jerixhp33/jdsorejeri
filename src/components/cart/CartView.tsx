@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 export function CartView() {
-  const { items, itemCount, subtotal, deliveryCharge, total, loading, updateQuantity, removeItem } =
+  const { items, itemCount, subtotal, deliveryCharge, total, loading, updateQuantity, removeItem, deliverySettings } =
     useCart();
     
   const { appliedCoupon, setAppliedCoupon } = useCouponStore();
@@ -148,6 +148,7 @@ export function CartView() {
 
                 return (
                   <motion.div
+                    layout
                     key={item.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -275,7 +276,7 @@ export function CartView() {
                   <p className="text-white/30 text-xs">
                     Add{' '}
                     <span className="text-luxe-accent">
-                      {formatCurrency(999 - subtotal)}
+                      {formatCurrency(deliverySettings.threshold - subtotal)}
                     </span>{' '}
                     more for free delivery
                   </p>
