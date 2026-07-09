@@ -394,15 +394,9 @@ export function SidebarBannersPanel({ banners }: BannersSectionProps) {
 
   return (
     <div className="sticky top-24 flex flex-col gap-5 py-6">
-      {/* Top gold accent */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/30 to-transparent" />
-
       {banners.map((banner, i) => (
         <SidebarBannerCard key={banner.id} banner={banner} priority={i === 0} />
       ))}
-
-      {/* Bottom gold accent */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/30 to-transparent" />
     </div>
   );
 }
@@ -463,9 +457,6 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
 
   return (
     <section className="relative w-full py-6">
-      {/* Gold accent line */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mb-8" />
-
       {/* Ambient background glow */}
       <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center">
         <AnimatePresence>
@@ -582,8 +573,6 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
           );
         })}
       </div>
-
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mt-8" />
     </section>
   );
 }
