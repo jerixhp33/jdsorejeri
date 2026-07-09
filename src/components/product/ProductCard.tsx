@@ -265,25 +265,25 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* Product Info */}
         <div className="p-3 sm:p-4">
           <p className="text-white/40 text-[11px] mb-0.5">{product.category?.name}</p>
-          <h3 className="text-white text-xs sm:text-sm font-medium leading-snug mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-luxe-accent transition-colors">
+          <h3 className="text-white text-xs sm:text-sm font-medium leading-snug mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-luxe-accent transition-colors h-8 sm:h-10 flex items-start">
             {product.name}
           </h3>
 
-          <div className="flex items-center justify-between">
-             <div className="flex items-baseline gap-1">
+          <div className="flex items-center justify-between mt-auto">
+            <div className="flex items-center h-6">
               {!isInStock ? (
-                <span className="inline-block px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/50 text-[11px] font-medium tracking-wide backdrop-blur-md uppercase">
+                <span className="inline-block px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-white/80 text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md">
                   Coming Soon
                 </span>
               ) : (
-                <>
+                <div className="flex items-baseline gap-1">
                   {product.product_type === 'poster' && displayPrice > 0 && (
                     <span className="text-white/40 text-[10px] uppercase tracking-widest">From</span>
                   )}
                   <span className="text-white font-semibold text-sm sm:text-base">
                     {displayPrice > 0 ? formatCurrency(displayPrice) : 'Coming Soon'}
                   </span>
-                </>
+                </div>
               )}
             </div>
             {(product.average_rating ?? 0) > 0 && (
