@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Package, Heart, MapPin, Shield, Monitor, Clock, Bell } from 'lucide-react';
-import { formatDate, formatRelativeTime, getInitials } from '@/lib/utils';
+import { formatDate, formatRelativeTime, getInitials, cn } from '@/lib/utils';
 import { useWebPush } from '@/hooks/useWebPush';
 import type { UserProfile, LoginLog, Order } from '@/types';
 
