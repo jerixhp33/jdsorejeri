@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from 'next/font/google';
 import { ThemeProvider } from '@/components/shared/ThemeProvider';
 import { PageLoader } from '@/components/shared/PageLoader';
 import { SmoothScroll } from '@/components/shared/SmoothScroll';
+import { ServiceWorkerRegister } from '@/components/shared/ServiceWorkerRegister';
 import { Toaster } from 'sonner';
 import '@/styles/globals.css';
 
@@ -96,6 +97,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SmoothScroll />
+          <ServiceWorkerRegister />
           <PageLoader />
           {children}
           <Toaster

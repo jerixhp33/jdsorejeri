@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline | JD Store</title>
+  <style>
+    :root {
+      --luxe-black: #0a0a0a;
+      --luxe-near-black: #121212;
+      --luxe-accent: #c8a96e;
+      --luxe-accent-rgb: 200, 169, 110;
+      --text-white: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--luxe-black);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    /* Ambient glow */
+    .glow-orb {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(var(--luxe-accent-rgb), 0.08) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      pointer-events: none;
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+    }
+
+    /* Logo icon */
+    .logo-container {
+      margin-bottom: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      background: rgba(var(--luxe-accent-rgb), 0.05);
+      border: 1px solid rgba(var(--luxe-accent-rgb), 0.15);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .logo-container svg {
+      width: 36px;
+      height: 36px;
+      fill: var(--luxe-accent);
+    }
+
+    /* Offline card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 32px 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 30%, var(--luxe-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 100px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    p.description {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* Primary Action */
+    .btn-gold {
+      display: block;
+      width: 100%;
+      padding: 14px 28px;
+      background-color: var(--text-white);
+      color: var(--luxe-black);
+      border: none;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-gold:hover {
+      background-color: var(--luxe-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(var(--luxe-accent-rgb), 0.2);
+    }
+
+    .btn-gold:active {
+      transform: translateY(0);
+    }
+
+    /* Game Section */
+    .game-section {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .game-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--luxe-accent);
+      margin-bottom: 12px;
+    }
+
+    .game-board {
+      height: 120px;
+      position: relative;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+    }
+
+    .gem {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: radial-gradient(circle, #fff 0%, var(--luxe-accent) 80%);
+      clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px var(--luxe-accent);
+      animation: rotateGem 2s linear infinite;
+    }
+
+    @keyframes rotateGem {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .score-board {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .score-board span strong {
+      color: var(--text-white);
+    }
+
+    /* Footer info */
+    .support-info {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 24px;
+      line-height: 1.5;
+    }
+
+    .support-info a {
+      color: var(--luxe-accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .support-info a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb"></div>
+
+  <div class="container">
+    <div class="logo-container">
+      <!-- Custom vector JD Logo representation for offline -->
+      <svg viewBox="0 0 36 36">
+        <path d="M12 8h8v14c0 3.3-2.7 6-6 6s-6-2.7-6-6v-2h4v2c0 1.1.9 2 2 2s2-.9 2-2V12h-4V8z M22 8h6v4h-6V8z"/>
+      </svg>
+    </div>
+
+    <div class="glass-card">
+      <span class="status-badge">Connection Lost</span>
+      <h1>You're Offline</h1>
+      <p class="description">
+        We can't load this page right now because your device is disconnected from the internet. Please check your signal or Wi-Fi settings.
+      </p>
+      <button class="btn-gold" onclick="window.location.reload()">Reload Page</button>
+    </div>
+
+    <!-- Offline clicker game -->
+    <div class="game-section">
+      <div class="game-title">✦ Catch the Gold Gems ✦</div>
+      <div class="game-board" id="gameBoard">
+        <div class="gem" id="gem" style="top: 40px; left: 160px;"></div>
+      </div>
+      <div class="score-board">
+        <span>Gems Caught: <strong id="score">0</strong></span>
+        <span>High Score: <strong id="highScore">0</strong></span>
+      </div>
+    </div>
+
+    <div class="support-info">
+      Need support? Contact us on WhatsApp at<br>
+      <a href="https://wa.me/919360490974" target="_blank">+91 9360490974</a>
+    </div>
+  </div>
+
+  <script>
+    // Game state variables
+    let score = 0;
+    let highScore = localStorage.getItem('jd_offline_highscore') || 0;
+    document.getElementById('highScore').innerText = highScore;
+
+    const board = document.getElementById('gameBoard');
+    const gem = document.getElementById('gem');
+    const scoreText = document.getElementById('score');
+
+    // Move gem randomly
+    function moveGem() {
+      const boardWidth = board.clientWidth - 30;
+      const boardHeight = board.clientHeight - 30;
+
+      const randomX = Math.max(10, Math.floor(Math.random() * boardWidth));
+      const randomY = Math.max(10, Math.floor(Math.random() * boardHeight));
+
+      gem.style.left = randomX + 'px';
+      gem.style.top = randomY + 'px';
+    }
+
+    // Gem click handler
+    gem.addEventListener('click', function(e) {
+      e.stopPropagation();
+      score++;
+      scoreText.innerText = score;
+
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('jd_offline_highscore', highScore);
+        document.getElementById('highScore').innerText = highScore;
+      }
+
+      moveGem();
+    });
+
+    // Board click handler (miss)
+    board.addEventListener('click', function() {
+      score = 0;
+      scoreText.innerText = score;
+      moveGem();
+    });
+  </script>
+</body>
+</html>
