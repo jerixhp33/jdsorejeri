@@ -42,32 +42,32 @@ export default async function HomePage() {
       </div>
 
       {/* Top banners */}
-      <div className="mb-16 lg:mb-24">
+      <div className="mb-8 lg:mb-12">
         <BannersSection banners={topBanners} />
       </div>
 
       {/* Best Sellers Section */}
-      <div className="mb-20 lg:mb-32">
+      <div className="mb-8 lg:mb-12">
         <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
           <BestSellers products={bestSellers} />
         </Suspense>
       </div>
 
       {/* Sidebar layout — desktop only */}
-      <div className={sidebarBanners.length > 0 ? 'lg:flex lg:gap-6 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto mb-20 lg:mb-32' : 'mb-20 lg:mb-32'}>
+      <div className={sidebarBanners.length > 0 ? 'lg:flex lg:gap-6 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto mb-8 lg:mb-12' : 'mb-8 lg:mb-12'}>
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          <div className="mb-16 lg:mb-24">
+          <div className="mb-8 lg:mb-12">
             <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
               <FeaturedPosters products={featuredPosters} />
             </Suspense>
           </div>
 
-          <div className="mb-16 lg:mb-24">
+          <div className="mb-8 lg:mb-12">
             <BannersSection banners={middleBanners} />
           </div>
 
-          <div className="mb-16 lg:mb-24">
+          <div className="mb-8 lg:mb-12">
             <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
               <FeaturedEarrings products={featuredEarrings} />
             </Suspense>
@@ -75,7 +75,7 @@ export default async function HomePage() {
 
           {/* Mobile sidebar banners appear here, right after featured earrings */}
           {sidebarBanners.length > 0 && (
-            <div className="lg:hidden mt-8 mb-16">
+            <div className="lg:hidden mt-8 mb-8">
               <MobileSidebarBanners banners={sidebarBanners} />
             </div>
           )}
@@ -89,23 +89,23 @@ export default async function HomePage() {
         )}
       </div>
 
-      <div className="mb-20 lg:mb-32">
+      <div className="mb-8 lg:mb-12">
         <CollectionsSection collections={collections} />
       </div>
 
-      <div className="mb-20 lg:mb-32">
+      <div className="mb-8 lg:mb-12">
         <WhyChooseUs />
       </div>
       
-      <div className="mb-20 lg:mb-32">
+      <div className="mb-8 lg:mb-12">
         <TestimonialsSection testimonials={testimonials} />
       </div>
 
-      <div className="mb-20 lg:mb-32">
+      <div className="mb-8 lg:mb-12">
         <BannersSection banners={bottomBanners} />
       </div>
 
-      <div className="mb-20 lg:mb-32">
+      <div className="mb-8 lg:mb-12">
         <FAQSection faqs={faqs} />
       </div>
 
