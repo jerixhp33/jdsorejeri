@@ -35,8 +35,10 @@ export function useWishlist(): WishlistState {
           `
           *,
           product:products(
-            id, name, slug, product_type, price,
-            images:product_images(url, is_primary, display_order)
+            *,
+            category:product_categories(id, name),
+            images:product_images(url, is_primary, display_order),
+            sizes:poster_sizes(*)
           )
         `
         )

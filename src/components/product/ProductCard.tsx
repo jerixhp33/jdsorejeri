@@ -98,13 +98,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (product.product_type === 'poster') {
-      router.push(`/product/${product.slug}`);
-      return;
-    }
-    setAddingToCart(true);
-    await addItem(product.id, displayPrice);
-    setAddingToCart(false);
+    router.push(`/product/${product.slug}`);
   };
 
   const handleWishlist = async (e: React.MouseEvent) => {
@@ -250,7 +244,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300">
             <button
               onClick={handleAddToCart}
-              disabled={!isInStock || addingToCart}
+              disabled={!isInStock}
               className={cn(
                 'w-full py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 transition-all duration-200 min-h-[36px]',
                 isInStock
@@ -259,13 +253,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               )}
             >
               <ShoppingCart className="w-3.5 h-3.5" />
-              {addingToCart
-                ? 'Adding...'
-                : !isInStock
-                  ? 'Out of Stock'
-                  : product.product_type === 'poster'
-                    ? 'Select Poster'
-                    : 'Add to Cart'}
+              {!isInStock
+                ? 'Out of Stock'
+                : product.product_type === 'poster'
+                  ? 'Select Poster'
+                  : 'Select Earring'}
             </button>
           </div>
         </div>

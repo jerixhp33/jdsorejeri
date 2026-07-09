@@ -74,7 +74,7 @@ export function ContactSection() {
                 <div>
                   <p className="text-white font-medium text-sm mb-0.5">Email</p>
                   <a
-                    href="mailto:hello@luxestore.in"
+                    href="mailto:jdstore.jeri@gmail.com"
                     className="text-white/50 text-sm hover:text-luxe-accent transition-colors"
                   >
                     jdstore.jeri@gmail.com
@@ -135,7 +135,7 @@ export function ContactSection() {
               reply within 30 minutes during business hours.
             </p>
             <a
-              href="https://wa.me/919360490974?text=Hi%20LUXE%20Store!%20I%20have%20a%20question."
+              href="https://wa.me/919360490974?text=Hi%20JD%20Store!%20I%20have%20a%20question."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-green-500 text-white font-semibold px-8 py-3.5 rounded-full hover:bg-green-400 transition-colors w-full justify-center"
