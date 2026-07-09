@@ -672,3 +672,24 @@ a, button, [role="button"], input[type="submit"], input[type="button"], input[ty
     print-color-adjust: exact !important;
   }
 }
+
+/* Lenis smooth scrolling defaults */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overflow: clip;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}

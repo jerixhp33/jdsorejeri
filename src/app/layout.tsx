@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { ThemeProvider } from '@/components/shared/ThemeProvider';
 import { PageLoader } from '@/components/shared/PageLoader';
+import { SmoothScroll } from '@/components/shared/SmoothScroll';
 import { Toaster } from 'sonner';
 import '@/styles/globals.css';
 
@@ -94,6 +95,7 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          <SmoothScroll />
           <PageLoader />
           {children}
           <Toaster
