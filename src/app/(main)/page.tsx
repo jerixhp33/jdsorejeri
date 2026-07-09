@@ -3,7 +3,6 @@ import { BannersSection, SidebarBannersPanel, MobileSidebarBanners } from '@/com
 import { FeaturedPosters } from '@/components/landing/FeaturedPosters';
 import { FeaturedEarrings } from '@/components/landing/FeaturedEarrings';
 import { BestSellers } from '@/components/landing/BestSellers';
-import { MarqueeStrip } from '@/components/landing/MarqueeStrip';
 import { WhyChooseUs } from '@/components/landing/WhyChooseUs';
 import { CollectionsSection } from '@/components/landing/CollectionsSection';
 import { TestimonialsSection } from '@/components/landing/TestimonialsSection';
@@ -18,10 +17,10 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [featuredPosters, featuredEarrings, allFeatured, collections, testimonials, faqs, banners, marqueeLabels] = await Promise.all([
+  const [featuredPosters, featuredEarrings, bestSellers, collections, testimonials, faqs, banners, marqueeLabels] = await Promise.all([
     getFeaturedProducts(20).then((products) => products.filter((p) => p.product_type === 'poster')),
     getFeaturedProducts(20).then((products) => products.filter((p) => p.product_type === 'earring')),
-    getFeaturedProducts(8),
+    supabase.from('products').select('*').eq('is_active', true).eq('is_best_seller', true).order('created_at', { ascending: false }).limit(4).then(({ data }) => data || []),
     supabase.from('collections').select('*').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
     supabase.from('testimonials').select('*').eq('is_active', true).order('display_order').limit(8).then(({ data }) => data || []),
     supabase.from('faqs').select('*').eq('is_active', true).order('display_order').limit(10).then(({ data }) => data || []),
@@ -37,20 +36,17 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Top Scrolling Label - below the floating navbar */}
-      <div className="pt-[72px] sm:pt-[88px]">
-        <MarqueeStrip labels={marqueeLabels} />
-      </div>
-
       {/* Hero-position banners */}
-      <BannersSection banners={heroBanners} />
+      <div className="pt-32 sm:pt-40 pb-4">
+        <BannersSection banners={heroBanners} />
+      </div>
 
       {/* Top banners */}
       <BannersSection banners={topBanners} />
 
       {/* Best Sellers Section */}
       <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
-        <BestSellers products={allFeatured} />
+        <BestSellers products={bestSellers} />
       </Suspense>
 
       {/* Sidebar layout — desktop only */}

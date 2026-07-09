@@ -219,17 +219,49 @@ export function Navbar() {
 
   const recentNotifs = notifications.slice(0, 5);
 
+  const MARQUEE_ITEMS = [
+    'Wall Posters', 'Artisan Earrings', 'Premium Quality',
+    'Museum-Grade Prints', 'Handcrafted', 'Tamil Nadu Delivery',
+    'Limited Editions', 'Free Shipping',
+  ];
+  const [marqueeItems, setMarqueeItems] = useState<string[]>(MARQUEE_ITEMS);
+
+  useEffect(() => {
+    async function fetchMarquee() {
+      try {
+        const { data } = await supabase
+          .from('marquee_labels')
+          .select('text')
+          .eq('is_active', true)
+          .order('order_index', { ascending: true });
+        
+        if (data && data.length > 0) {
+          setMarqueeItems(data.map(d => d.text));
+        }
+      } catch (e) {
+        console.error('Failed to fetch marquee texts', e);
+      }
+    }
+    fetchMarquee();
+  }, [supabase]);
+
+  const baseItems = marqueeItems.length > 0 ? marqueeItems : MARQUEE_ITEMS;
+  const itemsToRender = Array(Math.max(1, Math.ceil(12 / baseItems.length))).fill(baseItems).flat();
+
   return (
     <>
-
-      <header
-        className={cn(
-          'fixed z-50 transition-all duration-500 left-1/2 -translate-x-1/2 w-[calc(100%-16px)] sm:w-[calc(100%-32px)] max-w-[1400px] rounded-[2rem]',
-          scrolled
-            ? 'top-2 sm:top-4 bg-white/[0.08] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-white/20'
-            : 'top-2 sm:top-4 bg-black/40 backdrop-blur-md border border-white/[0.05] shadow-lg hover:bg-black/60 hover:border-white/10'
-        )}
-      >
+      <div className={cn(
+        "fixed z-50 transition-all duration-500 left-1/2 -translate-x-1/2 w-[calc(100%-16px)] sm:w-[calc(100%-32px)] max-w-[1400px] pointer-events-none flex flex-col items-center",
+        scrolled ? "top-2 sm:top-4" : "top-2 sm:top-4"
+      )}>
+        <header
+          className={cn(
+            'w-full pointer-events-auto relative z-20 rounded-[2rem] transition-all duration-500',
+            scrolled
+              ? 'bg-white/[0.08] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-white/20'
+              : 'bg-black/40 backdrop-blur-md border border-white/[0.05] shadow-lg hover:bg-black/60 hover:border-white/10'
+          )}
+        >
         {/* 1-minute sweeping edge light effect starting from left (270deg) */}
         <div className="nav-edge-light" />
         
@@ -474,6 +506,42 @@ export function Navbar() {
           </div>
         </div>
       </header>
+
+      {/* Attached Top Label underneath the header pill */}
+      <div 
+        className={cn(
+          "pointer-events-auto w-full transition-all duration-700 ease-in-out transform origin-top flex justify-center",
+          scrolled ? "opacity-0 -translate-y-8 pointer-events-none" : "opacity-100 translate-y-0"
+        )}
+      >
+        <div className="w-[90%] bg-luxe-accent text-black rounded-b-2xl sm:rounded-b-3xl overflow-hidden py-1.5 sm:py-2 shadow-[0_10px_30px_rgba(200,169,110,0.2)] relative -mt-3 pt-4 -z-10">
+          <div className="flex whitespace-nowrap animate-marquee w-max" style={{ animationDuration: '40s' }}>
+            <div className="flex shrink-0">
+              {itemsToRender.map((item, i) => (
+                <span
+                  key={`h1-${i}`}
+                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/80 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase font-bold"
+                >
+                  <Sparkles className="w-2.5 h-2.5 text-black/40" />
+                  {item}
+                </span>
+              ))}
+            </div>
+            <div className="flex shrink-0">
+              {itemsToRender.map((item, i) => (
+                <span
+                  key={`h2-${i}`}
+                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/80 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase font-bold"
+                >
+                  <Sparkles className="w-2.5 h-2.5 text-black/40" />
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
       {/* Mobile Navigation — full-screen slide-in drawer */}
       <AnimatePresence>

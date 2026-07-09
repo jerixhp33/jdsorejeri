@@ -42,7 +42,7 @@ export function BestSellers({ products }: BestSellersProps) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <Link prefetch={true} href="/collections"
+            <Link prefetch={true} href="/best-sellers"
               className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors group"
             >
               View all products

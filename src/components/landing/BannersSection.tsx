@@ -88,8 +88,8 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
         />
       )}
 
-      {/* Image with zoom-on-hover */}
-      <div className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] overflow-hidden rounded-3xl z-10">
+      {/* Image with simple rounded corners and no heavy masking */}
+      <div className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] overflow-hidden rounded-3xl md:rounded-[2.5rem] z-10">
         <Image
           src={banner.image_url}
           alt={banner.title}
@@ -101,33 +101,8 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
           onLoad={handleImageLoad}
         />
 
-        {/* Multi-layer cinematic overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-        {/* Adaptive inner glow */}
-        {glowColor && (
-          <div
-            className="absolute inset-0 pointer-events-none transition-opacity duration-700"
-            style={{
-              background: `radial-gradient(ellipse at 50% 90%, rgba(${glowColor},0.06) 0%, transparent 55%)`,
-            }}
-          />
-        )}
-
-        {/* Gold shimmer lines */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e]/60 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e]/40 to-transparent" />
-
-        {/* Animated shimmer sweep */}
-        <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          style={{
-            background: 'linear-gradient(105deg, transparent 40%, rgba(200,169,110,0.06) 50%, transparent 60%)',
-            backgroundSize: '200% 100%',
-            animation: 'shimmer 2s linear infinite',
-          }}
-        />
+        {/* Clean, simple dark gradient just enough for text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
       </div>
 
       {/* Content overlay */}
