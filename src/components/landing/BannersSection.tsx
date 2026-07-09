@@ -50,63 +50,29 @@ function sampleColor(imgEl: HTMLImageElement): string | null {
 // ─── SingleBanner ─────────────────────────────────────────────────────────────
 
 function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean }) {
-  const [glowColor, setGlowColor] = useState<string | null>(null);
-
-  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
-    if (color) setGlowColor(color);
-  }, []);
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
+      viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className="relative w-full overflow-visible rounded-3xl group"
-      style={{
-        minHeight: '220px',
-        transition: 'box-shadow 0.7s ease',
-        ...(glowColor ? {
-          boxShadow: `
-            0 0 0 1px rgba(${glowColor},0.18),
-            0 0 24px 4px rgba(${glowColor},0.08),
-            0 8px 36px 0px rgba(${glowColor},0.10),
-            0 20px 50px 0px rgba(${glowColor},0.06)
-          `,
-          borderRadius: '1.5rem',
-        } : {}),
-      }}
+      className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] overflow-hidden rounded-3xl md:rounded-[2.5rem] group z-10"
     >
-      {/* Adaptive background bloom — bleeds outside card */}
-      {glowColor && (
-        <div
-          className="absolute -inset-8 pointer-events-none z-0 transition-opacity duration-700"
-          style={{
-            background: `radial-gradient(ellipse at 50% 100%, rgba(${glowColor},0.07) 0%, transparent 60%)`,
-          }}
-        />
-      )}
+      <Image
+        src={banner.image_url}
+        alt={banner.title || 'Banner'}
+        fill
+        crossOrigin="anonymous"
+        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+        sizes="(max-width: 768px) 100vw, 1400px"
+        priority={priority}
+      />
 
-      {/* Image with simple rounded corners and no heavy masking */}
-      <div className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] overflow-hidden rounded-3xl md:rounded-[2.5rem] z-10">
-        <Image
-          src={banner.image_url}
-          alt={banner.title}
-          fill
-          crossOrigin="anonymous"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, 1400px"
-          priority={priority}
-          onLoad={handleImageLoad}
-        />
-
-        {/* Clean, simple dark gradient just enough for text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-      </div>
+      {/* Clean, simple dark gradient just enough for text legibility */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
 
       {/* Content overlay */}
-      <div className="absolute inset-0 flex items-center px-10 md:px-16 lg:px-20 z-20">
+      <div className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20">
         <div className="max-w-xl">
           <motion.div
             initial={{ scaleX: 0 }}
@@ -122,7 +88,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.25 }}
-              className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
+              className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
               style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
             >
               {banner.title}
@@ -135,7 +101,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.35 }}
-              className="text-white/70 text-sm md:text-base mb-6 leading-relaxed"
+              className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
             >
               {banner.subtitle}
             </motion.p>
@@ -153,7 +119,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
                 style={{
                   background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
                   color: '#0a0a0a',
-                  boxShadow: '0 0 24px rgba(200,169,110,0.35)',
+                  boxShadow: '0 0 24px rgba(200,169,110,0.25)',
                 }}
               >
                 {banner.cta_text}
@@ -169,7 +135,6 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
 
 function SliderBanners({ banners }: { banners: Banner[] }) {
   const [current, setCurrent] = useState(0);
-  const [glowColors, setGlowColors] = useState<Record<number, string>>({});
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const next = useCallback(() => {
@@ -180,164 +145,119 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
     setCurrent((c) => (c - 1 + banners.length) % banners.length);
   }, [banners.length]);
 
-  const resetTimer = useCallback(() => {
+  useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(next, 5000); // 5s loop
+    timerRef.current = setInterval(next, 5000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [next]);
 
-  useEffect(() => {
-    resetTimer();
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [resetTimer]);
-
-  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
-    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
-    if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
-  }, []);
-
-  const activeGlow = glowColors[current];
-
-  // Helper to calculate shortest distance around the infinite loop
-  const getDiff = (i: number) => {
-    let diff = i - current;
-    const half = banners.length / 2;
-    if (diff < -half) diff += banners.length;
-    else if (diff > half) diff -= banners.length;
-    return diff;
-  };
-
   return (
-    <div 
-      className="relative w-full py-16 overflow-hidden group"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] overflow-hidden rounded-3xl md:rounded-[2.5rem] group z-10"
     >
-      {/* Ambient background glow (YouTube style) - soft, diffuse, less glow */}
-      <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
-        <AnimatePresence>
-          {activeGlow && (
-            <motion.div
-              key={current}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5, ease: 'easeInOut' }}
-              className="absolute w-full h-[150%] max-w-[1200px]"
-              style={{
-                background: `radial-gradient(circle at 50% 50%, rgba(${activeGlow}, 0.12) 0%, transparent 60%)`,
-                filter: 'blur(80px)',
-              }}
-            />
-          )}
-        </AnimatePresence>
-      </div>
-
-      <div className="relative w-full h-[350px] md:h-[450px] lg:h-[500px] flex items-center justify-center z-10 perspective-[1200px]">
-        {banners.map((banner, i) => {
-          const diff = getDiff(i);
-          const isCenter = diff === 0;
-          const absDiff = Math.abs(diff);
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={current}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+          className="absolute inset-0"
+        >
+          <Image
+            src={banners[current].image_url}
+            alt={banners[current].title || "Banner"}
+            fill
+            crossOrigin="anonymous"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 1400px"
+            priority={current === 0}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
           
-          // Math for the coverflow positions
-          const xOffset = diff * 50; // percentage shift horizontally
-          const scale = isCenter ? 1 : Math.max(0.7, 0.85 - (absDiff * 0.05));
-          const zIndex = 50 - absDiff;
-          const opacity = isCenter ? 1 : absDiff <= 2 ? 1 - (absDiff * 0.35) : 0;
-          const pointerEvents = opacity === 0 ? 'none' : 'auto';
+          <div className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20">
+            <div className="max-w-xl">
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="w-10 h-0.5 bg-[#c8a96e] mb-4 origin-left"
+              />
+              {banners[current].title && (
+                <motion.h3
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.25 }}
+                  className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
+                  style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
+                >
+                  {banners[current].title}
+                </motion.h3>
+              )}
+              {banners[current].subtitle && (
+                <motion.p
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.35 }}
+                  className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
+                >
+                  {banners[current].subtitle}
+                </motion.p>
+              )}
+              {banners[current].cta_text && banners[current].cta_url && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.45 }}
+                >
+                  <Link prefetch={true} href={banners[current].cta_url}
+                    className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300"
+                    style={{
+                      background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
+                      color: '#0a0a0a',
+                      boxShadow: '0 0 24px rgba(200,169,110,0.25)',
+                    }}
+                  >
+                    {banners[current].cta_text}
+                    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                  </Link>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
 
-          return (
-            <motion.div
-              key={banner.id}
-              className="absolute w-[80%] max-w-[800px] h-full rounded-[2rem] overflow-hidden cursor-pointer"
-              animate={{
-                x: `${xOffset}%`,
-                scale,
-                opacity,
-                zIndex,
-                filter: isCenter ? 'blur(0px)' : 'blur(4px)',
-              }}
-              transition={{
-                duration: 0.7,
-                ease: [0.22, 1, 0.36, 1] // Apple-like smooth spring curve
-              }}
-              onClick={() => {
-                if (!isCenter) setCurrent(i);
-              }}
-              style={{
-                pointerEvents: pointerEvents as any,
-                boxShadow: isCenter 
-                  ? '0 30px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)'
-                  : '0 10px 30px rgba(0,0,0,0.5)',
-              }}
-            >
-              <Image
-                src={banner.image_url}
-                alt={banner.title}
-                fill
-                crossOrigin="anonymous"
-                className="object-cover"
-                sizes="(max-width: 1024px) 80vw, 800px"
-                priority={isCenter}
-                onLoad={(e) => handleImageLoad(e, i)}
-              />
-              
-              {/* Overlays for depth and text legibility */}
-              <motion.div 
-                className="absolute inset-0 bg-black"
-                animate={{ opacity: isCenter ? 0 : 0.4 }}
-                transition={{ duration: 1.2 }}
-              />
-              
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-90" />
-              
-              {/* Banner content (only visible on center card) */}
-              <motion.div 
-                className="absolute inset-0 flex flex-col justify-end p-8 md:p-14"
-                animate={{ opacity: isCenter ? 1 : 0 }}
-                transition={{ duration: 1.0 }}
-              >
-                 <div className="w-10 h-1 bg-[#c8a96e] mb-5" />
-                 <h3 className="font-display text-3xl md:text-5xl font-bold text-white mb-3 leading-tight" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.6)' }}>
-                   {banner.title}
-                 </h3>
-                 <p className="text-white/80 text-sm md:text-lg mb-8 line-clamp-2 max-w-xl font-medium">
-                   {banner.subtitle}
-                 </p>
-                 {banner.cta_text && banner.cta_url && (
-                   <Link prefetch={true} href={banner.cta_url}
-                     onClick={(e) => {
-                       if (!isCenter) e.preventDefault();
-                       else e.stopPropagation();
-                     }}
-                     className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full font-bold text-sm self-start transition-transform hover:scale-105"
-                     style={{
-                       background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
-                       color: '#0a0a0a',
-                       pointerEvents: isCenter ? 'auto' : 'none',
-                     }}
-                   >
-                     {banner.cta_text}
-                     <ArrowRight className="w-4 h-4" />
-                   </Link>
-                 )}
-              </motion.div>
-            </motion.div>
-          );
-        })}
-      </div>
-      
-      {/* Prev / Next controls */}
       <button
         onClick={prev}
-        className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-black/40 hover:bg-black/60 backdrop-blur-xl text-white border border-white/10 hover:scale-110"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20"
       >
-        <ChevronLeft className="w-6 h-6" />
+        <ChevronLeft className="w-5 h-5" />
       </button>
       <button
         onClick={next}
-        className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-black/40 hover:bg-black/60 backdrop-blur-xl text-white border border-white/10 hover:scale-110"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20"
       >
-        <ChevronRight className="w-6 h-6" />
+        <ChevronRight className="w-5 h-5" />
       </button>
-    </div>
+
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2">
+        {banners.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={cn(
+              "w-2 h-2 rounded-full transition-all duration-300",
+              i === current ? "w-6 bg-white" : "bg-white/40 hover:bg-white/60"
+            )}
+          />
+        ))}
+      </div>
+    </motion.div>
   );
 }
 
@@ -347,18 +267,12 @@ export function BannersSection({ banners }: BannersSectionProps) {
   if (!banners.length) return null;
 
   return (
-    <section className="px-4 md:px-8 lg:px-12 py-10 max-w-[1400px] mx-auto">
-      {/* Gold border accent above */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/30 to-transparent mb-8" />
-
+    <section className="px-4 md:px-8 lg:px-12 py-6 max-w-[1400px] mx-auto w-full">
       {banners.length === 1 ? (
         <SingleBanner banner={banners[0]} priority />
       ) : (
         <SliderBanners banners={banners} />
       )}
-
-      {/* Gold border accent below */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/30 to-transparent mt-8" />
     </section>
   );
 }
