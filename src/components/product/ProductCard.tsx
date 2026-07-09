@@ -24,6 +24,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [addingToCart, setAddingToCart] = useState(false);
   const [glowColor, setGlowColor] = useState<string | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   const sampleImageColor = useCallback((imgEl: HTMLImageElement) => {
     try {
@@ -74,12 +75,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   };
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (images.length <= 1 || !isHovered) return;
     const timer = setInterval(() => {
       setImageIndex((prev) => (prev + 1) % images.length);
     }, 2500);
     return () => clearInterval(timer);
-  }, [images.length]);
+  }, [images.length, isHovered]);
 
   const wishlisted = isWishlisted(product.id);
 
@@ -108,15 +109,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      whileHover={{ y: -4 }}
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="relative rounded-[1rem] animate-card-fade transition-all duration-300 hover:-translate-y-1"
       style={{
-        position: 'relative',
-        borderRadius: '1rem',
-        transition: 'box-shadow 0.7s ease',
+        animationDelay: `${index * 40}ms`,
+        opacity: 0,
+        animationFillMode: 'forwards',
+        transition: 'box-shadow 0.3s ease, transform 0.3s ease',
         ...(glowColor ? {
           boxShadow: `
             0 0 0 1px rgba(${glowColor},0.25),
@@ -299,6 +300,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }
