@@ -50,83 +50,102 @@ function sampleColor(imgEl: HTMLImageElement): string | null {
 // ─── SingleBanner ─────────────────────────────────────────────────────────────
 
 function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean }) {
+  const [glowColor, setGlowColor] = useState<string | null>(null);
+
+  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
+    if (color) setGlowColor(color);
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] overflow-hidden rounded-3xl md:rounded-[2.5rem] group z-10"
+      className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] rounded-3xl md:rounded-[2.5rem] group z-10"
+      style={glowColor ? {
+        boxShadow: `0 0 60px rgba(${glowColor},0.2), 0 20px 40px rgba(${glowColor},0.15)`,
+        transition: 'box-shadow 0.7s ease',
+      } : undefined}
     >
-      <Image
-        src={banner.image_url}
-        alt={banner.title || 'Banner'}
-        fill
-        crossOrigin="anonymous"
-        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        sizes="(max-width: 768px) 100vw, 1400px"
-        priority={priority}
-      />
+      {/* Ambient background bloom */}
+      {glowColor && (
+        <div
+          className="absolute inset-0 pointer-events-none z-0 transition-opacity duration-700"
+          style={{
+            background: `radial-gradient(circle at 50% 50%, rgba(${glowColor}, 0.25) 0%, transparent 70%)`,
+            filter: 'blur(40px)',
+            transform: 'scale(1.1)',
+          }}
+        />
+      )}
 
-      {/* Clean, simple dark gradient just enough for text legibility */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
+      {/* Content wrapper */}
+      <div className="absolute inset-0 overflow-hidden rounded-[inherit] z-10">
+        <Image
+          src={banner.image_url}
+          alt={banner.title || 'Banner'}
+          fill
+          crossOrigin="anonymous"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, 1400px"
+          priority={priority}
+          onLoad={handleImageLoad}
+        />
 
-      {/* Content overlay */}
-      <div className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20">
-        <div className="max-w-xl">
-          <motion.div
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-10 h-0.5 bg-[#c8a96e] mb-4 origin-left"
-          />
+        {/* Clean, simple dark gradient just enough for text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
 
-          {banner.title && (
-            <motion.h3
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.25 }}
-              className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
-              style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
-            >
-              {banner.title}
-            </motion.h3>
-          )}
-
-          {banner.subtitle && (
-            <motion.p
-              initial={{ opacity: 0, x: -16 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.35 }}
-              className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
-            >
-              {banner.subtitle}
-            </motion.p>
-          )}
-
-          {banner.cta_text && banner.cta_url && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.45 }}
-            >
-              <Link prefetch={true} href={banner.cta_url}
-                className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300"
-                style={{
-                  background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
-                  color: '#0a0a0a',
-                  boxShadow: '0 0 24px rgba(200,169,110,0.25)',
-                }}
+        {/* Content overlay */}
+        <div className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20">
+          <div className="max-w-xl">
+            {banner.title && (
+              <motion.h3
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.25 }}
+                className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
+                style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
               >
-                {banner.cta_text}
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-              </Link>
-            </motion.div>
-          )}
+                {banner.title}
+              </motion.h3>
+            )}
+
+            {banner.subtitle && (
+              <motion.p
+                initial={{ opacity: 0, x: -16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.35 }}
+                className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
+              >
+                {banner.subtitle}
+              </motion.p>
+            )}
+
+            {banner.cta_text && banner.cta_url && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.45 }}
+              >
+                <Link prefetch={true} href={banner.cta_url}
+                  className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300"
+                  style={{
+                    background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
+                    color: '#0a0a0a',
+                    boxShadow: '0 0 24px rgba(200,169,110,0.25)',
+                  }}
+                >
+                  {banner.cta_text}
+                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                </Link>
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>
@@ -135,6 +154,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
 
 function SliderBanners({ banners }: { banners: Banner[] }) {
   const [current, setCurrent] = useState(0);
+  const [glowColors, setGlowColors] = useState<Record<number, string>>({});
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const next = useCallback(() => {
@@ -151,111 +171,132 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [next]);
 
+  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
+    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
+    if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
+  }, []);
+
+  const activeGlow = glowColors[current];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] overflow-hidden rounded-3xl md:rounded-[2.5rem] group z-10"
+      className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] rounded-3xl md:rounded-[2.5rem] group z-10"
+      style={activeGlow ? {
+        boxShadow: `0 0 60px rgba(${activeGlow},0.2), 0 20px 40px rgba(${activeGlow},0.15)`,
+        transition: 'box-shadow 0.7s ease',
+      } : undefined}
     >
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={current}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="absolute inset-0"
-        >
-          <Image
-            src={banners[current].image_url}
-            alt={banners[current].title || "Banner"}
-            fill
-            crossOrigin="anonymous"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 1400px"
-            priority={current === 0}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
-          
-          <div className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20">
-            <div className="max-w-xl">
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="w-10 h-0.5 bg-[#c8a96e] mb-4 origin-left"
-              />
-              {banners[current].title && (
-                <motion.h3
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.25 }}
-                  className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
-                  style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
-                >
-                  {banners[current].title}
-                </motion.h3>
-              )}
-              {banners[current].subtitle && (
-                <motion.p
-                  initial={{ opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.35 }}
-                  className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
-                >
-                  {banners[current].subtitle}
-                </motion.p>
-              )}
-              {banners[current].cta_text && banners[current].cta_url && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.45 }}
-                >
-                  <Link prefetch={true} href={banners[current].cta_url}
-                    className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300"
-                    style={{
-                      background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
-                      color: '#0a0a0a',
-                      boxShadow: '0 0 24px rgba(200,169,110,0.25)',
-                    }}
+      {/* Ambient background bloom */}
+      {activeGlow && (
+        <div
+          className="absolute inset-0 pointer-events-none z-0 transition-opacity duration-700"
+          style={{
+            background: `radial-gradient(circle at 50% 50%, rgba(${activeGlow}, 0.25) 0%, transparent 70%)`,
+            filter: 'blur(40px)',
+            transform: 'scale(1.1)',
+          }}
+        />
+      )}
+
+      {/* Content wrapper */}
+      <div className="absolute inset-0 overflow-hidden rounded-[inherit] z-10">
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={current}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={banners[current].image_url}
+              alt={banners[current].title || "Banner"}
+              fill
+              crossOrigin="anonymous"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, 1400px"
+              priority={current === 0}
+              onLoad={(e) => handleImageLoad(e, current)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
+            
+            <div className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20">
+              <div className="max-w-xl">
+                {banners[current].title && (
+                  <motion.h3
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.25 }}
+                    className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
+                    style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
                   >
-                    {banners[current].cta_text}
-                    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                  </Link>
-                </motion.div>
-              )}
+                    {banners[current].title}
+                  </motion.h3>
+                )}
+                {banners[current].subtitle && (
+                  <motion.p
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.35 }}
+                    className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
+                  >
+                    {banners[current].subtitle}
+                  </motion.p>
+                )}
+                {banners[current].cta_text && banners[current].cta_url && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.45 }}
+                  >
+                    <Link prefetch={true} href={banners[current].cta_url}
+                      className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300"
+                      style={{
+                        background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
+                        color: '#0a0a0a',
+                        boxShadow: '0 0 24px rgba(200,169,110,0.25)',
+                      }}
+                    >
+                      {banners[current].cta_text}
+                      <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                    </Link>
+                  </motion.div>
+                )}
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+          </motion.div>
+        </AnimatePresence>
 
-      <button
-        onClick={prev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-      <button
-        onClick={next}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20"
-      >
-        <ChevronRight className="w-5 h-5" />
-      </button>
+        <button
+          onClick={prev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button
+          onClick={next}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2">
-        {banners.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={cn(
-              "w-2 h-2 rounded-full transition-all duration-300",
-              i === current ? "w-6 bg-white" : "bg-white/40 hover:bg-white/60"
-            )}
-          />
-        ))}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2">
+          {banners.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className={cn(
+                "w-2 h-2 rounded-full transition-all duration-300",
+                i === current ? "w-6 bg-white" : "bg-white/40 hover:bg-white/60"
+              )}
+            />
+          ))}
+        </div>
       </div>
     </motion.div>
   );
