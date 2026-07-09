@@ -295,9 +295,8 @@ function SidebarBannerCard({ banner, priority }: { banner: Banner; priority: boo
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       className="relative w-full overflow-hidden card-edge-light group"
       style={glowColor ? {
-        boxShadow: `0 0 0 1px rgba(${glowColor},0.22), 0 8px 24px rgba(${glowColor},0.12), 0 2px 8px rgba(${glowColor},0.08)`,
-        borderColor: `rgba(${glowColor},0.25)`,
-        transition: 'box-shadow 0.7s ease, border-color 0.7s ease',
+        boxShadow: `0 0 40px rgba(${glowColor},0.15), 0 8px 24px rgba(${glowColor},0.1)`,
+        transition: 'box-shadow 0.7s ease',
       } : undefined}
     >
       {/* Adaptive background bloom */}
@@ -394,7 +393,7 @@ export function SidebarBannersPanel({ banners }: BannersSectionProps) {
   if (!banners.length) return null;
 
   return (
-    <div className="sticky top-24 flex flex-col gap-5 py-10">
+    <div className="sticky top-24 flex flex-col gap-5 py-6">
       {/* Top gold accent */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/30 to-transparent" />
 
@@ -463,12 +462,12 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
   };
 
   return (
-    <section className="relative w-full py-12 overflow-hidden">
+    <section className="relative w-full py-6">
       {/* Gold accent line */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c8a96e]/25 to-transparent mb-8" />
 
       {/* Ambient background glow */}
-      <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center">
         <AnimatePresence>
           {activeGlow && (
             <motion.div
@@ -479,8 +478,8 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
               transition={{ duration: 1.2, ease: 'easeInOut' }}
               className="absolute w-full h-[150%] max-w-[600px]"
               style={{
-                background: `radial-gradient(circle at 50% 50%, rgba(${activeGlow}, 0.15) 0%, transparent 60%)`,
-                filter: 'blur(60px)',
+                background: `radial-gradient(circle at 50% 50%, rgba(${activeGlow}, 0.2) 0%, transparent 60%)`,
+                filter: 'blur(40px)',
               }}
             />
           )}
@@ -522,7 +521,7 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
               style={{
                 pointerEvents: pointerEvents as any,
                 boxShadow: isCenter 
-                  ? '0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(200,169,110,0.2)'
+                  ? '0 20px 40px rgba(0,0,0,0.5)'
                   : '0 10px 20px rgba(0,0,0,0.4)',
               }}
             >
@@ -601,7 +600,7 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
     <div
       className="relative flex-shrink-0 w-[72vw] max-w-[280px] overflow-hidden rounded-2xl group"
       style={glowColor ? {
-        boxShadow: `0 0 0 1px rgba(${glowColor},0.18), 0 4px 16px rgba(${glowColor},0.08)`,
+        boxShadow: `0 0 40px rgba(${glowColor},0.2)`,
         transition: 'box-shadow 0.7s ease',
       } : {
         boxShadow: '0 0 0 1px rgba(200,169,110,0.08)',

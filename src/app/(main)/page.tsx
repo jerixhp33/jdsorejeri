@@ -37,37 +37,37 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero-position banners */}
-      <div className="pt-32 sm:pt-40 pb-4">
+      <div className="pt-20 sm:pt-24 pb-4">
         <BannersSection banners={heroBanners} />
       </div>
 
       {/* Top banners */}
-      <div className="mb-8 lg:mb-12">
+      <div className="mb-4 lg:mb-6">
         <BannersSection banners={topBanners} />
       </div>
 
       {/* Best Sellers Section */}
-      <div className="mb-8 lg:mb-12">
+      <div className="mb-4 lg:mb-6">
         <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
           <BestSellers products={bestSellers} />
         </Suspense>
       </div>
 
       {/* Sidebar layout — desktop only */}
-      <div className={sidebarBanners.length > 0 ? 'lg:flex lg:gap-6 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto mb-8 lg:mb-12' : 'mb-8 lg:mb-12'}>
+      <div className={sidebarBanners.length > 0 ? 'lg:flex lg:gap-6 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto mb-4 lg:mb-6' : 'mb-4 lg:mb-6'}>
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          <div className="mb-8 lg:mb-12">
+          <div className="mb-4 lg:mb-6">
             <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
               <FeaturedPosters products={featuredPosters} />
             </Suspense>
           </div>
 
-          <div className="mb-8 lg:mb-12">
+          <div className="mb-4 lg:mb-6">
             <BannersSection banners={middleBanners} />
           </div>
 
-          <div className="mb-8 lg:mb-12">
+          <div className="mb-4 lg:mb-6">
             <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
               <FeaturedEarrings products={featuredEarrings} />
             </Suspense>
@@ -89,23 +89,23 @@ export default async function HomePage() {
         )}
       </div>
 
-      <div className="mb-8 lg:mb-12">
+      <div className="mb-4 lg:mb-6">
         <CollectionsSection collections={collections} />
       </div>
 
-      <div className="mb-8 lg:mb-12">
+      <div className="mb-4 lg:mb-6">
         <WhyChooseUs />
       </div>
       
-      <div className="mb-8 lg:mb-12">
+      <div className="mb-4 lg:mb-6">
         <TestimonialsSection testimonials={testimonials} />
       </div>
 
-      <div className="mb-8 lg:mb-12">
+      <div className="mb-4 lg:mb-6">
         <BannersSection banners={bottomBanners} />
       </div>
 
-      <div className="mb-8 lg:mb-12">
+      <div className="mb-4 lg:mb-6">
         <FAQSection faqs={faqs} />
       </div>
 
