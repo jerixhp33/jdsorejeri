@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { ProductGrid } from '@/components/product/ProductGrid';
+import { ProductCard } from '@/components/product/ProductCard';
 import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
 import { createClient } from '@/lib/supabase/server';
 
@@ -26,7 +26,11 @@ export default async function BestSellersPage() {
       </div>
       <Suspense fallback={<ProductGridSkeleton count={12} />}>
         {products && products.length > 0 ? (
-          <ProductGrid products={products} />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
+            {products.map((product, i) => (
+              <ProductCard key={product.id} product={product} index={i} />
+            ))}
+          </div>
         ) : (
           <div className="text-center py-20 text-white/50">
             No best sellers found at the moment.
