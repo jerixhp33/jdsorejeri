@@ -147,7 +147,7 @@ export function CollectionsSection({ collections }: CollectionsSectionProps) {
   if (!collections.length) return null;
 
   return (
-    <section className="py-20 lg:py-28 bg-luxe-near-black">
+    <section className="py-12 lg:py-16">
       <div className="page-container">
         <div className="text-center mb-16">
           <motion.p

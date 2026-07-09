@@ -42,30 +42,40 @@ export default async function HomePage() {
       </div>
 
       {/* Top banners */}
-      <BannersSection banners={topBanners} />
+      <div className="mb-16 lg:mb-24">
+        <BannersSection banners={topBanners} />
+      </div>
 
       {/* Best Sellers Section */}
-      <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
-        <BestSellers products={bestSellers} />
-      </Suspense>
+      <div className="mb-20 lg:mb-32">
+        <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
+          <BestSellers products={bestSellers} />
+        </Suspense>
+      </div>
 
       {/* Sidebar layout — desktop only */}
-      <div className={sidebarBanners.length > 0 ? 'lg:flex lg:gap-6 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto' : ''}>
+      <div className={sidebarBanners.length > 0 ? 'lg:flex lg:gap-6 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto mb-20 lg:mb-32' : 'mb-20 lg:mb-32'}>
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
-            <FeaturedPosters products={featuredPosters} />
-          </Suspense>
+          <div className="mb-16 lg:mb-24">
+            <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
+              <FeaturedPosters products={featuredPosters} />
+            </Suspense>
+          </div>
 
-          <BannersSection banners={middleBanners} />
+          <div className="mb-16 lg:mb-24">
+            <BannersSection banners={middleBanners} />
+          </div>
 
-          <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
-            <FeaturedEarrings products={featuredEarrings} />
-          </Suspense>
+          <div className="mb-16 lg:mb-24">
+            <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
+              <FeaturedEarrings products={featuredEarrings} />
+            </Suspense>
+          </div>
 
           {/* Mobile sidebar banners appear here, right after featured earrings */}
           {sidebarBanners.length > 0 && (
-            <div className="lg:hidden mt-8">
+            <div className="lg:hidden mt-8 mb-16">
               <MobileSidebarBanners banners={sidebarBanners} />
             </div>
           )}
@@ -79,14 +89,26 @@ export default async function HomePage() {
         )}
       </div>
 
-      <CollectionsSection collections={collections} />
-      <WhyChooseUs />
+      <div className="mb-20 lg:mb-32">
+        <CollectionsSection collections={collections} />
+      </div>
+
+      <div className="mb-20 lg:mb-32">
+        <WhyChooseUs />
+      </div>
       
-      <TestimonialsSection testimonials={testimonials} />
+      <div className="mb-20 lg:mb-32">
+        <TestimonialsSection testimonials={testimonials} />
+      </div>
 
-      <BannersSection banners={bottomBanners} />
+      <div className="mb-20 lg:mb-32">
+        <BannersSection banners={bottomBanners} />
+      </div>
 
-      <FAQSection faqs={faqs} />
+      <div className="mb-20 lg:mb-32">
+        <FAQSection faqs={faqs} />
+      </div>
+
       <ContactSection />
     </>
   );

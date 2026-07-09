@@ -16,7 +16,7 @@ export function FAQSection({ faqs }: FAQSectionProps) {
   if (!faqs.length) return null;
 
   return (
-    <section id="faq" className="py-20 lg:py-28 bg-luxe-near-black">
+    <section id="faq" className="py-12 lg:py-16">
       <div className="page-container">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">

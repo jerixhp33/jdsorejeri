@@ -25,7 +25,7 @@ const FOOTER_LINKS = {
 
 export function Footer() {
   return (
-    <footer className="bg-luxe-near-black border-t border-white/10">
+    <footer className="bg-transparent border-t border-white/10">
       {/* Main footer */}
       <div className="page-container py-16 lg:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
