@@ -64,7 +64,6 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
         area: '',
         city: 'Coimbatore',
         district: 'Coimbatore',
-        state: 'Tamil Nadu',
         pincode: '',
         landmark: '',
       });
