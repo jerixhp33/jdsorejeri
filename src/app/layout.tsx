@@ -18,8 +18,16 @@ const playfair = Playfair_Display({
   weight: ['400', '500', '600', '700', '800', '900'],
 });
 
+const getBaseUrl = () => {
+  const url = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app';
+  if (url.includes('localhost') && process.env.NODE_ENV === 'production') {
+    return 'https://jdsorejeri.vercel.app';
+  }
+  return url;
+};
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app'),
+  metadataBase: new URL(getBaseUrl()),
   manifest: '/manifest.json',
   title: {
     default: 'JD Store — Premium Wall Posters & Earrings',

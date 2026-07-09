@@ -1,7 +1,10 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app';
+  let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app';
+  if (baseUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
+    baseUrl = 'https://jdsorejeri.vercel.app';
+  }
   return {
     rules: [
       {

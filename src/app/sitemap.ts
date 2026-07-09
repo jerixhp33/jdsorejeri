@@ -3,7 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient();
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app';
+  let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app';
+  if (baseUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
+    baseUrl = 'https://jdsorejeri.vercel.app';
+  }
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
