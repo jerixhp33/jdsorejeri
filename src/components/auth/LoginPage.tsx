@@ -21,11 +21,29 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
-  // Reset loading state if user cancels the Google popup and returns to the tab
+  // Reset loading state if user returns via browser back button (bfcache) or switching tabs
   useEffect(() => {
-    const handleFocus = () => setLoading(false);
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setLoading(false);
+      }
+    };
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setLoading(false);
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+    };
   }, []);
 
   const handleGoogleSignIn = async () => {
