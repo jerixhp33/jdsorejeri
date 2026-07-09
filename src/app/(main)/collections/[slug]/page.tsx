@@ -1,11 +1,13 @@
-export const dynamic = 'force-dynamic';
-
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { ProductCard } from '@/components/product/ProductCard';
+import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
+
+export const dynamic = 'force-dynamic';
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -23,21 +25,14 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   const { slug } = await params;
   const supabase = await createClient();
 
+  // Fetch only the collection details immediately for the layout
   const { data: collection } = await supabase
     .from('collections').select('*').eq('slug', slug).eq('is_active', true).single();
 
   if (!collection) notFound();
 
-  const { data: collectionProducts } = await supabase
-    .from('collection_products')
-    .select('product_id, display_order, product:products(*, category:product_categories(*), images:product_images(*), sizes:poster_sizes(*))')
-    .eq('collection_id', collection.id)
-    .order('display_order');
-
-  const products = (collectionProducts || []).map((cp) => cp.product).filter(Boolean);
-
   return (
-    <div className="page-container py-24 md:py-32">
+    <div className="page-container py-24 md:py-32 min-h-screen">
       <div className="mb-16 flex flex-col items-center text-center">
         <Link 
           href="/" 
@@ -55,17 +50,36 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         )}
       </div>
 
-      {products.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
-          {products.map((product: any, i: number) => (
-            <ProductCard key={product.id} product={product} index={i} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-24">
-          <p className="text-white/30">No products in this collection yet.</p>
-        </div>
-      )}
+      <Suspense fallback={<ProductGridSkeleton count={12} />}>
+        <CollectionProductsData collectionId={collection.id} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function CollectionProductsData({ collectionId }: { collectionId: string }) {
+  const supabase = await createClient();
+  const { data: collectionProducts } = await supabase
+    .from('collection_products')
+    .select('product_id, display_order, product:products(*, category:product_categories(*), images:product_images(*), sizes:poster_sizes(*))')
+    .eq('collection_id', collectionId)
+    .order('display_order');
+
+  const products = (collectionProducts || []).map((cp) => cp.product).filter(Boolean);
+
+  if (!products || products.length === 0) {
+    return (
+      <div className="text-center py-24">
+        <p className="text-white/30">No products in this collection yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
+      {products.map((product: any, i: number) => (
+        <ProductCard key={product.id} product={product} index={i} />
+      ))}
     </div>
   );
 }

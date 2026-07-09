@@ -8,14 +8,6 @@ import { createClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 export default async function BestSellersPage() {
-  const supabase = await createClient();
-  const { data: products } = await supabase
-    .from('products')
-    .select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)')
-    .eq('is_active', true)
-    .eq('is_best_seller', true)
-    .order('created_at', { ascending: false });
-
   return (
     <div className="pt-24 sm:pt-32 pb-20 page-container min-h-screen">
       <div className="mb-6">
@@ -32,18 +24,34 @@ export default async function BestSellersPage() {
         </p>
       </div>
       <Suspense fallback={<ProductGridSkeleton count={12} />}>
-        {products && products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
-            {products.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 text-white/50">
-            No best sellers found at the moment.
-          </div>
-        )}
+        <BestSellersData />
       </Suspense>
+    </div>
+  );
+}
+
+async function BestSellersData() {
+  const supabase = await createClient();
+  const { data: products } = await supabase
+    .from('products')
+    .select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)')
+    .eq('is_active', true)
+    .eq('is_best_seller', true)
+    .order('created_at', { ascending: false });
+
+  if (!products || products.length === 0) {
+    return (
+      <div className="text-center py-20 text-white/50">
+        No best sellers found at the moment.
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
+      {products.map((product, i) => (
+        <ProductCard key={product.id} product={product} index={i} />
+      ))}
     </div>
   );
 }
