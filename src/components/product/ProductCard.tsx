@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useInView } from 'react-intersection-observer';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -25,6 +26,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [glowColor, setGlowColor] = useState<string | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const { ref: inViewRef, inView } = useInView({
+    threshold: 0.05,
+    triggerOnce: false,
+  });
 
   const sampleImageColor = useCallback((imgEl: HTMLImageElement) => {
     try {
@@ -75,12 +80,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   };
 
   useEffect(() => {
-    if (images.length <= 1 || !isHovered) return;
+    if (images.length <= 1 || !inView) return;
     const timer = setInterval(() => {
       setImageIndex((prev) => (prev + 1) % images.length);
     }, 2500);
     return () => clearInterval(timer);
-  }, [images.length, isHovered]);
+  }, [images.length, inView]);
 
   const wishlisted = isWishlisted(product.id);
 
@@ -110,6 +115,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   return (
     <div
+      ref={inViewRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="relative rounded-[1rem] animate-card-fade transition-all duration-300 hover:-translate-y-1"
@@ -141,32 +147,34 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden rounded-t-[1rem] bg-luxe-gray">
           {images.length > 0 ? (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={imageIndex}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="absolute inset-0"
-              >
-                <Image
-                  src={images[imageIndex].url}
-                  alt={images[imageIndex].alt_text || product.name}
-                  fill
-                  crossOrigin="anonymous"
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className={cn(
-                    'object-cover transition-all duration-700',
-                    imageLoaded ? 'opacity-100' : 'opacity-0'
-                  )}
-                  onLoad={(e) => {
-                    setImageLoaded(true);
-                    sampleImageColor(e.currentTarget as unknown as HTMLImageElement);
-                  }}
-                />
-              </motion.div>
-            </AnimatePresence>
+            <div 
+              className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
+              style={{
+                transform: `translateX(-${imageIndex * 100}%)`,
+              }}
+            >
+              {images.map((img, idx) => (
+                <div key={idx} className="relative w-full h-full flex-shrink-0">
+                  <Image
+                    src={img.url}
+                    alt={img.alt_text || product.name}
+                    fill
+                    crossOrigin="anonymous"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className={cn(
+                      'object-cover transition-all duration-700',
+                      imageLoaded ? 'opacity-100' : 'opacity-0'
+                    )}
+                    onLoad={(e) => {
+                      if (idx === 0) {
+                        setImageLoaded(true);
+                        sampleImageColor(e.currentTarget as unknown as HTMLImageElement);
+                      }
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-luxe-gray">
               <span className="text-white/20 text-4xl">✦</span>
