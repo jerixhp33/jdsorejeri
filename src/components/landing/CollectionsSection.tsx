@@ -98,7 +98,7 @@ export function CollectionCard({ collection, index }: { collection: Collection; 
                 alt={collection.name}
                 fill
                 crossOrigin="anonymous"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-700"
                 onLoad={onImgLoad}
               />
@@ -124,18 +124,18 @@ export function CollectionCard({ collection, index }: { collection: Collection; 
         </div>
 
         {/* Info */}
-        <div className="absolute bottom-0 left-0 right-0 p-5">
-          <h3 className="text-white font-display text-xl font-bold mb-1">
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+          <h3 className="text-white font-display text-base md:text-xl font-bold mb-1">
             {collection.name}
           </h3>
           {collection.description && (
-            <p className="text-white/50 text-sm line-clamp-2 mb-3">
+            <p className="text-white/50 text-xs md:text-sm line-clamp-2 mb-2 md:mb-3">
               {collection.description}
             </p>
           )}
-          <div className="flex items-center gap-1 text-luxe-accent text-sm font-medium">
+          <div className="flex items-center gap-1 text-luxe-accent text-[10px] md:text-sm font-medium">
             Explore
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-3 h-3 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
       </Link>
@@ -169,7 +169,7 @@ export function CollectionsSection({ collections }: CollectionsSectionProps) {
           </motion.h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {collections.map((collection, i) => (
             <CollectionCard key={collection.id} collection={collection} index={i} />
           ))}
