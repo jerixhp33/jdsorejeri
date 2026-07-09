@@ -263,11 +263,13 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
 
         {/* Product Info */}
-        <div className="p-3 sm:p-4">
-          <p className="text-white/40 text-[11px] mb-0.5">{product.category?.name}</p>
-          <h3 className="text-white text-xs sm:text-sm font-medium leading-snug mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-luxe-accent transition-colors h-8 sm:h-10 flex items-start">
-            {product.name}
-          </h3>
+        <div className="p-3 sm:p-4 flex flex-col justify-between h-[90px] sm:h-[104px]">
+          <div>
+            <p className="text-white/40 text-[10px] sm:text-[11px] mb-0.5 leading-none">{product.category?.name}</p>
+            <h3 className="text-white text-xs sm:text-sm font-medium leading-snug line-clamp-2 group-hover:text-luxe-accent transition-colors">
+              {product.name}
+            </h3>
+          </div>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center h-6">
