@@ -202,7 +202,7 @@ export function OrdersList({ orders }: OrdersListProps) {
                             <RotateCcw className="w-3 h-3" />
                             {addingItem === item.id ? 'Adding...' : 'Buy Again'}
                           </button>
-                        </div>>
+                        </div>
                       </div>
                     );
                   })}
