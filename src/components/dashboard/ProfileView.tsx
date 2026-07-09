@@ -6,15 +6,16 @@ import { motion } from 'framer-motion';
 import { Package, Heart, MapPin, Shield, Monitor, Clock, Bell } from 'lucide-react';
 import { formatDate, formatRelativeTime, getInitials } from '@/lib/utils';
 import { useWebPush } from '@/hooks/useWebPush';
-import type { UserProfile, LoginLog } from '@/types';
+import type { UserProfile, LoginLog, Order } from '@/types';
 
 interface ProfileViewProps {
   profile: UserProfile;
   loginLogs: LoginLog[];
   orderCount: number;
+  recentOrders: Order[];
 }
 
-export function ProfileView({ profile, loginLogs, orderCount }: ProfileViewProps) {
+export function ProfileView({ profile, loginLogs, orderCount, recentOrders }: ProfileViewProps) {
   const { isSupported, isSubscribed, subscribe } = useWebPush();
 
   return (
@@ -100,6 +101,42 @@ export function ProfileView({ profile, loginLogs, orderCount }: ProfileViewProps
           </Link>
         ))}
       </motion.div>
+
+      {/* Active Orders Widget */}
+      {recentOrders && recentOrders.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="glass-card p-4 sm:p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Package className="w-4 h-4 text-luxe-accent" />
+              <h2 className="text-white font-semibold">Active Orders</h2>
+            </div>
+            <Link prefetch={true} href="/dashboard/orders" className="text-xs text-luxe-accent hover:underline">View All</Link>
+          </div>
+          <div className="space-y-4">
+            {recentOrders.map((order) => {
+              const firstItem = order.items?.[0];
+              const img = (firstItem?.product?.images as any[])?.find(i => i.is_primary) || (firstItem?.product?.images as any[])?.[0];
+              return (
+                <div key={order.id} className="flex items-center gap-4 p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="w-12 h-12 rounded-lg bg-luxe-dark overflow-hidden flex-shrink-0">
+                    {img && <Image src={img.url} alt={firstItem?.product?.name || ''} width={48} height={48} className="object-cover w-full h-full" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-medium truncate">Order #{order.order_number}</p>
+                    <p className="text-white/50 text-xs mt-0.5">Status: <span className={cn('status-' + order.status, 'text-[10px] ml-1')}>{order.status}</span></p>
+                  </div>
+                  <Link prefetch={true} href="/dashboard/orders" className="btn-glass !py-1.5 !px-3 text-xs shrink-0">Track</Link>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* Recent login activity */}
       {loginLogs.length > 0 && (

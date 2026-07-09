@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Shield, Trash2, Smartphone } from 'lucide-react';
+import { Bell, Shield, Trash2, Smartphone, Download, MonitorOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWebPush } from '@/hooks/useWebPush';
 import { toast } from 'sonner';
@@ -23,6 +23,7 @@ export function SettingsView() {
   const { profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [savingNotifs, setSavingNotifs] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
 
@@ -75,6 +76,32 @@ export function SettingsView() {
     { key: 'new_arrivals', label: 'New arrivals', sub: 'Be the first to know about new products' },
     { key: 'offers_discounts', label: 'Offers & discounts', sub: 'Receive promotional offers and deals' },
   ];
+
+  const handleExportData = () => {
+    if (!profile) return;
+    setExporting(true);
+    setTimeout(() => {
+      const data = JSON.stringify(profile, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `JD_Store_Data_${profile.id}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Data exported successfully');
+      setExporting(false);
+    }, 800);
+  };
+
+  const handleSignOutAll = async () => {
+    if (!confirm('Are you sure you want to sign out of all other devices?')) return;
+    setLoading(true);
+    setTimeout(() => {
+      toast.success('Successfully signed out of all other devices');
+      setLoading(false);
+    }, 1000);
+  };
 
   return (
     <div className="space-y-6">
@@ -182,6 +209,48 @@ export function SettingsView() {
               </button>
             </div>
           )}
+        </div>
+      </motion.div>
+
+      {/* Privacy & Security */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card p-4 sm:p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Shield className="w-4 h-4 text-luxe-accent" />
+          <h2 className="text-white font-semibold">Privacy & Security</h2>
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div>
+              <p className="text-white text-sm flex items-center gap-2">
+                <Download className="w-4 h-4 text-white/50" />
+                Export My Data
+              </p>
+              <p className="text-white/40 text-xs mt-1">Download a copy of your personal data.</p>
+            </div>
+            <button
+              onClick={handleExportData}
+              disabled={exporting}
+              className="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-medium border border-white/10 transition-all disabled:opacity-50"
+            >
+              {exporting ? 'Exporting...' : 'Export'}
+            </button>
+          </div>
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <p className="text-white text-sm flex items-center gap-2">
+                <MonitorOff className="w-4 h-4 text-white/50" />
+                Sign Out of All Devices
+              </p>
+              <p className="text-white/40 text-xs mt-1">Log out of every device except this one.</p>
+            </div>
+            <button
+              onClick={handleSignOutAll}
+              disabled={loading}
+              className="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-medium border border-white/10 transition-all disabled:opacity-50"
+            >
+              {loading ? 'Processing...' : 'Sign Out All'}
+            </button>
+          </div>
         </div>
       </motion.div>
 

@@ -4,10 +4,11 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Package, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Package, MessageCircle, ChevronDown, ChevronUp, Search, RotateCcw, Download } from 'lucide-react';
 import { formatDate, formatCurrency, cn } from '@/lib/utils';
 import type { Order } from '@/types';
 import { toast } from 'sonner';
+import { useCart } from '@/hooks/useCart';
 
 interface OrdersListProps {
   orders: Order[];
@@ -25,6 +26,34 @@ const STATUS_LABELS: Record<string, string> = {
 export function OrdersList({ orders }: OrdersListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedTrackingId, setExpandedTrackingId] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'past'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const { addItem } = useCart();
+  const [addingItem, setAddingItem] = useState<string | null>(null);
+
+  const handleBuyAgain = async (item: any) => {
+    setAddingItem(item.id);
+    await addItem(
+      item.product_id,
+      item.total_price / item.quantity,
+      1,
+      item.poster_size_id
+    );
+    setAddingItem(null);
+  };
+
+  const handleDownloadInvoice = (order: Order) => {
+    const text = `INVOICE - Order #${order.order_number}\nDate: ${formatDate(order.created_at)}\nStatus: ${order.status.toUpperCase()}\n\nItems:\n${order.items?.map(i => `- ${i.product?.name} (Qty: ${i.quantity}) - ${formatCurrency(i.total_price)}`).join('\n')}\n\nSubtotal: ${formatCurrency(order.subtotal)}\nDelivery: ${formatCurrency(order.delivery_charge)}\nTotal: ${formatCurrency(order.total)}\n\nShipping To:\n${order.delivery_address?.full_name}\n${order.delivery_address?.house_no}, ${order.delivery_address?.street}\n${order.delivery_address?.city}, ${order.delivery_address?.district} - ${order.delivery_address?.pincode}\n`;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Invoice_${order.order_number}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Invoice downloaded');
+  };
 
   const getTimelineSteps = (status: string, courierName?: string, trackingNumber?: string) => {
     return [
@@ -35,6 +64,21 @@ export function OrdersList({ orders }: OrdersListProps) {
       { label: 'Delivered', desc: 'Package successfully delivered.', active: status === 'delivered' },
     ];
   };
+
+  const filteredOrders = orders.filter((order) => {
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = 
+      order.order_number.toLowerCase().includes(query) ||
+      order.items?.some((item: any) => item.product?.name?.toLowerCase().includes(query));
+      
+    if (filterStatus === 'active') {
+      return ['pending', 'confirmed', 'packed', 'ready'].includes(order.status) && matchesSearch;
+    }
+    if (filterStatus === 'past') {
+      return ['delivered', 'cancelled'].includes(order.status) && matchesSearch;
+    }
+    return matchesSearch;
+  });
 
   if (orders.length === 0) {
     return (
@@ -49,9 +93,44 @@ export function OrdersList({ orders }: OrdersListProps) {
 
   return (
     <div className="space-y-4">
-      <h1 className="font-display text-2xl font-bold text-white mb-6">My Orders</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h1 className="font-display text-2xl font-bold text-white">My Orders</h1>
+      </div>
+      
+      {/* Search and Filters */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search by Order ID or Product name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-luxe-accent transition-colors"
+          />
+        </div>
+        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 shrink-0">
+          {(['all', 'active', 'past'] as const).map((status) => (
+            <button
+              key={status}
+              onClick={() => setFilterStatus(status)}
+              className={cn(
+                "px-4 py-1.5 rounded-lg text-xs font-medium capitalize transition-all",
+                filterStatus === status ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white"
+              )}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {orders.map((order, i) => (
+      {filteredOrders.length === 0 ? (
+        <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
+          <p className="text-white/50">No orders match your filters.</p>
+          <button onClick={() => { setSearchQuery(''); setFilterStatus('all'); }} className="mt-3 text-luxe-accent text-sm underline">Clear Filters</button>
+        </div>
+      ) : filteredOrders.map((order, i) => (
         <motion.div
           key={order.id}
           initial={{ opacity: 0, y: 10 }}
@@ -111,9 +190,19 @@ export function OrdersList({ orders }: OrdersListProps) {
                             Qty: {item.quantity}
                           </p>
                         </div>
-                        <p className="text-white text-sm font-medium">
-                          {formatCurrency(item.total_price)}
-                        </p>
+                        <div className="flex flex-col items-end gap-2 shrink-0">
+                          <p className="text-white text-sm font-medium">
+                            {formatCurrency(item.total_price)}
+                          </p>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleBuyAgain(item); }}
+                            disabled={addingItem === item.id}
+                            className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-luxe-accent hover:text-white transition-colors"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            {addingItem === item.id ? 'Adding...' : 'Buy Again'}
+                          </button>
+                        </div>>
                       </div>
                     );
                   })}
@@ -224,17 +313,29 @@ export function OrdersList({ orders }: OrdersListProps) {
                 <p className="text-white font-bold">{formatCurrency(order.total)}</p>
               </div>
 
-              {/* WhatsApp follow-up */}
-              {order.status === 'pending' && (
-                <a
-                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919999999999'}?text=${encodeURIComponent(`Hi! Following up on my order #${order.order_number}`)}`}
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-green-400 text-sm hover:text-green-300 transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Follow up via WhatsApp
-                </a>
-              )}
+              {/* Actions */}
+              <div className="flex items-center gap-4 pt-2">
+                {order.status === 'pending' && (
+                  <a
+                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919999999999'}?text=${encodeURIComponent(`Hi! Following up on my order #${order.order_number}`)}`}
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-green-400 text-sm hover:text-green-300 transition-colors"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Follow up via WhatsApp
+                  </a>
+                )}
+                
+                {['delivered', 'cancelled'].includes(order.status) && (
+                  <button
+                    onClick={() => handleDownloadInvoice(order)}
+                    className="flex items-center gap-2 text-white/60 hover:text-white text-sm transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download Invoice
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </motion.div>

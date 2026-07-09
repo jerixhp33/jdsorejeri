@@ -16,13 +16,17 @@ export default async function DashboardPage() {
 
   if (!profile) redirect('/login');
 
-  const [{ data: loginLogs }, { count: orderCount }] = await Promise.all([
+  const [{ data: loginLogs }, { count: orderCount }, { data: recentOrders }] = await Promise.all([
     admin.from('login_logs').select('*')
       .eq('user_id', profile.id)
       .order('login_time', { ascending: false }).limit(5),
     admin.from('orders').select('*', { count: 'exact', head: true })
       .eq('user_id', profile.id),
+    admin.from('orders').select('*, items:order_items(*, product:products(name, images:product_images(url, is_primary)))')
+      .eq('user_id', profile.id)
+      .in('status', ['pending', 'confirmed', 'packed', 'ready'])
+      .order('created_at', { ascending: false }).limit(2),
   ]);
 
-  return <ProfileView profile={profile} loginLogs={loginLogs || []} orderCount={orderCount || 0} />;
+  return <ProfileView profile={profile} loginLogs={loginLogs || []} orderCount={orderCount || 0} recentOrders={recentOrders || []} />;
 }
