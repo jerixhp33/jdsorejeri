@@ -25,7 +25,7 @@ export function FeaturedPosters({ products }: FeaturedPostersProps) {
               viewport={{ once: true }}
               className="text-luxe-accent text-sm tracking-widest uppercase mb-3"
             >
-              Wall Art
+              Top Picks
             </motion.p>
             <motion.h2
               initial={{ opacity: 0, y: 15 }}
@@ -34,7 +34,7 @@ export function FeaturedPosters({ products }: FeaturedPostersProps) {
               transition={{ delay: 0.1 }}
               className="section-title"
             >
-              Featured Posters
+              Best Sellers
             </motion.h2>
           </div>
           <motion.div

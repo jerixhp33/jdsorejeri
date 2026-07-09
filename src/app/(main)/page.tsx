@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { HeroSection } from '@/components/landing/HeroSection';
 import { BannersSection, SidebarBannersPanel, MobileSidebarBanners } from '@/components/landing/BannersSection';
 import { FeaturedPosters } from '@/components/landing/FeaturedPosters';
 import { FeaturedEarrings } from '@/components/landing/FeaturedEarrings';
@@ -34,10 +33,10 @@ export default async function HomePage() {
 
   return (
     <>
-      <HeroSection />
-
       {/* Hero-position banners */}
-      <BannersSection banners={heroBanners} />
+      <div className="pt-28 sm:pt-36">
+        <BannersSection banners={heroBanners} />
+      </div>
 
       {/* Top banners */}
       <BannersSection banners={topBanners} />
