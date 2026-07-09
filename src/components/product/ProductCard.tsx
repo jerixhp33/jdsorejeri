@@ -270,13 +270,21 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </h3>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-baseline gap-1">
-              {product.product_type === 'poster' && displayPrice > 0 && (
-                <span className="text-white/40 text-[10px] uppercase tracking-widest">From</span>
+             <div className="flex items-baseline gap-1">
+              {!isInStock ? (
+                <span className="inline-block px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/50 text-[11px] font-medium tracking-wide backdrop-blur-md uppercase">
+                  Coming Soon
+                </span>
+              ) : (
+                <>
+                  {product.product_type === 'poster' && displayPrice > 0 && (
+                    <span className="text-white/40 text-[10px] uppercase tracking-widest">From</span>
+                  )}
+                  <span className="text-white font-semibold text-sm sm:text-base">
+                    {displayPrice > 0 ? formatCurrency(displayPrice) : 'Coming Soon'}
+                  </span>
+                </>
               )}
-              <span className="text-white font-semibold text-sm sm:text-base">
-                {displayPrice > 0 ? formatCurrency(displayPrice) : 'Coming Soon'}
-              </span>
             </div>
             {(product.average_rating ?? 0) > 0 && (
               <div className="flex items-center gap-0.5">
