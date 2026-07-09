@@ -11,7 +11,7 @@ export default async function BestSellersPage() {
   const supabase = await createClient();
   const { data: products } = await supabase
     .from('products')
-    .select('*, images:product_images(*), category:categories(*)')
+    .select('*, images:product_images(*), category:product_categories(*)')
     .eq('is_active', true)
     .eq('is_best_seller', true)
     .order('created_at', { ascending: false });
