@@ -21,7 +21,7 @@ export default async function CollectionsPage() {
     .order('display_order');
 
   return (
-    <div className="page-container py-8 sm:py-10 md:py-16">
+    <div className="page-container pt-16 pb-8 sm:pt-20 sm:pb-10 md:pt-24 md:pb-16">
       <div className="mb-8 sm:mb-12">
         <p className="text-luxe-accent text-xs sm:text-sm tracking-widest uppercase mb-2 sm:mb-3">Curated</p>
         <h1 className="section-title">Collections</h1>

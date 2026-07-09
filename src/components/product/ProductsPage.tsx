@@ -166,7 +166,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="page-container pt-10 pb-8" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <div className="page-container pt-16 sm:pt-20 md:pt-24 pb-8" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
