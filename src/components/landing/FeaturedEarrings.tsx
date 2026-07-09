@@ -14,7 +14,7 @@ export function FeaturedEarrings({ products }: FeaturedEarringsProps) {
   if (!products.length) return null;
 
   return (
-    <section className="py-20 lg:py-28">
+    <section className="py-2">
       <div className="page-container">
         {/* Decorative line */}
         <div className="flex items-center gap-4 mb-12">

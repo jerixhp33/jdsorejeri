@@ -15,7 +15,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
   if (!testimonials.length) return null;
 
   return (
-    <section className="py-20 lg:py-28 overflow-hidden">
+    <section className="py-2 overflow-hidden">
       <div className="page-container">
         <div className="text-center mb-16">
           <motion.p

@@ -14,7 +14,7 @@ export function FeaturedPosters({ products }: FeaturedPostersProps) {
   if (!products.length) return null;
 
   return (
-    <section className="py-20 lg:py-28">
+    <section className="py-2">
       <div className="page-container">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">

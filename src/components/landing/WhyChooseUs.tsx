@@ -38,7 +38,7 @@ const FEATURES = [
 
 export function WhyChooseUs() {
   return (
-    <section className="py-20 lg:py-28">
+    <section className="py-2">
       <div className="page-container">
         <div className="text-center mb-16">
           <motion.p
