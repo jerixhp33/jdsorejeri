@@ -15,66 +15,53 @@ const BACKGROUND_COLOR = '#0a0a0a';
 
 async function generateIcons() {
   try {
-    const svgBuffer = fs.readFileSync(svgPath);
+    const rawSvg = fs.readFileSync(svgPath, 'utf8');
 
-    // Generate 192x192 with padding (logo takes up 70% of the canvas)
+    // For standard icons, Sharp fails to render SVG <linearGradient> reliably on some OSes.
+    // We will inject solid colors directly into the SVG string for the PNG conversion.
+    const solidSvg = rawSvg
+      .replace(/fill="url\(#silver-gradient\)"/g, 'fill="#FFFFFF"')
+      .replace(/fill="url\(#gold-gradient\)"/g, 'fill="#C99537"');
+
+    // For the notification icon, Android requires a purely transparent background with SOLID WHITE shapes.
+    const notificationSvg = rawSvg
+      .replace(/fill="url\(#silver-gradient\)"/g, 'fill="#FFFFFF"')
+      .replace(/fill="url\(#gold-gradient\)"/g, 'fill="#FFFFFF"');
+
+    // Generate 192x192 with padding
     await sharp({
-      create: {
-        width: 192,
-        height: 192,
-        channels: 4,
-        background: BACKGROUND_COLOR
-      }
+      create: { width: 192, height: 192, channels: 4, background: BACKGROUND_COLOR }
     })
-    .composite([
-      {
-        input: await sharp(svgBuffer).resize(134, 134, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer(),
-        gravity: 'center'
-      }
-    ])
+    .composite([{ input: await sharp(Buffer.from(solidSvg)).resize(134, 134, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer(), gravity: 'center' }])
     .png()
     .toFile(path.join(publicDir, 'icon-192x192.png'));
-
     console.log('Generated icon-192x192.png');
 
-    // Generate 512x512 with padding (logo takes up 70% of the canvas)
+    // Generate 512x512 with padding
     await sharp({
-      create: {
-        width: 512,
-        height: 512,
-        channels: 4,
-        background: BACKGROUND_COLOR
-      }
+      create: { width: 512, height: 512, channels: 4, background: BACKGROUND_COLOR }
     })
-    .composite([
-      {
-        input: await sharp(svgBuffer).resize(358, 358, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer(),
-        gravity: 'center'
-      }
-    ])
+    .composite([{ input: await sharp(Buffer.from(solidSvg)).resize(358, 358, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer(), gravity: 'center' }])
     .png()
     .toFile(path.join(publicDir, 'icon-512x512.png'));
-
     console.log('Generated icon-512x512.png');
 
-    // Generate apple-touch-icon (180x180)
+    // Generate Notification Icon (pure white, transparent background, 96x96 is standard)
     await sharp({
-      create: {
-        width: 180,
-        height: 180,
-        channels: 4,
-        background: BACKGROUND_COLOR
-      }
+      create: { width: 96, height: 96, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
     })
-    .composite([
-      {
-        input: await sharp(svgBuffer).resize(126, 126, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer(),
-        gravity: 'center'
-      }
-    ])
+    .composite([{ input: await sharp(Buffer.from(notificationSvg)).resize(80, 80, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer(), gravity: 'center' }])
+    .png()
+    .toFile(path.join(publicDir, 'notification-icon.png'));
+    console.log('Generated notification-icon.png');
+
+    // Generate apple-touch-icon
+    await sharp({
+      create: { width: 180, height: 180, channels: 4, background: BACKGROUND_COLOR }
+    })
+    .composite([{ input: await sharp(Buffer.from(solidSvg)).resize(126, 126, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer(), gravity: 'center' }])
     .png()
     .toFile(path.join(publicDir, 'apple-touch-icon.png'));
-
     console.log('Generated apple-touch-icon.png');
 
   } catch (error) {
