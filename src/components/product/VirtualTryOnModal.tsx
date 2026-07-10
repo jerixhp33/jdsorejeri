@@ -26,31 +26,34 @@ interface CollagePoster {
 }
 
 const LAYOUTS = [
-  // 1. Cross / Diamond
+  // 1. Dense Grid (Like the 3rd image)
   [
-    { x: 50, y: 50, scale: 0.45 }, // Center
-    { x: 50, y: 20, scale: 0.35 }, // Top
-    { x: 50, y: 80, scale: 0.35 }, // Bottom
-    { x: 20, y: 50, scale: 0.35 }, // Left
-    { x: 80, y: 50, scale: 0.35 }, // Right
-    { x: 25, y: 25, scale: 0.25 }, // Top Left
-    { x: 75, y: 25, scale: 0.25 }, // Top Right
-    { x: 25, y: 75, scale: 0.25 }, // Bottom Left
-    { x: 75, y: 75, scale: 0.25 }, // Bottom Right
+    { x: 35, y: 20, scale: 0.18 }, { x: 50, y: 20, scale: 0.18 }, { x: 65, y: 20, scale: 0.18 },
+    { x: 35, y: 40, scale: 0.18 }, { x: 50, y: 40, scale: 0.18 }, { x: 65, y: 40, scale: 0.18 },
+    { x: 35, y: 60, scale: 0.18 }, { x: 50, y: 60, scale: 0.18 }, { x: 65, y: 60, scale: 0.18 },
+    { x: 35, y: 80, scale: 0.18 }, { x: 50, y: 80, scale: 0.18 }, { x: 65, y: 80, scale: 0.18 },
   ],
-  // 2. 3x3 Grid
+  // 2. Cross / Diamond (Tightened up)
   [
-    { x: 25, y: 25, scale: 0.3 }, { x: 50, y: 25, scale: 0.3 }, { x: 75, y: 25, scale: 0.3 },
-    { x: 25, y: 50, scale: 0.3 }, { x: 50, y: 50, scale: 0.3 }, { x: 75, y: 50, scale: 0.3 },
-    { x: 25, y: 75, scale: 0.3 }, { x: 50, y: 75, scale: 0.3 }, { x: 75, y: 75, scale: 0.3 },
+    { x: 50, y: 50, scale: 0.22 }, // Center
+    { x: 50, y: 25, scale: 0.2 }, // Top
+    { x: 50, y: 75, scale: 0.2 }, // Bottom
+    { x: 32, y: 50, scale: 0.2 }, // Left
+    { x: 68, y: 50, scale: 0.2 }, // Right
+    { x: 35, y: 30, scale: 0.15 }, // Top Left
+    { x: 65, y: 30, scale: 0.15 }, // Top Right
+    { x: 35, y: 70, scale: 0.15 }, // Bottom Left
+    { x: 65, y: 70, scale: 0.15 }, // Bottom Right
   ],
-  // 3. Asymmetrical Gallery
+  // 3. Staggered Gallery Wall
   [
-    { x: 30, y: 40, scale: 0.5 }, // Large left
-    { x: 70, y: 30, scale: 0.3 }, // Small top right
-    { x: 70, y: 65, scale: 0.35 }, // Med bottom right
-    { x: 45, y: 75, scale: 0.25 }, // Small bottom
-    { x: 20, y: 70, scale: 0.25 }, // Small bottom left
+    { x: 40, y: 40, scale: 0.25 }, // Main Left
+    { x: 60, y: 30, scale: 0.18 }, // Top Right
+    { x: 60, y: 55, scale: 0.18 }, // Mid Right
+    { x: 40, y: 65, scale: 0.15 }, // Bottom Left
+    { x: 50, y: 75, scale: 0.15 }, // Bottom Center
+    { x: 25, y: 35, scale: 0.15 }, // Far Left
+    { x: 75, y: 45, scale: 0.15 }, // Far Right
   ]
 ];
 
@@ -81,12 +84,28 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
         productId: currentProduct.id,
         url: posterUrl,
         initialX: 50,
-        initialY: 40,
-        baseScale: 0.5,
+        initialY: 50,
+        baseScale: 0.25,
         product: currentProduct
       }]);
     }
   }, [isOpen, posterUrl, currentProduct]);
+
+  // Handle Body Scroll Lock
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none'; // Prevent pull-to-refresh on mobile when dragging
+    } else {
+      document.body.style.overflow = 'unset';
+      document.body.style.touchAction = 'auto';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.touchAction = 'auto';
+    };
+  }, [isOpen]);
 
   // Clear bg image on close
   useEffect(() => {
@@ -154,7 +173,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
         productForSpot = otherPosters[(i - 1) % otherPosters.length];
       }
       
-      const imgUrl = productForSpot.images?.find(i => i.is_primary)?.url || productForSpot.images?.[0]?.url;
+      const imgUrl = productForSpot?.images?.find((img: any) => img.is_primary)?.url || productForSpot?.images?.[0]?.url;
       if (!imgUrl) continue;
 
       newCollage.push({
