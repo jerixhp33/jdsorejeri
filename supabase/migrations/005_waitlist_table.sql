@@ -50,3 +50,6 @@ CREATE POLICY "Admins have full access to waitlists"
 
 -- Create index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_waitlists_user_product ON waitlists(user_id, product_id);
+
+-- Grant privileges
+GRANT ALL ON TABLE waitlists TO anon, authenticated, service_role;
