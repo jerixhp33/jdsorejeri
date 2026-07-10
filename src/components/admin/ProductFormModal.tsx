@@ -167,6 +167,14 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
   const price = watch('price');
   const cost = watch('cost_price');
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
   // Smart Category Mapping
   useEffect(() => {
     if (selectedCategoryId) {
@@ -192,14 +200,18 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
   const setAttr = (key: string, value: string) => {
     setAttributes(prev => {
       const next = { ...prev };
-      if (value.trim() === '') {
-        delete next[key];
-      } else {
-        next[key] = value;
-      }
+      if (value.trim() === '') delete next[key];
+      else next[key] = value;
       return next;
     });
   };
+
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const groupedCategories = categories.reduce((acc, cat) => {
+    if (!acc[cat.product_type]) acc[cat.product_type] = [];
+    if (!acc[cat.product_type].find(c => c.id === cat.id)) acc[cat.product_type].push(cat);
+    return acc;
+  }, {} as Record<string, Category[]>);
 
   const onSubmit = async (data: ProductFormData) => {
     if (data.product_type === 'poster') {
@@ -333,22 +345,48 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
                   Category *
                   {selectedCategoryId && <span className="text-luxe-accent flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Auto-mapped to type: {productType}</span>}
                 </label>
-                <select {...register('category_id')} className="input-luxe text-base py-3">
-                  <option value="">Select a product category to begin</option>
-                  {Object.entries(
-                    categories.reduce((acc, cat) => {
-                      if (!acc[cat.product_type]) acc[cat.product_type] = [];
-                      if (!acc[cat.product_type].find(c => c.id === cat.id)) acc[cat.product_type].push(cat);
-                      return acc;
-                    }, {} as Record<string, Category[]>)
-                  ).map(([type, cats]) => (
-                    <optgroup key={type} label={type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}>
-                      {cats.sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                <div className="relative">
+                  <div 
+                    onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                    className="input-luxe text-base py-3 flex items-center justify-between cursor-pointer"
+                  >
+                    <span>
+                      {selectedCategoryId 
+                        ? categories.find(c => c.id === selectedCategoryId)?.name 
+                        : <span className="text-white/40">Select a product category to begin</span>}
+                    </span>
+                    <ChevronRight className={cn("w-4 h-4 transition-transform text-white/40", isCategoryOpen && "rotate-90")} />
+                  </div>
+                  
+                  {isCategoryOpen && (
+                    <div className="absolute top-full left-0 w-full mt-2 bg-luxe-black border border-white/10 rounded-xl shadow-2xl z-50 max-h-[300px] overflow-y-auto">
+                      {Object.entries(groupedCategories).map(([type, cats]) => (
+                        <div key={type} className="p-2 border-b border-white/5 last:border-0">
+                          <p className="text-[10px] uppercase tracking-widest text-luxe-accent font-semibold px-3 py-2">
+                            {type.replace('_', ' ')}
+                          </p>
+                          <div className="space-y-1">
+                            {cats.sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                              <div 
+                                key={cat.id} 
+                                onClick={() => {
+                                  setValue('category_id', cat.id, { shouldValidate: true });
+                                  setIsCategoryOpen(false);
+                                }}
+                                className={cn(
+                                  "px-3 py-2 text-sm rounded-lg cursor-pointer transition-colors",
+                                  selectedCategoryId === cat.id ? "bg-luxe-accent/20 text-luxe-accent" : "text-white/70 hover:bg-white/10 hover:text-white"
+                                )}
+                              >
+                                {cat.name}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       ))}
-                    </optgroup>
-                  ))}
-                </select>
+                    </div>
+                  )}
+                </div>
                 {errors.category_id && <p className="text-red-400 text-xs mt-1">{errors.category_id.message}</p>}
               </div>
 
