@@ -725,3 +725,29 @@ html.lenis, html.lenis body {
 .animate-card-fade {
   animation: fadeInCard 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Global Content Protection */
+body:not(.admin-route) {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+  -webkit-touch-callout: none; /* iOS Safari */
+}
+
+/* Allow text selection inside inputs and textareas */
+input, textarea {
+  -webkit-user-select: auto !important;
+  -ms-user-select: auto !important;
+  user-select: auto !important;
+}
+
+/* Image overlay protector */
+.image-protector-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background-color: transparent;
+}

@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import { BannersSection, SidebarBannersPanel, MobileSidebarBanners } from '@/components/landing/BannersSection';
-import { FeaturedPosters } from '@/components/landing/FeaturedPosters';
-import { FeaturedEarrings } from '@/components/landing/FeaturedEarrings';
+import { DynamicShowcase } from '@/components/landing/DynamicShowcase';
 import { BestSellers } from '@/components/landing/BestSellers';
 import { WhyChooseUs } from '@/components/landing/WhyChooseUs';
 import { CollectionsSection } from '@/components/landing/CollectionsSection';
@@ -57,22 +56,14 @@ export default async function HomePage() {
         <div className="flex-1 min-w-0">
           <div className="mb-4 lg:mb-6">
             <Suspense fallback={
-              <div className="py-2"><div className="page-container"><ProductGridSkeleton count={4} /></div></div>
+              <div className="py-2"><div className="page-container"><ProductGridSkeleton count={8} /></div></div>
             }>
-              <FeaturedPostersData />
+              <DynamicShowcaseData />
             </Suspense>
           </div>
 
           <div className="mb-4 lg:mb-6">
             <BannersSection banners={middleBanners} />
-          </div>
-
-          <div className="mb-4 lg:mb-6">
-            <Suspense fallback={
-              <div className="py-2"><div className="page-container"><ProductGridSkeleton count={4} /></div></div>
-            }>
-              <FeaturedEarringsData />
-            </Suspense>
           </div>
 
           {/* Mobile sidebar banners appear here, right after featured earrings */}
@@ -128,16 +119,9 @@ async function BestSellersData() {
   return <BestSellers products={data || []} />;
 }
 
-async function FeaturedPostersData() {
-  const products = await getFeaturedProducts(20);
-  const posters = products.filter((p) => p.product_type === 'poster');
-  return <FeaturedPosters products={posters} />;
-}
-
-async function FeaturedEarringsData() {
-  const products = await getFeaturedProducts(20);
-  const earrings = products.filter((p) => p.product_type === 'earring');
-  return <FeaturedEarrings products={earrings} />;
+async function DynamicShowcaseData() {
+  const products = await getFeaturedProducts(40);
+  return <DynamicShowcase products={products} />;
 }
 
 async function TestimonialsData() {

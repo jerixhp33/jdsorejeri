@@ -92,6 +92,7 @@ export interface Product {
 
   // Shared attributes
   material?: string;
+  attributes?: Record<string, any>;
 
   // Poster-specific
   finish?: PosterFinish;

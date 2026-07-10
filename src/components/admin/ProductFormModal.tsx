@@ -9,6 +9,7 @@ import { generateSlug } from '@/lib/utils';
 import { toast } from 'sonner';
 import { ImageUploader, type UploadedImage } from './ImageUploader';
 import type { Product, Category } from '@/types';
+import { AttributesEditor } from './AttributesEditor';
 
 // Safely coerce a value to number, returning undefined for empty/null/undefined/NaN
 const toOptionalNumber = (val: unknown): number | undefined => {
@@ -101,6 +102,10 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
       : [{ ...DEFAULT_SIZE }]
   );
 
+  const [attributes, setAttributes] = useState<Record<string, string>>(
+    product?.attributes || {}
+  );
+
   const { register, handleSubmit, watch, formState: { errors, isSubmitted } } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -179,6 +184,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
         is_featured: data.is_featured,
         is_trending: data.is_trending,
         is_best_seller: data.is_best_seller,
+        attributes,
         ...(data.product_type === 'poster' ? {
           finish: data.finish || null,
           orientation: data.orientation || null,
@@ -446,6 +452,10 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
               <div className="col-span-2">
                 <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SKU</label>
                 <input {...register('sku')} className="input-luxe" placeholder="Leave blank to auto-generate" />
+              </div>
+              
+              <div className="col-span-2 mt-4 border-t border-white/10 pt-4">
+                <AttributesEditor attributes={attributes} onChange={setAttributes} />
               </div>
             </div>
           )}

@@ -10,7 +10,7 @@ import { PwaInstallPrompt } from '@/components/shared/PwaInstallPrompt';
 import { PushNotificationPrompt } from '@/components/shared/PushNotificationPrompt';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/Providers';
-import { ContextMenuBlocker } from '@/components/shared/ContextMenuBlocker';
+import { ContentProtector } from '@/components/shared/ContentProtector';
 import '@/styles/globals.css';
 
 const inter = Inter({
@@ -103,7 +103,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
-            <ContextMenuBlocker />
+            <ContentProtector />
             <SmoothScroll />
             <ServiceWorkerRegister />
             <OfflineStatusMonitor />
