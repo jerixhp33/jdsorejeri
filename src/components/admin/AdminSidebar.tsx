@@ -7,7 +7,7 @@ import { JDLogo } from '@/components/shared/JDLogo';
 import {
   LayoutDashboard, Package, ShoppingBag, Users, BarChart3,
   Image as ImageIcon, Layers, Mail, Settings, FileText, LogOut,
-  Star, HelpCircle, Menu, X, Ticket, ChevronLeft, Type, Bell
+  Star, HelpCircle, Menu, X, Ticket, ChevronLeft, Type, Bell, Tag
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -17,6 +17,7 @@ const NAV = [
   { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/admin/waitlist', label: 'Waitlists', icon: Bell },
   { href: '/admin/products', label: 'Products', icon: Package },
+  { href: '/admin/categories', label: 'Categories', icon: Tag },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/banners', label: 'Banners', icon: ImageIcon },
