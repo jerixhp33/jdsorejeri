@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Plus, Trash2, CheckCircle2, ChevronRight, Settings, Image as ImageIcon, Tag, LayoutTemplate, Star } from 'lucide-react';
+import { X, Plus, Trash2, CheckCircle2, ChevronRight, Settings, Image as ImageIcon, Tag, LayoutTemplate, Star, Package, Settings2 } from 'lucide-react';
 import { generateSlug, cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { ImageUploader, type UploadedImage } from './ImageUploader';
@@ -20,21 +20,43 @@ const toOptionalNumber = (val: unknown): number | undefined => {
 const productSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  product_type: z.enum(['poster', 'earring', 'hairband', 'bracelet', 'keychain', 'hair_clip', 'other']),
+  short_description: z.string().optional(),
+  brand: z.string().default('JD Store'),
+  product_type: z.string().min(1),
   category_id: z.string().min(1, 'Select a category'),
+  
+  // Pricing
+  original_price: z.preprocess(toOptionalNumber, z.number().optional()),
+  cost_price: z.preprocess(toOptionalNumber, z.number().optional()),
+  price: z.preprocess(toOptionalNumber, z.number().min(0, 'Selling Price is required').optional()),
+  discount_percent: z.preprocess(toOptionalNumber, z.number().optional()),
+  tax_percent: z.preprocess(toOptionalNumber, z.number().optional()),
+
+  // Inventory & Shipping
+  stock: z.preprocess(toOptionalNumber, z.number().min(0).optional()),
+  low_stock_alert: z.preprocess(toOptionalNumber, z.number().optional()),
+  continue_selling_oos: z.boolean().default(false),
+  status: z.enum(['active', 'draft', 'out_of_stock', 'archived']).default('active'),
+  length_cm: z.preprocess(toOptionalNumber, z.number().optional()),
+  width_cm: z.preprocess(toOptionalNumber, z.number().optional()),
+  height_cm: z.preprocess(toOptionalNumber, z.number().optional()),
+  weight_grams: z.preprocess(toOptionalNumber, z.number().optional()),
+  courier_category: z.string().optional(),
+  is_free_shipping: z.boolean().default(false),
+  sku: z.string().optional(),
+
+  // SEO & Marketing
   tags: z.string().optional(),
-  material: z.string().optional(),
+  seo_title: z.string().optional(),
+  seo_description: z.string().optional(),
+  seo_keywords: z.string().optional(),
+
   is_active: z.boolean().default(true),
   is_featured: z.boolean().default(false),
   is_trending: z.boolean().default(false),
   is_best_seller: z.boolean().default(false),
-  finish: z.preprocess((val) => (val === '' || val === null || val === undefined ? undefined : val), z.enum(['matte', 'glossy', 'satin', 'metallic']).optional()),
-  orientation: z.preprocess((val) => (val === '' || val === null || val === undefined ? undefined : val), z.enum(['portrait', 'landscape', 'square']).optional()),
-  color: z.string().optional(),
-  weight_grams: z.preprocess(toOptionalNumber, z.number().optional()),
-  price: z.preprocess(toOptionalNumber, z.number().min(0).optional()),
-  stock: z.preprocess(toOptionalNumber, z.number().min(0).optional()),
-  sku: z.string().optional(),
+  is_new_arrival: z.boolean().default(false),
+  is_limited_edition: z.boolean().default(false),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -63,7 +85,7 @@ interface ProductFormModalProps {
   onSaved: (product: Product) => void;
 }
 
-type TabKey = 'general' | 'pricing' | 'images' | 'visibility';
+type TabKey = 'general' | 'pricing' | 'inventory' | 'specs' | 'images' | 'marketing';
 
 export function ProductFormModal({ product, categories, onClose, onSaved }: ProductFormModalProps) {
   const [saving, setSaving] = useState(false);
@@ -103,26 +125,47 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
     defaultValues: {
       name: product?.name || '',
       description: product?.description || '',
+      short_description: product?.short_description || '',
+      brand: product?.brand || 'JD Store',
       product_type: product?.product_type || 'other',
       category_id: product?.category_id || '',
       tags: product?.tags?.join(', ') || '',
-      material: product?.material || '',
+      
+      original_price: product?.original_price,
+      cost_price: product?.cost_price,
+      price: product?.price,
+      discount_percent: product?.discount_percent,
+      tax_percent: product?.tax_percent,
+
+      stock: product?.stock,
+      low_stock_alert: product?.low_stock_alert || 5,
+      continue_selling_oos: product?.continue_selling_oos ?? false,
+      status: (product?.status as any) || 'active',
+      length_cm: product?.length_cm,
+      width_cm: product?.width_cm,
+      height_cm: product?.height_cm,
+      weight_grams: product?.weight_grams,
+      courier_category: product?.courier_category || '',
+      is_free_shipping: product?.is_free_shipping ?? false,
+      sku: product?.sku || '',
+
+      seo_title: product?.seo_title || '',
+      seo_description: product?.seo_description || '',
+      seo_keywords: product?.seo_keywords || '',
+
       is_active: product?.is_active ?? true,
       is_featured: product?.is_featured ?? false,
       is_trending: product?.is_trending ?? false,
       is_best_seller: product?.is_best_seller ?? false,
-      finish: product?.finish,
-      orientation: product?.orientation,
-      color: product?.color || '',
-      weight_grams: product?.weight_grams,
-      price: product?.price,
-      stock: product?.stock,
-      sku: product?.sku || '',
+      is_new_arrival: product?.is_new_arrival ?? false,
+      is_limited_edition: product?.is_limited_edition ?? false,
     },
   });
 
   const productType = watch('product_type');
   const selectedCategoryId = watch('category_id');
+  const price = watch('price');
+  const cost = watch('cost_price');
 
   // Smart Category Mapping
   useEffect(() => {
@@ -146,6 +189,18 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
     if (img.storage_path) setDeletedStoragePaths(prev => [...prev, img.storage_path!]);
   };
 
+  const setAttr = (key: string, value: string) => {
+    setAttributes(prev => {
+      const next = { ...prev };
+      if (value.trim() === '') {
+        delete next[key];
+      } else {
+        next[key] = value;
+      }
+      return next;
+    });
+  };
+
   const onSubmit = async (data: ProductFormData) => {
     if (data.product_type === 'poster') {
       const validSizes = sizes.filter(s => s.label.trim());
@@ -156,7 +211,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
     } else {
       if (!data.price || data.price <= 0) {
         setActiveTab('pricing');
-        return toast.error('Price is required and must be greater than 0');
+        return toast.error('Selling Price is required and must be greater than 0');
       }
     }
 
@@ -171,19 +226,10 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
       const tags = data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
 
       const payload = {
-        name: data.name,
+        ...data,
         slug,
-        description: data.description,
-        product_type: data.product_type,
-        category_id: data.category_id,
         tags,
-        material: data.material || null,
-        is_active: data.is_active,
-        is_featured: data.is_featured,
-        is_trending: data.is_trending,
-        is_best_seller: data.is_best_seller,
         attributes,
-        ...(data.product_type === 'poster' ? { finish: data.finish || null, orientation: data.orientation || null } : { color: data.color || null, weight_grams: data.weight_grams || null, price: data.price || null, stock: data.stock || null, sku: data.sku || null }),
         updated_at: new Date().toISOString(),
       };
 
@@ -206,7 +252,6 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
         });
       }
 
-      // Smart Upsert for Images
       await fetch('/api/admin/product-images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -229,15 +274,17 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
 
   const tabs = [
     { key: 'general', label: 'General Info', icon: LayoutTemplate },
-    { key: 'pricing', label: 'Pricing & Specs', icon: Tag },
+    { key: 'pricing', label: 'Pricing', icon: Tag },
+    { key: 'inventory', label: 'Inventory & Shipping', icon: Package },
+    { key: 'specs', label: 'Dynamic Specs', icon: Settings2 },
     { key: 'images', label: 'Media', icon: ImageIcon },
-    { key: 'visibility', label: 'Settings', icon: Settings },
+    { key: 'marketing', label: 'SEO & Marketing', icon: Settings },
   ] as const;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div ref={scrollContainerRef} className="relative w-full max-w-3xl h-[85vh] flex flex-col glass-card overflow-hidden shadow-2xl">
+      <div ref={scrollContainerRef} className="relative w-full max-w-4xl h-[90vh] flex flex-col glass-card overflow-hidden shadow-2xl">
         
         {/* Header */}
         <div className="flex-shrink-0 sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
@@ -254,11 +301,12 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
             const active = activeTab === tab.key;
             const hasError = isSubmitted && (
               (tab.key === 'general' && (errors.name || errors.description || errors.category_id)) ||
-              (tab.key === 'pricing' && (errors.price || errors.stock))
+              (tab.key === 'pricing' && errors.price)
             );
             return (
               <button
                 key={tab.key}
+                type="button"
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
@@ -279,20 +327,18 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
           <div className="flex-1 overflow-y-auto p-6">
             
             {/* GENERAL TAB */}
-            <div className={cn("space-y-5 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'general' && 'hidden')}>
+            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'general' && 'hidden')}>
               <div>
                 <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block flex justify-between">
                   Category *
-                  {selectedCategoryId && <span className="text-luxe-accent flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Auto-mapped</span>}
+                  {selectedCategoryId && <span className="text-luxe-accent flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Auto-mapped to type: {productType}</span>}
                 </label>
                 <select {...register('category_id')} className="input-luxe text-base py-3">
                   <option value="">Select a product category to begin</option>
                   {Object.entries(
                     categories.reduce((acc, cat) => {
                       if (!acc[cat.product_type]) acc[cat.product_type] = [];
-                      if (!acc[cat.product_type].find(c => c.id === cat.id)) {
-                        acc[cat.product_type].push(cat);
-                      }
+                      if (!acc[cat.product_type].find(c => c.id === cat.id)) acc[cat.product_type].push(cat);
                       return acc;
                     }, {} as Record<string, Category[]>)
                   ).map(([type, cats]) => (
@@ -304,24 +350,27 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
                   ))}
                 </select>
                 {errors.category_id && <p className="text-red-400 text-xs mt-1">{errors.category_id.message}</p>}
-                {selectedCategoryId && <p className="text-white/30 text-xs mt-2">The form layout will perfectly adapt based on the category you chose.</p>}
               </div>
 
               {selectedCategoryId && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-white/5">
-                  <div className="col-span-2">
+                  <div className="col-span-2 sm:col-span-1">
                     <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Product Name *</label>
                     <input {...register('name')} className="input-luxe py-3" placeholder="Golden Statement Necklace" />
                     {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
                   </div>
-                  <div className="col-span-2">
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Description *</label>
-                    <textarea {...register('description')} className="input-luxe resize-none py-3" rows={4} placeholder="Craft an elegant description..." />
-                    {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description.message}</p>}
-                  </div>
                   <div className="col-span-2 sm:col-span-1">
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Primary Material</label>
-                    <input {...register('material')} className="input-luxe" placeholder={productType !== 'poster' ? '18k Gold Plated' : '250gsm Premium Paper'} />
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Brand</label>
+                    <input {...register('brand')} className="input-luxe py-3" placeholder="JD Store" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Short Description</label>
+                    <input {...register('short_description')} className="input-luxe py-3" placeholder="A brief one-liner summary..." />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Full Description * (Rich Text Ready)</label>
+                    <textarea {...register('description')} className="input-luxe resize-none py-3" rows={6} placeholder="Craft an elegant description..." />
+                    {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description.message}</p>}
                   </div>
                 </div>
               )}
@@ -330,87 +379,202 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
             {/* PRICING TAB */}
             <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'pricing' && 'hidden')}>
               {!selectedCategoryId ? (
-                <div className="h-full flex flex-col items-center justify-center text-center py-20 text-white/30">
-                  <Tag className="w-12 h-12 mb-4 opacity-50" />
-                  <p>Please select a category in the General tab first.</p>
-                </div>
+                <div className="h-full flex flex-col items-center justify-center text-center py-20 text-white/30"><Tag className="w-12 h-12 mb-4 opacity-50" /><p>Select a category first.</p></div>
               ) : productType === 'poster' ? (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Paper Finish</label>
-                      <select {...register('finish')} className="input-luxe">
-                        <option value="">Standard</option>
-                        <option value="matte">Matte</option>
-                        <option value="glossy">Glossy</option>
-                        <option value="satin">Satin</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Orientation</label>
-                      <select {...register('orientation')} className="input-luxe">
-                        <option value="">Auto</option>
-                        <option value="portrait">Portrait</option>
-                        <option value="landscape">Landscape</option>
-                      </select>
-                    </div>
+                <div className="p-5 rounded-2xl border border-white/10 bg-white/5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-white/70 text-sm font-semibold">Poster Sizes & Pricing *</p>
+                    <button type="button" onClick={addSize} className="btn-luxe-outline py-1.5 px-3 text-xs"><Plus className="w-3.5 h-3.5"/> Add Size</button>
                   </div>
-                  
-                  <div className="p-5 rounded-2xl border border-white/10 bg-white/5 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-white/70 text-sm font-semibold">Poster Sizes & Pricing *</p>
-                      <button type="button" onClick={addSize} className="btn-luxe-outline py-1.5 px-3 text-xs"><Plus className="w-3.5 h-3.5"/> Add Size</button>
-                    </div>
-                    <div className="flex gap-2">
-                      {PRESET_SIZES.map((p) => (
-                        <button key={p.label} type="button" onClick={() => addPreset(p)} className="px-3 py-1 rounded-lg text-xs border border-white/20 text-white/60 hover:text-white hover:border-luxe-accent transition-all">
-                          + {p.label}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="space-y-3">
-                      {sizes.map((size, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                          <input value={size.label} onChange={e => updateSize(i, 'label', e.target.value)} className="input-luxe flex-[2] text-xs py-2" placeholder="Label (A4)" />
-                          <input value={size.price} onChange={e => updateSize(i, 'price', e.target.value)} className="input-luxe flex-[2] text-xs py-2" type="number" placeholder="Price (₹)" />
-                          <input value={size.stock} onChange={e => updateSize(i, 'stock', e.target.value)} className="input-luxe flex-[1.5] text-xs py-2" type="number" placeholder="Stock" />
-                          <button type="button" onClick={() => removeSize(i)} disabled={sizes.length === 1} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white disabled:opacity-20"><Trash2 className="w-4 h-4"/></button>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="flex gap-2">
+                    {PRESET_SIZES.map((p) => (
+                      <button key={p.label} type="button" onClick={() => addPreset(p)} className="px-3 py-1 rounded-lg text-xs border border-white/20 text-white/60 hover:text-white hover:border-luxe-accent transition-all">+ {p.label}</button>
+                    ))}
+                  </div>
+                  <div className="space-y-3">
+                    {sizes.map((size, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <input value={size.label} onChange={e => updateSize(i, 'label', e.target.value)} className="input-luxe flex-[2] text-xs py-2" placeholder="Label (A4)" />
+                        <input value={size.price} onChange={e => updateSize(i, 'price', e.target.value)} className="input-luxe flex-[2] text-xs py-2" type="number" placeholder="Price (₹)" />
+                        <input value={size.stock} onChange={e => updateSize(i, 'stock', e.target.value)} className="input-luxe flex-[1.5] text-xs py-2" type="number" placeholder="Stock" />
+                        <button type="button" onClick={() => removeSize(i)} disabled={sizes.length === 1} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white disabled:opacity-20"><Trash2 className="w-4 h-4"/></button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-5">
-                    <div>
-                      <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Price (₹) *</label>
-                      <input {...register('price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3 text-lg font-medium" placeholder="499" />
-                      {errors.price && <p className="text-red-400 text-xs mt-1">{errors.price.message}</p>}
+                <div className="grid grid-cols-2 gap-5">
+                  <div>
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Selling Price (₹) *</label>
+                    <input {...register('price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3 text-lg font-medium text-luxe-accent" placeholder="499" />
+                    {errors.price && <p className="text-red-400 text-xs mt-1">{errors.price.message}</p>}
+                  </div>
+                  <div>
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Original Price (₹)</label>
+                    <input {...register('original_price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="699" />
+                  </div>
+                  <div>
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Cost Price (Admin Only)</label>
+                    <input {...register('cost_price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="200" />
+                  </div>
+                  <div>
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Tax (%)</label>
+                    <input {...register('tax_percent', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="18" />
+                  </div>
+                  {price && cost ? (
+                    <div className="col-span-2 p-4 rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex justify-between items-center">
+                      <span className="text-white/70 text-sm">Estimated Profit Margin:</span>
+                      <span className="text-luxe-accent font-bold text-lg">₹{(price - cost).toFixed(2)}</span>
                     </div>
-                    <div>
-                      <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Available Stock *</label>
-                      <input {...register('stock', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="50" />
-                      {errors.stock && <p className="text-red-400 text-xs mt-1">{errors.stock.message}</p>}
-                    </div>
-                    <div>
-                      <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Color/Variant Name</label>
-                      <input {...register('color')} className="input-luxe" placeholder="e.g. Gold" />
-                    </div>
-                    <div>
-                      <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Weight (grams)</label>
-                      <input {...register('weight_grams', { valueAsNumber: true })} type="number" step="0.1" className="input-luxe" placeholder="5.0" />
-                    </div>
-                    <div className="col-span-2">
-                      <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Product SKU</label>
-                      <input {...register('sku')} className="input-luxe text-white/50" placeholder="Leave blank to auto-generate" />
-                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
+
+            {/* INVENTORY & SHIPPING */}
+            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'inventory' && 'hidden')}>
+              <div className="grid grid-cols-2 gap-5">
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Stock Quantity</label>
+                  <input {...register('stock', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="50" />
+                </div>
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Low Stock Alert</label>
+                  <input {...register('low_stock_alert', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="5" />
+                </div>
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Product Status</label>
+                  <select {...register('status')} className="input-luxe py-3">
+                    <option value="active">Active</option>
+                    <option value="draft">Draft</option>
+                    <option value="out_of_stock">Out of Stock</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SKU (Auto-generates if blank)</label>
+                  <input {...register('sku')} className="input-luxe py-3" placeholder="E.g. RNG-SLV-01" />
+                </div>
+                
+                <div className="col-span-2 border-t border-white/5 pt-4 mt-2"><h3 className="text-white/80 font-medium mb-4">Shipping Dimensions</h3></div>
+                
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Weight (grams)</label>
+                  <input {...register('weight_grams', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="150" />
+                </div>
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Courier Category</label>
+                  <input {...register('courier_category')} className="input-luxe" placeholder="Small Packet" />
+                </div>
+                <div className="grid grid-cols-3 gap-2 col-span-2">
+                  <div>
+                    <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Length (cm)</label>
+                    <input {...register('length_cm', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="10" />
+                  </div>
+                  <div>
+                    <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Width (cm)</label>
+                    <input {...register('width_cm', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="5" />
+                  </div>
+                  <div>
+                    <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Height (cm)</label>
+                    <input {...register('height_cm', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="2" />
+                  </div>
+                </div>
+                
+                <div className="col-span-2 mt-4 space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" {...register('continue_selling_oos')} className="w-5 h-5 accent-luxe-accent rounded" />
+                    <span className="text-white/70 text-sm">Continue Selling When Out of Stock</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" {...register('is_free_shipping')} className="w-5 h-5 accent-luxe-accent rounded" />
+                    <span className="text-white/70 text-sm">Free Shipping</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* DYNAMIC SPECS */}
+            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'specs' && 'hidden')}>
+              {!selectedCategoryId ? (
+                 <div className="h-full flex flex-col items-center justify-center text-center py-20 text-white/30"><Settings2 className="w-12 h-12 mb-4 opacity-50" /><p>Select a category first.</p></div>
+              ) : (
+                <>
+                  <div className="bg-luxe-accent/10 border border-luxe-accent/20 p-4 rounded-xl mb-6">
+                    <p className="text-luxe-accent text-sm">Dynamic fields generated for <strong>{productType.toUpperCase()}</strong></p>
+                  </div>
+                  
+                  {/* DYNAMIC UI RENDERER */}
+                  <div className="grid grid-cols-2 gap-5 mb-6">
+                    {productType === 'poster' && (
+                      <>
+                        <div>
+                          <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Orientation</label>
+                          <select value={attributes['Orientation'] || ''} onChange={e => setAttr('Orientation', e.target.value)} className="input-luxe py-3">
+                            <option value="">Select...</option>
+                            <option value="Portrait">Portrait</option>
+                            <option value="Landscape">Landscape</option>
+                            <option value="Square">Square</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Paper Finish</label>
+                          <select value={attributes['Finish'] || ''} onChange={e => setAttr('Finish', e.target.value)} className="input-luxe py-3">
+                            <option value="">Select...</option>
+                            <option value="Matte">Matte</option>
+                            <option value="Glossy">Glossy</option>
+                          </select>
+                        </div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Frame Included</label><input className="input-luxe py-3" value={attributes['Frame'] || ''} onChange={e => setAttr('Frame', e.target.value)} placeholder="Yes / No" /></div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Print Technology</label><input className="input-luxe py-3" value={attributes['Technology'] || ''} onChange={e => setAttr('Technology', e.target.value)} placeholder="Giclée Print" /></div>
+                      </>
+                    )}
+
+                    {productType === 'earring' && (
+                      <>
+                        <div>
+                          <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Type</label>
+                          <select value={attributes['Type'] || ''} onChange={e => setAttr('Type', e.target.value)} className="input-luxe py-3">
+                            <option value="">Select...</option>
+                            <option value="Stud">Stud</option><option value="Hoop">Hoop</option><option value="Drop">Drop</option><option value="Dangle">Dangle</option><option value="Jhumka">Jhumka</option>
+                          </select>
+                        </div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Material</label><input className="input-luxe py-3" value={attributes['Material'] || ''} onChange={e => setAttr('Material', e.target.value)} placeholder="Sterling Silver" /></div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Closure Type</label><input className="input-luxe py-3" value={attributes['Closure'] || ''} onChange={e => setAttr('Closure', e.target.value)} placeholder="Push Back" /></div>
+                        <div>
+                          <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Hypoallergenic</label>
+                          <select value={attributes['Hypoallergenic'] || ''} onChange={e => setAttr('Hypoallergenic', e.target.value)} className="input-luxe py-3">
+                            <option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option>
+                          </select>
+                        </div>
+                      </>
+                    )}
+
+                    {productType === 'hairband' && (
+                      <>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Material</label><input className="input-luxe py-3" value={attributes['Material'] || ''} onChange={e => setAttr('Material', e.target.value)} /></div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Width</label><input className="input-luxe py-3" value={attributes['Width'] || ''} onChange={e => setAttr('Width', e.target.value)} /></div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Stretchable</label><select value={attributes['Stretchable'] || ''} onChange={e => setAttr('Stretchable', e.target.value)} className="input-luxe py-3"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Pattern</label><input className="input-luxe py-3" value={attributes['Pattern'] || ''} onChange={e => setAttr('Pattern', e.target.value)} /></div>
+                      </>
+                    )}
+
+                    {productType === 'bracelet' && (
+                      <>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Material</label><input className="input-luxe py-3" value={attributes['Material'] || ''} onChange={e => setAttr('Material', e.target.value)} /></div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Adjustable</label><select value={attributes['Adjustable'] || ''} onChange={e => setAttr('Adjustable', e.target.value)} className="input-luxe py-3"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Charm Included</label><input className="input-luxe py-3" value={attributes['Charm'] || ''} onChange={e => setAttr('Charm', e.target.value)} /></div>
+                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Unisex</label><select value={attributes['Unisex'] || ''} onChange={e => setAttr('Unisex', e.target.value)} className="input-luxe py-3"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                      </>
+                    )}
                   </div>
                   
                   <div className="border-t border-white/10 pt-6">
+                    <h3 className="text-white font-medium mb-4">Custom Attributes Builder</h3>
+                    <p className="text-white/40 text-xs mb-4">Add any infinite combination of custom attributes below.</p>
                     <AttributesEditor attributes={attributes} onChange={setAttributes} />
                   </div>
-                </div>
+                </>
               )}
             </div>
 
@@ -422,19 +586,31 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
               <ImageUploader images={images} onChange={setImages} onDelete={handleImageDelete} maxImages={8} />
             </div>
 
-            {/* VISIBILITY TAB */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'visibility' && 'hidden')}>
-              <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Tags (SEO & Search)</label>
-                <input {...register('tags')} className="input-luxe py-3" placeholder="minimal, gold, trending (comma separated)" />
+            {/* SEO & MARKETING TAB */}
+            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'marketing' && 'hidden')}>
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SEO Title</label>
+                  <input {...register('seo_title')} className="input-luxe py-3" placeholder="Optimized title for Google" />
+                </div>
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SEO Description</label>
+                  <textarea {...register('seo_description')} className="input-luxe py-3 resize-none" rows={3} placeholder="Meta description..." />
+                </div>
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Search Keywords / Tags</label>
+                  <input {...register('tags')} className="input-luxe py-3" placeholder="minimal, gold, trending (comma separated)" />
+                </div>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/5">
                 {[
                   { name: 'is_active', label: 'Product Active', desc: 'Visible in the store' },
                   { name: 'is_featured', label: 'Featured Product', desc: 'Show in Hero sections' },
-                  { name: 'is_trending', label: 'Trending', desc: 'Add trending badge' },
-                  { name: 'is_best_seller', label: 'Best Seller', desc: 'Add best seller badge' },
+                  { name: 'is_best_seller', label: 'Best Seller', desc: 'Add Best Seller badge' },
+                  { name: 'is_new_arrival', label: 'New Arrival', desc: 'Add New Arrival badge' },
+                  { name: 'is_trending', label: 'Trending', desc: 'Add Trending badge' },
+                  { name: 'is_limited_edition', label: 'Limited Edition', desc: 'Add Limited badge' },
                 ].map((flag) => (
                   <label key={flag.name} className="flex items-start gap-3 p-4 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-white/30 transition-colors">
                     <input type="checkbox" {...register(flag.name as any)} className="w-5 h-5 mt-0.5 accent-luxe-accent rounded bg-black border-white/20" />
