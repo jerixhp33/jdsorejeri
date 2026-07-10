@@ -7,6 +7,7 @@ import { ServiceWorkerRegister } from '@/components/shared/ServiceWorkerRegister
 import { OfflineStatusMonitor } from '@/components/shared/OfflineStatusMonitor';
 import { ToastSound } from '@/components/shared/ToastSound';
 import { PwaInstallPrompt } from '@/components/shared/PwaInstallPrompt';
+import { PushNotificationPrompt } from '@/components/shared/PushNotificationPrompt';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/Providers';
 import { ContextMenuBlocker } from '@/components/shared/ContextMenuBlocker';
@@ -108,6 +109,7 @@ export default function RootLayout({
             <OfflineStatusMonitor />
             <ToastSound />
             <PwaInstallPrompt />
+            <PushNotificationPrompt />
             <PageLoader />
             {children}
             <Toaster
