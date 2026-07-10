@@ -9,6 +9,7 @@ import { ToastSound } from '@/components/shared/ToastSound';
 import { PwaInstallPrompt } from '@/components/shared/PwaInstallPrompt';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/Providers';
+import { ContextMenuBlocker } from '@/components/shared/ContextMenuBlocker';
 import '@/styles/globals.css';
 
 const inter = Inter({
@@ -101,6 +102,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
+            <ContextMenuBlocker />
             <SmoothScroll />
             <ServiceWorkerRegister />
             <OfflineStatusMonitor />
