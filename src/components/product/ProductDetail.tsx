@@ -32,7 +32,7 @@ interface ProductDetailProps {
 
 export function ProductDetail({ product, reviews }: ProductDetailProps) {
   const router = useRouter();
-  const { addItem, updateQuantity, items: cartItems } = useCart();
+  const { addItem, updateQuantity, items: cartItems, deliverySettings } = useCart();
   const { isWishlisted, toggle } = useWishlist();
 
   const [selectedImage, setSelectedImage] = useState(0);
@@ -550,7 +550,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                         </div>
                         <div className="flex items-center gap-3 text-sm text-white/50">
                           <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
-                          Free delivery on orders above ₹999
+                          Free delivery on orders above {formatCurrency(deliverySettings.threshold)}
                         </div>
                         <div className="flex items-center gap-3 text-sm text-white/50">
                           <Shield className="w-4 h-4 text-luxe-accent flex-shrink-0" />
