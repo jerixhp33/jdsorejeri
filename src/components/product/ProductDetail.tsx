@@ -24,6 +24,7 @@ import { formatCurrency, cn } from '@/lib/utils';
 import type { Product, PosterSize, Review } from '@/types';
 import { toast } from 'sonner';
 import { VirtualTryOnModal } from './VirtualTryOnModal';
+import { ReviewFormModal } from './ReviewFormModal';
 
 interface ProductDetailProps {
   product: Product;
@@ -45,6 +46,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const [openAccordion, setOpenAccordion] = useState<string | null>('description');
   const [showTryOn, setShowTryOn] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   
   // Adaptive aspect ratio: tracks the natural width/height of the loaded image
   const [imgAspect, setImgAspect] = useState<number | null>(null);
@@ -582,11 +584,21 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
         </div>
 
         {/* Reviews Section */}
-        {reviews.length > 0 && (
-          <div className="mt-20 pt-12 border-t border-white/10">
-            <h2 className="font-display text-2xl font-bold text-white mb-8">
+        <div className="mt-20 pt-12 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <h2 className="font-display text-2xl font-bold text-white">
               Customer Reviews ({reviews.length})
             </h2>
+            <button
+              onClick={() => setIsReviewModalOpen(true)}
+              className="btn-luxe px-6 py-2.5 text-sm w-full sm:w-auto"
+            >
+              Write a Review
+            </button>
+          </div>
+
+          {reviews.length > 0 ? (
+            <>
 
             {/* Rating summary */}
             <div className="flex items-center gap-6 mb-10 p-6 glass-card">
@@ -661,8 +673,25 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                 </motion.div>
               ))}
             </div>
-          </div>
-        )}
+            </>
+          ) : (
+            <div className="glass-card p-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                <Star className="w-8 h-8 text-white/20" />
+              </div>
+              <h3 className="text-xl font-display font-medium text-white mb-2">No Reviews Yet</h3>
+              <p className="text-white/50 mb-6 max-w-md mx-auto">
+                Be the first to share your thoughts on {product.name}. Your feedback helps other customers make better choices!
+              </p>
+              <button
+                onClick={() => setIsReviewModalOpen(true)}
+                className="btn-luxe px-8 py-3"
+              >
+                Write a Review
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Virtual Try-On Modal */}
         {currentImage && (
@@ -673,6 +702,15 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             currentProduct={product}
           />
         )}
+
+        {/* Review Form Modal */}
+        <ReviewFormModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          productId={product.id}
+          productName={product.name}
+          onSuccess={() => router.refresh()}
+        />
       </div>
     );
   }

@@ -23,6 +23,7 @@ export interface UserProfile {
   profile_picture?: string;
   role: UserRole;
   phone?: string;
+  notification_preferences?: Record<string, boolean>;
   created_at: string;
   updated_at: string;
   last_active?: string;
