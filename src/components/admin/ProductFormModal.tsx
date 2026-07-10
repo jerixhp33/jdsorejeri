@@ -287,8 +287,20 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
                 </label>
                 <select {...register('category_id')} className="input-luxe text-base py-3">
                   <option value="">Select a product category to begin</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name} ({cat.product_type})</option>
+                  {Object.entries(
+                    categories.reduce((acc, cat) => {
+                      if (!acc[cat.product_type]) acc[cat.product_type] = [];
+                      if (!acc[cat.product_type].find(c => c.id === cat.id)) {
+                        acc[cat.product_type].push(cat);
+                      }
+                      return acc;
+                    }, {} as Record<string, Category[]>)
+                  ).map(([type, cats]) => (
+                    <optgroup key={type} label={type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}>
+                      {cats.sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
                 {errors.category_id && <p className="text-red-400 text-xs mt-1">{errors.category_id.message}</p>}
