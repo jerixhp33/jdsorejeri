@@ -94,7 +94,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     >
       <Link prefetch={true} href={`/product/${product.slug}`}
         className="block product-card group"
-        style={{ overflow: 'hidden' }}
+        style={{ overflow: 'hidden', WebkitTouchCallout: 'none' }}
+        onContextMenu={(e) => e.preventDefault()}
+        draggable={false}
       >
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden rounded-t-[1rem] bg-luxe-gray">

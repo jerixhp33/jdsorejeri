@@ -77,6 +77,7 @@
   /* Ensure minimum tap target size on mobile */
   button, a, [role="button"] {
     touch-action: manipulation;
+    -webkit-touch-callout: none;
   }
 }
 
