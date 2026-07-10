@@ -669,6 +669,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             isOpen={showTryOn}
             onClose={() => setShowTryOn(false)}
             posterUrl={currentImage.url}
+            currentProduct={product}
           />
         )}
       </div>
