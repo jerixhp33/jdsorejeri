@@ -18,6 +18,14 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
   const [products, setProducts] = useState(initialProducts);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<ProductType | 'all'>('all');
+
+  const uniqueTypes = Array.from(new Set(categories.map(c => c?.product_type).filter(Boolean)));
+  const formatTypeLabel = (type: string) => {
+    if (!type) return '';
+    if (type === 'hair_clip') return 'Hair Clips';
+    if (type === 'other') return 'Miscellaneous';
+    return type.charAt(0).toUpperCase() + type.slice(1) + 's';
+  };
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
 
@@ -133,13 +141,11 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
             className="input-luxe text-sm w-full h-[40px]"
           >
             <option value="all">All Types</option>
-            <option value="poster">Posters</option>
-            <option value="earring">Earrings</option>
-            <option value="hairband">Hairbands</option>
-            <option value="bracelet">Bracelets</option>
-            <option value="keychain">Keychains</option>
-            <option value="hair_clip">Hair Clips</option>
-            <option value="other">Other</option>
+            {uniqueTypes.map(type => (
+              <option key={type as string} value={type as string}>
+                {formatTypeLabel(type as string)}
+              </option>
+            ))}
           </select>
         </div>
       </div>
