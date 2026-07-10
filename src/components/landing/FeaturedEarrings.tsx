@@ -48,7 +48,7 @@ export function FeaturedEarrings({ products }: FeaturedEarringsProps) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <Link prefetch={true} href="/earrings"
+            <Link prefetch={true} href="/category/earring"
               className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors group"
             >
               View all earrings

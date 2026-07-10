@@ -20,7 +20,7 @@ const toOptionalNumber = (val: unknown): number | undefined => {
 const productSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  product_type: z.enum(['poster', 'earring']),
+  product_type: z.enum(['poster', 'earring', 'hairband', 'bracelet', 'keychain', 'hair_clip', 'other']),
   category_id: z.string().min(1, 'Select a category'),
   tags: z.string().optional(),
   material: z.string().optional(),
@@ -37,10 +37,10 @@ const productSchema = z.object({
     (val) => (val === '' || val === null || val === undefined ? undefined : val),
     z.enum(['portrait', 'landscape', 'square']).optional()
   ),
-  // Earring specific (optional — posters don't fill these)
+  // Standard product specific (optional — posters don't fill these)
   color: z.string().optional(),
   weight_grams: z.preprocess(toOptionalNumber, z.number().optional()),
-  // price/stock are earring-only; posters use poster_sizes instead.
+  // price/stock are standard-only; posters use poster_sizes instead.
   // Using .optional() so Zod never errors when these are empty on poster forms.
   price: z.preprocess(toOptionalNumber, z.number().min(0).optional()),
   stock: z.preprocess(toOptionalNumber, z.number().min(0).optional()),
@@ -154,10 +154,10 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
         }
       }
     }
-    // Validate earring price
-    if (data.product_type === 'earring') {
+    // Validate standard product price
+    if (data.product_type !== 'poster') {
       if (!data.price || data.price <= 0) {
-        toast.error('Earring price is required and must be greater than 0');
+        toast.error('Price is required and must be greater than 0');
         return;
       }
     }
@@ -299,6 +299,11 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
               <select {...register('product_type')} className="input-luxe">
                 <option value="poster">Poster</option>
                 <option value="earring">Earring</option>
+                <option value="hairband">Hairband</option>
+                <option value="bracelet">Bracelet</option>
+                <option value="keychain">Keychain</option>
+                <option value="hair_clip">Hair Clip</option>
+                <option value="other">Other</option>
               </select>
             </div>
             <div>
@@ -323,7 +328,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
               <input
                 {...register('material')}
                 className="input-luxe"
-                placeholder={productType === 'earring' ? 'e.g. Gold-plated, Sterling Silver' : 'e.g. 250gsm paper'}
+                placeholder={productType !== 'poster' ? 'e.g. Gold-plated, Sterling Silver' : 'e.g. 250gsm paper'}
               />
             </div>
             <div>
@@ -417,10 +422,10 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
             </>
           )}
 
-          {/* Earring-specific */}
-          {productType === 'earring' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl border border-white/10">
-              <p className="col-span-2 text-white/50 text-xs uppercase tracking-wide">Earring Details</p>
+          {/* Standard-specific */}
+          {productType !== 'poster' && (
+            <div className="grid grid-cols-2 gap-4">
+              <p className="col-span-2 text-white/50 text-xs uppercase tracking-wide">Standard Details</p>
               <div>
                 <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Price (₹) *</label>
                 <input {...register('price', { valueAsNumber: true })} type="number" min="0" className="input-luxe" placeholder="499" />

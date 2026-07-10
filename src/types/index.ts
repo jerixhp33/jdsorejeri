@@ -3,7 +3,7 @@
 // ============================================================
 
 export type UserRole = 'user' | 'admin' | 'super_admin';
-export type ProductType = 'poster' | 'earring';
+export type ProductType = 'poster' | 'earring' | 'hairband' | 'bracelet' | 'keychain' | 'hair_clip' | 'other';
 export type OrderStatus = 'pending' | 'confirmed' | 'packed' | 'ready' | 'delivered' | 'cancelled';
 export type PosterOrientation = 'portrait' | 'landscape' | 'square';
 export type PosterFinish = 'matte' | 'glossy' | 'satin' | 'metallic';

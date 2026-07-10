@@ -42,7 +42,7 @@ export function FeaturedPosters({ products }: FeaturedPostersProps) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <Link prefetch={true} href="/posters"
+            <Link prefetch={true} href="/category/poster"
               className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors group"
             >
               View all posters

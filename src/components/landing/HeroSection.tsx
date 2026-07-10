@@ -354,7 +354,7 @@ export function HeroSection() {
           transition={{ delay: 1.2, duration: 0.6 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4 sm:px-0"
         >
-          <ShimmerButton href="/posters" gold>
+          <ShimmerButton href="/category/poster" gold>
             Shop Posters
             <motion.span
               animate={{ x: [0, 4, 0] }}
@@ -363,7 +363,7 @@ export function HeroSection() {
               <ArrowRight className="w-4 h-4" />
             </motion.span>
           </ShimmerButton>
-          <ShimmerButton href="/earrings">
+          <ShimmerButton href="/category/earring">
             <Sparkles className="w-4 h-4 text-white/70" />
             Explore Earrings
           </ShimmerButton>

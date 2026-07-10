@@ -37,8 +37,10 @@ import { Tooltip } from '@/components/shared/Tooltip';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
-  { href: '/posters', label: 'Posters' },
-  { href: '/earrings', label: 'Earrings' },
+  { href: '/category/poster', label: 'Posters' },
+  { href: '/category/earring', label: 'Earrings' },
+  { href: '/category/hairband', label: 'Hairbands' },
+  { href: '/category/bracelet', label: 'Bracelets' },
   { href: '/collections', label: 'Collections' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },

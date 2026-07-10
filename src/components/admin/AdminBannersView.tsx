@@ -252,7 +252,7 @@ export function AdminBannersView({ banners: initial }: AdminBannersViewProps) {
                   value={form.cta_url}
                   onChange={e => setForm(f => ({ ...f, cta_url: e.target.value }))}
                   className="input-luxe"
-                  placeholder="/posters"
+                  placeholder="/category/poster"
                 />
               </div>
               <div>

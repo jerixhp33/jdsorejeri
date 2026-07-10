@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Plus, Search, Edit2, Trash2, Eye, EyeOff, Star, Package } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { Product, Category } from '@/types';
+import type { Product, Category, ProductType } from '@/types';
 import { ProductFormModal } from './ProductFormModal';
 
 interface AdminProductsViewProps {
@@ -17,7 +17,7 @@ interface AdminProductsViewProps {
 export function AdminProductsView({ initialProducts, categories }: AdminProductsViewProps) {
   const [products, setProducts] = useState(initialProducts);
   const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'poster' | 'earring'>('all');
+  const [typeFilter, setTypeFilter] = useState<ProductType | 'all'>('all');
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
 
@@ -126,19 +126,21 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
             className="input-luxe pl-9 text-sm w-full"
           />
         </div>
-        <div className="flex gap-2">
-          {(['all', 'poster', 'earring'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
-              className={cn(
-                'px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all',
-                typeFilter === t ? 'bg-luxe-accent text-black' : 'bg-white/5 text-white/50 hover:bg-white/10'
-              )}
-            >
-              {t === 'all' ? 'All Types' : t === 'poster' ? 'Posters' : 'Earrings'}
-            </button>
-          ))}
+        <div className="flex gap-2 min-w-[150px]">
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as ProductType | 'all')}
+            className="input-luxe text-sm w-full h-[40px]"
+          >
+            <option value="all">All Types</option>
+            <option value="poster">Posters</option>
+            <option value="earring">Earrings</option>
+            <option value="hairband">Hairbands</option>
+            <option value="bracelet">Bracelets</option>
+            <option value="keychain">Keychains</option>
+            <option value="hair_clip">Hair Clips</option>
+            <option value="other">Other</option>
+          </select>
         </div>
       </div>
 
@@ -155,7 +157,7 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
             const img = images?.find((im) => im.is_primary) || images?.[0];
             const posterSizes = product.sizes as Array<{ label: string; price: number }> | undefined;
             const displayPrice =
-              product.product_type === 'earring'
+              product.product_type !== 'poster'
                 ? product.price
                 : posterSizes && posterSizes.length > 0
                   ? Math.min(...posterSizes.map((s) => s.price))

@@ -120,10 +120,10 @@ export function CartView() {
             Browse our collections and add something you love
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link prefetch={true} href="/posters" className="btn-luxe text-sm">
+            <Link prefetch={true} href="/category/poster" className="btn-luxe text-sm">
               Shop Posters
             </Link>
-            <Link prefetch={true} href="/earrings" className="btn-luxe-outline text-sm">
+            <Link prefetch={true} href="/category/earring" className="btn-luxe-outline text-sm">
               Shop Earrings
             </Link>
           </div>
@@ -250,7 +250,7 @@ export function CartView() {
 
             {/* Continue shopping */}
             <div className="flex gap-3 pt-2">
-              <Link prefetch={true} href="/posters"
+              <Link prefetch={true} href="/category/poster"
                 className="btn-glass !py-2 !px-4 text-sm group w-fit"
               >
                 <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
