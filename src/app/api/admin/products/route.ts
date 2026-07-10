@@ -58,37 +58,32 @@ export async function POST(req: NextRequest) {
                       <!-- Header -->
                       <tr>
                         <td align="center" style="padding: 40px 20px; border-bottom: 1px solid #222222;">
-                          <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #D4AF37; letter-spacing: 4px; text-transform: uppercase;">JD STORE</h1>
-                          <p style="margin: 10px 0 0 0; font-size: 12px; color: #888888; letter-spacing: 2px; text-transform: uppercase;">Just Arrived</p>
+                          <h1 style="color: #D4AF37; font-size: 28px; margin: 0; letter-spacing: 2px;">NEW ARRIVAL</h1>
+                          <p style="color: #FFFFFF; font-size: 16px; margin: 10px 0 0 0; opacity: 0.8;">JD Store Exclusive</p>
                         </td>
                       </tr>
 
-                      <!-- Body -->
+                      <!-- Content -->
                       <tr>
-                        <td style="padding: 40px 40px 20px 40px;">
-                          <p style="margin: 0 0 20px 0; font-size: 16px; color: #E5E5E5; font-weight: 500;">Hello ${u.name || 'there'},</p>
-                          <p style="margin: 0 0 30px 0; font-size: 15px; color: #AAAAAA; line-height: 1.6;">
-                            We are thrilled to unveil the latest addition to our curated collection. Discover the exceptional craftsmanship and design of our newest piece.
+                        <td align="center" style="padding: 40px 30px;">
+                          <p style="color: #FFFFFF; font-size: 18px; margin: 0 0 20px 0; line-height: 1.6;">
+                            Hi ${u.name || 'there'},<br>
+                            We just added a stunning new piece to our collection:
                           </p>
-
-                          <div style="background-color: #1A1A1A; border: 1px solid #333333; border-radius: 8px; padding: 30px; text-align: center; margin-bottom: 40px;">
-                            <h2 style="margin: 0 0 15px 0; font-size: 22px; color: #FFFFFF; font-weight: 600; letter-spacing: 0.5px;">${data.name}</h2>
-                            ${data.description ? `<p style="margin: 0; font-size: 14px; color: #888888; line-height: 1.5; font-style: italic;">"${data.description}"</p>` : ''}
-                          </div>
-
-                          <!-- CTA Button -->
+                          <h2 style="color: #D4AF37; font-size: 24px; margin: 0 0 30px 0;">${data.name}</h2>
+                          
                           <table width="100%" border="0" cellspacing="0" cellpadding="0">
                             <tr>
                               <td align="center">
                                 <a href="${siteUrl}/product/${data.slug}" style="display: inline-block; background-color: #D4AF37; color: #000000; font-size: 14px; font-weight: 700; text-decoration: none; padding: 16px 36px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase;">
-                                  Discover Now
+                                  Shop Now
                                 </a>
                               </td>
                             </tr>
                           </table>
                         </td>
                       </tr>
-
+                      
                       <!-- Footer -->
                       <tr>
                         <td align="center" style="padding: 40px; background-color: #0A0A0A; border-top: 1px solid #222222;">

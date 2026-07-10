@@ -57,6 +57,7 @@ const productSchema = z.object({
   is_best_seller: z.boolean().default(false),
   is_new_arrival: z.boolean().default(false),
   is_limited_edition: z.boolean().default(false),
+  slug: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -79,15 +80,16 @@ const PRESET_SIZES = [
 ];
 
 interface ProductFormModalProps {
-  product: Product | null;
+  product?: Product | null;
   categories: Category[];
   onClose: () => void;
   onSaved: (product: Product) => void;
+  onSuccess?: () => void;
 }
 
 type TabKey = 'general' | 'pricing' | 'inventory' | 'specs' | 'images' | 'marketing';
 
-export function ProductFormModal({ product, categories, onClose, onSaved }: ProductFormModalProps) {
+export function ProductFormModal({ product, categories, onClose, onSaved, onSuccess }: ProductFormModalProps) {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('general');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -240,7 +242,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
 
     setSaving(true);
     try {
-      const slug = product?.slug || generateSlug(data.name);
+      const slug = data.slug || product?.slug || (generateSlug(data.name) + '-' + Math.random().toString(36).substring(2, 6));
       const tags = data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
 
       const payload = {
@@ -633,6 +635,14 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
             {/* SEO & MARKETING TAB */}
             <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'marketing' && 'hidden')}>
               <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 flex justify-between">
+                    <span>Product Slug</span>
+                    <span className="text-white/30 text-[10px]">Auto-generates if blank</span>
+                  </label>
+                  <input {...register('slug')} className="input-luxe py-3" placeholder="custom-product-url-slug" />
+                  {errors.slug && <p className="text-red-400 text-xs mt-1">{errors.slug.message}</p>}
+                </div>
                 <div>
                   <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SEO Title</label>
                   <input {...register('seo_title')} className="input-luxe py-3" placeholder="Optimized title for Google" />
