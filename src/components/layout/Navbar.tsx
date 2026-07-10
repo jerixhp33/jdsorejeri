@@ -99,9 +99,23 @@ interface NavbarProps {
 }
 
 export function Navbar({ categories = [] }: NavbarProps) {
+  // Get unique product types from active categories
+  const uniqueTypes = Array.from(new Set(categories.map(c => c.product_type)));
+  
+  const formatTypeLabel = (type: string) => {
+    if (type === 'hair_clip') return 'Hair Clips';
+    if (type === 'other') return 'Miscellaneous';
+    return type.charAt(0).toUpperCase() + type.slice(1) + 's';
+  };
+
+  const dynamicCategoryLinks = uniqueTypes.map(type => ({
+    href: `/category/${type}`,
+    label: formatTypeLabel(type)
+  }));
+
   const navLinks = [
     { href: '/', label: 'Home' },
-    ...categories.map((c) => ({ href: `/category/${c.product_type}`, label: c.name })),
+    ...dynamicCategoryLinks,
     { href: '/collections', label: 'Collections' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
