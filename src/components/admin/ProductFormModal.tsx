@@ -278,7 +278,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div ref={scrollContainerRef} className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto glass-card">
+      <div ref={scrollContainerRef} className="relative w-full max-w-2xl max-h-[85vh] flex flex-col glass-card overflow-hidden">
         <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
           <h2 className="text-white font-semibold">{product ? 'Edit Product' : 'Add New Product'}</h2>
           <button onClick={onClose} className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all">
@@ -291,7 +291,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
             // Scroll to top so the user sees the field-level errors
             scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
           })}
-          className="p-5 space-y-5"
+          className="p-5 space-y-5 overflow-y-auto flex-1"
         >
           {/* Basic Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -431,7 +431,9 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
           {/* Standard-specific */}
           {productType !== 'poster' && (
             <div className="grid grid-cols-2 gap-4">
-              <p className="col-span-2 text-white/50 text-xs uppercase tracking-wide">Standard Details</p>
+              <p className="col-span-2 text-white/50 text-xs uppercase tracking-wide">
+                {productType.charAt(0).toUpperCase() + productType.slice(1).replace('_', ' ')} Details
+              </p>
               <div>
                 <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Price (₹) *</label>
                 <input {...register('price', { valueAsNumber: true })} type="number" min="0" className="input-luxe" placeholder="499" />

@@ -35,16 +35,7 @@ import type { Notification } from '@/types';
 import { JDLogo } from '@/components/shared/JDLogo';
 import { Tooltip } from '@/components/shared/Tooltip';
 
-const NAV_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/category/poster', label: 'Posters' },
-  { href: '/category/earring', label: 'Earrings' },
-  { href: '/category/hairband', label: 'Hairbands' },
-  { href: '/category/bracelet', label: 'Bracelets' },
-  { href: '/collections', label: 'Collections' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
-];
+import type { Category } from '@/types';
 
 const typeIcon: Record<string, React.ElementType> = {
   order:   Package,
@@ -103,7 +94,18 @@ function NotifItem({
   );
 }
 
-export function Navbar() {
+interface NavbarProps {
+  categories?: Category[];
+}
+
+export function Navbar({ categories = [] }: NavbarProps) {
+  const navLinks = [
+    { href: '/', label: 'Home' },
+    ...categories.map((c) => ({ href: `/category/${c.product_type}`, label: c.name })),
+    { href: '/collections', label: 'Collections' },
+    { href: '/about', label: 'About' },
+    { href: '/contact', label: 'Contact' },
+  ];
   const pathname = usePathname();
   const router = useRouter();
   const { user, profile, loading } = useAuth();
@@ -280,7 +282,7 @@ export function Navbar() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -596,7 +598,7 @@ export function Navbar() {
 
               {/* Nav links */}
               <nav className="p-4 space-y-1.5">
-                {NAV_LINKS.map((link) => (
+                {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
