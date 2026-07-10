@@ -55,6 +55,27 @@ const LAYOUTS = [
     { x: 75, y: 60, width: 24 }, // Mid Right
     { x: 40, y: 72, width: 18 }, // Bottom Left
     { x: 60, y: 80, width: 20 }, // Bottom Center
+  ],
+  // 4. Clean 2x2 Square Grid
+  [
+    { x: 35, y: 35, width: 25 },
+    { x: 65, y: 35, width: 25 },
+    { x: 35, y: 65, width: 25 },
+    { x: 65, y: 65, width: 25 },
+  ],
+  // 5. The Hero (One huge center, 4 small corners)
+  [
+    { x: 50, y: 50, width: 40 }, // Massive Center
+    { x: 20, y: 20, width: 15 }, // TL
+    { x: 80, y: 20, width: 15 }, // TR
+    { x: 20, y: 80, width: 15 }, // BL
+    { x: 80, y: 80, width: 15 }, // BR
+  ],
+  // 6. Vertical Cascade
+  [
+    { x: 50, y: 20, width: 35 },
+    { x: 50, y: 50, width: 35 },
+    { x: 50, y: 80, width: 35 },
   ]
 ];
 
@@ -298,6 +319,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     }
   };
 
+  const handleBack = () => {
+    window.location.reload();
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -328,10 +353,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                 </button>
               )}
               <button 
-                onClick={onClose}
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/80 hover:bg-white/20 hover:text-white active:scale-95 transition-all border border-white/5"
+                onClick={handleBack}
+                className="px-5 py-2.5 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md text-white font-semibold text-sm hover:bg-white/20 active:scale-95 transition-all border border-white/20 shadow-lg"
               >
-                <X className="w-5 h-5" />
+                Back
               </button>
             </div>
           </div>

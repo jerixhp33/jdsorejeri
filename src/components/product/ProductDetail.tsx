@@ -93,12 +93,12 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
   }, [images.length]);
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (images.length <= 1 || showTryOn) return;
     const timer = setInterval(() => {
       handleNextImage();
     }, 2800);
     return () => clearInterval(timer);
-  }, [images.length, handleNextImage]);
+  }, [images.length, handleNextImage, showTryOn]);
   
   // Ensure quantity doesn't exceed newly selected size stock
   useEffect(() => {
@@ -243,7 +243,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                     e.stopPropagation();
                     setShowTryOn(true);
                   }}
-                  className="absolute bottom-3 left-3 px-4 py-2.5 rounded-xl bg-luxe-accent text-black font-semibold shadow-lg hover:scale-105 transition-transform flex items-center gap-2 z-10"
+                  className="absolute bottom-3 left-3 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold shadow-lg hover:bg-white/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 z-10"
                 >
                   <Package className="w-4 h-4" />
                   See it on your wall
