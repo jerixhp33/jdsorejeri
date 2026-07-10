@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useCart } from '@/hooks/useCart';
 import type { Product } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface VirtualTryOnModalProps {
   isOpen: boolean;
@@ -21,52 +22,52 @@ interface CollagePoster {
   url: string;
   initialX: number; // 0-100%
   initialY: number; // 0-100%
-  baseScale: number;
+  widthVw: number; // width in viewport width units
   product: Product;
 }
 
+// Layouts based on viewport widths (vw) and viewport heights (vh) percentages
+// This guarantees posters don't overlap regardless of the original image resolution.
 const LAYOUTS = [
-  // 1. Dense Grid (Like the 3rd image)
+  // 1. Dense Grid (3x4)
   [
-    { x: 40, y: 30, scale: 0.18 }, { x: 50, y: 30, scale: 0.18 }, { x: 60, y: 30, scale: 0.18 },
-    { x: 40, y: 44, scale: 0.18 }, { x: 50, y: 44, scale: 0.18 }, { x: 60, y: 44, scale: 0.18 },
-    { x: 40, y: 58, scale: 0.18 }, { x: 50, y: 58, scale: 0.18 }, { x: 60, y: 58, scale: 0.18 },
-    { x: 40, y: 72, scale: 0.18 }, { x: 50, y: 72, scale: 0.18 }, { x: 60, y: 72, scale: 0.18 },
+    { x: 25, y: 20, width: 22 }, { x: 50, y: 20, width: 22 }, { x: 75, y: 20, width: 22 },
+    { x: 25, y: 40, width: 22 }, { x: 50, y: 40, width: 22 }, { x: 75, y: 40, width: 22 },
+    { x: 25, y: 60, width: 22 }, { x: 50, y: 60, width: 22 }, { x: 75, y: 60, width: 22 },
+    { x: 25, y: 80, width: 22 }, { x: 50, y: 80, width: 22 }, { x: 75, y: 80, width: 22 },
   ],
-  // 2. Cross / Diamond (Tightened up)
+  // 2. Cross / Diamond
   [
-    { x: 50, y: 50, scale: 0.22 }, // Center
-    { x: 50, y: 34, scale: 0.2 }, // Top
-    { x: 50, y: 66, scale: 0.2 }, // Bottom
-    { x: 38, y: 50, scale: 0.2 }, // Left
-    { x: 62, y: 50, scale: 0.2 }, // Right
-    { x: 38, y: 34, scale: 0.15 }, // Top Left
-    { x: 62, y: 34, scale: 0.15 }, // Top Right
-    { x: 38, y: 66, scale: 0.15 }, // Bottom Left
-    { x: 62, y: 66, scale: 0.15 }, // Bottom Right
+    { x: 50, y: 50, width: 28 }, // Center
+    { x: 50, y: 25, width: 22 }, // Top
+    { x: 50, y: 75, width: 22 }, // Bottom
+    { x: 20, y: 50, width: 22 }, // Left
+    { x: 80, y: 50, width: 22 }, // Right
+    { x: 25, y: 28, width: 18 }, // Top Left
+    { x: 75, y: 28, width: 18 }, // Top Right
+    { x: 25, y: 72, width: 18 }, // Bottom Left
+    { x: 75, y: 72, width: 18 }, // Bottom Right
   ],
   // 3. Staggered Gallery Wall
   [
-    { x: 45, y: 45, scale: 0.25 }, // Main Left
-    { x: 58, y: 38, scale: 0.18 }, // Top Right
-    { x: 58, y: 55, scale: 0.18 }, // Mid Right
-    { x: 43, y: 65, scale: 0.15 }, // Bottom Left
-    { x: 53, y: 68, scale: 0.15 }, // Bottom Center
+    { x: 45, y: 45, width: 32 }, // Main Left
+    { x: 75, y: 35, width: 22 }, // Top Right
+    { x: 75, y: 60, width: 24 }, // Mid Right
+    { x: 40, y: 72, width: 18 }, // Bottom Left
+    { x: 60, y: 80, width: 20 }, // Bottom Center
   ]
 ];
 
 export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }: VirtualTryOnModalProps) {
-  const [bgImage, setBgImage] = useState<string | null>(null);
+  const [wallImage, setWallImage] = useState<string | null>(null);
   const [globalScale, setGlobalScale] = useState(1);
   const [saving, setSaving] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   
-  // Library of all posters for the collage
   const [posterLibrary, setPosterLibrary] = useState<Product[]>([]);
   const [isFetchingLibrary, setIsFetchingLibrary] = useState(false);
   
-  // Currently displayed posters
-  const [posters, setPosters] = useState<CollagePoster[]>([]);
+  const [posterGrid, setPosterGrid] = useState<CollagePoster[]>([]);
   
   const { addItem } = useCart();
   const supabase = createClient();
@@ -74,27 +75,25 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   const containerRef = useRef<HTMLDivElement>(null);
   const bgImageRef = useRef<HTMLImageElement>(null);
 
-  // Initialize with single poster
   useEffect(() => {
     if (isOpen) {
-      setPosters([{
+      setPosterGrid([{
         id: 'main-' + Date.now(),
         productId: currentProduct.id,
         url: posterUrl,
         initialX: 50,
         initialY: 50,
-        baseScale: 0.25,
+        widthVw: 35, // default single poster size
         product: currentProduct
       }]);
     }
   }, [isOpen, posterUrl, currentProduct]);
 
-  // Handle Body Scroll Lock with Lenis Custom Events
   useEffect(() => {
     if (isOpen) {
       window.dispatchEvent(new CustomEvent('pause-scroll'));
       document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none'; // Prevent pull-to-refresh on mobile when dragging
+      document.body.style.touchAction = 'none';
     } else {
       window.dispatchEvent(new CustomEvent('resume-scroll'));
       document.body.style.overflow = '';
@@ -108,11 +107,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     };
   }, [isOpen]);
 
-  // Clear bg image on close
   useEffect(() => {
     if (!isOpen) {
-      if (bgImage) URL.revokeObjectURL(bgImage);
-      setBgImage(null);
+      if (wallImage) URL.revokeObjectURL(wallImage);
+      setWallImage(null);
       setGlobalScale(1);
     }
   }, [isOpen]);
@@ -155,13 +153,8 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       return;
     }
 
-    // Pick a random layout
     const layout = LAYOUTS[Math.floor(Math.random() * LAYOUTS.length)];
-    
-    // Shuffle the library
     const shuffled = [...lib].sort(() => 0.5 - Math.random());
-    
-    // Ensure the current product is in the layout (put it in the first spot, usually center)
     const otherPosters = shuffled.filter(p => p.id !== currentProduct.id);
     
     const newCollage: CollagePoster[] = [];
@@ -183,12 +176,12 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
         url: imgUrl,
         initialX: layout[i].x,
         initialY: layout[i].y,
-        baseScale: layout[i].scale,
+        widthVw: layout[i].width,
         product: productForSpot
       });
     }
 
-    setPosters(newCollage);
+    setPosterGrid(newCollage);
     toast.success('Generated a new wall design!');
   };
 
@@ -196,15 +189,12 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     setAddingToCart(true);
     try {
       let addedCount = 0;
-      // Use a Set to avoid adding duplicates if the collage repeats a poster (it shouldn't, but just in case)
-      const uniqueProducts = Array.from(new Set(posters.map(p => p.productId)))
-        .map(id => posters.find(p => p.productId === id)!.product);
+      const uniqueProducts = Array.from(new Set(posterGrid.map(p => p.productId)))
+        .map(id => posterGrid.find(p => p.productId === id)!.product);
         
       for (const prod of uniqueProducts) {
-        // Find default size (usually A4)
         const sizeId = prod.sizes?.[0]?.id;
         const price = prod.sizes?.[0]?.price || prod.price || 0;
-        
         await addItem(prod.id, price, 1, sizeId);
         addedCount++;
       }
@@ -219,18 +209,16 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
     }
-
     const url = URL.createObjectURL(file);
-    setBgImage(url);
+    setWallImage(url);
   };
 
   const handleSave = async () => {
-    if (!bgImage || !containerRef.current || !bgImageRef.current) return;
+    if (!wallImage || !containerRef.current || !bgImageRef.current) return;
     
     const posterElements = document.querySelectorAll('.collage-poster-img') as NodeListOf<HTMLImageElement>;
     if (posterElements.length === 0) return;
@@ -244,12 +232,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
 
       const bgImg = new Image();
       bgImg.crossOrigin = 'anonymous';
-      
-      await new Promise((resolve, reject) => {
-        bgImg.onload = resolve;
-        bgImg.onerror = reject;
-        bgImg.src = bgImage;
-      });
+      await new Promise((resolve, reject) => { bgImg.onload = resolve; bgImg.onerror = reject; bgImg.src = wallImage; });
 
       canvas.width = bgImg.width;
       canvas.height = bgImg.height;
@@ -276,18 +259,13 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       const scaleX = canvas.width / renderedWidth;
       const scaleY = canvas.height / renderedHeight;
 
-      // Draw each poster
       for (let i = 0; i < posterElements.length; i++) {
         const el = posterElements[i];
         const posterRect = el.getBoundingClientRect();
         
         const posterImg = new Image();
         posterImg.crossOrigin = 'anonymous';
-        await new Promise((resolve, reject) => {
-          posterImg.onload = resolve;
-          posterImg.onerror = reject;
-          posterImg.src = el.src;
-        });
+        await new Promise((resolve, reject) => { posterImg.onload = resolve; posterImg.onerror = reject; posterImg.src = el.src; });
 
         const posterRenderX = posterRect.left - renderedX;
         const posterRenderY = posterRect.top - renderedY;
@@ -327,19 +305,19 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-xl"
+          className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a] backdrop-blur-3xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-black/50 border-b border-white/10 z-20">
-            <h3 className="font-display text-xl text-white font-semibold">
-              {posters.length > 1 ? 'Wall Design Generator' : 'Virtual Try-On'}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 z-20 bg-black/40 backdrop-blur-xl">
+            <h3 className="font-display text-xl text-white font-bold tracking-wide">
+              {posterGrid.length > 1 ? 'Wall Design Generator' : 'Virtual Try-On'}
             </h3>
-            <div className="flex items-center gap-3">
-              {posters.length > 1 && (
+            <div className="flex items-center gap-4">
+              {posterGrid.length > 1 && (
                 <button
                   onClick={handleAddAllToCart}
                   disabled={addingToCart}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-luxe-accent transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black text-sm font-bold hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] disabled:opacity-50 disabled:hover:scale-100"
                 >
                   {addingToCart ? (
                     <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
@@ -351,26 +329,30 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
               )}
               <button 
                 onClick={onClose}
-                className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 text-white/80 hover:bg-white/20 hover:text-white active:scale-95 transition-all border border-white/5"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 relative overflow-hidden" ref={containerRef}>
-            {!bgImage ? (
+          {/* Main Viewport */}
+          <div className="flex-1 relative overflow-hidden bg-black/20" ref={containerRef}>
+            {!wallImage ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10">
-                  <ImageIcon className="w-8 h-8 text-white/40" />
-                </div>
-                <h4 className="text-xl font-semibold text-white mb-2">Upload a photo of your wall</h4>
-                <p className="text-white/50 text-sm mb-8 max-w-sm">
-                  Take a photo of where you want to hang this poster to see how it looks in your room.
+                <motion.div 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="w-24 h-24 rounded-full bg-luxe-accent/10 flex items-center justify-center mb-8 border border-luxe-accent/20 shadow-[0_0_40px_rgba(200,169,110,0.1)]"
+                >
+                  <ImageIcon className="w-10 h-10 text-luxe-accent" />
+                </motion.div>
+                <h4 className="font-display text-3xl font-bold text-white mb-3">Upload your wall</h4>
+                <p className="text-white/50 text-base mb-10 max-w-sm leading-relaxed">
+                  Take a photo of your room to see exactly how these posters will look on your wall.
                 </p>
-                <label className="btn-luxe flex items-center gap-2 cursor-pointer">
-                  <Upload className="w-4 h-4" />
+                <label className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-luxe-accent to-[#d4b982] text-black font-bold text-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer shadow-xl">
+                  <Upload className="w-5 h-5" />
                   Take or Choose Photo
                   <input 
                     type="file" 
@@ -383,95 +365,16 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
               </div>
             ) : (
               <>
-                {/* Background Image */}
+                {/* Background Wall */}
                 <img 
                   ref={bgImageRef}
-                  src={bgImage} 
+                  src={wallImage} 
                   alt="Your wall" 
-                  className="w-full h-full object-contain pointer-events-none select-none"
+                  className="w-full h-full object-cover md:object-contain pointer-events-none select-none brightness-90"
                 />
 
-                {/* Draggable Posters */}
-                {posters.map((poster, index) => (
-                  <motion.img
-                    key={poster.id}
-                    src={poster.url}
-                    alt={`Poster ${index}`}
-                    drag
-                    dragConstraints={containerRef}
-                    dragElastic={0}
-                    dragMomentum={false}
-                    initial={{ scale: 0, opacity: 0, x: '-50%', y: '-50%' }}
-                    animate={{ scale: poster.baseScale * globalScale, opacity: 1, x: '-50%', y: '-50%' }}
-                    transition={{ delay: index * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
-                    style={{
-                      position: 'absolute',
-                      top: `${poster.initialY}%`,
-                      left: `${poster.initialX}%`,
-                      boxShadow: '0 25px 50px -12px rgba(0,0,0,0.6), 0 10px 20px -5px rgba(0,0,0,0.4)',
-                      cursor: 'grab',
-                      touchAction: 'none',
-                      transformOrigin: 'center center'
-                    }}
-                    whileDrag={{ cursor: 'grabbing', scale: (poster.baseScale * globalScale) * 1.05 }}
-                    className="collage-poster-img max-h-[80vh] w-auto border-4 border-white/5 bg-white/5"
-                    crossOrigin="anonymous"
-                  />
-                ))}
-
-                {/* Bottom Controls */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 w-full px-4 md:w-auto">
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md p-2 rounded-2xl border border-white/10 z-10 w-full md:w-auto overflow-x-auto no-scrollbar">
-                    
-                    <button 
-                      onClick={handleAutoDesign}
-                      disabled={isFetchingLibrary}
-                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-luxe-accent to-luxe-accent/80 text-black font-semibold hover:brightness-110 active:scale-95 transition-all flex-shrink-0"
-                    >
-                      {isFetchingLibrary ? (
-                        <div className="w-5 h-5 rounded-full border-2 border-black/20 border-t-black animate-spin" />
-                      ) : (
-                        <Sparkles className="w-5 h-5" />
-                      )}
-                      Auto Design
-                    </button>
-
-                    <div className="w-px h-8 bg-white/20 mx-1 flex-shrink-0" />
-
-                    <button 
-                      onClick={() => setGlobalScale(s => Math.max(0.3, s - 0.1))}
-                      className="p-3 rounded-xl bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex-shrink-0"
-                    >
-                      <ZoomOut className="w-5 h-5" />
-                    </button>
-                    
-                    <button 
-                      onClick={() => setGlobalScale(s => Math.min(2.5, s + 0.1))}
-                      className="p-3 rounded-xl bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex-shrink-0"
-                    >
-                      <ZoomIn className="w-5 h-5" />
-                    </button>
-                    
-                    <div className="w-px h-8 bg-white/20 mx-1 flex-shrink-0" />
-                    
-                    <button 
-                      onClick={handleSave}
-                      disabled={saving}
-                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/10 text-white font-semibold hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50 flex-shrink-0"
-                    >
-                      {saving ? (
-                        <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                      ) : (
-                        <Download className="w-5 h-5" />
-                      )}
-                      Save
-                    </button>
-                  </div>
-                </div>
-
-                {/* Change photo button */}
-                <label className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white/80 text-sm hover:text-white hover:bg-white/10 transition-all cursor-pointer z-20">
+                {/* Floating "Change Photo" Button */}
+                <label className="absolute top-6 right-6 px-5 py-2.5 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 active:scale-95 transition-all cursor-pointer z-20 shadow-lg">
                   Change Photo
                   <input 
                     type="file" 
@@ -481,6 +384,86 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                     onChange={handleFileUpload}
                   />
                 </label>
+
+                {/* Draggable Posters Collage */}
+                <div className="absolute inset-0 z-10 pointer-events-none">
+                  {posterGrid.map((poster, index) => (
+                    <motion.img
+                      key={poster.id}
+                      src={poster.url}
+                      alt={`Poster ${index}`}
+                      drag
+                      dragConstraints={containerRef}
+                      dragElastic={0}
+                      dragMomentum={false}
+                      initial={{ scale: 0, opacity: 0, x: '-50%', y: '-50%' }}
+                      animate={{ scale: globalScale, opacity: 1, x: '-50%', y: '-50%' }}
+                      transition={{ delay: index * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
+                      style={{
+                        position: 'absolute',
+                        top: `${poster.initialY}%`,
+                        left: `${poster.initialX}%`,
+                        width: `${poster.widthVw}vw`,
+                        height: 'auto',
+                        cursor: 'grab',
+                        touchAction: 'none',
+                        transformOrigin: 'center center'
+                      }}
+                      whileDrag={{ cursor: 'grabbing', scale: globalScale * 1.05 }}
+                      className="collage-poster-img pointer-events-auto border-4 border-white/10 bg-white/5 filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]"
+                      crossOrigin="anonymous"
+                    />
+                  ))}
+                </div>
+
+                {/* Footer Dock */}
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center justify-between w-[90%] max-w-md px-4 py-3 rounded-2xl backdrop-blur-xl bg-black/40 border border-white/10 shadow-2xl z-30">
+                  
+                  {/* Left: Auto Design */}
+                  <button 
+                    onClick={handleAutoDesign}
+                    disabled={isFetchingLibrary}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-luxe-accent/20 to-transparent border border-luxe-accent/30 text-luxe-accent text-sm font-bold hover:bg-luxe-accent/30 active:scale-95 transition-all"
+                  >
+                    {isFetchingLibrary ? (
+                      <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/20 border-t-luxe-accent animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
+                    Auto Design
+                  </button>
+
+                  {/* Center: Zoom Controls */}
+                  <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10">
+                    <button 
+                      onClick={() => setGlobalScale(s => Math.max(0.3, s - 0.1))}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => setGlobalScale(s => Math.min(2.5, s + 0.1))}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  {/* Right: Save */}
+                  <button 
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 text-white text-sm font-semibold hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    {saving ? (
+                      <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                    Save
+                  </button>
+
+                </div>
               </>
             )}
           </div>
