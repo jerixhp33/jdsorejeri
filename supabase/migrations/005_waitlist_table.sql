@@ -16,7 +16,7 @@ CREATE POLICY "Users can view their own waitlist entries"
   ON waitlists FOR SELECT
   USING (
     user_id IN (
-      SELECT id FROM user_profiles WHERE uid = auth.uid()
+      SELECT id FROM user_profiles WHERE uid = auth.uid()::text
     )
   );
 
@@ -25,7 +25,7 @@ CREATE POLICY "Users can insert their own waitlist entries"
   ON waitlists FOR INSERT
   WITH CHECK (
     user_id IN (
-      SELECT id FROM user_profiles WHERE uid = auth.uid()
+      SELECT id FROM user_profiles WHERE uid = auth.uid()::text
     )
   );
 
@@ -34,7 +34,7 @@ CREATE POLICY "Users can delete their own waitlist entries"
   ON waitlists FOR DELETE
   USING (
     user_id IN (
-      SELECT id FROM user_profiles WHERE uid = auth.uid()
+      SELECT id FROM user_profiles WHERE uid = auth.uid()::text
     )
   );
 
