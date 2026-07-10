@@ -30,28 +30,10 @@ export function PageLoader() {
           exit={{ opacity: 0, scale: 1.04 }}
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
         >
-          {/* Subtle grid */}
-          <div
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage:
-                'linear-gradient(rgba(200,169,110,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,0.5) 1px, transparent 1px)',
-              backgroundSize: '64px 64px',
-            }}
-          />
-
-          {/* Radial fade over grid — wide enough to kill edges on mobile */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'radial-gradient(ellipse 80% 75% at 50% 50%, transparent 15%, #0a0a0a 65%)',
-            }}
-          />
-
-          {/* Soft ambient glow — tiny opacity so it doesn't flood */}
+          {/* Soft ambient glow — tiny opacity so it doesn't flood and is easy on mobile GPU */}
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(200,169,110,0.08) 0%, transparent 70%)' }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(200,169,110,0.06) 0%, transparent 70%)' }}
             animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
           />
