@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { motion } from 'framer-motion';
 import { Search, Filter, ChevronDown, MessageCircle } from 'lucide-react';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';

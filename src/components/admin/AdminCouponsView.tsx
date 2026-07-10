@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { motion } from 'framer-motion';
 import { Plus, Edit2, Trash2, Ticket } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ const emptyForm = () => ({
 export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
   const [coupons, setCoupons] = useState(initial);
   const [showModal, setShowModal] = useState(false);
+  useScrollLock(showModal);
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Pencil, Trash2, Eye, EyeOff, Save, X } from 'lucide-react';
 import { toast } from 'sonner';

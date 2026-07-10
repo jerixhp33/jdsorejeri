@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { motion } from 'framer-motion';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Layers } from 'lucide-react';
 import { generateSlug, cn } from '@/lib/utils';
@@ -16,6 +17,7 @@ interface AdminCollectionsViewProps {
 export function AdminCollectionsView({ collections: initial, allProducts }: AdminCollectionsViewProps) {
   const [collections, setCollections] = useState(initial);
   const [showModal, setShowModal] = useState(false);
+  useScrollLock(showModal);
   const [editCollection, setEditCollection] = useState<any>(null);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [productSearch, setProductSearch] = useState('');

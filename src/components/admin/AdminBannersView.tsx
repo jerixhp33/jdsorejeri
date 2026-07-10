@@ -29,6 +29,9 @@ export function AdminBannersView({ banners: initial }: AdminBannersViewProps) {
   const [banners, setBanners] = useState(initial);
   const [showModal, setShowModal] = useState(false);
   const [editBanner, setEditBanner] = useState<Banner | null>(null);
+  
+  useScrollLock(showModal);
+  
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
 

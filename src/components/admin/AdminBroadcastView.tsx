@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { motion } from 'framer-motion';
 import { Plus, Mail, Send, Clock, CheckCircle, XCircle, Users } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';

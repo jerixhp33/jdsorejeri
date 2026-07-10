@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { Plus, Search, Tag, Edit3, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateSlug, cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ export function AdminCategoriesView({ initialCategories }: AdminCategoriesViewPr
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
+  useScrollLock(showModal);
   const [editCategory, setEditCategory] = useState<Category | null>(null);
 
   const [formData, setFormData] = useState({
