@@ -342,7 +342,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
 
         {/* Scrollable Form Area */}
         <form onSubmit={handleSubmit(onSubmit, () => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }))} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6 overscroll-contain">
+          <div className={cn("flex-1 p-6 overscroll-contain", isCategoryOpen ? "overflow-hidden" : "overflow-y-auto")}>
             
             {/* GENERAL TAB */}
             <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'general' && 'hidden')}>
