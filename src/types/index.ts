@@ -71,6 +71,7 @@ export interface ProductImage {
   id: string;
   product_id: string;
   url: string;
+  storage_path?: string;
   alt_text?: string;
   display_order: number;
   is_primary: boolean;

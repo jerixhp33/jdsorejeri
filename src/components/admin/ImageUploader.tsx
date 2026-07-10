@@ -1,23 +1,25 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { Upload, X, ImageIcon, Loader2, GripVertical } from 'lucide-react';
+import { Upload, X, ImageIcon, Loader2, GripVertical, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 export interface UploadedImage {
+  id?: string;
   url: string;
-  path?: string;   // storage path — present for newly uploaded files
-  isPrimary?: boolean;
+  storage_path?: string;
+  is_primary?: boolean;
 }
 
 interface ImageUploaderProps {
   images: UploadedImage[];
   onChange: (images: UploadedImage[]) => void;
+  onDelete?: (image: UploadedImage) => void;
   maxImages?: number;
 }
 
-export function ImageUploader({ images, onChange, maxImages = 8 }: ImageUploaderProps) {
+export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: ImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState<string[]>([]); // local object URLs being uploaded
@@ -37,7 +39,7 @@ export function ImageUploader({ images, onChange, maxImages = 8 }: ImageUploader
       toast.error(json.error || 'Upload failed');
       return null;
     }
-    return { url: json.url, path: json.path };
+    return { url: json.url, storage_path: json.path, is_primary: false };
   };
 
   const handleFiles = useCallback(
@@ -64,6 +66,10 @@ export function ImageUploader({ images, onChange, maxImages = 8 }: ImageUploader
 
       const succeeded = results.filter(Boolean) as UploadedImage[];
       if (succeeded.length) {
+        // If it's the very first image uploaded, make it primary automatically
+        if (images.length === 0 && succeeded.length > 0) {
+          succeeded[0].is_primary = true;
+        }
         onChange([...images, ...succeeded]);
       }
     },
@@ -103,23 +109,88 @@ export function ImageUploader({ images, onChange, maxImages = 8 }: ImageUploader
     setDropIndex(null);
   };
 
-  const removeImage = async (i: number) => {
+  const removeImage = (i: number) => {
     const img = images[i];
-    // Optionally delete from storage (fire-and-forget; non-blocking)
-    if (img.path) {
-      fetch('/api/admin/upload', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: img.path }),
-      }).catch(() => {}); // best-effort
+    if (onDelete) onDelete(img);
+    
+    const next = images.filter((_, j) => j !== i);
+    // Auto-assign primary if we deleted the primary
+    if (img.is_primary && next.length > 0) {
+      next[0].is_primary = true;
     }
-    onChange(images.filter((_, j) => j !== i));
+    onChange(next);
+  };
+
+  const setPrimary = (i: number) => {
+    const next = images.map((img, idx) => ({
+      ...img,
+      is_primary: idx === i
+    }));
+    onChange(next);
   };
 
   const canAddMore = images.length + uploading.length < maxImages;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {/* Visual Grid */}
+      {images.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {images.map((img, i) => (
+            <div
+              key={img.url}
+              draggable
+              onDragStart={() => onThumbDragStart(i)}
+              onDragOver={(e) => onThumbDragOver(e, i)}
+              onDrop={(e) => onThumbDrop(e, i)}
+              onDragEnd={onThumbDragEnd}
+              className={cn(
+                'group relative aspect-square rounded-xl overflow-hidden bg-white/5 border-2 transition-all cursor-move',
+                dropIndex === i ? 'border-luxe-accent scale-105 shadow-xl' : 'border-transparent',
+                img.is_primary ? 'ring-2 ring-luxe-accent ring-offset-2 ring-offset-luxe-black sm:col-span-2 sm:row-span-2' : ''
+              )}
+            >
+              <img src={img.url} alt="Preview" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
+                <div className="flex justify-between items-start">
+                  <button
+                    type="button"
+                    onClick={() => setPrimary(i)}
+                    className={cn(
+                      "p-1.5 rounded-lg transition-all",
+                      img.is_primary ? "bg-luxe-accent text-luxe-black" : "bg-white/20 text-white hover:bg-luxe-accent hover:text-luxe-black"
+                    )}
+                    title="Set as Primary Cover"
+                  >
+                    <Star className={cn("w-4 h-4", img.is_primary ? "fill-luxe-black" : "")} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="p-1.5 rounded-lg bg-red-500/80 text-white hover:bg-red-500 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex justify-center">
+                  <GripVertical className="w-5 h-5 text-white/50" />
+                </div>
+              </div>
+              {img.is_primary && (
+                <div className="absolute bottom-2 left-2 px-2 py-1 bg-luxe-accent text-luxe-black text-[10px] font-bold uppercase tracking-wider rounded-md">
+                  Cover
+                </div>
+              )}
+            </div>
+          ))}
+          {uploading.map((url, i) => (
+            <div key={i} className="aspect-square rounded-xl bg-white/5 flex items-center justify-center animate-pulse">
+              <Loader2 className="w-6 h-6 text-luxe-accent animate-spin" />
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Drop zone */}
       {canAddMore && (
         <div
@@ -148,95 +219,12 @@ export function ImageUploader({ images, onChange, maxImages = 8 }: ImageUploader
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
             multiple
+            accept="image/*"
             className="hidden"
             onChange={(e) => e.target.files && handleFiles(e.target.files)}
           />
         </div>
-      )}
-
-      {/* Thumbnails grid */}
-      {(images.length > 0 || uploading.length > 0) && (
-        <div className="grid grid-cols-4 gap-2">
-          {images.map((img, i) => (
-            <div
-              key={img.url}
-              draggable
-              onDragStart={() => onThumbDragStart(i)}
-              onDragOver={(e) => onThumbDragOver(e, i)}
-              onDrop={(e) => onThumbDrop(e, i)}
-              onDragEnd={onThumbDragEnd}
-              className={cn(
-                'relative aspect-square rounded-lg overflow-hidden border group cursor-grab active:cursor-grabbing transition-all duration-150',
-                dragIndex === i && 'opacity-40 scale-95',
-                dropIndex === i && dragIndex !== i && 'ring-2 ring-luxe-accent',
-                i === 0 ? 'border-luxe-accent/60' : 'border-white/10'
-              )}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={img.url}
-                alt={`Product image ${i + 1}`}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-
-              {/* Primary badge */}
-              {i === 0 && (
-                <span className="absolute top-1 left-1 bg-luxe-accent text-black text-[9px] font-bold px-1.5 py-0.5 rounded">
-                  Main
-                </span>
-              )}
-
-              {/* Drag handle hint */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <GripVertical className="w-5 h-5 text-white/70" />
-              </div>
-
-              {/* Remove button */}
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); removeImage(i); }}
-                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                aria-label="Remove image"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-
-          {/* Uploading placeholders */}
-          {uploading.map((localUrl) => (
-            <div
-              key={localUrl}
-              className="relative aspect-square rounded-lg overflow-hidden border border-white/10 bg-white/5"
-            >
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-                <Loader2 className="w-5 h-5 text-luxe-accent animate-spin" />
-                <span className="text-white/30 text-[10px]">Uploading…</span>
-              </div>
-            </div>
-          ))}
-
-          {/* Add more tile */}
-          {canAddMore && images.length > 0 && (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="aspect-square rounded-lg border-2 border-dashed border-white/15 hover:border-white/30 flex flex-col items-center justify-center gap-1 text-white/30 hover:text-white/50 transition-all"
-            >
-              <ImageIcon className="w-5 h-5" />
-              <span className="text-[10px]">Add more</span>
-            </button>
-          )}
-        </div>
-      )}
-
-      {images.length > 1 && (
-        <p className="text-white/25 text-xs">Drag thumbnails to reorder · First image is the main photo</p>
       )}
     </div>
   );
