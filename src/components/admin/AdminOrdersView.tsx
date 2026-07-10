@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Filter, ChevronDown, MessageCircle } from 'lucide-react';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
@@ -29,9 +29,13 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all');
   const [search, setSearch] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkActionStatus, setBulkActionStatus] = useState<OrderStatus | ''>('');
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const [printingOrder, setPrintingOrder] = useState<Order | null>(null);
   const [dispatchOrder, setDispatchOrder] = useState<Order | null>(null);
-  const [dispatchCourier, setDispatchCourier] = useState('SD Courier');
+  const [dispatchCourier, setDispatchCourier] = useState('ST Courier');
   const [dispatchCustomCourier, setDispatchCustomCourier] = useState('');
   const [dispatchAwb, setDispatchAwb] = useState('');
 
@@ -120,6 +124,48 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
     }
   };
 
+  const toggleSelection = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedIds(newSet);
+  };
+
+  const toggleAll = () => {
+    if (selectedIds.size === filtered.length && filtered.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map(o => o.id)));
+    }
+  };
+
+  const handleBulkUpdate = async () => {
+    if (!bulkActionStatus || selectedIds.size === 0) return;
+    setIsBulkUpdating(true);
+    let successCount = 0;
+    
+    for (const id of Array.from(selectedIds)) {
+      try {
+        const res = await fetch('/api/admin/orders', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, status: bulkActionStatus, updated_at: new Date().toISOString() }),
+        });
+        if (res.ok) {
+          setOrders(prev => prev.map(o => o.id === id ? { ...o, status: bulkActionStatus } : o));
+          successCount++;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    
+    setIsBulkUpdating(false);
+    setSelectedIds(new Set());
+    setBulkActionStatus('');
+    toast.success(`Updated ${successCount} orders to ${bulkActionStatus}`);
+  };
+
   const cancelOrder = async (orderId: string) => {
     if (!confirm('Cancel this order?')) return;
     await updateStatus(orderId, 'cancelled');
@@ -145,6 +191,30 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
             className="input-luxe pl-9 text-sm w-full"
           />
         </div>
+        
+        {/* Bulk Actions */}
+        {selectedIds.size > 0 && (
+          <div className="flex items-center gap-2 mr-2">
+            <select 
+              value={bulkActionStatus} 
+              onChange={e => setBulkActionStatus(e.target.value as OrderStatus)}
+              className="input-luxe py-1.5 text-xs bg-luxe-dark"
+            >
+              <option value="">Bulk Actions ({selectedIds.size})</option>
+              {STATUSES.filter(s => s.value !== 'all').map(s => (
+                <option key={s.value} value={s.value}>Mark as {s.label}</option>
+              ))}
+            </select>
+            <button
+              onClick={handleBulkUpdate}
+              disabled={isBulkUpdating || !bulkActionStatus}
+              className="px-3 py-1.5 text-xs font-semibold bg-luxe-accent text-black rounded-lg hover:bg-luxe-accent/80 transition-all disabled:opacity-50"
+            >
+              {isBulkUpdating ? 'Updating...' : 'Apply'}
+            </button>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-2">
           {STATUSES.map((s) => (
             <button
@@ -169,6 +239,14 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/10">
+                <th className="px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer"
+                    checked={selectedIds.size === filtered.length && filtered.length > 0}
+                    onChange={toggleAll}
+                  />
+                </th>
                 {['Order', 'Customer', 'Items', 'District', 'Total', 'Status', 'Date', 'Actions'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-white/40 text-xs uppercase tracking-wide font-medium">
                     {h}
@@ -179,14 +257,31 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center text-white/30 text-sm">
+                  <td colSpan={9} className="px-4 py-16 text-center text-white/30 text-sm">
                     No orders found
                   </td>
                 </tr>
               ) : (
                 filtered.map((order) => (
-                  <tr key={order.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-4 py-3">
+                  <React.Fragment key={order.id}>
+                    <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer"
+                            checked={selectedIds.has(order.id)}
+                            onChange={() => toggleSelection(order.id)}
+                          />
+                          <button 
+                            onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
+                            className="p-1 text-white/40 hover:text-white transition-colors"
+                          >
+                            <ChevronDown className={cn("w-4 h-4 transition-transform", expandedId === order.id ? "rotate-180" : "")} />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
                       <p className="text-white text-sm font-medium">#{order.order_number}</p>
                     </td>
                     <td className="px-4 py-3">
@@ -216,7 +311,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                               const next = NEXT_STATUS[order.status as OrderStatus]!;
                               if (next === 'packed' || next === 'ready') {
                                 setDispatchOrder(order);
-                                setDispatchCourier('SD Courier');
+                                setDispatchCourier('ST Courier');
                                 setDispatchCustomCourier('');
                                 setDispatchAwb('');
                               } else {
@@ -241,7 +336,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                         {(order.status === 'packed' || order.status === 'ready') && (order as any).tracking_number && ((order.delivery_address as any)?.phone || (order.user as any)?.phone) && (
                           <a
                             href={`https://wa.me/91${((order.delivery_address as any)?.phone || (order.user as any)?.phone)}?text=${encodeURIComponent(
-                              `Hi ${(order.delivery_address as any)?.full_name || (order.user as any)?.name || 'Customer'}, your JD Store order #${order.order_number} has been shipped via ${(order as any).courier_name || 'SD Courier'} (AWB: ${(order as any).tracking_number}). Track here: https://stcourier.com/track/shipment`
+                              `Hi ${(order.delivery_address as any)?.full_name || (order.user as any)?.name || 'Customer'}, your JD Store order #${order.order_number} has been shipped via ${(order as any).courier_name || 'ST Courier'} (AWB: ${(order as any).tracking_number}). Track here: https://stcourier.com/track/shipment`
                             )}`}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -277,6 +372,58 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                       </div>
                     </td>
                   </tr>
+                  {expandedId === order.id && (
+                    <tr className="bg-white/[0.01]">
+                      <td colSpan={9} className="px-6 py-4 border-b border-white/5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="text-white/50 text-xs uppercase tracking-wider mb-3">Order Items</h4>
+                            <div className="space-y-3">
+                              {order.items?.map((item: any, idx: number) => (
+                                <div key={idx} className="flex items-center gap-3 bg-white/5 p-2.5 rounded-lg border border-white/10">
+                                  <div className="w-12 h-12 bg-luxe-dark rounded-md overflow-hidden flex-shrink-0">
+                                    {item.product?.images?.[0]?.url && (
+                                      <img src={item.product.images[0].url} alt="" className="w-full h-full object-cover" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white text-sm font-medium truncate">{item.product?.name || 'Unknown'}</p>
+                                    <p className="text-white/40 text-xs">
+                                      {item.poster_size?.label ? `Size: ${item.poster_size.label}` : 'Standard'}
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-white/70 text-xs">{item.quantity} × {formatCurrency(item.unit_price)}</p>
+                                    <p className="text-luxe-accent text-sm font-bold mt-0.5">{formatCurrency(item.total_price)}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="text-white/50 text-xs uppercase tracking-wider mb-3">Delivery Details</h4>
+                            <div className="bg-white/5 p-4 rounded-lg border border-white/10 space-y-1.5">
+                              <p className="text-white font-medium">{(order.delivery_address as any)?.full_name || (order.user as any)?.name}</p>
+                              <p className="text-white/70 text-sm">{(order.delivery_address as any)?.phone}</p>
+                              <div className="text-white/50 text-sm mt-3 pt-3 border-t border-white/10">
+                                <p>{[(order.delivery_address as any)?.house_no, (order.delivery_address as any)?.street, (order.delivery_address as any)?.area].filter(Boolean).join(', ')}</p>
+                                <p>{[(order.delivery_address as any)?.city, (order.delivery_address as any)?.district].filter(Boolean).join(', ')} - {(order.delivery_address as any)?.pincode}</p>
+                                <p>{(order.delivery_address as any)?.state}, {(order.delivery_address as any)?.country}</p>
+                              </div>
+                            </div>
+                            
+                            {(order.discount_amount || 0) > 0 && (
+                              <div className="mt-4 bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20 flex justify-between items-center">
+                                <span className="text-emerald-400 text-sm font-medium">Discount Applied</span>
+                                <span className="text-emerald-400 font-bold">-{formatCurrency(order.discount_amount || 0)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  </React.Fragment>
                 ))
               )}
             </tbody>
@@ -394,7 +541,6 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                   onChange={(e) => setDispatchCourier(e.target.value)}
                   className="input-luxe w-full"
                 >
-                  <option value="SD Courier">SD Courier</option>
                   <option value="ST Courier">ST Courier</option>
                   <option value="Other">Other (Custom)</option>
                 </select>
