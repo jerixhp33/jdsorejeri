@@ -33,6 +33,7 @@ import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import type { Notification } from '@/types';
 import { JDLogo } from '@/components/shared/JDLogo';
+import { Tooltip } from '@/components/shared/Tooltip';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -297,32 +298,36 @@ export function Navbar() {
             {/* Right Actions */}
             <div className="flex items-center gap-1">
               {/* Search */}
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
-                aria-label="Search"
-              >
-                <Search className="w-5 h-5" />
-              </button>
+              <Tooltip content="Search">
+                <button
+                  onClick={() => setSearchOpen(true)}
+                  className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                  aria-label="Search"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </Tooltip>
               {!loading && user ? (
                 <>
                   {/* Notifications — desktop only */}
                   <div className="relative hidden sm:block" ref={notifRef}>
-                    <button
-                      onClick={() => {
-                        setNotifOpen(!notifOpen);
-                        setProfileOpen(false);
-                      }}
-                      className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
-                      aria-label="Notifications"
-                    >
-                      <Bell className="w-5 h-5" />
-                      {unreadCount > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-luxe-accent rounded-full text-black text-[10px] font-bold flex items-center justify-center">
-                          {unreadCount > 9 ? '9+' : unreadCount}
-                        </span>
-                      )}
-                    </button>
+                    <Tooltip content="Notifications">
+                      <button
+                        onClick={() => {
+                          setNotifOpen(!notifOpen);
+                          setProfileOpen(false);
+                        }}
+                        className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                        aria-label="Notifications"
+                      >
+                        <Bell className="w-5 h-5" />
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-luxe-accent rounded-full text-black text-[10px] font-bold flex items-center justify-center">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
+                      </button>
+                    </Tooltip>
 
                     <AnimatePresence>
                       {notifOpen && (
@@ -385,58 +390,64 @@ export function Navbar() {
                   </div>
 
                   {/* Wishlist — desktop only */}
-                  <Link prefetch={true} href="/wishlist"
-                    className="hidden sm:flex p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] items-center justify-center"
-                    aria-label="Wishlist"
-                  >
-                    <Heart className="w-5 h-5" />
-                  </Link>
+                  <Tooltip content="Wishlist">
+                    <Link prefetch={true} href="/wishlist"
+                      className="hidden sm:flex p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] items-center justify-center"
+                      aria-label="Wishlist"
+                    >
+                      <Heart className="w-5 h-5" />
+                    </Link>
+                  </Tooltip>
 
                   {/* Cart */}
-                  <Link prefetch={true} href="/cart"
-                    className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
-                    aria-label="Cart"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    {itemCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-luxe-accent rounded-full text-black text-[10px] font-bold flex items-center justify-center">
-                        {itemCount > 9 ? '9+' : itemCount}
-                      </span>
-                    )}
-                  </Link>
+                  <Tooltip content="Cart">
+                    <Link prefetch={true} href="/cart"
+                      className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                      aria-label="Cart"
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                      {itemCount > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-luxe-accent rounded-full text-black text-[10px] font-bold flex items-center justify-center">
+                          {itemCount > 9 ? '9+' : itemCount}
+                        </span>
+                      )}
+                    </Link>
+                  </Tooltip>
 
                   {/* Profile — desktop only */}
                   <div className="relative hidden sm:block">
-                    <button
-                      onClick={() => {
-                        setProfileOpen(!profileOpen);
-                        setNotifOpen(false);
-                      }}
-                      className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-all min-h-[40px]"
-                      aria-label="Profile menu"
-                    >
-                      {profile?.profile_picture ? (
-                        <Image
-                          src={profile.profile_picture}
-                          alt={profile.name}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-luxe-accent flex items-center justify-center">
-                          <span className="text-black text-xs font-bold">
-                            {profile ? getInitials(profile.name) : 'U'}
-                          </span>
-                        </div>
-                      )}
-                      <ChevronDown
-                        className={cn(
-                          'w-4 h-4 text-white/60 transition-transform',
-                          profileOpen && 'rotate-180'
+                    <Tooltip content="Profile">
+                      <button
+                        onClick={() => {
+                          setProfileOpen(!profileOpen);
+                          setNotifOpen(false);
+                        }}
+                        className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-all min-h-[40px]"
+                        aria-label="Profile menu"
+                      >
+                        {profile?.profile_picture ? (
+                          <Image
+                            src={profile.profile_picture}
+                            alt={profile.name}
+                            width={32}
+                            height={32}
+                            className="rounded-full"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-luxe-accent flex items-center justify-center">
+                            <span className="text-black text-xs font-bold">
+                              {profile ? getInitials(profile.name) : 'U'}
+                            </span>
+                          </div>
                         )}
-                      />
-                    </button>
+                        <ChevronDown
+                          className={cn(
+                            'w-4 h-4 text-white/60 transition-transform',
+                            profileOpen && 'rotate-180'
+                          )}
+                        />
+                      </button>
+                    </Tooltip>
 
                     <AnimatePresence>
                       {profileOpen && (

@@ -9,6 +9,7 @@ import { useInView } from 'react-intersection-observer';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { formatCurrency, cn } from '@/lib/utils';
+import { Tooltip } from '@/components/shared/Tooltip';
 import type { Product } from '@/types';
 
 interface ProductCardProps {
@@ -183,39 +184,53 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
 
           {/* Wishlist button */}
-          <button
-            onClick={handleWishlist}
+          <Tooltip
+            content={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            position="left"
             className={cn(
-              'absolute top-2 right-2 z-10 p-2 rounded-full border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center',
-              'sm:opacity-0 sm:translate-x-2 sm:group-hover:opacity-100 sm:group-hover:translate-x-0',
-              wishlisted
-                ? 'bg-[#200505]/90 border-red-500/40 text-red-400'
-                : 'bg-black/60 border-white/20 text-white hover:bg-black/80'
+              'absolute top-2 right-2 z-10',
+              'sm:opacity-0 sm:translate-x-2 sm:group-hover:opacity-100 sm:group-hover:translate-x-0 transition-all duration-200'
             )}
-            aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            <Heart className={cn('w-3.5 h-3.5', wishlisted && 'fill-current')} />
-          </button>
+            <button
+              onClick={handleWishlist}
+              className={cn(
+                'p-2 rounded-full border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center',
+                wishlisted
+                  ? 'bg-[#200505]/90 border-red-500/40 text-red-400'
+                  : 'bg-black/60 border-white/20 text-white hover:bg-black/80'
+              )}
+              aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <Heart className={cn('w-3.5 h-3.5', wishlisted && 'fill-current')} />
+            </button>
+          </Tooltip>
 
           {/* Add to cart */}
-          <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300">
-            <button
-              onClick={handleAddToCart}
-              disabled={!isInStock}
-              className={cn(
-                'w-full py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 transition-all duration-200 min-h-[36px]',
-                isInStock
-                  ? 'bg-white text-black hover:bg-luxe-accent'
-                  : 'bg-black/80 border border-white/10 text-white/50 cursor-not-allowed'
-              )}
+          <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300 flex">
+            <Tooltip 
+              content={isInStock ? 'Quick Add' : 'Out of Stock'} 
+              position="top" 
+              className="w-full flex-1"
             >
-              <ShoppingCart className="w-3.5 h-3.5" />
-              {!isInStock
-                ? 'Out of Stock'
-                : product.product_type === 'poster'
-                  ? 'Select Poster'
-                  : 'Select Earring'}
-            </button>
+              <button
+                onClick={handleAddToCart}
+                disabled={!isInStock}
+                className={cn(
+                  'w-full py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 transition-all duration-200 min-h-[36px]',
+                  isInStock
+                    ? 'bg-white text-black hover:bg-luxe-accent'
+                    : 'bg-black/80 border border-white/10 text-white/50 cursor-not-allowed'
+                )}
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+                {!isInStock
+                  ? 'Out of Stock'
+                  : product.product_type === 'poster'
+                    ? 'Select Poster'
+                    : 'Select Earring'}
+              </button>
+            </Tooltip>
           </div>
         </div>
 
