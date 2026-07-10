@@ -8,6 +8,7 @@ import { OfflineStatusMonitor } from '@/components/shared/OfflineStatusMonitor';
 import { ToastSound } from '@/components/shared/ToastSound';
 import { PwaInstallPrompt } from '@/components/shared/PwaInstallPrompt';
 import { Toaster } from 'sonner';
+import { Providers } from '@/components/Providers';
 import '@/styles/globals.css';
 
 const inter = Inter({
@@ -99,30 +100,32 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <SmoothScroll />
-          <ServiceWorkerRegister />
-          <OfflineStatusMonitor />
-          <ToastSound />
-          <PwaInstallPrompt />
-          <PageLoader />
-          {children}
-          <Toaster
-            position="top-right"
-            expand={true}
-            richColors
-            theme="dark"
-            toastOptions={{
-              classNames: {
-                toast: 'bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl !rounded-2xl',
-                title: 'text-white font-semibold text-sm tracking-wide',
-                description: 'text-white/60 text-xs',
-                actionButton: 'bg-luxe-accent text-black font-semibold !rounded-xl',
-                cancelButton: 'bg-white/10 text-white hover:bg-white/20 !rounded-xl',
-                success: '!bg-green-500/10 !border-green-500/20 !text-green-400',
-                error: '!bg-red-500/10 !border-red-500/20 !text-red-400',
-              },
-            }}
-          />
+          <Providers>
+            <SmoothScroll />
+            <ServiceWorkerRegister />
+            <OfflineStatusMonitor />
+            <ToastSound />
+            <PwaInstallPrompt />
+            <PageLoader />
+            {children}
+            <Toaster
+              position="top-right"
+              expand={true}
+              richColors
+              theme="dark"
+              toastOptions={{
+                classNames: {
+                  toast: 'bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl !rounded-2xl',
+                  title: 'text-white font-semibold text-sm tracking-wide',
+                  description: 'text-white/60 text-xs',
+                  actionButton: 'bg-luxe-accent text-black font-semibold !rounded-xl',
+                  cancelButton: 'bg-white/10 text-white hover:bg-white/20 !rounded-xl',
+                  success: '!bg-green-500/10 !border-green-500/20 !text-green-400',
+                  error: '!bg-red-500/10 !border-red-500/20 !text-red-400',
+                },
+              }}
+            />
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

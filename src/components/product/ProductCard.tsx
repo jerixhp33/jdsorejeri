@@ -114,7 +114,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     crossOrigin="anonymous"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     className={cn(
-                      'object-cover transition-all duration-700',
+                      'object-cover transition-all duration-700 protect-image pointer-events-none',
                       imageLoaded ? 'opacity-100' : 'opacity-0'
                     )}
                     onLoad={() => {

@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { ProductGridSkeleton } from './ProductGridSkeleton';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInView } from 'react-intersection-observer';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { Product, ProductType, Category } from '@/types';
 
@@ -81,12 +83,7 @@ function CustomSelect({ value, onChange, options, minWidth = 150 }: {
 }
 
 export function ProductsPage({ productType, title, subtitle }: ProductsPageProps) {
-  const [products, setProducts]           = useState<Product[]>([]);
   const [categories, setCategories]       = useState<Category[]>([]);
-  const [loading, setLoading]             = useState(true);
-  const [loadingMore, setLoadingMore]     = useState(false);
-  const [total, setTotal]                 = useState(0);
-  const [page, setPage]                   = useState(1);
   const [filtersOpen, setFiltersOpen]     = useState(false);
   const [search, setSearch]               = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -114,46 +111,51 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
     return () => clearTimeout(handler);
   }, [search]);
 
-  const fetchProducts = useCallback(async (currentPage = 1, append = false) => {
-    if (!append) setLoading(true); else setLoadingMore(true);
+  const fetchProductsPage = async ({ pageParam = 1 }) => {
+    const params = new URLSearchParams({
+      type: productType,
+      page: String(pageParam),
+      limit: String(LIMIT),
+      sort,
+    });
+    if (selectedCategory) params.set('category', selectedCategory);
+    if (debouncedSearch)  params.set('search', debouncedSearch);
+    if (inStockOnly)      params.set('inStock', '1');
+    if (maxPrice < sliderMax) params.set('maxPrice', String(maxPrice));
 
-    try {
-      const params = new URLSearchParams({
-        type: productType,
-        page: String(currentPage),
-        limit: String(LIMIT),
-        sort,
-      });
-      if (selectedCategory) params.set('category', selectedCategory);
-      if (debouncedSearch)  params.set('search', debouncedSearch);
-      if (inStockOnly)      params.set('inStock', '1');
-      if (maxPrice < sliderMax) params.set('maxPrice', String(maxPrice));
+    const res = await fetch(`/api/products?${params.toString()}`);
+    return res.json();
+  };
 
-      const res = await fetch(`/api/products?${params.toString()}`);
-      const json = await res.json();
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: ['products', productType, selectedCategory, debouncedSearch, sort, maxPrice, inStockOnly],
+    queryFn: fetchProductsPage,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      const fetchedCount = allPages.reduce((acc, page) => acc + (page.data?.length || 0), 0);
+      if (fetchedCount < (lastPage.total || 0)) {
+        return allPages.length + 1;
+      }
+      return undefined;
+    },
+  });
 
-      setTotal(json.total ?? 0);
-      const fetched: Product[] = json.data || [];
-      if (append) setProducts(prev => [...prev, ...fetched]);
-      else        setProducts(fetched);
-    } catch (err) {
-      console.error('Error fetching products:', err);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, [productType, selectedCategory, debouncedSearch, sort, maxPrice, inStockOnly]);
+  const { ref: loadMoreRef, inView } = useInView();
 
   useEffect(() => {
-    setPage(1);
-    fetchProducts(1, false);
-  }, [fetchProducts]);
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const handleLoadMore = () => {
-    const next = page + 1;
-    setPage(next);
-    fetchProducts(next, true);
-  };
+  const products = data?.pages.flatMap((page) => page.data || []) || [];
+  const total = data?.pages[0]?.total || 0;
 
   const clearFilter = (key: string) => {
     if (key === 'category') setSelectedCategory('');
@@ -279,13 +281,13 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
 
       {/* Grid */}
       <div className="page-container py-10">
-        {!loading && (
+        {!isLoading && (
           <p className="text-white/30 text-sm mb-6">
             {total} product{total !== 1 ? 's' : ''} found
           </p>
         )}
 
-        {loading ? (
+        {isLoading ? (
           <ProductGridSkeleton count={LIMIT} />
         ) : products.length === 0 ? (
           <div className="text-center py-24">
@@ -309,15 +311,16 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
                 <ProductCard key={product.id} product={product} index={i % LIMIT} />
               ))}
             </div>
-            {products.length < total && (
-              <div className="text-center mt-12">
-                <button onClick={handleLoadMore} disabled={loadingMore} className="btn-luxe-outline flex items-center gap-2 mx-auto">
-                  {loadingMore ? (
-                    <><div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />Loading...</>
-                  ) : (
-                    `Load More (${total - products.length} remaining)`
-                  )}
-                </button>
+            {hasNextPage && (
+              <div ref={loadMoreRef} className="text-center mt-12 py-8">
+                {isFetchingNextPage ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/40 border-t-luxe-accent animate-spin" />
+                    <span className="text-luxe-accent text-sm">Loading more...</span>
+                  </div>
+                ) : (
+                  <div className="h-4" /> 
+                )}
               </div>
             )}
           </>

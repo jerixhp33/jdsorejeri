@@ -160,6 +160,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
               aspectRatio: imgAspect ? String(imgAspect) : '4/5',
               maxHeight: '85vh',
             }}
+            onContextMenu={(e) => e.preventDefault()}
             onMouseEnter={() => { if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) setZoomed(true); }}
             onMouseLeave={() => setZoomed(false)}
             onMouseMove={handleMouseMove}
@@ -185,7 +186,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                       transformOrigin: zoomed ? `${mousePos.x}% ${mousePos.y}%` : 'center',
                     }}
                     className={cn(
-                      'object-contain transition-transform duration-200 ease-out',
+                      'object-contain transition-transform duration-200 ease-out protect-image pointer-events-none',
                       zoomed && 'scale-[1.75]'
                     )}
                     onLoad={handleMainImageLoad}

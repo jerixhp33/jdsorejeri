@@ -452,6 +452,21 @@
 }
 
 @layer utilities {
+  /* Content Protection */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input, textarea, [contenteditable], .allow-select {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+  .protect-image {
+    -webkit-touch-callout: none;
+    pointer-events: none;
+    user-select: none;
+  }
+
   .text-gradient-gold {
     background: linear-gradient(to right, #c8a96e, #e8d5a3, #c8a96e);
     -webkit-background-clip: text;
