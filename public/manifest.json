@@ -1,11 +1,11 @@
 {
-  "name": "JD Store",
+  "name": "\u200B",
   "short_name": "JD Store",
   "description": "Museum-quality prints and artisan jewelry for the discerning collector.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
