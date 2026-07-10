@@ -336,7 +336,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
 
         {/* Scrollable Form Area */}
         <form onSubmit={handleSubmit(onSubmit, () => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }))} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 overscroll-contain">
             
             {/* GENERAL TAB */}
             <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'general' && 'hidden')}>
@@ -359,7 +359,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved }: Prod
                   </div>
                   
                   {isCategoryOpen && (
-                    <div className="absolute top-full left-0 w-full mt-2 bg-luxe-black border border-white/10 rounded-xl shadow-2xl z-50 max-h-[300px] overflow-y-auto">
+                    <div className="absolute top-full left-0 w-full mt-2 bg-luxe-black border border-white/10 rounded-xl shadow-2xl z-50 max-h-[300px] overflow-y-auto overscroll-contain">
                       {Object.entries(groupedCategories).map(([type, cats]) => (
                         <div key={type} className="p-2 border-b border-white/5 last:border-0">
                           <p className="text-[10px] uppercase tracking-widest text-luxe-accent font-semibold px-3 py-2">
