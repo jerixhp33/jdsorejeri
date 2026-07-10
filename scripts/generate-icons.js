@@ -21,7 +21,7 @@ async function generateIcons() {
     // We will inject solid colors directly into the SVG string for the PNG conversion.
     const solidSvg = rawSvg
       .replace(/fill="url\(#silver-gradient\)"/g, 'fill="#FFFFFF"')
-      .replace(/fill="url\(#gold-gradient\)"/g, 'fill="#C99537"');
+      .replace(/fill="url\(#gold-gradient\)"/g, 'fill="#FFFFFF"');
 
     // For the notification icon, Android requires a purely transparent background with SOLID WHITE shapes.
     const notificationSvg = rawSvg
