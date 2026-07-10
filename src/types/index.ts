@@ -362,6 +362,15 @@ export interface DailySales {
   orders: number;
 }
 
+export interface Waitlist {
+  id: string;
+  user_id: string;
+  product_id: string;
+  poster_size_id?: string;
+  created_at: string;
+  product?: Product;
+}
+
 // ============================================================
 // ACTIVITY / AUDIT LOG TYPES
 // ============================================================

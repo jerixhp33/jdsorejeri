@@ -47,6 +47,8 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
   const [openAccordion, setOpenAccordion] = useState<string | null>('description');
   const [showTryOn, setShowTryOn] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [waitlistJoined, setWaitlistJoined] = useState(false);
+  const [joiningWaitlist, setJoiningWaitlist] = useState(false);
   
   // Adaptive aspect ratio: tracks the natural width/height of the loaded image
   const [imgAspect, setImgAspect] = useState<number | null>(null);
@@ -114,15 +116,45 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
       toast.error('Please select a size');
       return;
     }
-
+    if (!inStock || cartQuantity >= dbStock) return;
     setAddingToCart(true);
     await addItem(
       product.id,
       unitPrice,
-      1,
+      quantity,
       product.product_type === 'poster' ? selectedSize?.id : undefined
     );
     setAddingToCart(false);
+    toast.success('Added to Cart');
+  };
+
+  const handleWaitlist = async () => {
+    setJoiningWaitlist(true);
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product.id,
+          posterSizeId: product.product_type === 'poster' ? selectedSize?.id : undefined
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 401) {
+          router.push('/login');
+          toast.error('Please log in to join the waitlist');
+          return;
+        }
+        throw new Error(data.error || 'Failed to join waitlist');
+      }
+      setWaitlistJoined(true);
+      toast.success('You have been added to the waitlist!');
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setJoiningWaitlist(false);
+    }
   };
 
   const handleShare = () => {
@@ -387,8 +419,19 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             <div className="flex flex-col gap-2 mb-6">
               <div className="flex items-center gap-3 h-[52px]">
                 {dbStock === 0 ? (
-                  <button disabled className="w-full h-full rounded-xl font-semibold text-sm bg-white/10 text-white/30 cursor-not-allowed">
-                    Out of Stock
+                  <button 
+                    onClick={handleWaitlist}
+                    disabled={joiningWaitlist || waitlistJoined}
+                    className="w-full h-full flex items-center justify-center gap-2 rounded-xl font-semibold text-sm bg-white/10 text-white hover:bg-white/20 transition-all border border-white/20"
+                  >
+                    {joiningWaitlist ? (
+                      <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                    ) : waitlistJoined ? (
+                      <Check className="w-4 h-4 text-green-400" />
+                    ) : (
+                      <Package className="w-4 h-4" />
+                    )}
+                    {waitlistJoined ? 'You\'re on the list!' : 'Notify Me When Available'}
                   </button>
                 ) : cartQuantity === 0 ? (
                   <button
