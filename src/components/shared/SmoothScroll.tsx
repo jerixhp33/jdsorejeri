@@ -31,13 +31,21 @@ export function SmoothScroll() {
       lenis.scrollTo(0, { immediate: true });
     };
 
+    // Listen to custom events for modals
+    const handlePause = () => lenis.stop();
+    const handleResume = () => lenis.start();
+
     // Listen to route transition completions if possible, or scroll events
     window.addEventListener('popstate', handleScrollToTop);
+    window.addEventListener('pause-scroll', handlePause);
+    window.addEventListener('resume-scroll', handleResume);
 
     return () => {
       lenis.destroy();
       cancelAnimationFrame(rafId);
       window.removeEventListener('popstate', handleScrollToTop);
+      window.removeEventListener('pause-scroll', handlePause);
+      window.removeEventListener('resume-scroll', handleResume);
     };
   }, []);
 

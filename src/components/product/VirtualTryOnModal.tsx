@@ -28,32 +28,30 @@ interface CollagePoster {
 const LAYOUTS = [
   // 1. Dense Grid (Like the 3rd image)
   [
-    { x: 35, y: 20, scale: 0.18 }, { x: 50, y: 20, scale: 0.18 }, { x: 65, y: 20, scale: 0.18 },
-    { x: 35, y: 40, scale: 0.18 }, { x: 50, y: 40, scale: 0.18 }, { x: 65, y: 40, scale: 0.18 },
-    { x: 35, y: 60, scale: 0.18 }, { x: 50, y: 60, scale: 0.18 }, { x: 65, y: 60, scale: 0.18 },
-    { x: 35, y: 80, scale: 0.18 }, { x: 50, y: 80, scale: 0.18 }, { x: 65, y: 80, scale: 0.18 },
+    { x: 40, y: 30, scale: 0.18 }, { x: 50, y: 30, scale: 0.18 }, { x: 60, y: 30, scale: 0.18 },
+    { x: 40, y: 44, scale: 0.18 }, { x: 50, y: 44, scale: 0.18 }, { x: 60, y: 44, scale: 0.18 },
+    { x: 40, y: 58, scale: 0.18 }, { x: 50, y: 58, scale: 0.18 }, { x: 60, y: 58, scale: 0.18 },
+    { x: 40, y: 72, scale: 0.18 }, { x: 50, y: 72, scale: 0.18 }, { x: 60, y: 72, scale: 0.18 },
   ],
   // 2. Cross / Diamond (Tightened up)
   [
     { x: 50, y: 50, scale: 0.22 }, // Center
-    { x: 50, y: 25, scale: 0.2 }, // Top
-    { x: 50, y: 75, scale: 0.2 }, // Bottom
-    { x: 32, y: 50, scale: 0.2 }, // Left
-    { x: 68, y: 50, scale: 0.2 }, // Right
-    { x: 35, y: 30, scale: 0.15 }, // Top Left
-    { x: 65, y: 30, scale: 0.15 }, // Top Right
-    { x: 35, y: 70, scale: 0.15 }, // Bottom Left
-    { x: 65, y: 70, scale: 0.15 }, // Bottom Right
+    { x: 50, y: 34, scale: 0.2 }, // Top
+    { x: 50, y: 66, scale: 0.2 }, // Bottom
+    { x: 38, y: 50, scale: 0.2 }, // Left
+    { x: 62, y: 50, scale: 0.2 }, // Right
+    { x: 38, y: 34, scale: 0.15 }, // Top Left
+    { x: 62, y: 34, scale: 0.15 }, // Top Right
+    { x: 38, y: 66, scale: 0.15 }, // Bottom Left
+    { x: 62, y: 66, scale: 0.15 }, // Bottom Right
   ],
   // 3. Staggered Gallery Wall
   [
-    { x: 40, y: 40, scale: 0.25 }, // Main Left
-    { x: 60, y: 30, scale: 0.18 }, // Top Right
-    { x: 60, y: 55, scale: 0.18 }, // Mid Right
-    { x: 40, y: 65, scale: 0.15 }, // Bottom Left
-    { x: 50, y: 75, scale: 0.15 }, // Bottom Center
-    { x: 25, y: 35, scale: 0.15 }, // Far Left
-    { x: 75, y: 45, scale: 0.15 }, // Far Right
+    { x: 45, y: 45, scale: 0.25 }, // Main Left
+    { x: 58, y: 38, scale: 0.18 }, // Top Right
+    { x: 58, y: 55, scale: 0.18 }, // Mid Right
+    { x: 43, y: 65, scale: 0.15 }, // Bottom Left
+    { x: 53, y: 68, scale: 0.15 }, // Bottom Center
   ]
 ];
 
@@ -91,19 +89,22 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     }
   }, [isOpen, posterUrl, currentProduct]);
 
-  // Handle Body Scroll Lock
+  // Handle Body Scroll Lock with Lenis Custom Events
   useEffect(() => {
     if (isOpen) {
+      window.dispatchEvent(new CustomEvent('pause-scroll'));
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none'; // Prevent pull-to-refresh on mobile when dragging
     } else {
-      document.body.style.overflow = 'unset';
-      document.body.style.touchAction = 'auto';
+      window.dispatchEvent(new CustomEvent('resume-scroll'));
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
     }
     
     return () => {
-      document.body.style.overflow = 'unset';
-      document.body.style.touchAction = 'auto';
+      window.dispatchEvent(new CustomEvent('resume-scroll'));
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
     };
   }, [isOpen]);
 
