@@ -108,9 +108,39 @@ export interface Product {
   sku?: string; // for earrings
 
   images?: ProductImage[];
-  sizes?: PosterSize[]; // for posters
   average_rating?: number;
   review_count?: number;
+
+  // Pricing
+  original_price?: number;
+  cost_price?: number;
+  discount_percent?: number;
+  tax_percent?: number;
+
+  // Inventory & Status
+  status?: string; // active, draft, out_of_stock, archived
+  low_stock_alert?: number;
+  continue_selling_oos?: boolean;
+
+  // Shipping
+  length_cm?: number;
+  width_cm?: number;
+  height_cm?: number;
+  courier_category?: string;
+  is_free_shipping?: boolean;
+
+  // SEO & Marketing
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
+  brand?: string;
+  short_description?: string;
+  is_new_arrival?: boolean;
+  is_limited_edition?: boolean;
+
+  // Relations
+  sizes?: PosterSize[];
+
   created_at: string;
   updated_at: string;
 }

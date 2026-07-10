@@ -1,0 +1,28 @@
+-- Add premium fields to products table for enterprise management
+
+-- Pricing
+ALTER TABLE products ADD COLUMN IF NOT EXISTS original_price NUMERIC(10,2);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC(10,2);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_percent NUMERIC(5,2) DEFAULT 0;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS tax_percent NUMERIC(5,2) DEFAULT 0;
+
+-- Inventory & Status
+ALTER TABLE products ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS low_stock_alert INTEGER DEFAULT 5;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS continue_selling_oos BOOLEAN DEFAULT FALSE;
+
+-- Shipping
+ALTER TABLE products ADD COLUMN IF NOT EXISTS length_cm NUMERIC(6,2);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS width_cm NUMERIC(6,2);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS height_cm NUMERIC(6,2);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS courier_category TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_free_shipping BOOLEAN DEFAULT FALSE;
+
+-- SEO & Marketing
+ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_title TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_description TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_keywords TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'JD Store';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_new_arrival BOOLEAN DEFAULT FALSE;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_limited_edition BOOLEAN DEFAULT FALSE;
