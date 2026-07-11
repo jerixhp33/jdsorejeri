@@ -88,6 +88,8 @@ export async function broadcastWebPush(payload: { title: string; body: string; u
             title: payload.title,
             body: payload.body,
             url: payload.url || '/',
+            image: payload.image,
+            icon: payload.icon
           })
         );
       } catch (err: any) {
