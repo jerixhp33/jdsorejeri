@@ -57,7 +57,9 @@ export function ProductWorkspace({ initialData, onClose, onSaved }: ProductWorks
   const saveAction = async (data: ProductFormData) => {
     try {
       if (!data.name || !data.category_id || !data.product_type) {
-        throw new Error('Name, Category, and Product Type are required.');
+        // Don't throw for auto-save, just gracefully exit until they fill it out
+        console.warn('Skipping save: Name, Category, and Product Type are required.');
+        return null;
       }
       
       const slug = data.slug || (generateSlug(data.name) + '-' + Math.random().toString(36).substring(2, 6));
@@ -181,12 +183,20 @@ export function ProductWorkspace({ initialData, onClose, onSaved }: ProductWorks
 
   // Actions
   const handleSaveDraft = async () => {
+    if (!formData.name || !formData.category_id || !formData.product_type) {
+      toast.error('Name, Category, and Product Type are required to save.');
+      return;
+    }
     updateField('status', 'draft');
     const p = await saveAction({ ...formData, status: 'draft' });
     if (p && onSaved) onSaved(p);
   };
 
   const handlePublish = async () => {
+    if (!formData.name || !formData.category_id || !formData.product_type) {
+      toast.error('Name, Category, and Product Type are required to publish.');
+      return;
+    }
     updateField('status', 'active');
     const p = await saveAction({ ...formData, status: 'active' });
     toast.success('Product published successfully!');
