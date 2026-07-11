@@ -25,6 +25,9 @@ export function useWebPush() {
       
       // Check current subscription status
       navigator.serviceWorker.register('/sw.js').then((registration) => {
+        // Force browser to check for sw.js updates immediately
+        registration.update();
+        
         registration.pushManager.getSubscription().then((subscription) => {
           setIsSubscribed(subscription !== null);
         });
