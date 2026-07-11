@@ -319,6 +319,8 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
             sku: editProduct.sku || '',
             status: (editProduct.status as any) || (editProduct.is_active ? 'active' : 'draft'),
             is_featured: editProduct.is_featured || false,
+            is_trending: editProduct.is_trending || false,
+            is_best_seller: editProduct.is_best_seller || false,
             weight_grams: editProduct.weight_grams || 0,
             length_cm: editProduct.length_cm || 0,
             width_cm: editProduct.width_cm || 0,

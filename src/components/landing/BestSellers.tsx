@@ -8,9 +8,11 @@ import type { Product } from '@/types';
 
 interface BestSellersProps {
   products: Product[];
+  title?: string;
+  subtitle?: string;
 }
 
-export function BestSellers({ products }: BestSellersProps) {
+export function BestSellers({ products, title = "Best Sellers", subtitle = "Trending Now" }: BestSellersProps) {
   if (!products.length) return null;
 
   return (
@@ -25,7 +27,7 @@ export function BestSellers({ products }: BestSellersProps) {
               viewport={{ once: true }}
               className="text-luxe-accent text-sm tracking-widest uppercase mb-3"
             >
-              Trending Now
+              {subtitle}
             </motion.p>
             <motion.h2
               initial={{ opacity: 0, y: 15 }}
@@ -34,7 +36,7 @@ export function BestSellers({ products }: BestSellersProps) {
               transition={{ delay: 0.1 }}
               className="section-title"
             >
-              Best Sellers
+              {title}
             </motion.h2>
           </div>
           <motion.div

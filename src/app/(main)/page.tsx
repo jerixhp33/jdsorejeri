@@ -56,6 +56,14 @@ export default async function HomePage() {
         <div className="flex-1 min-w-0">
           <div className="mb-4 lg:mb-6">
             <Suspense fallback={
+              <div className="py-2"><div className="page-container"><ProductGridSkeleton count={4} /></div></div>
+            }>
+              <TrendingData />
+            </Suspense>
+          </div>
+          
+          <div className="mb-4 lg:mb-6">
+            <Suspense fallback={
               <div className="py-2"><div className="page-container"><ProductGridSkeleton count={8} /></div></div>
             }>
               <DynamicShowcaseData />
@@ -134,4 +142,10 @@ async function FAQData() {
   const supabase = await createClient();
   const { data } = await supabase.from('faqs').select('*').eq('is_active', true).order('display_order').limit(10);
   return <FAQSection faqs={data || []} />;
+}
+
+async function TrendingData() {
+  const supabase = await createClient();
+  const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_trending', true).order('created_at', { ascending: false }).limit(4);
+  return <BestSellers products={data || []} title="Trending Products" subtitle="Hot Right Now" />;
 }
