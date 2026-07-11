@@ -4,7 +4,9 @@
 
 export type UserRole = 'user' | 'admin' | 'super_admin';
 export type ProductType = 'poster' | 'earring' | 'hairband' | 'bracelet' | 'keychain' | 'hair_clip' | 'other';
-export type OrderStatus = 'pending' | 'confirmed' | 'packed' | 'ready' | 'delivered' | 'cancelled';
+export type OrderStatus = 'pending' | 'confirmed' | 'packed' | 'shipped' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'returned' | 'refund_requested' | 'refunded';
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'partially_refunded' | 'refunded';
+export type FulfillmentStatus = 'unfulfilled' | 'processing' | 'packed' | 'shipped' | 'delivered';
 export type PosterOrientation = 'portrait' | 'landscape' | 'square';
 export type PosterFinish = 'matte' | 'glossy' | 'satin' | 'metallic';
 export type NotificationType = 'order' | 'product' | 'offer' | 'system' | 'admin';
@@ -27,6 +29,22 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
   last_active?: string;
+}
+
+export interface Customer {
+  id: string;
+  user_id: string;
+  customer_number: string;
+  loyalty_points: number;
+  lifetime_points: number;
+  membership_tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  admin_notes?: string;
+  status: 'active' | 'disabled';
+  created_at: string;
+  updated_at: string;
+  
+  // Joined relation
+  user_profile?: UserProfile;
 }
 
 export interface LoginLog {
@@ -217,25 +235,129 @@ export interface OrderItem {
 export interface Order {
   id: string;
   order_number: string;
+  invoice_number?: string;
   user_id: string;
   user?: UserProfile;
   status: OrderStatus;
+  payment_status: PaymentStatus;
+  fulfillment_status: FulfillmentStatus;
   items?: OrderItem[];
   delivery_address_id?: string;
   delivery_address?: DeliveryAddress;
+  currency: string;
   subtotal: number;
+  tax: number;
   delivery_charge: number;
-  total: number;
-  discount_amount?: number;
+  shipping_cost: number;
+  discount_amount: number;
   coupon_code?: string;
+  coupon_id?: string;
+  grand_total: number;
+  total: number; // legacy fallback
   delivery_notes?: string;
   delivery_instructions?: string;
   whatsapp_sent: boolean;
   whatsapp_message?: string;
   admin_notes?: string;
+  admin_internal_notes?: string;
+  internal_tags?: string[];
   cancelled_reason?: string;
   created_at: string;
   updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+  deleted_at?: string;
+  
+  // Relations mapped from the new architecture
+  events?: OrderEvent[];
+  payments?: Payment[];
+  shipments?: Shipment[];
+  returns?: ReturnRequest[];
+  refunds?: Refund[];
+}
+
+export interface OrderEvent {
+  id: string;
+  order_id: string;
+  event_type: string;
+  title: string;
+  description?: string;
+  actor_type: 'system' | 'admin' | 'customer' | 'courier';
+  performed_by?: string;
+  metadata?: Record<string, any>;
+  created_at: string;
+}
+
+export interface Payment {
+  id: string;
+  order_id: string;
+  provider: string;
+  transaction_id?: string;
+  payment_method?: string;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  paid_at?: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface Shipment {
+  id: string;
+  order_id: string;
+  provider: string;
+  provider_reference?: string;
+  tracking_number?: string;
+  tracking_url?: string;
+  status: 'pending' | 'label_generated' | 'picked_up' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'failed_attempt' | 'returned_to_sender';
+  shipping_cost?: number;
+  package_weight?: number;
+  estimated_delivery?: string;
+  notes?: string;
+  label_url?: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
+export interface ReturnRequest {
+  id: string;
+  order_id: string;
+  status: 'requested' | 'approved' | 'rejected' | 'received' | 'inspected';
+  reason: string;
+  photos?: string[];
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  approved_by?: string;
+}
+
+export interface Refund {
+  id: string;
+  order_id: string;
+  return_id?: string;
+  amount: number;
+  reason?: string;
+  status: 'requested' | 'approved' | 'rejected' | 'refunded' | 'failed';
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
+export interface InventoryTransaction {
+  id: string;
+  product_id: string;
+  variant_id?: string;
+  type: 'reserve' | 'release' | 'sale' | 'return' | 'manual_adjustment';
+  quantity: number;
+  reason?: string;
+  order_id?: string;
+  created_at: string;
+  created_by?: string;
 }
 
 // ============================================================
@@ -386,6 +508,13 @@ export interface AnalyticsSummary {
   active_carts: number;
   conversion_rate: number;
   average_order_value: number;
+  // Executive Dashboard Additions
+  today_profit: number;
+  pending_orders: number;
+  active_customers: number;
+  inventory_alerts: number;
+  returns_count: number;
+  refunds_count: number;
 }
 
 export interface DailySales {

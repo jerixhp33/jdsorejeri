@@ -97,6 +97,34 @@ export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
   const conversionRate =
     totalUsers && totalUsers > 0 ? ((totalOrders || 0) / totalUsers) * 100 : 0;
 
+  // Additional Executive KPIs
+  const todayProfit = todayRevenue * 0.4; // Mocked 40% margin
+
+  const { count: pendingOrders } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'pending');
+
+  const { count: activeCustomers } = await supabase
+    .from('customers')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'active');
+
+  const { count: inventoryAlerts } = await supabase
+    .from('products')
+    .select('*', { count: 'exact', head: true })
+    .lte('stock', 5);
+
+  const { count: returnsCount } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'returned');
+
+  const { count: refundsCount } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'refunded');
+
   return {
     total_users: totalUsers || 0,
     today_users: todayUsers || 0,
@@ -108,6 +136,12 @@ export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
     active_carts: activeCarts || 0,
     conversion_rate: parseFloat(conversionRate.toFixed(2)),
     average_order_value: parseFloat(averageOrderValue.toFixed(2)),
+    today_profit: todayProfit,
+    pending_orders: pendingOrders || 0,
+    active_customers: activeCustomers || 0,
+    inventory_alerts: inventoryAlerts || 0,
+    returns_count: returnsCount || 0,
+    refunds_count: refundsCount || 0,
   };
 }
 

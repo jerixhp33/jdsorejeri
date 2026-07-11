@@ -1,0 +1,230 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { Search, ChevronRight, Package, Truck, AlertTriangle, CheckCircle, Clock, Download } from 'lucide-react';
+import { formatDate, cn } from '@/lib/utils';
+import type { Shipment } from '@/types';
+
+type ShipmentStatus = Shipment['status'] | 'all';
+
+const STATUSES: { value: ShipmentStatus; label: string }[] = [
+  { value: 'all', label: 'All Shipments' },
+  { value: 'pending', label: 'Ready to Ship (Pending)' },
+  { value: 'label_generated', label: 'Label Generated' },
+  { value: 'picked_up', label: 'Picked Up' },
+  { value: 'in_transit', label: 'In Transit' },
+  { value: 'out_for_delivery', label: 'Out for Delivery' },
+  { value: 'delivered', label: 'Delivered' },
+  { value: 'failed_attempt', label: 'Failed Delivery' },
+  { value: 'returned_to_sender', label: 'Returned' },
+];
+
+export function ShippingDashboardView({ initialShipments }: { initialShipments: any[] }) {
+  const [shipments, setShipments] = useState(initialShipments);
+  const [filter, setFilter] = useState<ShipmentStatus>('all');
+  const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // KPIs
+  const kpis = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let readyToShip = 0;
+    let awaitingPickup = 0;
+    let pickedUpToday = 0;
+    let inTransit = 0;
+    let deliveredToday = 0;
+    let issues = 0;
+
+    shipments.forEach(s => {
+      const created = new Date(s.created_at);
+      created.setHours(0, 0, 0, 0);
+      const updated = new Date(s.updated_at);
+      updated.setHours(0, 0, 0, 0);
+
+      if (s.status === 'pending') readyToShip++;
+      if (s.status === 'label_generated') awaitingPickup++;
+      if (s.status === 'picked_up' && updated.getTime() === today.getTime()) pickedUpToday++;
+      if (s.status === 'in_transit') inTransit++;
+      if (s.status === 'delivered' && updated.getTime() === today.getTime()) deliveredToday++;
+      if (s.status === 'failed_attempt' || s.status === 'returned_to_sender') issues++;
+    });
+
+    return { readyToShip, awaitingPickup, pickedUpToday, inTransit, deliveredToday, issues };
+  }, [shipments]);
+
+  const filtered = shipments.filter(s => {
+    const matchesFilter = filter === 'all' || s.status === filter;
+    const matchesSearch = !search ||
+      s.tracking_number?.toLowerCase().includes(search.toLowerCase()) ||
+      s.order?.order_number?.toLowerCase().includes(search.toLowerCase()) ||
+      s.order?.delivery_address?.full_name?.toLowerCase().includes(search.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const toggleSelection = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedIds(newSet);
+  };
+
+  const toggleAll = () => {
+    if (selectedIds.size === filtered.length && filtered.length > 0) setSelectedIds(new Set());
+    else setSelectedIds(new Set(filtered.map(s => s.id)));
+  };
+
+  const generateBulkManifest = () => {
+    alert('This will trigger the ManifestGenerator to create a consolidated PDF for selected shipments.');
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-white">Fulfillment Dashboard</h1>
+          <p className="text-white/50 text-sm mt-1">Manage shipments, couriers, and tracking</p>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={generateBulkManifest} disabled={selectedIds.size === 0} className="btn-secondary flex items-center gap-2">
+            <Download className="w-4 h-4" />
+            <span>Generate Manifest</span>
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Ready to Ship</p>
+          <p className="text-2xl font-bold text-amber-400">{kpis.readyToShip}</p>
+        </div>
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Awaiting Pickup</p>
+          <p className="text-2xl font-bold text-blue-400">{kpis.awaitingPickup}</p>
+        </div>
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Picked Up Today</p>
+          <p className="text-2xl font-bold text-purple-400">{kpis.pickedUpToday}</p>
+        </div>
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">In Transit</p>
+          <p className="text-2xl font-bold text-indigo-400">{kpis.inTransit}</p>
+        </div>
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Delivered Today</p>
+          <p className="text-2xl font-bold text-emerald-400">{kpis.deliveredToday}</p>
+        </div>
+        <div className="glass-card p-4 rounded-xl border border-red-500/20 bg-red-500/5">
+          <p className="text-red-400/70 text-[10px] uppercase tracking-wider mb-1">Failed / Returns</p>
+          <p className="text-2xl font-bold text-red-400">{kpis.issues}</p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="glass-card p-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative max-w-sm w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <input
+              type="text"
+              placeholder="Search AWB, Order ID, Customer..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="input-luxe pl-9 text-sm w-full"
+            />
+          </div>
+          
+          <select 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value as ShipmentStatus)}
+            className="input-luxe text-sm py-2 px-3 bg-luxe-dark border-white/10"
+          >
+            {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+        </div>
+        
+        {selectedIds.size > 0 && (
+          <div className="flex items-center gap-3">
+             <span className="text-luxe-accent text-sm font-medium">{selectedIds.size} Selected</span>
+             <button className="px-3 py-1.5 text-xs font-semibold bg-white/10 text-white rounded hover:bg-white/20 transition-all">Bulk Print Labels</button>
+          </div>
+        )}
+      </div>
+
+      {/* Data Table */}
+      <div className="glass-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/10 bg-white/[0.02]">
+                <th className="px-4 py-4 text-left w-12">
+                  <input type="checkbox" className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer" checked={selectedIds.size === filtered.length && filtered.length > 0} onChange={toggleAll} />
+                </th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Shipment / AWB</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Order</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Courier</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Destination</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Status</th>
+                <th className="px-4 py-4 text-right text-white/40 text-xs uppercase tracking-wider font-semibold">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-16 text-center text-white/30 text-sm">No shipments match your criteria.</td>
+                </tr>
+              ) : (
+                filtered.map((s) => (
+                  <tr key={s.id} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="px-4 py-4">
+                      <input type="checkbox" className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer" checked={selectedIds.has(s.id)} onChange={() => toggleSelection(s.id)} />
+                    </td>
+                    <td className="px-4 py-4">
+                      <p className="text-white font-medium">{s.tracking_number || 'Pending Assignment'}</p>
+                      <p className="text-white/40 text-xs mt-0.5">{formatDate(s.created_at)}</p>
+                    </td>
+                    <td className="px-4 py-4">
+                      <Link href={`/admin/orders/${s.order_id}`} className="text-luxe-accent hover:underline text-sm font-medium">#{s.order?.order_number}</Link>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="px-2 py-1 rounded bg-white/5 text-white/70 text-xs font-medium capitalize border border-white/10">{s.provider?.replace('_', ' ')}</span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <p className="text-white text-sm font-medium">{s.order?.delivery_address?.city || 'Unknown'}</p>
+                      <p className="text-white/40 text-xs mt-0.5">{s.order?.delivery_address?.state}</p>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={cn(
+                        "px-2 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider",
+                        ['pending', 'label_generated'].includes(s.status) ? "bg-blue-500/10 text-blue-400" :
+                        s.status === 'delivered' ? "bg-emerald-500/10 text-emerald-400" :
+                        ['failed_attempt', 'returned_to_sender'].includes(s.status) ? "bg-red-500/10 text-red-400" :
+                        "bg-purple-500/10 text-purple-400"
+                      )}>
+                        {s.status?.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      {s.label_url ? (
+                        <a href={s.label_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 text-white/70 text-xs font-medium hover:bg-white/10 hover:text-white transition-all opacity-0 group-hover:opacity-100">
+                          Print Label
+                        </a>
+                      ) : (
+                        <button className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-luxe-accent/20 text-luxe-accent text-xs font-medium hover:bg-luxe-accent hover:text-black transition-all opacity-0 group-hover:opacity-100">
+                          Create Label
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -108,12 +108,30 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  
   const body = await req.json();
   const { id, key, ...updates } = body;
   const col = id ? 'id' : 'key';
   const val = id ?? key;
+  
   const { data, error } = await admin.from('orders').update(updates).eq(col, val).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  
+  // Log the event if a major status was updated
+  if (data?.id && (updates.status || updates.payment_status || updates.fulfillment_status)) {
+    const eventTitles: string[] = [];
+    if (updates.status) eventTitles.push(`Order status updated to ${updates.status}`);
+    if (updates.payment_status) eventTitles.push(`Payment marked as ${updates.payment_status}`);
+    if (updates.fulfillment_status) eventTitles.push(`Fulfillment marked as ${updates.fulfillment_status}`);
+    
+    await admin.from('order_events').insert({
+      order_id: data.id,
+      event_type: 'status_update',
+      title: eventTitles.join(', '),
+      actor_type: 'admin',
+    });
+  }
+  
   return NextResponse.json(data);
 }
 

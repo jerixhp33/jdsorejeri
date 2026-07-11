@@ -1,0 +1,19 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    # Vercel deployment action goes here
+    - name: Deploy to Vercel (Production)
+      run: |
+        echo "Deploying to Vercel Production"
+        # npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        # npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        # npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

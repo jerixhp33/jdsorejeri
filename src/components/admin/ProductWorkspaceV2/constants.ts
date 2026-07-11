@@ -1,0 +1,41 @@
+import { ProductFormData } from './types';
+
+export const DEFAULT_FORM_DATA: ProductFormData = {
+  name: '',
+  slug: '',
+  description: '',
+  short_description: '',
+  product_type: '',
+  category_id: '',
+  tags: [],
+  price: 0,
+  original_price: 0,
+  cost_price: 0,
+  stock: 0,
+  sku: '',
+  status: 'draft',
+  is_featured: false,
+  weight_grams: 0,
+  length_cm: 0,
+  width_cm: 0,
+  height_cm: 0,
+  seo_title: '',
+  seo_description: '',
+  seo_keywords: '',
+  attributes: {},
+  variant_options: [],
+  variant_combinations: [],
+  images: [],
+};
+
+export const SECTIONS = [
+  { id: 'basic', label: 'Basic Info' },
+  { id: 'description', label: 'Description' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'inventory', label: 'Inventory' },
+  { id: 'shipping', label: 'Shipping' },
+  { id: 'variants', label: 'Variants' },
+  { id: 'images', label: 'Images' },
+  { id: 'attributes', label: 'Attributes' },
+  { id: 'seo', label: 'SEO & Marketing' },
+];

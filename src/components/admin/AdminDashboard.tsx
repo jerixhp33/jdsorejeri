@@ -6,7 +6,7 @@ import {
   BarChart, Bar,
 } from 'recharts';
 import {
-  Users, ShoppingBag, Package, TrendingUp, DollarSign, Target,
+  Users, ShoppingBag, Package, TrendingUp, DollarSign, Target, Clock, AlertTriangle, RefreshCcw, Banknote
 } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -30,12 +30,14 @@ const STATUS_COLORS: Record<string, string> = {
 
 export function AdminDashboard({ summary, dailySales, topProducts, recentOrders }: AdminDashboardProps) {
   const stats = [
-    { label: 'Total Users',      value: summary.total_users.toLocaleString(),       sub: `+${summary.today_users} today`,           icon: Users,       color: 'text-blue-400' },
-    { label: 'Total Orders',     value: summary.total_orders.toLocaleString(),      sub: `+${summary.today_orders} today`,           icon: ShoppingBag, color: 'text-green-400' },
-    { label: 'Total Revenue',    value: formatCurrency(summary.total_revenue),      sub: `${formatCurrency(summary.today_revenue)} today`, icon: DollarSign,  color: 'text-luxe-accent' },
-    { label: 'Products',         value: summary.total_products.toLocaleString(),    sub: 'Active products',                          icon: Package,     color: 'text-purple-400' },
-    { label: 'Avg Order Value',  value: formatCurrency(summary.average_order_value), sub: 'Per order',                              icon: TrendingUp,  color: 'text-pink-400' },
-    { label: 'Conversion Rate',  value: `${summary.conversion_rate}%`,              sub: 'Users → Orders',                          icon: Target,      color: 'text-orange-400' },
+    { label: 'Revenue Today',     value: formatCurrency(summary.today_revenue),     sub: 'Gross sales',                          icon: DollarSign,  color: 'text-luxe-accent' },
+    { label: 'Orders Today',      value: summary.today_orders.toLocaleString(),     sub: 'Total orders placed',                  icon: ShoppingBag, color: 'text-green-400' },
+    { label: 'Profit Today',      value: formatCurrency(summary.today_profit),      sub: 'Est. 40% margin',                      icon: Banknote,    color: 'text-blue-400' },
+    { label: 'Pending Orders',    value: summary.pending_orders.toLocaleString(),   sub: 'Awaiting fulfillment',                 icon: Clock,       color: 'text-orange-400' },
+    { label: 'Active Customers',  value: summary.active_customers.toLocaleString(), sub: 'In CRM Database',                      icon: Users,       color: 'text-purple-400' },
+    { label: 'Inventory Alerts',  value: summary.inventory_alerts.toLocaleString(), sub: 'Low stock items',                      icon: AlertTriangle, color: 'text-red-400' },
+    { label: 'Returns',           value: summary.returns_count.toLocaleString(),    sub: 'Total returned',                       icon: RefreshCcw,  color: 'text-amber-400' },
+    { label: 'Refunds',           value: summary.refunds_count.toLocaleString(),    sub: 'Total refunded',                       icon: TrendingUp,  color: 'text-pink-400' },
   ];
 
   const chartData = dailySales.slice(-14).map((d) => ({
@@ -47,12 +49,12 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
   return (
     <div className="space-y-5 md:space-y-8">
       <div>
-        <h1 className="font-display text-2xl md:text-3xl font-bold text-white mb-1">Dashboard</h1>
-        <p className="text-white/40 text-sm">Welcome back. Here's what's happening.</p>
+        <h1 className="font-display text-2xl md:text-3xl font-bold text-white mb-1">Executive Dashboard</h1>
+        <p className="text-white/40 text-sm">Welcome back. Here's how your business is doing today.</p>
       </div>
 
-      {/* Stat cards — 2 cols on mobile, 3 on lg */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+      {/* Stat cards — 2 cols on mobile, 4 on lg */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label}

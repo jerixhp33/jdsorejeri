@@ -8,6 +8,7 @@ import { formatCurrency, cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Product, Category, ProductType } from '@/types';
 import { ProductFormModal } from './ProductFormModal';
+import { ProductWorkspace } from './ProductWorkspaceV2/ProductWorkspace';
 import { useScrollLock } from '@/hooks/useScrollLock';
 
 interface AdminProductsViewProps {
@@ -28,8 +29,9 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
     return type.charAt(0).toUpperCase() + type.slice(1) + 's';
   };
   const [showModal, setShowModal] = useState(false);
+  const [showV2, setShowV2] = useState(false);
   
-  useScrollLock(showModal);
+  useScrollLock(showModal || showV2);
 
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -140,13 +142,22 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-white">Products</h1>
-        <button
-          onClick={() => { setEditProduct(null); setShowModal(true); }}
-          className="btn-gold flex items-center gap-2 text-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Add Product
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => { setEditProduct(null); setShowV2(true); }}
+            className="btn-luxe-outline flex items-center gap-2 text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Product V2 (Beta)
+          </button>
+          <button
+            onClick={() => { setEditProduct(null); setShowModal(true); }}
+            className="btn-gold flex items-center gap-2 text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Product
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -290,6 +301,12 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
           categories={categories}
           onClose={() => { setShowModal(false); setEditProduct(null); }}
           onSaved={handleSaved}
+        />
+      )}
+
+      {showV2 && (
+        <ProductWorkspace
+          onClose={() => { setShowV2(false); setEditProduct(null); }}
         />
       )}
 
