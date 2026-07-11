@@ -1,13 +1,15 @@
 import { ProductFormData } from '../types';
+import { Category } from '@/types';
 
 interface Props {
   formData: ProductFormData;
   updateField: <K extends keyof ProductFormData>(field: K, value: ProductFormData[K]) => void;
   onGenerateTags?: () => void;
   isGeneratingTags?: boolean;
+  categories: Category[];
 }
 
-export function BasicInfoSection({ formData, updateField, onGenerateTags, isGeneratingTags }: Props) {
+export function BasicInfoSection({ formData, updateField, onGenerateTags, isGeneratingTags, categories }: Props) {
   return (
     <div className="space-y-6">
       <div>
@@ -47,6 +49,20 @@ export function BasicInfoSection({ formData, updateField, onGenerateTags, isGene
           <option value="hairband">Hairband</option>
           <option value="keychain">Keychain</option>
           <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Category *</label>
+        <select 
+          value={formData.category_id}
+          onChange={(e) => updateField('category_id', e.target.value)}
+          className="input-luxe w-full"
+        >
+          <option value="">Select Category...</option>
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
+          ))}
         </select>
       </div>
 

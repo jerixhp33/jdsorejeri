@@ -30,15 +30,16 @@ import { AttributesSection } from './sections/AttributesSection';
 import { MarketingSection } from './sections/MarketingSection';
 import { SEOSection } from './sections/SEOSection';
 
-import { Product } from '@/types';
+import { Product, Category } from '@/types';
 
 interface ProductWorkspaceProps {
   initialData?: ProductFormData | null;
+  categories: Category[];
   onClose: () => void;
   onSaved?: (product: Product) => void;
 }
 
-export function ProductWorkspace({ initialData, onClose, onSaved }: ProductWorkspaceProps) {
+export function ProductWorkspace({ initialData, categories, onClose, onSaved }: ProductWorkspaceProps) {
   useScrollLock(true);
   
   const { formData, setFormData, updateField, updateAttribute, removeAttribute, undo, redo, canUndo, canRedo } = useProductForm(initialData);
@@ -283,7 +284,7 @@ export function ProductWorkspace({ initialData, onClose, onSaved }: ProductWorks
 
   const renderSection = (id: string) => {
     switch (id) {
-      case 'basic': return <BasicInfoSection formData={formData} updateField={updateField} onGenerateTags={generateTags} isGeneratingTags={isGenerating.tags} />;
+      case 'basic': return <BasicInfoSection formData={formData} updateField={updateField} onGenerateTags={generateTags} isGeneratingTags={isGenerating.tags} categories={categories} />;
       case 'description': return <DescriptionSection formData={formData} updateField={updateField} onGenerateFullDesc={generateFullDescription} onGenerateShortDesc={generateShortDescription} isGeneratingFullDesc={isGenerating.description} isGeneratingShortDesc={isGenerating.short_description} />;
       case 'pricing': return <PricingSection formData={formData} updateField={updateField} />;
       case 'inventory': return <InventorySection formData={formData} updateField={updateField} />;

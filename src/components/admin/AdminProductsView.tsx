@@ -302,6 +302,7 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
 
       {showV2 && (
         <ProductWorkspace
+          categories={categories}
           initialData={editProduct ? {
             id: editProduct.id,
             name: editProduct.name,
