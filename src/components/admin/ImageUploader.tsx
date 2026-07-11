@@ -138,7 +138,7 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {images.map((img, i) => (
             <div
-              key={img.url}
+              key={img.id || `${img.url}-${i}`}
               draggable
               onDragStart={() => onThumbDragStart(i)}
               onDragOver={(e) => onThumbDragOver(e, i)}

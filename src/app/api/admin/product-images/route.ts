@@ -31,13 +31,23 @@ export async function POST(req: NextRequest) {
 
     // 3. Upsert remaining images (handles both updates and inserts)
     if (images && images.length > 0) {
-      const { error: upsertError } = await admin.from('product_images').upsert(
-        images.map((img: any) => ({
-          ...img,
-          product_id, // ensure product_id is correctly mapped
-        }))
-      );
-      if (upsertError) throw upsertError;
+      // Get existing images for this product to prevent duplicate URLs on auto-save
+      const { data: existing } = await admin.from('product_images').select('id, url').eq('product_id', product_id);
+      
+      for (const img of images) {
+        const payload = { ...img, product_id };
+        
+        // If the frontend didn't provide an ID, see if we already have this URL in the DB
+        if (!payload.id && existing) {
+          const existingImg = existing.find(e => e.url === img.url);
+          if (existingImg) {
+            payload.id = existingImg.id;
+          }
+        }
+        
+        const { error: upsertError } = await admin.from('product_images').upsert(payload);
+        if (upsertError) throw upsertError;
+      }
     }
 
     return NextResponse.json({ success: true });
