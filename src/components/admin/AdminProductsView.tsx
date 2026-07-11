@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Plus, Search, Edit2, Trash2, Eye, EyeOff, Star, Package } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Eye, EyeOff, Star, Package, Copy, Check } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Product, Category, ProductType } from '@/types';
@@ -28,6 +28,29 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
   };
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const duplicateProduct = (product: Product) => {
+    setEditProduct({ ...product, id: '', name: `${product.name} (Copy)`, slug: '' });
+    setShowModal(true);
+  };
+
+  const bulkDelete = async () => {
+    if (!confirm(`Delete ${selectedIds.length} products? This cannot be undone.`)) return;
+    try {
+      const res = await fetch('/api/admin/products', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: selectedIds, _type: 'bulk_delete' }) });
+      if (!res.ok) throw new Error('Failed to delete');
+      setProducts(prev => prev.filter(p => !selectedIds.includes(p.id)));
+      setSelectedIds([]);
+      toast.success('Products deleted');
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
 
   const filtered = products.filter((p) => {
     const matchesType = typeFilter === 'all' || p.product_type === typeFilter;
@@ -178,6 +201,11 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
                 className={cn('glass-card overflow-hidden', !product.is_active && 'opacity-60')}
               >
                 <div className="relative aspect-video bg-luxe-dark">
+                  <div className="absolute top-2 right-2 z-10">
+                    <button onClick={(e) => { e.stopPropagation(); toggleSelection(product.id); }} className={cn("w-6 h-6 rounded flex items-center justify-center transition-all", selectedIds.includes(product.id) ? "bg-luxe-accent text-black" : "bg-black/50 text-white/50 border border-white/20 hover:border-white/50")}>
+                      {selectedIds.includes(product.id) && <Check className="w-4 h-4" />}
+                    </button>
+                  </div>
                   {img ? (
                     <Image src={img.url} alt={product.name} fill className="object-cover" />
                   ) : (
@@ -222,6 +250,13 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
                       {product.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                     </button>
                     <button
+                      onClick={() => duplicateProduct(product)}
+                      className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all"
+                      title="Duplicate"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                    <button
                       onClick={() => toggleFeatured(product)}
                       className={cn(
                         'p-2 rounded-lg transition-all',
@@ -252,6 +287,18 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
           onClose={() => { setShowModal(false); setEditProduct(null); }}
           onSaved={handleSaved}
         />
+      )}
+
+      {selectedIds.length > 0 && (
+        <motion.div initial={{ y: 100 }} animate={{ y: 0 }} className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 glass-card px-6 py-4 rounded-full flex items-center gap-6 shadow-2xl border-luxe-accent/30">
+          <span className="text-white font-medium">{selectedIds.length} selected</span>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSelectedIds([])} className="text-white/50 hover:text-white text-sm transition-colors">Cancel</button>
+            <button onClick={bulkDelete} className="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2">
+              <Trash2 className="w-4 h-4" /> Delete All
+            </button>
+          </div>
+        </motion.div>
       )}
     </div>
   );

@@ -149,6 +149,14 @@ export async function DELETE(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   }
+
+  // Handle bulk delete
+  if (body._type === 'bulk_delete' && Array.isArray(body.ids)) {
+    const { error } = await admin.from('products').delete().in('id', body.ids);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
   const { error } = await admin.from('products').delete().eq('id', body.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });

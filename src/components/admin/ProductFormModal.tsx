@@ -277,7 +277,11 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           product_id: savedProduct.id,
-          images: images.map((img, i) => ({ id: img.id, url: img.url, storage_path: img.storage_path, display_order: i, is_primary: img.is_primary || false })),
+          images: images.map((img, i) => {
+            const payload: any = { url: img.url, storage_path: img.storage_path, display_order: i, is_primary: img.is_primary || false };
+            if (img.id && img.id.length > 20 && !img.id.startsWith('temp-')) payload.id = img.id;
+            return payload;
+          }),
           deletedImageIds,
           deletedStoragePaths,
         }),
