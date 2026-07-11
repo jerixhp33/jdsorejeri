@@ -658,7 +658,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
                     {[
                       { href: '/dashboard', label: 'My Profile', icon: User },
                       { href: '/dashboard/orders', label: 'My Orders', icon: Package },
-                      { href: '/dashboard/notifications', label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, icon: ({ className }: { className?: string }) => <div className={cn("flex items-center justify-center font-bold font-serif text-[10px] border-[1.5px] border-current rounded-sm leading-none shrink-0", className)} style={{ width: '1.25rem', height: '1.25rem' }}>JD</div> },
+                      { href: '/dashboard/notifications', label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, icon: Bell },
                       { href: '/cart', label: `Cart${itemCount > 0 ? ` (${itemCount})` : ''}`, icon: ShoppingCart },
                       { href: '/wishlist', label: 'Wishlist', icon: Heart },
                       { href: '/dashboard/settings', label: 'Settings', icon: Settings },

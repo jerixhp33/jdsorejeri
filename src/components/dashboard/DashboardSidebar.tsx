@@ -10,16 +10,10 @@ import { createClient } from '@/lib/supabase/client';
 import { cn, getInitials } from '@/lib/utils';
 import { toast } from 'sonner';
 
-const LogoIcon = ({ className }: { className?: string }) => (
-  <div className={cn("flex items-center justify-center font-bold font-serif text-[10px] border-[1.5px] border-current rounded-sm leading-none shrink-0", className)} style={{ width: '1.25rem', height: '1.25rem' }}>
-    JD
-  </div>
-);
-
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Profile', icon: User, exact: true },
   { href: '/dashboard/orders', label: 'Orders', icon: Package },
-  { href: '/dashboard/notifications', label: 'Notifs', icon: LogoIcon },
+  { href: '/dashboard/notifications', label: 'Notifs', icon: Bell },
   { href: '/wishlist', label: 'Wishlist', icon: Heart },
   { href: '/dashboard/addresses', label: 'Addresses', icon: MapPin },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
