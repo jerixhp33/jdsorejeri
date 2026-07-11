@@ -136,7 +136,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
           body: JSON.stringify({ 
             product_id: savedProduct.id, 
             sizes: validSizes.map(s => {
-              const label = Object.values(s.options)[0] || 'Unknown';
+              const label = Object.values(s.options).join(' / ') || 'Unknown';
               return { 
                 label, 
                 width_cm: null, 
