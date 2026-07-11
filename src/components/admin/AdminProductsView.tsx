@@ -144,13 +144,6 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
         <h1 className="font-display text-3xl font-bold text-white">Products</h1>
         <div className="flex gap-3">
           <button
-            onClick={() => { setEditProduct(null); setShowV2(true); }}
-            className="btn-luxe-outline flex items-center gap-2 text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Add Product V2 (Beta)
-          </button>
-          <button
             onClick={() => { setEditProduct(null); setShowModal(true); }}
             className="btn-gold flex items-center gap-2 text-sm"
           >
