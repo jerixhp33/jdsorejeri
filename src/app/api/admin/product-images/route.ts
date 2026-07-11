@@ -49,8 +49,10 @@ export async function POST(req: NextRequest) {
         if (upsertError) throw upsertError;
       }
     }
+    // 4. Return the updated images
+    const { data: updatedImages } = await admin.from('product_images').select('*').eq('product_id', product_id).order('display_order', { ascending: true });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, images: updatedImages });
   } catch (err: any) {
     console.error('Product images sync error:', err);
     return NextResponse.json({ error: err.message || 'Failed to sync images' }, { status: 500 });

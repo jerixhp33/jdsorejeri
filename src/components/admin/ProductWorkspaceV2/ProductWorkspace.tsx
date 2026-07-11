@@ -152,13 +152,13 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       }
 
       // Handle Images
-      if (data.images && data.images.length > 0) {
-        await fetch('/api/admin/product-images', {
+      if ((data.images && data.images.length > 0) || (data.deletedImageIds && data.deletedImageIds.length > 0)) {
+        const imgResponse = await fetch('/api/admin/product-images', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             product_id: savedProduct.id,
-            images: data.images.map((img, i) => {
+            images: (data.images || []).map((img, i) => {
               const imgPayload: any = { 
                 url: img.url, 
                 storage_path: img.storage_path, 
@@ -174,6 +174,14 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
             deletedStoragePaths: data.deletedStoragePaths || [],
           }),
         });
+        
+        if (imgResponse.ok) {
+          const imgData = await imgResponse.json();
+          if (imgData.images) {
+            updateField('images', imgData.images);
+            data.images = imgData.images;
+          }
+        }
         
         // Clear deleted tracking after successful save
         updateField('deletedImageIds', []);
