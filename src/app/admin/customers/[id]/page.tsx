@@ -6,11 +6,10 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
   const { id } = await params;
   const supabase = await createAdminClient();
 
-  const { data: userProfile } = await supabase
+  const { data: userProfile, error } = await supabase
     .from('user_profiles')
     .select(`
       *,
-      delivery_addresses(*),
       orders!orders_user_id_fkey(
         *,
         order_items(*, product:products(name, category_id, images)),
@@ -20,6 +19,10 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
     `)
     .eq('id', id)
     .single();
+
+  if (error) {
+    console.error('Error fetching userProfile:', error);
+  }
 
   if (!userProfile) {
     return notFound();

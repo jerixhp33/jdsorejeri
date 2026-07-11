@@ -50,8 +50,8 @@ export class CustomerAnalyticsService {
 
     orders.forEach(order => {
       // Basic metrics
-      if (order.status === 'delivered') {
-        lifetimeValue += (order.grand_total || 0);
+      if (!['cancelled', 'returned', 'refund_requested', 'refunded'].includes(order.status)) {
+        lifetimeValue += (order.grand_total || order.total || 0);
       }
       
       if (order.status === 'returned' || order.fulfillment_status === 'returned') returns++;
