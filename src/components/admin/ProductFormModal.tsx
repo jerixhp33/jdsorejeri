@@ -687,6 +687,4 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
       </form>
     </div>
   );
-}v>
-  );
 }
