@@ -330,8 +330,12 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       case 'variants': return <VariantSection formData={formData} setFormData={setFormData} />;
       case 'images': return <ImagesSection formData={formData} setFormData={setFormData} />;
       case 'attributes': return <AttributesSection formData={formData} updateAttribute={updateAttribute} removeAttribute={removeAttribute} />;
-      case 'marketing': return <MarketingSection formData={formData} updateField={updateField} />;
-      case 'seo': return <SEOSection formData={formData} updateField={updateField} onGenerateSEO={generateSEO} isGeneratingSEO={isGenerating.seo} />;
+      case 'seo': return (
+        <div className="space-y-12">
+          <MarketingSection formData={formData} updateField={updateField} />
+          <SEOSection formData={formData} updateField={updateField} onGenerateSEO={generateSEO} isGeneratingSEO={isGenerating.seo} />
+        </div>
+      );
       default: return null;
     }
   };
