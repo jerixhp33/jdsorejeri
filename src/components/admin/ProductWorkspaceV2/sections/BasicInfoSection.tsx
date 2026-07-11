@@ -60,9 +60,12 @@ export function BasicInfoSection({ formData, updateField, onGenerateTags, isGene
           className="input-luxe w-full"
         >
           <option value="">Select Category...</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
+          {categories
+            .filter(cat => !formData.product_type || cat.product_type === formData.product_type)
+            .map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))
+          }
         </select>
       </div>
 
