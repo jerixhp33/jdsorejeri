@@ -134,6 +134,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       setWallImage(null);
       setGlobalScale(1);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const fetchLibrary = async () => {

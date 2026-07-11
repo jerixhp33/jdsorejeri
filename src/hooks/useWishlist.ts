@@ -15,11 +15,13 @@ interface WishlistState {
   refresh: () => Promise<void>;
 }
 
+// Single shared client — stable across re-renders
+const supabase = createClient();
+
 export function useWishlist(): WishlistState {
   const { profile } = useAuth();
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
 
   const fetchWishlist = useCallback(async () => {
     if (!profile) {

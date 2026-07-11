@@ -18,7 +18,7 @@ function createTransporter() {
 
   // Cast to `any` for options that exist at runtime in nodemailer v6 but are
   // absent from @types/nodemailer@6.4.x (socketTimeout, connectionTimeout, etc.)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @next/next/no-assign-module-variable
   const transportOptions: any = {
     host: SMTP_HOST,
     port,

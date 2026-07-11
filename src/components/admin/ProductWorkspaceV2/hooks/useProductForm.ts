@@ -8,7 +8,7 @@ export function useProductForm(initialData?: ProductFormData | null) {
 
   const updateField = useCallback(<K extends keyof ProductFormData>(field: K, value: ProductFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  }, []);
+  }, [setFormData]);
 
   const updateAttribute = useCallback((key: string, value: string) => {
     setFormData(prev => ({
@@ -18,7 +18,7 @@ export function useProductForm(initialData?: ProductFormData | null) {
         [key]: value
       }
     }));
-  }, []);
+  }, [setFormData]);
 
   const removeAttribute = useCallback((key: string) => {
     setFormData(prev => {
@@ -26,7 +26,7 @@ export function useProductForm(initialData?: ProductFormData | null) {
       delete newAttrs[key];
       return { ...prev, attributes: newAttrs };
     });
-  }, []);
+  }, [setFormData]);
 
   return {
     formData,

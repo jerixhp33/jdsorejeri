@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -103,6 +103,21 @@ export function CheckoutForm() {
     }
   }, [profile, setValue, watch]);
 
+  const handleSelectSavedAddress = useCallback((addr: DeliveryAddress) => {
+    setSelectedAddressId(addr.id);
+    setShowForm(false);
+    setValue('full_name', addr.full_name, { shouldValidate: true });
+    setValue('phone', addr.phone, { shouldValidate: true });
+    setValue('alternate_phone', addr.alternate_phone || '', { shouldValidate: true });
+    setValue('house_no', addr.house_no, { shouldValidate: true });
+    setValue('street', addr.street, { shouldValidate: true });
+    setValue('area', addr.area, { shouldValidate: true });
+    setValue('city', addr.city, { shouldValidate: true });
+    setValue('district', addr.district, { shouldValidate: true });
+    setValue('pincode', addr.pincode, { shouldValidate: true });
+    setValue('landmark', addr.landmark || '', { shouldValidate: true });
+  }, [setValue]);
+
   // Fetch saved addresses
   useEffect(() => {
     if (profile?.id) {
@@ -117,7 +132,7 @@ export function CheckoutForm() {
           }
         });
     }
-  }, [profile?.id, supabase]);
+  }, [profile?.id, supabase, handleSelectSavedAddress]);
 
   // Auto-fetch city and district based on pincode
   useEffect(() => {
@@ -148,21 +163,6 @@ export function CheckoutForm() {
         .finally(() => setIsFetchingPincode(false));
     }
   }, [currentPincode, setValue]);
-
-  const handleSelectSavedAddress = (addr: DeliveryAddress) => {
-    setSelectedAddressId(addr.id);
-    setShowForm(false);
-    setValue('full_name', addr.full_name, { shouldValidate: true });
-    setValue('phone', addr.phone, { shouldValidate: true });
-    setValue('alternate_phone', addr.alternate_phone || '', { shouldValidate: true });
-    setValue('house_no', addr.house_no, { shouldValidate: true });
-    setValue('street', addr.street, { shouldValidate: true });
-    setValue('area', addr.area, { shouldValidate: true });
-    setValue('city', addr.city, { shouldValidate: true });
-    setValue('district', addr.district, { shouldValidate: true });
-    setValue('pincode', addr.pincode, { shouldValidate: true });
-    setValue('landmark', addr.landmark || '', { shouldValidate: true });
-  };
 
   const handleDeleteAddress = async (id: string) => {
     try {

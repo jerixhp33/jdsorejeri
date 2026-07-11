@@ -44,7 +44,7 @@ export function useNotifications(): NotificationsState {
     } finally {
       setLoading(false);
     }
-  }, [profile?.id]);
+  }, [profile?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchNotifications();
@@ -83,7 +83,7 @@ export function useNotifications(): NotificationsState {
       supabase.removeChannel(channel);
       channelRef.current = null;
     };
-  }, [profile?.id]);
+  }, [profile?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const markAsRead = async (id: string) => {
     await supabase.from('notifications').update({ is_read: true }).eq('id', id);

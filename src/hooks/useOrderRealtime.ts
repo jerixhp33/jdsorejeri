@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { Order } from '@/types';
 
+// Single shared client — stable across re-renders
+const supabase = createClient();
+
 export function useOrderRealtime(orderId: string) {
   const [order, setOrder] = useState<Order | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
     if (!orderId) return;
