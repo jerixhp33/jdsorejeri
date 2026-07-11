@@ -104,6 +104,8 @@ const EMAIL_TEMPLATES = [
 export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcastViewProps) {
   const [campaigns, setCampaigns] = useState(initial);
   const [showCompose, setShowCompose] = useState(false);
+  const [composeType, setComposeType] = useState<'email' | 'push'>('email');
+  
   const [form, setForm] = useState({
     title: '',
     subject: '',
@@ -111,6 +113,15 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
     target_all: true,
     target_user_ids: [] as string[],
   });
+  
+  const [pushForm, setPushForm] = useState({
+    title: '',
+    body: '',
+    url: '/dashboard',
+    target_all: true,
+    target_user_ids: [] as string[],
+  });
+  
   const [sending, setSending] = useState(false);
 
   const applyTemplate = (template: (typeof EMAIL_TEMPLATES)[0]) => {
@@ -170,25 +181,66 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
     }
   };
 
+  const sendPush = async () => {
+    if (!pushForm.title || !pushForm.body) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    if (!pushForm.target_all && pushForm.target_user_ids.length === 0) {
+      toast.error('Please select at least one recipient');
+      return;
+    }
+
+    setSending(true);
+    try {
+      const res = await fetch('/api/admin/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pushForm),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || 'Failed to send push notification');
+
+      toast.success('Push notification sent successfully!');
+      setShowCompose(false);
+      setPushForm({ title: '', body: '', url: '/dashboard', target_all: true, target_user_ids: [] });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send push notification');
+    } finally {
+      setSending(false);
+    }
+  };
+
   const toggleUser = (userId: string) => {
-    setForm((f) => ({
-      ...f,
-      target_user_ids: f.target_user_ids.includes(userId)
-        ? f.target_user_ids.filter((id) => id !== userId)
-        : [...f.target_user_ids, userId],
-    }));
+    if (composeType === 'email') {
+      setForm((f) => ({
+        ...f,
+        target_user_ids: f.target_user_ids.includes(userId)
+          ? f.target_user_ids.filter((id) => id !== userId)
+          : [...f.target_user_ids, userId],
+      }));
+    } else {
+      setPushForm((f) => ({
+        ...f,
+        target_user_ids: f.target_user_ids.includes(userId)
+          ? f.target_user_ids.filter((id) => id !== userId)
+          : [...f.target_user_ids, userId],
+      }));
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-white">Email Broadcast</h1>
+        <h1 className="font-display text-3xl font-bold text-white">Broadcast</h1>
         <button
           onClick={() => setShowCompose(true)}
           className="btn-gold flex items-center gap-2 text-sm"
         >
           <Plus className="w-4 h-4" />
-          New Campaign
+          New Message
         </button>
       </div>
 
@@ -265,19 +317,44 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
             onClick={() => setShowCompose(false)}
           />
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto glass-card">
-            <div className="sticky top-0 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
-              <h2 className="text-white font-semibold">Compose Campaign</h2>
-              <button
-                onClick={() => setShowCompose(false)}
-                className="text-white/50 hover:text-white text-xl"
-              >
-                ×
-              </button>
+            <div className="sticky top-0 p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-white font-semibold">Compose Message</h2>
+                <button
+                  onClick={() => setShowCompose(false)}
+                  className="text-white/50 hover:text-white text-xl"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setComposeType('email')}
+                  className={cn(
+                    "px-4 py-2 text-sm rounded-lg transition-all",
+                    composeType === 'email' ? "bg-luxe-accent text-black font-semibold" : "text-white/50 hover:bg-white/5"
+                  )}
+                >
+                  Email Campaign
+                </button>
+                <button
+                  onClick={() => setComposeType('push')}
+                  className={cn(
+                    "px-4 py-2 text-sm rounded-lg transition-all",
+                    composeType === 'push' ? "bg-luxe-accent text-black font-semibold" : "text-white/50 hover:bg-white/5"
+                  )}
+                >
+                  Push Notification
+                </button>
+              </div>
             </div>
+            
             <div className="p-5 space-y-5">
-              {/* Templates */}
-              <div>
-                <p className="text-white/50 text-xs uppercase tracking-wide mb-2">Quick Templates</p>
+              {composeType === 'email' ? (
+                <>
+                  {/* Email Templates */}
+                  <div>
+                    <p className="text-white/50 text-xs uppercase tracking-wide mb-2">Quick Templates</p>
                 <div className="flex gap-2 flex-wrap">
                   {EMAIL_TEMPLATES.map((t) => (
                     <button
@@ -328,6 +405,48 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                 />
               </div>
 
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
+                      Notification Title *
+                    </label>
+                    <input
+                      value={pushForm.title}
+                      onChange={(e) => setPushForm((f) => ({ ...f, title: e.target.value }))}
+                      className="input-luxe"
+                      placeholder="E.g., Flash Sale!"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
+                      Message Body *
+                    </label>
+                    <textarea
+                      value={pushForm.body}
+                      onChange={(e) => setPushForm((f) => ({ ...f, body: e.target.value }))}
+                      className="input-luxe resize-none text-sm"
+                      rows={3}
+                      placeholder="Short notification message..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
+                      Redirect URL (Optional)
+                    </label>
+                    <input
+                      value={pushForm.url}
+                      onChange={(e) => setPushForm((f) => ({ ...f, url: e.target.value }))}
+                      className="input-luxe text-sm font-mono"
+                      placeholder="/dashboard/orders"
+                    />
+                  </div>
+                </>
+              )}
+
               {/* Recipients */}
               <div>
                 <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">
@@ -336,8 +455,11 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                 <label className="flex items-center gap-2 mb-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={form.target_all}
-                    onChange={(e) => setForm((f) => ({ ...f, target_all: e.target.checked }))}
+                    checked={composeType === 'email' ? form.target_all : pushForm.target_all}
+                    onChange={(e) => {
+                      if (composeType === 'email') setForm((f) => ({ ...f, target_all: e.target.checked }));
+                      else setPushForm((f) => ({ ...f, target_all: e.target.checked }));
+                    }}
                     className="w-4 h-4 accent-luxe-accent"
                   />
                   <span className="text-white/70 text-sm">
@@ -345,7 +467,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                   </span>
                 </label>
 
-                {!form.target_all && (
+                {!(composeType === 'email' ? form.target_all : pushForm.target_all) && (
                   <div className="max-h-48 overflow-y-auto space-y-1 border border-white/10 rounded-xl p-3">
                     {users.map((user) => (
                       <label
@@ -354,7 +476,10 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                       >
                         <input
                           type="checkbox"
-                          checked={form.target_user_ids.includes(user.id)}
+                          checked={composeType === 'email' 
+                            ? form.target_user_ids.includes(user.id)
+                            : pushForm.target_user_ids.includes(user.id)
+                          }
                           onChange={() => toggleUser(user.id)}
                           className="w-3.5 h-3.5 accent-luxe-accent"
                         />
@@ -367,7 +492,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
               </div>
 
               {/* Preview */}
-              {form.html_body && (
+              {composeType === 'email' && form.html_body && (
                 <div>
                   <p className="text-white/50 text-xs uppercase tracking-wide mb-2">Preview</p>
                   <div
@@ -385,7 +510,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                   Cancel
                 </button>
                 <button
-                  onClick={sendCampaign}
+                  onClick={composeType === 'email' ? sendCampaign : sendPush}
                   disabled={sending}
                   className="btn-gold flex-1 flex items-center justify-center gap-2 text-sm"
                 >
@@ -394,7 +519,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                   ) : (
                     <Send className="w-4 h-4" />
                   )}
-                  {sending ? 'Sending...' : 'Send Campaign'}
+                  {sending ? 'Sending...' : (composeType === 'email' ? 'Send Campaign' : 'Send Push')}
                 </button>
               </div>
             </div>
