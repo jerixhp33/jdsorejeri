@@ -11,7 +11,9 @@ import { cn, getInitials } from '@/lib/utils';
 import { toast } from 'sonner';
 
 const LogoIcon = ({ className }: { className?: string }) => (
-  <img src="/icon-192x192.png" alt="JD Store" className={cn("w-5 h-5 object-contain", className)} />
+  <div className={cn("flex items-center justify-center font-bold font-serif text-[10px] border-[1.5px] border-current rounded-sm leading-none shrink-0", className)} style={{ width: '1.25rem', height: '1.25rem' }}>
+    JD
+  </div>
 );
 
 const NAV_ITEMS = [
