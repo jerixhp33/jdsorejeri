@@ -193,7 +193,7 @@ export function VariantSection({ formData, setFormData }: Props) {
                       <td className="py-2 pr-2">
                         <input 
                           type="number" 
-                          value={combo.price} 
+                          value={combo.price ?? 0} 
                           onChange={(e) => {
                             const newCombos = [...formData.variant_combinations];
                             newCombos[idx].price = Number(e.target.value);
@@ -205,7 +205,7 @@ export function VariantSection({ formData, setFormData }: Props) {
                       <td className="py-2 pr-2">
                         <input 
                           type="number" 
-                          value={combo.stock} 
+                          value={combo.stock ?? 0} 
                           onChange={(e) => {
                             const newCombos = [...formData.variant_combinations];
                             newCombos[idx].stock = Number(e.target.value);
@@ -217,7 +217,7 @@ export function VariantSection({ formData, setFormData }: Props) {
                       <td className="py-2 pr-2">
                         <input 
                           type="text" 
-                          value={combo.sku} 
+                          value={combo.sku ?? ''} 
                           onChange={(e) => {
                             const newCombos = [...formData.variant_combinations];
                             newCombos[idx].sku = e.target.value;
