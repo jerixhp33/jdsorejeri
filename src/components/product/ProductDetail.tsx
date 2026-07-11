@@ -65,8 +65,8 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
   const currentImage = images[selectedImage];
 
   const unitPrice =
-    product.product_type === 'poster'
-      ? (selectedSize?.price ?? 0)
+    (product.sizes && product.sizes.length > 0 && selectedSize)
+      ? selectedSize.price
       : (product.price ?? 0);
 
   // How many of this exact item (and size) are already in the cart?
@@ -74,13 +74,13 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     .filter(
       (item) =>
         item.product_id === product.id &&
-        (product.product_type === 'poster' ? item.poster_size_id === selectedSize?.id : true)
+        ((product.sizes && product.sizes.length > 0) ? item.poster_size_id === selectedSize?.id : true)
     )
     .reduce((sum, item) => sum + item.quantity, 0);
 
   const dbStock =
-    product.product_type === 'poster'
-      ? (selectedSize?.stock ?? 0)
+    (product.sizes && product.sizes.length > 0 && selectedSize)
+      ? selectedSize.stock
       : (product.stock ?? 0);
 
   const availableStock = Math.max(0, dbStock - cartQuantity);
@@ -112,8 +112,9 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
   }, [availableStock, quantity]);
 
   const handleAddToCart = async () => {
-    if (product.product_type === 'poster' && !selectedSize) {
-      toast.error('Please select a size');
+    const hasVariants = product.sizes && product.sizes.length > 0;
+    if (hasVariants && !selectedSize) {
+      toast.error('Please select an option');
       return;
     }
     if (!inStock || cartQuantity >= dbStock) return;
@@ -122,7 +123,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
       product.id,
       unitPrice,
       quantity,
-      product.product_type === 'poster' ? selectedSize?.id : undefined
+      hasVariants ? selectedSize?.id : undefined
     );
     setAddingToCart(false);
     toast.success('Added to Cart');
@@ -136,7 +137,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: product.id,
-          posterSizeId: product.product_type === 'poster' ? selectedSize?.id : undefined
+          posterSizeId: (product.sizes && product.sizes.length > 0) ? selectedSize?.id : undefined
         }),
       });
       const data = await res.json();
@@ -370,19 +371,17 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
               <span className="font-display text-3xl font-bold text-white">
                 {formatCurrency(unitPrice)}
               </span>
-              {product.product_type === 'poster' && selectedSize && (
+              {(product.sizes && product.sizes.length > 0 && selectedSize) && (
                 <span className="text-white/40 text-sm">for {selectedSize.label}</span>
               )}
             </div>
 
-            {/* Description - We'll move this to Accordion below */}
-
             {/* ── Size selector (Posters only) ── */}
-            {product.product_type === 'poster' && product.sizes && product.sizes.length > 0 && (
+            {product.sizes && product.sizes.length > 0 && (
               <div className="mb-8">
                 <p className="text-white/70 text-sm font-medium mb-3">
-                  Select Size
-                  {selectedSize && (
+                  Select Option
+                  {selectedSize && product.product_type === 'poster' && (
                     <span className="text-white/40 ml-2">
                       ({selectedSize.width_cm} × {selectedSize.height_cm} cm)
                     </span>
@@ -449,7 +448,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                 ) : (
                   <div className="w-full h-full flex items-center justify-between glass-card rounded-xl overflow-hidden border border-luxe-accent/50 bg-luxe-accent/5 shadow-[0_0_15px_rgba(200,169,110,0.1)]">
                     <button
-                      onClick={() => updateQuantity(cartItems.find(i => i.product_id === product.id && (product.product_type === 'poster' ? i.poster_size_id === selectedSize?.id : true))!.id, cartQuantity - 1)}
+                      onClick={() => updateQuantity(cartItems.find(i => i.product_id === product.id && ((product.sizes && product.sizes.length > 0) ? i.poster_size_id === selectedSize?.id : true))!.id, cartQuantity - 1)}
                       className="h-full px-6 text-white hover:text-luxe-accent hover:bg-white/5 active:scale-95 transition-all text-xl"
                     >
                       −
@@ -463,7 +462,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                         if (cartQuantity >= availableStock + cartQuantity) {
                           toast.error(`Only ${dbStock} left in stock`);
                         } else {
-                          updateQuantity(cartItems.find(i => i.product_id === product.id && (product.product_type === 'poster' ? i.poster_size_id === selectedSize?.id : true))!.id, cartQuantity + 1);
+                          updateQuantity(cartItems.find(i => i.product_id === product.id && ((product.sizes && product.sizes.length > 0) ? i.poster_size_id === selectedSize?.id : true))!.id, cartQuantity + 1);
                         }
                       }}
                       disabled={cartQuantity >= dbStock}
@@ -571,6 +570,12 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                             <p className="text-white text-sm font-medium">{product.weight_grams}g</p>
                           </div>
                         )}
+                        {product.attributes && Object.entries(product.attributes).map(([key, value]) => (
+                          <div key={key} className="glass-card-sm p-3">
+                            <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">{key}</p>
+                            <p className="text-white text-sm font-medium">{value as React.ReactNode}</p>
+                          </div>
+                        ))}
                       </div>
                     </motion.div>
                   )}

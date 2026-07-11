@@ -115,8 +115,8 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         data.id = savedProduct.id; // update local ref for subsequent calls in this block
       }
 
-      // Handle Poster Sizes
-      if (data.product_type === 'poster' && data.variant_combinations && data.variant_combinations.length > 0) {
+      // Handle Generic Variants (mapped to poster_sizes for legacy compatibility)
+      if (data.variant_combinations && data.variant_combinations.length > 0) {
         const validSizes = data.variant_combinations.filter(c => c.is_active);
         
         await fetch('/api/admin/poster-sizes', {
