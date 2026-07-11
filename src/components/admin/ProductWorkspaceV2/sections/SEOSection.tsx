@@ -68,7 +68,7 @@ export function SEOSection({ formData, updateField, onGenerateSEO, isGeneratingS
               {formData.seo_title || formData.name} - JD Store
             </p>
             <p className="text-xs text-[#006621] truncate">
-              https://jdstore.in/product/{formData.slug || 'product-slug'}
+              https://jdsorejeri.vercel.app/product/{formData.slug || 'product-slug'}
             </p>
             <p className="text-xs text-[#80868b] line-clamp-2 leading-relaxed">
               {formData.seo_description || formData.short_description || 'No description provided. Search engines will automatically generate a snippet based on page content.'}
