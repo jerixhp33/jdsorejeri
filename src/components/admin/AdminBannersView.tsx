@@ -12,6 +12,8 @@ import type { Banner } from '@/types';
 
 interface AdminBannersViewProps {
   banners: Banner[];
+  products?: { id: string; name: string; slug: string; product_type: string }[];
+  categories?: { id: string; name: string; slug: string; product_type: string }[];
 }
 
 const POSITIONS = ['hero', 'top', 'middle', 'bottom', 'sidebar'] as const;
@@ -26,7 +28,7 @@ const emptyForm = () => ({
   display_order: 0,
 });
 
-export function AdminBannersView({ banners: initial }: AdminBannersViewProps) {
+export function AdminBannersView({ banners: initial, products = [], categories = [] }: AdminBannersViewProps) {
   const [banners, setBanners] = useState(initial);
   const [showModal, setShowModal] = useState(false);
   const [editBanner, setEditBanner] = useState<Banner | null>(null);
@@ -40,11 +42,17 @@ export function AdminBannersView({ banners: initial }: AdminBannersViewProps) {
   const [desktopImages, setDesktopImages] = useState<UploadedImage[]>([]);
   const [mobileImages, setMobileImages] = useState<UploadedImage[]>([]);
 
+  // CTA Dropdown state
+  const [linkType, setLinkType] = useState<'product' | 'category' | 'custom'>('custom');
+  const [productTypeFilter, setProductTypeFilter] = useState('');
+
   const openCreate = () => {
     setEditBanner(null);
     setForm({ ...emptyForm(), display_order: banners.length });
     setDesktopImages([]);
     setMobileImages([]);
+    setLinkType('custom');
+    setProductTypeFilter('');
     setShowModal(true);
   };
 
@@ -61,6 +69,20 @@ export function AdminBannersView({ banners: initial }: AdminBannersViewProps) {
     });
     setDesktopImages(banner.image_url ? [{ url: banner.image_url }] : []);
     setMobileImages(banner.mobile_image_url ? [{ url: banner.mobile_image_url }] : []);
+    
+    if (banner.cta_url?.startsWith('/product/')) {
+      setLinkType('product');
+      const p = products.find(p => `/product/${p.slug}` === banner.cta_url);
+      setProductTypeFilter(p?.product_type || '');
+    } else if (banner.cta_url?.startsWith('/category/')) {
+      setLinkType('category');
+      const c = categories.find(c => `/category/${c.slug}` === banner.cta_url);
+      setProductTypeFilter(c?.product_type || '');
+    } else {
+      setLinkType('custom');
+      setProductTypeFilter('');
+    }
+    
     setShowModal(true);
   };
 
@@ -250,14 +272,84 @@ export function AdminBannersView({ banners: initial }: AdminBannersViewProps) {
                   placeholder="Shop Now"
                 />
               </div>
-              <div>
-                <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">CTA URL</label>
-                <input
-                  value={form.cta_url}
-                  onChange={e => setForm(f => ({ ...f, cta_url: e.target.value }))}
-                  className="input-luxe"
-                  placeholder="/category/poster"
-                />
+              <div className="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Link Type</label>
+                  <select
+                    value={linkType}
+                    onChange={e => {
+                      setLinkType(e.target.value as any);
+                      setForm(f => ({ ...f, cta_url: '' })); // reset URL when type changes
+                    }}
+                    className="input-luxe"
+                  >
+                    <option value="product">Product</option>
+                    <option value="category">Category</option>
+                    <option value="custom">Custom URL</option>
+                  </select>
+                </div>
+                
+                {linkType !== 'custom' && (
+                  <div>
+                    <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Filter by Type</label>
+                    <select
+                      value={productTypeFilter}
+                      onChange={e => {
+                        setProductTypeFilter(e.target.value);
+                        setForm(f => ({ ...f, cta_url: '' })); // reset URL when filter changes
+                      }}
+                      className="input-luxe capitalize"
+                    >
+                      <option value="">All Types</option>
+                      <option value="poster">Poster</option>
+                      <option value="earring">Earring</option>
+                      <option value="bracelet">Bracelet</option>
+                      <option value="hairband">Hairband</option>
+                      <option value="keychain">Keychain</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                )}
+
+                <div className={linkType === 'custom' ? "col-span-2" : "col-span-2 md:col-span-1"}>
+                  <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">CTA URL Target</label>
+                  {linkType === 'custom' ? (
+                    <input
+                      value={form.cta_url}
+                      onChange={e => setForm(f => ({ ...f, cta_url: e.target.value }))}
+                      className="input-luxe"
+                      placeholder="/about"
+                    />
+                  ) : linkType === 'product' ? (
+                    <select
+                      value={form.cta_url}
+                      onChange={e => setForm(f => ({ ...f, cta_url: e.target.value }))}
+                      className="input-luxe"
+                    >
+                      <option value="">Select Product...</option>
+                      {products
+                        .filter(p => !productTypeFilter || p.product_type === productTypeFilter)
+                        .map(p => (
+                          <option key={p.id} value={`/product/${p.slug}`}>{p.name}</option>
+                        ))
+                      }
+                    </select>
+                  ) : (
+                    <select
+                      value={form.cta_url}
+                      onChange={e => setForm(f => ({ ...f, cta_url: e.target.value }))}
+                      className="input-luxe"
+                    >
+                      <option value="">Select Category...</option>
+                      {categories
+                        .filter(c => !productTypeFilter || c.product_type === productTypeFilter)
+                        .map(c => (
+                          <option key={c.id} value={`/category/${c.slug}`}>{c.name}</option>
+                        ))
+                      }
+                    </select>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Position</label>

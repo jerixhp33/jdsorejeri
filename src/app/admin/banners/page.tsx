@@ -5,10 +5,17 @@ import { AdminBannersView } from '@/components/admin/AdminBannersView';
 
 export default async function AdminBannersPage() {
   const supabase = await createAdminClient();
-  const { data: banners } = await supabase
-    .from('banners')
-    .select('*')
-    .order('display_order');
+  const [bannersRes, productsRes, categoriesRes] = await Promise.all([
+    supabase.from('banners').select('*').order('display_order'),
+    supabase.from('products').select('id, name, slug, product_type').eq('is_active', true),
+    supabase.from('product_categories').select('id, name, slug, product_type').eq('is_active', true),
+  ]);
 
-  return <AdminBannersView banners={banners || []} />;
+  return (
+    <AdminBannersView 
+      banners={bannersRes.data || []} 
+      products={productsRes.data || []}
+      categories={categoriesRes.data || []}
+    />
+  );
 }
