@@ -201,6 +201,10 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       toast.error('Name, Category, and Product Type are required to save.');
       return;
     }
+    if (isSavingRef.current) {
+      toast.info('Finishing background save, please wait a moment...');
+      return;
+    }
     updateField('status', 'draft');
     const p = await saveAction({ ...formData, status: 'draft' });
     if (p && onSaved) onSaved(p);
@@ -211,14 +215,24 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       toast.error('Name, Category, and Product Type are required to publish.');
       return;
     }
+    if (isSavingRef.current) {
+      toast.info('Finishing background save, please wait a moment...');
+      return;
+    }
     updateField('status', 'active');
     const p = await saveAction({ ...formData, status: 'active' });
-    toast.success('Product published successfully!');
-    if (p && onSaved) onSaved(p);
-    onClose();
+    if (p) {
+      toast.success('Product published successfully!');
+      if (onSaved) onSaved(p);
+      onClose();
+    }
   };
 
   const handleArchive = async () => {
+    if (isSavingRef.current) {
+      toast.info('Finishing background save, please wait a moment...');
+      return;
+    }
     updateField('status', 'archived');
     await saveAction({ ...formData, status: 'archived' });
     toast.success('Product archived successfully!');

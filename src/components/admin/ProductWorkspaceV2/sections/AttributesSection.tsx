@@ -23,7 +23,9 @@ export function AttributesSection({ formData, updateAttribute, removeAttribute }
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        {Object.entries(formData.attributes || {}).map(([key, value]) => (
+        {Object.entries(formData.attributes || {})
+          .filter(([_, value]) => typeof value !== 'object')
+          .map(([key, value]) => (
           <div key={key} className="flex gap-3 items-center">
             <input 
               type="text" 

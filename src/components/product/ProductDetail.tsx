@@ -571,7 +571,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                           </div>
                         )}
                         {product.attributes && Object.entries(product.attributes)
-                          .filter(([key]) => key !== '_v2_variants')
+                          .filter(([key, value]) => !key.startsWith('_') && typeof value !== 'object')
                           .map(([key, value]) => (
                           <div key={key} className="glass-card-sm p-3">
                             <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">{key}</p>
