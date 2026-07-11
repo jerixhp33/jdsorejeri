@@ -37,9 +37,27 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
   const { isWishlisted, toggle } = useWishlist();
 
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<PosterSize | null>(
-    product.sizes?.[0] || null
-  );
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
+    const v2Variants = (product.attributes as any)?._v2_variants;
+    if (v2Variants?.options?.length > 0 && v2Variants.combinations?.length > 0) {
+      const defaultCombo = v2Variants.combinations.find((c: any) => c.is_active) || v2Variants.combinations[0];
+      return defaultCombo?.options || {};
+    }
+    return {};
+  });
+
+  const [selectedSize, setSelectedSize] = useState<PosterSize | null>(() => {
+    const v2Variants = (product.attributes as any)?._v2_variants;
+    if (v2Variants?.options?.length > 0 && v2Variants.combinations?.length > 0) {
+      const defaultCombo = v2Variants.combinations.find((c: any) => c.is_active) || v2Variants.combinations[0];
+      if (defaultCombo && product.sizes) {
+        const label = Object.values(defaultCombo.options).join(' / ');
+        return product.sizes.find(s => s.label === label) || product.sizes[0] || null;
+      }
+    }
+    return product.sizes?.[0] || null;
+  });
+
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [zoomed, setZoomed] = useState(false);
@@ -59,6 +77,23 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
       setImgAspect(el.naturalWidth / el.naturalHeight);
     }
   }, []);
+
+  useEffect(() => {
+    const v2Variants = (product.attributes as any)?._v2_variants;
+    if (v2Variants?.options?.length > 0 && product.sizes && product.sizes.length > 0) {
+      const combo = v2Variants.combinations?.find((c: any) => 
+        Object.entries(selectedOptions).every(([k, v]) => c.options[k] === v)
+      );
+      if (combo) {
+        const label = Object.values(combo.options).join(' / ');
+        const matchedSize = product.sizes.find(s => s.label === label);
+        if (matchedSize) setSelectedSize(matchedSize);
+        else setSelectedSize(null);
+      } else {
+        setSelectedSize(null);
+      }
+    }
+  }, [selectedOptions, product.sizes, product.attributes]);
 
   const images = product.images || [];
   const wishlisted = isWishlisted(product.id);
@@ -376,39 +411,106 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
               )}
             </div>
 
-            {/* ── Size selector (Posters only) ── */}
+            {/* ── Variant Selector ── */}
             {product.sizes && product.sizes.length > 0 && (
               <div className="mb-8">
-                <p className="text-white/70 text-sm font-medium mb-3">
-                  Select Option
-                  {selectedSize && product.product_type === 'poster' && (
-                    <span className="text-white/40 ml-2">
-                      ({selectedSize.width_cm} × {selectedSize.height_cm} cm)
-                    </span>
-                  )}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size.id}
-                      onClick={() => setSelectedSize(size)}
-                      disabled={size.stock === 0}
-                      className={cn(
-                        'flex flex-col items-center px-4 py-2.5 rounded-xl border text-sm font-medium transition-all',
-                        size.stock === 0
-                          ? 'border-white/10 text-white/20 cursor-not-allowed'
-                          : selectedSize?.id === size.id
-                            ? 'border-luxe-accent bg-luxe-accent/10 text-luxe-accent'
-                            : 'border-white/15 text-white/70 hover:border-white/40'
-                      )}
-                    >
-                      <span>{size.label}</span>
-                      <span className="text-[10px] mt-0.5 opacity-70">
-                        {size.stock === 0 ? 'Out' : formatCurrency(size.price)}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                {(() => {
+                  const v2Variants = (product.attributes as any)?._v2_variants;
+                  const hasMatrixVariants = v2Variants?.options?.length > 0 && v2Variants?.combinations?.length > 0;
+
+                  if (hasMatrixVariants) {
+                    return (
+                      <div className="space-y-5">
+                        {v2Variants.options.map((opt: any) => (
+                          <div key={opt.id}>
+                            <p className="text-white/70 text-sm font-medium mb-3">
+                              Select {opt.name}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {opt.values.map((val: string) => {
+                                const isSelected = selectedOptions[opt.name] === val;
+                                // Check if this combination exists and has stock
+                                const testOptions = { ...selectedOptions, [opt.name]: val };
+                                const combo = v2Variants.combinations.find((c: any) => 
+                                  Object.entries(testOptions).every(([k, v]) => c.options[k] === v)
+                                );
+                                
+                                // To get stock and price, we must match it against poster_sizes
+                                let matchedSize = null;
+                                if (combo) {
+                                  const label = Object.values(combo.options).join(' / ');
+                                  matchedSize = product.sizes?.find(s => s.label === label);
+                                }
+                                
+                                const stock = matchedSize?.stock || 0;
+                                const isOutOfStock = stock === 0;
+
+                                return (
+                                  <button
+                                    key={val}
+                                    onClick={() => setSelectedOptions(prev => ({ ...prev, [opt.name]: val }))}
+                                    disabled={!combo}
+                                    className={cn(
+                                      'flex flex-col items-center px-4 py-2.5 rounded-xl border text-sm font-medium transition-all',
+                                      !combo
+                                        ? 'border-white/5 text-white/10 cursor-not-allowed hidden' // combination doesn't exist
+                                        : isSelected
+                                          ? 'border-luxe-accent bg-luxe-accent/10 text-luxe-accent'
+                                          : 'border-white/15 text-white/70 hover:border-white/40'
+                                    )}
+                                  >
+                                    <span>{val}</span>
+                                    {isSelected && matchedSize && (
+                                      <span className="text-[10px] mt-0.5 opacity-70">
+                                        {isOutOfStock ? 'Out' : formatCurrency(matchedSize.price)}
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+
+                  // Fallback for legacy poster sizes
+                  return (
+                    <div>
+                      <p className="text-white/70 text-sm font-medium mb-3">
+                        Select Option
+                        {selectedSize && product.product_type === 'poster' && (
+                          <span className="text-white/40 ml-2">
+                            ({selectedSize.width_cm} × {selectedSize.height_cm} cm)
+                          </span>
+                        )}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {product.sizes.map((size) => (
+                          <button
+                            key={size.id}
+                            onClick={() => setSelectedSize(size)}
+                            disabled={size.stock === 0}
+                            className={cn(
+                              'flex flex-col items-center px-4 py-2.5 rounded-xl border text-sm font-medium transition-all',
+                              size.stock === 0
+                                ? 'border-white/10 text-white/20 cursor-not-allowed'
+                                : selectedSize?.id === size.id
+                                  ? 'border-luxe-accent bg-luxe-accent/10 text-luxe-accent'
+                                  : 'border-white/15 text-white/70 hover:border-white/40'
+                            )}
+                          >
+                            <span>{size.label}</span>
+                            <span className="text-[10px] mt-0.5 opacity-70">
+                              {size.stock === 0 ? 'Out' : formatCurrency(size.price)}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
