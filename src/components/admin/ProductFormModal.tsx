@@ -292,7 +292,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
   ] as const;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div data-lenis-prevent="true" className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       
       <form 
