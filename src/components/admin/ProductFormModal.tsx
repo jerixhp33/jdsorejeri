@@ -169,20 +169,6 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
   const price = watch('price');
   const cost = watch('cost_price');
 
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    const originalBody = document.body.style.overflow;
-    const originalHtml = document.documentElement.style.overflow;
-    
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    
-    return () => {
-      document.body.style.overflow = originalBody;
-      document.documentElement.style.overflow = originalHtml;
-    };
-  }, []);
-
   // Smart Category Mapping
   useEffect(() => {
     if (selectedCategoryId) {

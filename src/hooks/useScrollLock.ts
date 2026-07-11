@@ -5,14 +5,12 @@ export function useScrollLock(isLocked: boolean = true) {
     if (!isLocked) return;
 
     const originalBody = document.body.style.overflow;
-    const originalHtml = document.documentElement.style.overflow;
     
+    // Only lock body. Locking html breaks Windows trackpad scrolling in Modals.
     document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
     
     return () => {
       document.body.style.overflow = originalBody;
-      document.documentElement.style.overflow = originalHtml;
     };
   }, [isLocked]);
 }

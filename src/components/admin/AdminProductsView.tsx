@@ -8,6 +8,7 @@ import { formatCurrency, cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Product, Category, ProductType } from '@/types';
 import { ProductFormModal } from './ProductFormModal';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 interface AdminProductsViewProps {
   initialProducts: Product[];
@@ -27,6 +28,9 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
     return type.charAt(0).toUpperCase() + type.slice(1) + 's';
   };
   const [showModal, setShowModal] = useState(false);
+  
+  useScrollLock(showModal);
+
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
