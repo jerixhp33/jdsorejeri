@@ -337,7 +337,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
         </div>
 
         {/* Scrollable Form Area (Row 3) */}
-        <div ref={scrollContainerRef} className={cn("p-6 overscroll-contain", isCategoryOpen ? "overflow-hidden" : "overflow-y-auto")}>
+        <div ref={scrollContainerRef} className={cn("p-6 overscroll-contain min-h-0", isCategoryOpen ? "overflow-hidden" : "overflow-y-auto")}>
           
           {/* GENERAL TAB */}
           <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'general' && 'hidden')}>
