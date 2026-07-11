@@ -104,3 +104,54 @@ export async function broadcastWebPush(payload: { title: string; body: string; u
     console.error('Error in broadcastWebPush:', error);
   }
 }
+
+export async function notifyAdmins(payload: { title: string; body: string; url?: string; image?: string; icon?: string }) {
+  try {
+    // Get all admin users
+    const { data: admins } = await supabase
+      .from('user_profiles')
+      .select('uid')
+      .in('role', ['admin', 'super_admin']);
+
+    if (!admins || admins.length === 0) return;
+
+    const adminUids = admins.map(a => a.uid);
+
+    // Get all subscriptions for admins
+    const { data: subscriptions } = await supabase
+      .from('push_subscriptions')
+      .select('*')
+      .in('user_id', adminUids);
+
+    if (!subscriptions || subscriptions.length === 0) return;
+
+    const pushPromises = subscriptions.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth,
+            },
+          },
+          JSON.stringify({
+            title: payload.title,
+            body: payload.body,
+            url: payload.url || '/admin',
+            image: payload.image,
+            icon: payload.icon
+          })
+        );
+      } catch (err: any) {
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          await supabase.from('push_subscriptions').delete().eq('id', sub.id);
+        }
+      }
+    });
+
+    await Promise.allSettled(pushPromises);
+  } catch (error) {
+    console.error('Error in notifyAdmins:', error);
+  }
+}

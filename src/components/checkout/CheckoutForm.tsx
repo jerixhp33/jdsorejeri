@@ -313,6 +313,18 @@ export function CheckoutForm() {
       );
       if (itemsErr) throw itemsErr;
 
+      // Notify admins of new order asynchronously
+      fetch('/api/admin/notify-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          total: order.grand_total,
+          customerName: data.full_name
+        })
+      }).catch(err => console.error('Failed to send admin notification:', err));
+
       const whatsappMsg = generateWhatsAppMessage({
         order_number: ordNum,
         customer_name: data.full_name,
