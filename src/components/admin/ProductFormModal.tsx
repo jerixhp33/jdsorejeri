@@ -295,7 +295,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       
-      <div ref={scrollContainerRef} className="relative w-full max-w-4xl h-[calc(100vh-2rem)] sm:h-[85vh] flex flex-col glass-card overflow-hidden shadow-2xl">
+      <div ref={scrollContainerRef} className="relative w-full max-w-4xl max-h-[calc(100vh-2rem)] sm:max-h-[85vh] flex flex-col glass-card overflow-hidden shadow-2xl">
         
         {/* Header */}
         <div className="flex-shrink-0 sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
