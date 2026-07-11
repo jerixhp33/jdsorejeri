@@ -295,18 +295,21 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       
-      <div ref={scrollContainerRef} className="relative w-full max-w-4xl max-h-[calc(100vh-2rem)] sm:max-h-[85vh] flex flex-col glass-card overflow-hidden shadow-2xl">
+      <form 
+        onSubmit={handleSubmit(onSubmit, () => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }))} 
+        className="relative w-full max-w-4xl max-h-[calc(100vh-2rem)] sm:max-h-[85vh] grid grid-rows-[auto_auto_minmax(0,1fr)_auto] glass-card shadow-2xl overflow-hidden"
+      >
         
-        {/* Header */}
-        <div className="flex-shrink-0 sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
+        {/* Header (Row 1) */}
+        <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
           <h2 className="text-white font-semibold text-lg">{product ? 'Edit Product' : 'Add New Product'}</h2>
-          <button onClick={onClose} className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all">
+          <button type="button" onClick={onClose} className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex-shrink-0 flex items-center gap-2 p-4 border-b border-white/5 overflow-x-auto scrollbar-hide">
+        {/* Tab Navigation (Row 2) */}
+        <div className="flex items-center gap-2 p-4 border-b border-white/5 overflow-x-auto scrollbar-hide">
           {tabs.map(tab => {
             const Icon = tab.icon;
             const active = activeTab === tab.key;
@@ -333,358 +336,357 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
           })}
         </div>
 
-        {/* Scrollable Form Area */}
-        <form onSubmit={handleSubmit(onSubmit, () => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }))} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className={cn("flex-1 p-6 overscroll-contain min-h-0", isCategoryOpen ? "overflow-hidden" : "overflow-y-auto")}>
-            
-            {/* GENERAL TAB */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'general' && 'hidden')}>
-              <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block flex justify-between">
-                  Category *
-                  {selectedCategoryId && <span className="text-luxe-accent flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Auto-mapped to type: {productType}</span>}
-                </label>
-                <div className="relative">
-                  <div 
-                    onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                    className="input-luxe text-base py-3 flex items-center justify-between cursor-pointer"
-                  >
-                    <span>
-                      {selectedCategoryId 
-                        ? categories.find(c => c.id === selectedCategoryId)?.name 
-                        : <span className="text-white/40">Select a product category to begin</span>}
-                    </span>
-                    <ChevronRight className={cn("w-4 h-4 transition-transform text-white/40", isCategoryOpen && "rotate-90")} />
-                  </div>
-                  
-                  {isCategoryOpen && (
-                    <div className="absolute top-full left-0 w-full mt-2 bg-luxe-black border border-white/10 rounded-xl shadow-2xl z-50 max-h-[300px] overflow-y-auto overscroll-contain">
-                      {Object.entries(groupedCategories).map(([type, cats]) => (
-                        <div key={type} className="p-2 border-b border-white/5 last:border-0">
-                          <p className="text-[10px] uppercase tracking-widest text-luxe-accent font-semibold px-3 py-2">
-                            {type.replace('_', ' ')}
-                          </p>
-                          <div className="space-y-1">
-                            {cats.sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
-                              <div 
-                                key={cat.id} 
-                                onClick={() => {
-                                  setValue('category_id', cat.id, { shouldValidate: true });
-                                  setIsCategoryOpen(false);
-                                }}
-                                className={cn(
-                                  "px-3 py-2 text-sm rounded-lg cursor-pointer transition-colors",
-                                  selectedCategoryId === cat.id ? "bg-luxe-accent/20 text-luxe-accent" : "text-white/70 hover:bg-white/10 hover:text-white"
-                                )}
-                              >
-                                {cat.name}
-                              </div>
-                            ))}
-                          </div>
+        {/* Scrollable Form Area (Row 3) */}
+        <div ref={scrollContainerRef} className={cn("p-6 overscroll-contain", isCategoryOpen ? "overflow-hidden" : "overflow-y-auto")}>
+          
+          {/* GENERAL TAB */}
+          <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'general' && 'hidden')}>
+            <div>
+              <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block flex justify-between">
+                Category *
+                {selectedCategoryId && <span className="text-luxe-accent flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Auto-mapped to type: {productType}</span>}
+              </label>
+              <div className="relative">
+                <div 
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                  className="input-luxe text-base py-3 flex items-center justify-between cursor-pointer"
+                >
+                  <span>
+                    {selectedCategoryId 
+                      ? categories.find(c => c.id === selectedCategoryId)?.name 
+                      : <span className="text-white/40">Select a product category to begin</span>}
+                  </span>
+                  <ChevronRight className={cn("w-4 h-4 transition-transform text-white/40", isCategoryOpen && "rotate-90")} />
+                </div>
+                
+                {isCategoryOpen && (
+                  <div className="absolute top-full left-0 w-full mt-2 bg-luxe-black border border-white/10 rounded-xl shadow-2xl z-50 max-h-[300px] overflow-y-auto overscroll-contain">
+                    {Object.entries(groupedCategories).map(([type, cats]) => (
+                      <div key={type} className="p-2 border-b border-white/5 last:border-0">
+                        <p className="text-[10px] uppercase tracking-widest text-luxe-accent font-semibold px-3 py-2">
+                          {type.replace('_', ' ')}
+                        </p>
+                        <div className="space-y-1">
+                          {cats.sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                            <div 
+                              key={cat.id} 
+                              onClick={() => {
+                                setValue('category_id', cat.id, { shouldValidate: true });
+                                setIsCategoryOpen(false);
+                              }}
+                              className={cn(
+                                "px-3 py-2 text-sm rounded-lg cursor-pointer transition-colors",
+                                selectedCategoryId === cat.id ? "bg-luxe-accent/20 text-luxe-accent" : "text-white/70 hover:bg-white/10 hover:text-white"
+                              )}
+                            >
+                              {cat.name}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {errors.category_id && <p className="text-red-400 text-xs mt-1">{errors.category_id.message}</p>}
-              </div>
-
-              {selectedCategoryId && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-white/5">
-                  <div className="col-span-2 sm:col-span-1">
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Product Name *</label>
-                    <input {...register('name')} className="input-luxe py-3" placeholder="Golden Statement Necklace" />
-                    {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Brand</label>
-                    <input {...register('brand')} className="input-luxe py-3" placeholder="JD Store" />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Short Description</label>
-                    <input {...register('short_description')} className="input-luxe py-3" placeholder="A brief one-liner summary..." />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Full Description * (Rich Text Ready)</label>
-                    <textarea {...register('description')} className="input-luxe resize-none py-3" rows={6} placeholder="Craft an elegant description..." />
-                    {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description.message}</p>}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* PRICING TAB */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'pricing' && 'hidden')}>
-              {!selectedCategoryId ? (
-                <div className="h-full flex flex-col items-center justify-center text-center py-20 text-white/30"><Tag className="w-12 h-12 mb-4 opacity-50" /><p>Select a category first.</p></div>
-              ) : productType === 'poster' ? (
-                <div className="p-5 rounded-2xl border border-white/10 bg-white/5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-white/70 text-sm font-semibold">Poster Sizes & Pricing *</p>
-                    <button type="button" onClick={addSize} className="btn-luxe-outline py-1.5 px-3 text-xs"><Plus className="w-3.5 h-3.5"/> Add Size</button>
-                  </div>
-                  <div className="flex gap-2">
-                    {PRESET_SIZES.map((p) => (
-                      <button key={p.label} type="button" onClick={() => addPreset(p)} className="px-3 py-1 rounded-lg text-xs border border-white/20 text-white/60 hover:text-white hover:border-luxe-accent transition-all">+ {p.label}</button>
-                    ))}
-                  </div>
-                  <div className="space-y-3">
-                    {sizes.map((size, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <input value={size.label} onChange={e => updateSize(i, 'label', e.target.value)} className="input-luxe flex-[2] text-xs py-2" placeholder="Label (A4)" />
-                        <input value={size.price} onChange={e => updateSize(i, 'price', e.target.value)} className="input-luxe flex-[2] text-xs py-2" type="number" placeholder="Price (₹)" />
-                        <input value={size.stock} onChange={e => updateSize(i, 'stock', e.target.value)} className="input-luxe flex-[1.5] text-xs py-2" type="number" placeholder="Stock" />
-                        <button type="button" onClick={() => removeSize(i)} disabled={sizes.length === 1} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white disabled:opacity-20"><Trash2 className="w-4 h-4"/></button>
                       </div>
                     ))}
                   </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-5">
-                  <div>
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Selling Price (₹) *</label>
-                    <input {...register('price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3 text-lg font-medium text-luxe-accent" placeholder="499" />
-                    {errors.price && <p className="text-red-400 text-xs mt-1">{errors.price.message}</p>}
-                  </div>
-                  <div>
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Original Price (₹)</label>
-                    <input {...register('original_price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="699" />
-                  </div>
-                  <div>
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Cost Price (Admin Only)</label>
-                    <input {...register('cost_price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="200" />
-                  </div>
-                  <div>
-                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Tax (%)</label>
-                    <input {...register('tax_percent', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="18" />
-                  </div>
-                  {price && cost ? (
-                    <div className="col-span-2 p-4 rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex justify-between items-center">
-                      <span className="text-white/70 text-sm">Estimated Profit Margin:</span>
-                      <span className="text-luxe-accent font-bold text-lg">₹{(price - cost).toFixed(2)}</span>
-                    </div>
-                  ) : null}
-                </div>
-              )}
+                )}
+              </div>
+              {errors.category_id && <p className="text-red-400 text-xs mt-1">{errors.category_id.message}</p>}
             </div>
 
-            {/* INVENTORY & SHIPPING */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'inventory' && 'hidden')}>
-              <div className="grid grid-cols-2 gap-5">
-                <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Stock Quantity</label>
-                  <input {...register('stock', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="50" />
+            {selectedCategoryId && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-white/5">
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Product Name *</label>
+                  <input {...register('name')} className="input-luxe py-3" placeholder="Golden Statement Necklace" />
+                  {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
                 </div>
-                <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Low Stock Alert</label>
-                  <input {...register('low_stock_alert', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="5" />
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Brand</label>
+                  <input {...register('brand')} className="input-luxe py-3" placeholder="JD Store" />
                 </div>
-                <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Product Status</label>
-                  <select {...register('status')} className="input-luxe py-3">
-                    <option value="active">Active</option>
-                    <option value="draft">Draft</option>
-                    <option value="out_of_stock">Out of Stock</option>
-                    <option value="archived">Archived</option>
-                  </select>
+                <div className="col-span-2">
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Short Description</label>
+                  <input {...register('short_description')} className="input-luxe py-3" placeholder="A brief one-liner summary..." />
                 </div>
-                <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SKU (Auto-generates if blank)</label>
-                  <input {...register('sku')} className="input-luxe py-3" placeholder="E.g. RNG-SLV-01" />
-                </div>
-                
-                <div className="col-span-2 border-t border-white/5 pt-4 mt-2"><h3 className="text-white/80 font-medium mb-4">Shipping Dimensions</h3></div>
-                
-                <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Weight (grams)</label>
-                  <input {...register('weight_grams', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="150" />
-                </div>
-                <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Courier Category</label>
-                  <input {...register('courier_category')} className="input-luxe" placeholder="Small Packet" />
-                </div>
-                <div className="grid grid-cols-3 gap-2 col-span-2">
-                  <div>
-                    <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Length (cm)</label>
-                    <input {...register('length_cm', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="10" />
-                  </div>
-                  <div>
-                    <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Width (cm)</label>
-                    <input {...register('width_cm', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="5" />
-                  </div>
-                  <div>
-                    <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Height (cm)</label>
-                    <input {...register('height_cm', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="2" />
-                  </div>
-                </div>
-                
-                <div className="col-span-2 mt-4 space-y-3">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" {...register('continue_selling_oos')} className="w-5 h-5 accent-luxe-accent rounded" />
-                    <span className="text-white/70 text-sm">Continue Selling When Out of Stock</span>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" {...register('is_free_shipping')} className="w-5 h-5 accent-luxe-accent rounded" />
-                    <span className="text-white/70 text-sm">Free Shipping</span>
-                  </label>
+                <div className="col-span-2">
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Full Description * (Rich Text Ready)</label>
+                  <textarea {...register('description')} className="input-luxe resize-none py-3" rows={6} placeholder="Craft an elegant description..." />
+                  {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description.message}</p>}
                 </div>
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* DYNAMIC SPECS */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'specs' && 'hidden')}>
-              {!selectedCategoryId ? (
-                 <div className="h-full flex flex-col items-center justify-center text-center py-20 text-white/30"><Settings2 className="w-12 h-12 mb-4 opacity-50" /><p>Select a category first.</p></div>
-              ) : (
-                <>
-                  <div className="bg-luxe-accent/10 border border-luxe-accent/20 p-4 rounded-xl mb-6">
-                    <p className="text-luxe-accent text-sm">Dynamic fields generated for <strong>{productType.toUpperCase()}</strong></p>
-                  </div>
-                  
-                  {/* DYNAMIC UI RENDERER */}
-                  <div className="grid grid-cols-2 gap-5 mb-6">
-                    {productType === 'poster' && (
-                      <>
-                        <div>
-                          <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Orientation</label>
-                          <select value={attributes['Orientation'] || ''} onChange={e => setAttr('Orientation', e.target.value)} className="input-luxe py-3">
-                            <option value="">Select...</option>
-                            <option value="Portrait">Portrait</option>
-                            <option value="Landscape">Landscape</option>
-                            <option value="Square">Square</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Paper Finish</label>
-                          <select value={attributes['Finish'] || ''} onChange={e => setAttr('Finish', e.target.value)} className="input-luxe py-3">
-                            <option value="">Select...</option>
-                            <option value="Matte">Matte</option>
-                            <option value="Glossy">Glossy</option>
-                          </select>
-                        </div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Frame Included</label><input className="input-luxe py-3" value={attributes['Frame'] || ''} onChange={e => setAttr('Frame', e.target.value)} placeholder="Yes / No" /></div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Print Technology</label><input className="input-luxe py-3" value={attributes['Technology'] || ''} onChange={e => setAttr('Technology', e.target.value)} placeholder="Giclée Print" /></div>
-                      </>
-                    )}
-
-                    {productType === 'earring' && (
-                      <>
-                        <div>
-                          <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Type</label>
-                          <select value={attributes['Type'] || ''} onChange={e => setAttr('Type', e.target.value)} className="input-luxe py-3">
-                            <option value="">Select...</option>
-                            <option value="Stud">Stud</option><option value="Hoop">Hoop</option><option value="Drop">Drop</option><option value="Dangle">Dangle</option><option value="Jhumka">Jhumka</option>
-                          </select>
-                        </div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Material</label><input className="input-luxe py-3" value={attributes['Material'] || ''} onChange={e => setAttr('Material', e.target.value)} placeholder="Sterling Silver" /></div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Closure Type</label><input className="input-luxe py-3" value={attributes['Closure'] || ''} onChange={e => setAttr('Closure', e.target.value)} placeholder="Push Back" /></div>
-                        <div>
-                          <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Hypoallergenic</label>
-                          <select value={attributes['Hypoallergenic'] || ''} onChange={e => setAttr('Hypoallergenic', e.target.value)} className="input-luxe py-3">
-                            <option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option>
-                          </select>
-                        </div>
-                      </>
-                    )}
-
-                    {productType === 'hairband' && (
-                      <>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Material</label><input className="input-luxe py-3" value={attributes['Material'] || ''} onChange={e => setAttr('Material', e.target.value)} /></div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Width</label><input className="input-luxe py-3" value={attributes['Width'] || ''} onChange={e => setAttr('Width', e.target.value)} /></div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Stretchable</label><select value={attributes['Stretchable'] || ''} onChange={e => setAttr('Stretchable', e.target.value)} className="input-luxe py-3"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Pattern</label><input className="input-luxe py-3" value={attributes['Pattern'] || ''} onChange={e => setAttr('Pattern', e.target.value)} /></div>
-                      </>
-                    )}
-
-                    {productType === 'bracelet' && (
-                      <>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Material</label><input className="input-luxe py-3" value={attributes['Material'] || ''} onChange={e => setAttr('Material', e.target.value)} /></div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Adjustable</label><select value={attributes['Adjustable'] || ''} onChange={e => setAttr('Adjustable', e.target.value)} className="input-luxe py-3"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Charm Included</label><input className="input-luxe py-3" value={attributes['Charm'] || ''} onChange={e => setAttr('Charm', e.target.value)} /></div>
-                        <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Unisex</label><select value={attributes['Unisex'] || ''} onChange={e => setAttr('Unisex', e.target.value)} className="input-luxe py-3"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
-                      </>
-                    )}
-                  </div>
-                  
-                  <div className="border-t border-white/10 pt-6">
-                    <h3 className="text-white font-medium mb-4">Custom Attributes Builder</h3>
-                    <p className="text-white/40 text-xs mb-4">Add any infinite combination of custom attributes below.</p>
-                    <AttributesEditor attributes={attributes} onChange={setAttributes} />
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* IMAGES TAB */}
-            <div className={cn("animate-in fade-in slide-in-from-bottom-2 h-full", activeTab !== 'images' && 'hidden')}>
-              <p className="text-white/50 text-sm mb-4">
-                Upload beautiful, high-quality images. Select the <Star className="inline w-4 h-4 text-luxe-accent"/> to choose the primary cover image.
-              </p>
-              <ImageUploader images={images} onChange={setImages} onDelete={handleImageDelete} maxImages={8} />
-            </div>
-
-            {/* SEO & MARKETING TAB */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'marketing' && 'hidden')}>
-              <div className="grid grid-cols-1 gap-4">
+          {/* PRICING TAB */}
+          <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'pricing' && 'hidden')}>
+            {!selectedCategoryId ? (
+              <div className="h-full flex flex-col items-center justify-center text-center py-20 text-white/30"><Tag className="w-12 h-12 mb-4 opacity-50" /><p>Select a category first.</p></div>
+            ) : productType === 'poster' ? (
+              <div className="p-5 rounded-2xl border border-white/10 bg-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-white/70 text-sm font-semibold">Poster Sizes & Pricing *</p>
+                  <button type="button" onClick={addSize} className="btn-luxe-outline py-1.5 px-3 text-xs"><Plus className="w-3.5 h-3.5"/> Add Size</button>
+                </div>
+                <div className="flex gap-2">
+                  {PRESET_SIZES.map((p) => (
+                    <button key={p.label} type="button" onClick={() => addPreset(p)} className="px-3 py-1 rounded-lg text-xs border border-white/20 text-white/60 hover:text-white hover:border-luxe-accent transition-all">+ {p.label}</button>
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  {sizes.map((size, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input value={size.label} onChange={e => updateSize(i, 'label', e.target.value)} className="input-luxe flex-[2] text-xs py-2" placeholder="Label (A4)" />
+                      <input value={size.price} onChange={e => updateSize(i, 'price', e.target.value)} className="input-luxe flex-[2] text-xs py-2" type="number" placeholder="Price (₹)" />
+                      <input value={size.stock} onChange={e => updateSize(i, 'stock', e.target.value)} className="input-luxe flex-[1.5] text-xs py-2" type="number" placeholder="Stock" />
+                      <button type="button" onClick={() => removeSize(i)} disabled={sizes.length === 1} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white disabled:opacity-20"><Trash2 className="w-4 h-4"/></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-5">
                 <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 flex justify-between">
-                    <span>Product Slug</span>
-                    <span className="text-white/30 text-[10px]">Auto-generates if blank</span>
-                  </label>
-                  <input {...register('slug')} className="input-luxe py-3" placeholder="custom-product-url-slug" />
-                  {errors.slug && <p className="text-red-400 text-xs mt-1">{errors.slug.message}</p>}
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Selling Price (₹) *</label>
+                  <input {...register('price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3 text-lg font-medium text-luxe-accent" placeholder="499" />
+                  {errors.price && <p className="text-red-400 text-xs mt-1">{errors.price.message}</p>}
                 </div>
                 <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SEO Title</label>
-                  <input {...register('seo_title')} className="input-luxe py-3" placeholder="Optimized title for Google" />
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Original Price (₹)</label>
+                  <input {...register('original_price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="699" />
                 </div>
                 <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SEO Description</label>
-                  <textarea {...register('seo_description')} className="input-luxe py-3 resize-none" rows={3} placeholder="Meta description..." />
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Cost Price (Admin Only)</label>
+                  <input {...register('cost_price', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="200" />
                 </div>
                 <div>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Search Keywords / Tags</label>
-                  <input {...register('tags')} className="input-luxe py-3" placeholder="minimal, gold, trending (comma separated)" />
+                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Tax (%)</label>
+                  <input {...register('tax_percent', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="18" />
+                </div>
+                {price && cost ? (
+                  <div className="col-span-2 p-4 rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex justify-between items-center">
+                    <span className="text-white/70 text-sm">Estimated Profit Margin:</span>
+                    <span className="text-luxe-accent font-bold text-lg">₹{(price - cost).toFixed(2)}</span>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+
+          {/* INVENTORY & SHIPPING */}
+          <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'inventory' && 'hidden')}>
+            <div className="grid grid-cols-2 gap-5">
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Stock Quantity</label>
+                <input {...register('stock', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="50" />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Low Stock Alert</label>
+                <input {...register('low_stock_alert', { valueAsNumber: true })} type="number" min="0" className="input-luxe py-3" placeholder="5" />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Product Status</label>
+                <select {...register('status')} className="input-luxe py-3">
+                  <option value="active">Active</option>
+                  <option value="draft">Draft</option>
+                  <option value="out_of_stock">Out of Stock</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SKU (Auto-generates if blank)</label>
+                <input {...register('sku')} className="input-luxe py-3" placeholder="E.g. RNG-SLV-01" />
+              </div>
+              
+              <div className="col-span-2 border-t border-white/5 pt-4 mt-2"><h3 className="text-white/80 font-medium mb-4">Shipping Dimensions</h3></div>
+              
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Weight (grams)</label>
+                <input {...register('weight_grams', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="150" />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Courier Category</label>
+                <input {...register('courier_category')} className="input-luxe" placeholder="Small Packet" />
+              </div>
+              <div className="grid grid-cols-3 gap-2 col-span-2">
+                <div>
+                  <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Length (cm)</label>
+                  <input {...register('length_cm', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="10" />
+                </div>
+                <div>
+                  <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Width (cm)</label>
+                  <input {...register('width_cm', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="5" />
+                </div>
+                <div>
+                  <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Height (cm)</label>
+                  <input {...register('height_cm', { valueAsNumber: true })} type="number" className="input-luxe" placeholder="2" />
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/5">
-                {[
-                  { name: 'is_active', label: 'Product Active', desc: 'Visible in the store' },
-                  { name: 'is_featured', label: 'Featured Product', desc: 'Show in Hero sections' },
-                  { name: 'is_best_seller', label: 'Best Seller', desc: 'Add Best Seller badge' },
-                  { name: 'is_new_arrival', label: 'New Arrival', desc: 'Add New Arrival badge' },
-                  { name: 'is_trending', label: 'Trending', desc: 'Add Trending badge' },
-                  { name: 'is_limited_edition', label: 'Limited Edition', desc: 'Add Limited badge' },
-                ].map((flag) => (
-                  <label key={flag.name} className="flex items-start gap-3 p-4 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-white/30 transition-colors">
-                    <input type="checkbox" {...register(flag.name as any)} className="w-5 h-5 mt-0.5 accent-luxe-accent rounded bg-black border-white/20" />
-                    <div>
-                      <p className="text-white font-medium text-sm">{flag.label}</p>
-                      <p className="text-white/40 text-xs mt-0.5">{flag.desc}</p>
-                    </div>
-                  </label>
-                ))}
+              <div className="col-span-2 mt-4 space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" {...register('continue_selling_oos')} className="w-5 h-5 accent-luxe-accent rounded" />
+                  <span className="text-white/70 text-sm">Continue Selling When Out of Stock</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" {...register('is_free_shipping')} className="w-5 h-5 accent-luxe-accent rounded" />
+                  <span className="text-white/70 text-sm">Free Shipping</span>
+                </label>
               </div>
             </div>
-
           </div>
 
-          {/* Footer Actions */}
-          <div className="flex-shrink-0 flex items-center justify-between p-5 border-t border-white/10 bg-black/20">
-            {isSubmitted && Object.keys(errors).length > 0 ? (
-              <p className="text-red-400 text-sm font-medium">Please fix errors in previous tabs.</p>
-            ) : <div />}
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button type="button" onClick={onClose} className="btn-luxe-outline w-full sm:w-auto">Cancel</button>
-              <button type="submit" disabled={saving} className="btn-gold w-full sm:w-auto flex items-center gap-2">
-                {saving ? 'Saving...' : product ? 'Save Masterpiece' : 'Publish Product'} <ChevronRight className="w-4 h-4"/>
-              </button>
+          {/* DYNAMIC SPECS */}
+          <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'specs' && 'hidden')}>
+            {!selectedCategoryId ? (
+               <div className="h-full flex flex-col items-center justify-center text-center py-20 text-white/30"><Settings2 className="w-12 h-12 mb-4 opacity-50" /><p>Select a category first.</p></div>
+            ) : (
+              <>
+                <div className="bg-luxe-accent/10 border border-luxe-accent/20 p-4 rounded-xl mb-6">
+                  <p className="text-luxe-accent text-sm">Dynamic fields generated for <strong>{productType.toUpperCase()}</strong></p>
+                </div>
+                
+                {/* DYNAMIC UI RENDERER */}
+                <div className="grid grid-cols-2 gap-5 mb-6">
+                  {productType === 'poster' && (
+                    <>
+                      <div>
+                        <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Orientation</label>
+                        <select value={attributes['Orientation'] || ''} onChange={e => setAttr('Orientation', e.target.value)} className="input-luxe py-3">
+                          <option value="">Select...</option>
+                          <option value="Portrait">Portrait</option>
+                          <option value="Landscape">Landscape</option>
+                          <option value="Square">Square</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Paper Finish</label>
+                        <select value={attributes['Finish'] || ''} onChange={e => setAttr('Finish', e.target.value)} className="input-luxe py-3">
+                          <option value="">Select...</option>
+                          <option value="Matte">Matte</option>
+                          <option value="Glossy">Glossy</option>
+                        </select>
+                      </div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Frame Included</label><input className="input-luxe py-3" value={attributes['Frame'] || ''} onChange={e => setAttr('Frame', e.target.value)} placeholder="Yes / No" /></div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Print Technology</label><input className="input-luxe py-3" value={attributes['Technology'] || ''} onChange={e => setAttr('Technology', e.target.value)} placeholder="Giclée Print" /></div>
+                    </>
+                  )}
+
+                  {productType === 'earring' && (
+                    <>
+                      <div>
+                        <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Type</label>
+                        <select value={attributes['Type'] || ''} onChange={e => setAttr('Type', e.target.value)} className="input-luxe py-3">
+                          <option value="">Select...</option>
+                          <option value="Stud">Stud</option><option value="Hoop">Hoop</option><option value="Drop">Drop</option><option value="Dangle">Dangle</option><option value="Jhumka">Jhumka</option>
+                        </select>
+                      </div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Material</label><input className="input-luxe py-3" value={attributes['Material'] || ''} onChange={e => setAttr('Material', e.target.value)} placeholder="Sterling Silver" /></div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Closure Type</label><input className="input-luxe py-3" value={attributes['Closure'] || ''} onChange={e => setAttr('Closure', e.target.value)} placeholder="Push Back" /></div>
+                      <div>
+                        <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Hypoallergenic</label>
+                        <select value={attributes['Hypoallergenic'] || ''} onChange={e => setAttr('Hypoallergenic', e.target.value)} className="input-luxe py-3">
+                          <option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option>
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  {productType === 'hairband' && (
+                    <>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Material</label><input className="input-luxe py-3" value={attributes['Material'] || ''} onChange={e => setAttr('Material', e.target.value)} /></div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Width</label><input className="input-luxe py-3" value={attributes['Width'] || ''} onChange={e => setAttr('Width', e.target.value)} /></div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Stretchable</label><select value={attributes['Stretchable'] || ''} onChange={e => setAttr('Stretchable', e.target.value)} className="input-luxe py-3"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Pattern</label><input className="input-luxe py-3" value={attributes['Pattern'] || ''} onChange={e => setAttr('Pattern', e.target.value)} /></div>
+                    </>
+                  )}
+
+                  {productType === 'bracelet' && (
+                    <>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Material</label><input className="input-luxe py-3" value={attributes['Material'] || ''} onChange={e => setAttr('Material', e.target.value)} /></div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Adjustable</label><select value={attributes['Adjustable'] || ''} onChange={e => setAttr('Adjustable', e.target.value)} className="input-luxe py-3"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Charm Included</label><input className="input-luxe py-3" value={attributes['Charm'] || ''} onChange={e => setAttr('Charm', e.target.value)} /></div>
+                      <div><label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Unisex</label><select value={attributes['Unisex'] || ''} onChange={e => setAttr('Unisex', e.target.value)} className="input-luxe py-3"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    </>
+                  )}
+                </div>
+                
+                <div className="border-t border-white/10 pt-6">
+                  <h3 className="text-white font-medium mb-4">Custom Attributes Builder</h3>
+                  <p className="text-white/40 text-xs mb-4">Add any infinite combination of custom attributes below.</p>
+                  <AttributesEditor attributes={attributes} onChange={setAttributes} />
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* IMAGES TAB */}
+          <div className={cn("animate-in fade-in slide-in-from-bottom-2 h-full", activeTab !== 'images' && 'hidden')}>
+            <p className="text-white/50 text-sm mb-4">
+              Upload beautiful, high-quality images. Select the <Star className="inline w-4 h-4 text-luxe-accent"/> to choose the primary cover image.
+            </p>
+            <ImageUploader images={images} onChange={setImages} onDelete={handleImageDelete} maxImages={8} />
+          </div>
+
+          {/* SEO & MARKETING TAB */}
+          <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'marketing' && 'hidden')}>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 flex justify-between">
+                  <span>Product Slug</span>
+                  <span className="text-white/30 text-[10px]">Auto-generates if blank</span>
+                </label>
+                <input {...register('slug')} className="input-luxe py-3" placeholder="custom-product-url-slug" />
+                {errors.slug && <p className="text-red-400 text-xs mt-1">{errors.slug.message}</p>}
+              </div>
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SEO Title</label>
+                <input {...register('seo_title')} className="input-luxe py-3" placeholder="Optimized title for Google" />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">SEO Description</label>
+                <textarea {...register('seo_description')} className="input-luxe py-3 resize-none" rows={3} placeholder="Meta description..." />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Search Keywords / Tags</label>
+                <input {...register('tags')} className="input-luxe py-3" placeholder="minimal, gold, trending (comma separated)" />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/5">
+              {[
+                { name: 'is_active', label: 'Product Active', desc: 'Visible in the store' },
+                { name: 'is_featured', label: 'Featured Product', desc: 'Show in Hero sections' },
+                { name: 'is_best_seller', label: 'Best Seller', desc: 'Add Best Seller badge' },
+                { name: 'is_new_arrival', label: 'New Arrival', desc: 'Add New Arrival badge' },
+                { name: 'is_trending', label: 'Trending', desc: 'Add Trending badge' },
+                { name: 'is_limited_edition', label: 'Limited Edition', desc: 'Add Limited badge' },
+              ].map((flag) => (
+                <label key={flag.name} className="flex items-start gap-3 p-4 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-white/30 transition-colors">
+                  <input type="checkbox" {...register(flag.name as any)} className="w-5 h-5 mt-0.5 accent-luxe-accent rounded bg-black border-white/20" />
+                  <div>
+                    <p className="text-white font-medium text-sm">{flag.label}</p>
+                    <p className="text-white/40 text-xs mt-0.5">{flag.desc}</p>
+                  </div>
+                </label>
+              ))}
             </div>
           </div>
-        </form>
 
-      </div>
+        </div>
+
+        {/* Footer Actions (Row 4) */}
+        <div className="flex items-center justify-between p-5 border-t border-white/10 bg-black/20">
+          {isSubmitted && Object.keys(errors).length > 0 ? (
+            <p className="text-red-400 text-sm font-medium">Please fix errors in previous tabs.</p>
+          ) : <div />}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button type="button" onClick={onClose} className="btn-luxe-outline w-full sm:w-auto">Cancel</button>
+            <button type="submit" disabled={saving} className="btn-gold w-full sm:w-auto flex items-center gap-2">
+              {saving ? 'Saving...' : product ? 'Save Masterpiece' : 'Publish Product'} <ChevronRight className="w-4 h-4"/>
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
+  );
+}v>
   );
 }
