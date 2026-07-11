@@ -89,10 +89,8 @@ export function useNotifications(): NotificationsState {
               {/* Animated background gradient */}
               <div className="absolute inset-0 bg-gradient-to-br from-luxe-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               
-              <div className="relative shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[#111] to-[#222] border border-luxe-accent/30 flex items-center justify-center overflow-hidden">
-                <div className="flex items-center justify-center font-bold font-serif text-lg border-[2px] border-luxe-accent text-luxe-accent rounded-md drop-shadow-[0_0_10px_rgba(200,169,110,0.5)] leading-none" style={{ width: '2rem', height: '2rem' }}>
-                  JD
-                </div>
+              <div className="relative shrink-0 w-12 h-12 rounded-xl border border-luxe-accent/30 flex items-center justify-center overflow-hidden">
+                <img src="/icon-192x192.png" alt="JD Store" className="w-12 h-12 rounded-xl object-cover" />
                 <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-[#18181b] rounded-full animate-pulse" />
               </div>
               
