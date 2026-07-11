@@ -49,6 +49,7 @@ self.addEventListener('push', function (event) {
       const options = {
         body: data.body,
         icon: data.icon || '/icon-192x192.png',
+        badge: '/badge-96x96.png',
         image: data.image,
         vibrate: [200, 100, 200, 100, 200, 100, 200],
         requireInteraction: true, // Keep it visible until the user interacts
