@@ -54,14 +54,19 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
   const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const isSavingRef = useRef(false);
+
   // Auto-Save Hook (15s debounce)
   const saveAction = async (data: ProductFormData) => {
+    if (isSavingRef.current) return null;
+    
     try {
       if (!data.name || !data.category_id || !data.product_type) {
         // Don't throw for auto-save, just gracefully exit until they fill it out
         console.warn('Skipping save: Name, Category, and Product Type are required.');
         return null;
       }
+      isSavingRef.current = true;
       
       const slug = data.slug || (generateSlug(data.name) + '-' + Math.random().toString(36).substring(2, 6));
 
@@ -87,7 +92,13 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         seo_title: data.seo_title,
         seo_description: data.seo_description,
         seo_keywords: data.seo_keywords,
-        attributes: data.attributes,
+        attributes: {
+          ...(data.attributes || {}),
+          _v2_variants: {
+            options: data.variant_options,
+            combinations: data.variant_combinations
+          }
+        },
         updated_at: new Date().toISOString(),
       };
 
@@ -175,6 +186,8 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       console.error('Save failed', err);
       toast.error(err.message || 'Failed to save product');
       throw err;
+    } finally {
+      isSavingRef.current = false;
     }
   };
   const { isSaving, lastSavedTime, hasUnsavedChanges } = useAutoSave(formData, saveAction, 15000);

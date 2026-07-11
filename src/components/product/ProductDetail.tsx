@@ -570,7 +570,9 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                             <p className="text-white text-sm font-medium">{product.weight_grams}g</p>
                           </div>
                         )}
-                        {product.attributes && Object.entries(product.attributes).map(([key, value]) => (
+                        {product.attributes && Object.entries(product.attributes)
+                          .filter(([key]) => key !== '_v2_variants')
+                          .map(([key, value]) => (
                           <div key={key} className="glass-card-sm p-3">
                             <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">{key}</p>
                             <p className="text-white text-sm font-medium">{value as React.ReactNode}</p>

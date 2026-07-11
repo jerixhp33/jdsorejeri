@@ -326,9 +326,7 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
             seo_title: editProduct.seo_title || '',
             seo_description: editProduct.seo_description || '',
             seo_keywords: editProduct.seo_keywords || '',
-            attributes: editProduct.attributes || {},
-            variant_options: [],
-            variant_combinations: (editProduct.sizes || []).map(s => ({
+            variant_combinations: (editProduct.attributes as any)?._v2_variants?.combinations || (editProduct.sizes || []).map(s => ({
               id: s.id,
               options: { Size: s.label },
               price: s.price,
@@ -336,6 +334,17 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
               sku: s.sku,
               is_active: s.is_active
             })),
+            variant_options: (editProduct.attributes as any)?._v2_variants?.options || ((editProduct.sizes && editProduct.sizes.length > 0) ? [{
+              id: '1',
+              name: 'Size',
+              values: editProduct.sizes.map(s => s.label)
+            }] : []),
+            attributes: (() => {
+              // Strip out internal v2 variants from attributes shown to user
+              if (!editProduct.attributes) return {};
+              const { _v2_variants, ...rest } = editProduct.attributes as any;
+              return rest;
+            })(),
             images: editProduct.images || []
           } : null}
           onClose={() => { setShowV2(false); setEditProduct(null); }}
