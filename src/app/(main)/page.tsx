@@ -147,5 +147,5 @@ async function FAQData() {
 async function TrendingData() {
   const supabase = await createClient();
   const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_trending', true).order('created_at', { ascending: false }).limit(4);
-  return <BestSellers products={data || []} title="Trending Products" subtitle="Hot Right Now" />;
+  return <BestSellers products={data || []} title="Trending Products" subtitle="Hot Right Now" viewAllLink="/trending" />;
 }

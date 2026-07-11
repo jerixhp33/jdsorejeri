@@ -10,9 +10,10 @@ interface BestSellersProps {
   products: Product[];
   title?: string;
   subtitle?: string;
+  viewAllLink?: string;
 }
 
-export function BestSellers({ products, title = "Best Sellers", subtitle = "Trending Now" }: BestSellersProps) {
+export function BestSellers({ products, title = "Best Sellers", subtitle = "Trending Now", viewAllLink = "/best-sellers" }: BestSellersProps) {
   if (!products.length) return null;
 
   return (
@@ -44,7 +45,7 @@ export function BestSellers({ products, title = "Best Sellers", subtitle = "Tren
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <Link prefetch={true} href="/best-sellers"
+            <Link prefetch={true} href={viewAllLink}
               className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors group"
             >
               View all products
