@@ -76,19 +76,21 @@ export function useNotifications(): NotificationsState {
         (payload) => {
           const newNotif = payload.new as Notification;
           setNotifications((prev) => [newNotif, ...prev]);
-          
+          // Play a "pop" notification sound
+          try {
+            const audio = new Audio('https://actions.google.com/sounds/v1/water/single_drop.ogg');
+            audio.volume = 0.6;
+            audio.play().catch(e => console.log('Audio autoplay prevented'));
+          } catch (e) {}
+
           // Trigger a beautiful custom toast
           toast.custom((t) => (
             <div className="flex items-start gap-4 p-4 glass-card bg-[#18181b]/95 backdrop-blur-2xl border border-luxe-accent/20 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.5)] relative overflow-hidden group w-[350px] sm:w-[400px]">
               {/* Animated background gradient */}
               <div className="absolute inset-0 bg-gradient-to-br from-luxe-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               
-              <div className="relative shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-luxe-accent/20 to-luxe-accent/5 border border-luxe-accent/30 flex items-center justify-center">
-                {newNotif.type === 'order' ? (
-                  <Package className="w-6 h-6 text-luxe-accent drop-shadow-[0_0_10px_rgba(200,169,110,0.5)]" />
-                ) : (
-                  <BellRing className="w-6 h-6 text-luxe-accent drop-shadow-[0_0_10px_rgba(200,169,110,0.5)]" />
-                )}
+              <div className="relative shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[#111] to-[#222] border border-luxe-accent/30 flex items-center justify-center overflow-hidden">
+                <img src="/icon-192x192.png" alt="JD Store" className="w-8 h-8 object-contain drop-shadow-[0_0_10px_rgba(200,169,110,0.5)]" />
                 <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-[#18181b] rounded-full animate-pulse" />
               </div>
               

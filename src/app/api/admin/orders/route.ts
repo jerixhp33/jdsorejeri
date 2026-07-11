@@ -143,10 +143,10 @@ export async function PATCH(req: NextRequest) {
       
       let msg = '';
       if (updates.payment_status === 'paid') {
-        msg = `Great news! The payment for your order #${data.order_number} has been received successfully.`;
+        msg = `Hey ${customerName}, 🎉 great news! The payment for your order #${data.order_number} has been received successfully.`;
       } else if (updates.status) {
         const statusText = updates.status.replace(/_/g, ' ');
-        msg = `Your order #${data.order_number} status is now ${statusText}.`;
+        msg = `Hey ${customerName}, 📦 your order #${data.order_number} status is now ${statusText}.`;
       }
 
       // In-App Notification
@@ -211,7 +211,11 @@ export async function PATCH(req: NextRequest) {
 
     // 2. Add In-App Notification (Web Toast)
     if (data.user_id) {
-      const msg = `Your order #${data.order_number} has been ${updates.status === 'out_for_delivery' ? 'out for delivery' : 'shipped'} via ${tracking_data.provider}. AWB: ${tracking_data.tracking_number}`;
+      const { data: addressData } = await admin.from('delivery_addresses').select('full_name').eq('id', data.delivery_address_id).single();
+      const { data: profile } = await admin.from('user_profiles').select('name').eq('id', data.user_id).single();
+      const customerName = addressData?.full_name?.split(' ')[0] || profile?.name?.split(' ')[0] || 'Customer';
+      
+      const msg = `Hey ${customerName}, 🚚 your order #${data.order_number} has been ${updates.status === 'out_for_delivery' ? 'out for delivery' : 'shipped'} via ${tracking_data.provider}. AWB: ${tracking_data.tracking_number}`;
       await admin.from('notifications').insert({ 
         user_id: data.user_id, 
         title: `Order #${data.order_number} Dispatched`, 

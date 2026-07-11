@@ -73,9 +73,9 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
         <div className="absolute top-0 left-0 right-0 h-2 bg-black"></div>
 
         {/* Invoice Header */}
-        <div className="flex justify-between items-start border-b border-gray-200 pb-8 mb-8 mt-2">
+        <div className="flex flex-col sm:flex-row justify-between items-start border-b border-gray-200 pb-8 mb-8 mt-2 gap-6 sm:gap-0 print:flex-row">
           <div>
-            <h1 className="text-5xl font-serif font-black text-black tracking-tighter uppercase mb-4">Invoice</h1>
+            <h1 className="text-4xl sm:text-5xl font-serif font-black text-black tracking-tighter uppercase mb-4">Invoice</h1>
             <div className="space-y-1">
               <p className="text-sm font-medium text-gray-800">Order #{order.order_number}</p>
               <p className="text-sm text-gray-500">Date: {formatDate(order.created_at)}</p>
@@ -84,8 +84,8 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
               )}
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-3xl font-serif font-black tracking-tighter uppercase mb-2">JD Store</div>
+          <div className="text-left sm:text-right print:text-right">
+            <div className="text-2xl sm:text-3xl font-serif font-black tracking-tighter uppercase mb-2">JD Store</div>
             <div className="space-y-1 text-sm text-gray-600">
               <p>No 6, Sathivel Nagar</p>
               <p>Thiruverkadu, Chennai-77</p>
@@ -95,7 +95,7 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
         </div>
 
         {/* Addresses */}
-        <div className="grid grid-cols-2 gap-12 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 mb-10 print:grid-cols-2">
           <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 border-b border-gray-200 pb-2">Billed To</h3>
             <p className="font-bold text-lg text-gray-900 mb-1">{order.delivery_address?.full_name}</p>
