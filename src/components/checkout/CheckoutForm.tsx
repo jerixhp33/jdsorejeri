@@ -287,6 +287,12 @@ export function CheckoutForm() {
           delivery_notes: data.delivery_notes || null,
           delivery_instructions: data.delivery_instructions || null,
           whatsapp_sent: false,
+          // V2 Domain Columns
+          grand_total: finalTotal,
+          shipping_cost: deliveryCharge,
+          tax: 0,
+          payment_status: 'pending',
+          fulfillment_status: 'unfulfilled',
         })
         .select().single();
       if (orderErr) throw orderErr;

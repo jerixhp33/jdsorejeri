@@ -2,14 +2,25 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, Printer, Truck, FileText, User, CreditCard, Clock, CheckCircle, Package } from 'lucide-react';
-import { formatCurrency, formatDate, cn } from '@/lib/utils';
+import { ChevronLeft, Printer, FileText, User, CreditCard } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { Order, OrderStatus, PaymentStatus, FulfillmentStatus } from '@/types';
+import type { Order, OrderStatus } from '@/types';
+
+import {
+  OrderStatusBadge,
+  PaymentStatusBadge,
+  OrderTimeline,
+  PriceSummary,
+  OrderItemRow,
+  AddressCard,
+  ShippingCard,
+} from '@/components/shared/orders';
 
 export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
   const [order, setOrder] = useState(initialOrder);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [adminNotes, setAdminNotes] = useState(order.admin_internal_notes || order.admin_notes || '');
 
   const handlePrint = () => {
     window.print();
@@ -26,9 +37,32 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
       if (res.ok) {
         setOrder({ ...order, status: newStatus });
         toast.success(`Order marked as ${newStatus}`);
+      } else {
+        toast.error('Failed to update status');
       }
     } catch (err) {
       toast.error('Failed to update status');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const saveAdminNotes = async () => {
+    setIsUpdating(true);
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        // Fallback to legacy admin_notes column for now if the new one doesn't exist
+        body: JSON.stringify({ id: order.id, admin_notes: adminNotes, updated_at: new Date().toISOString() }),
+      });
+      if (res.ok) {
+        toast.success('Notes saved successfully');
+      } else {
+        toast.error('Failed to save notes');
+      }
+    } catch (err) {
+      toast.error('Failed to save notes');
     } finally {
       setIsUpdating(false);
     }
@@ -45,15 +79,8 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="font-display text-2xl font-bold text-white">Order #{order.order_number}</h1>
-              <span className={cn('status-' + order.status, 'text-xs')}>{order.status}</span>
-              <span className={cn(
-                "px-2 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider",
-                (order.payment_status || 'pending') === 'paid' ? "bg-emerald-500/10 text-emerald-400" :
-                (order.payment_status || 'pending') === 'pending' ? "bg-amber-500/10 text-amber-400" :
-                "bg-red-500/10 text-red-400"
-              )}>
-                {order.payment_status || 'Pending'}
-              </span>
+              <OrderStatusBadge status={order.status} />
+              <PaymentStatusBadge status={order.payment_status || 'pending'} />
             </div>
             <p className="text-white/50 text-sm mt-1">{formatDate(order.created_at)}</p>
           </div>
@@ -71,14 +98,23 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
             </button>
           )}
           {order.status === 'confirmed' && (
+            <button onClick={() => updateStatus('processing')} disabled={isUpdating} className="btn-primary">
+              Mark Processing
+            </button>
+          )}
+          {order.status === 'processing' && (
             <button onClick={() => updateStatus('packed')} disabled={isUpdating} className="btn-primary">
-              Mark as Packed
+              Mark Packed
             </button>
           )}
           {order.status === 'packed' && (
-            <button onClick={() => updateStatus('shipped')} disabled={isUpdating} className="btn-primary flex items-center gap-2">
-              <Truck className="w-4 h-4" />
-              <span>Ship Order</span>
+            <button onClick={() => updateStatus('label_generated')} disabled={isUpdating} className="btn-primary">
+              Generate Label
+            </button>
+          )}
+          {order.status === 'label_generated' && (
+            <button onClick={() => updateStatus('shipped')} disabled={isUpdating} className="btn-primary">
+              Ship Order
             </button>
           )}
         </div>
@@ -91,76 +127,21 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
           
           {/* Products Panel */}
           <div className="glass-card overflow-hidden print-hide-glass">
-            <div className="p-4 border-b border-white/10 bg-white/[0.02]">
+            <div className="p-4 border-b border-zinc-800 bg-white/[0.02]">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <Package className="w-5 h-5 text-luxe-accent" />
                 Products ({order.items?.length || 0})
               </h2>
             </div>
-            <div className="p-0">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-white/5 bg-white/[0.01]">
-                    <th className="px-4 py-3 text-white/40 text-xs uppercase tracking-wider font-medium">Item</th>
-                    <th className="px-4 py-3 text-white/40 text-xs uppercase tracking-wider font-medium text-center">Qty</th>
-                    <th className="px-4 py-3 text-white/40 text-xs uppercase tracking-wider font-medium text-right">Price</th>
-                    <th className="px-4 py-3 text-white/40 text-xs uppercase tracking-wider font-medium text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {order.items?.map((item: any, idx: number) => (
-                    <tr key={idx} className="hover:bg-white/[0.02]">
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 rounded-lg bg-luxe-dark border border-white/10 overflow-hidden flex-shrink-0">
-                            {item.product?.images?.[0]?.url && (
-                              <img src={item.product.images[0].url} alt="" className="w-full h-full object-cover" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-white">{item.product?.name || 'Unknown Item'}</p>
-                            {item.poster_size?.label && (
-                              <p className="text-sm text-white/50 mt-1">Variant: {item.poster_size.label}</p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-center text-white">{item.quantity}</td>
-                      <td className="px-4 py-4 text-right text-white/70">{formatCurrency(item.unit_price)}</td>
-                      <td className="px-4 py-4 text-right font-semibold text-white">{formatCurrency(item.total_price)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* Totals */}
-              <div className="p-4 bg-white/[0.01] flex justify-end">
-                <div className="w-64 space-y-3">
-                  <div className="flex justify-between text-sm text-white/70">
-                    <span>Subtotal</span>
-                    <span>{formatCurrency(order.subtotal || 0)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-white/70">
-                    <span>Shipping</span>
-                    <span>{order.shipping_cost || order.delivery_charge === 0 ? 'FREE' : formatCurrency(order.shipping_cost || order.delivery_charge)}</span>
-                  </div>
-                  {(order.tax || 0) > 0 && (
-                    <div className="flex justify-between text-sm text-white/70">
-                      <span>Tax</span>
-                      <span>{formatCurrency(order.tax || 0)}</span>
-                    </div>
-                  )}
-                  {(order.discount_amount || 0) > 0 && (
-                    <div className="flex justify-between text-sm text-emerald-400 font-medium">
-                      <span>Discount {order.coupon_code && `(${order.coupon_code})`}</span>
-                      <span>-{formatCurrency(order.discount_amount || 0)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-base font-bold text-white pt-3 border-t border-white/10 mt-3">
-                    <span>Grand Total</span>
-                    <span>{formatCurrency(order.grand_total || order.total || 0)}</span>
-                  </div>
-                </div>
+            <div className="p-4 space-y-2 divide-y divide-zinc-800/50">
+              {order.items?.map((item: any, idx: number) => (
+                <OrderItemRow key={idx} item={item} />
+              ))}
+            </div>
+            
+            {/* Totals */}
+            <div className="p-6 border-t border-zinc-800 bg-white/[0.01] flex justify-end">
+              <div className="w-64">
+                <PriceSummary order={order} />
               </div>
             </div>
           </div>
@@ -178,47 +159,32 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
                     <div key={i} className="bg-white/5 rounded-lg p-3 border border-white/10">
                       <div className="flex justify-between mb-2">
                         <span className="text-white text-sm font-medium capitalize">{p.provider.replace('_', ' ')}</span>
-                        <span className={cn(
-                          "px-2 py-0.5 rounded text-[10px] uppercase font-bold",
-                          p.status === 'paid' ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
-                        )}>{p.status}</span>
+                        <PaymentStatusBadge status={p.status} />
                       </div>
                       <p className="text-white/50 text-xs">Txn: {p.transaction_id || 'N/A'}</p>
-                      <p className="text-white/50 text-xs mt-1">Amount: {formatCurrency(p.amount)}</p>
+                      <p className="text-white/50 text-xs mt-1">Amount: {p.amount}</p>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-white/50 text-sm">
                   <p>Method: Online Payment</p>
-                  <p className="mt-1">Status: {order.payment_status}</p>
+                  <p className="mt-2"><PaymentStatusBadge status={order.payment_status || 'pending'} /></p>
                 </div>
               )}
             </div>
 
             <div className="glass-card p-6 border border-white/10">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-                <Truck className="w-5 h-5 text-white/50" />
-                Shipping Details
-              </h2>
               {order.shipments && order.shipments.length > 0 ? (
                 <div className="space-y-4">
                   {order.shipments.map((s, i) => (
-                    <div key={i} className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <div className="flex justify-between mb-2">
-                        <span className="text-white text-sm font-medium capitalize">{s.provider.replace('_', ' ')}</span>
-                        <span className="text-luxe-accent text-xs font-semibold">{s.status.replace(/_/g, ' ')}</span>
-                      </div>
-                      <p className="text-white/50 text-xs">AWB: {s.tracking_number || 'Pending'}</p>
-                      {s.tracking_url && (
-                        <a href={s.tracking_url} target="_blank" rel="noreferrer" className="text-blue-400 text-xs hover:underline mt-1 inline-block">Track Package</a>
-                      )}
-                    </div>
+                    <ShippingCard key={i} shipment={s as any} />
                   ))}
                 </div>
               ) : (
                 <div className="text-white/50 text-sm">
-                  <p>Fulfillment: {order.fulfillment_status}</p>
+                  <h2 className="text-lg font-semibold text-white mb-4">Fulfillment</h2>
+                  <p>Status: {order.fulfillment_status}</p>
                   <p className="mt-1 text-xs">No active shipments yet.</p>
                 </div>
               )}
@@ -240,15 +206,11 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
               <div>
                 <p className="text-white font-medium">{(order.delivery_address as any)?.full_name || (order.user as any)?.name}</p>
                 <p className="text-white/50 text-sm mt-1">{(order.user as any)?.email || 'Guest Checkout'}</p>
-                <p className="text-white/50 text-sm">{(order.delivery_address as any)?.phone || (order.user as any)?.phone}</p>
               </div>
               <div className="pt-4 border-t border-white/10">
-                <p className="text-white/50 text-xs uppercase tracking-wider mb-2">Shipping Address</p>
-                <p className="text-white/80 text-sm leading-relaxed">
-                  {[(order.delivery_address as any)?.house_no, (order.delivery_address as any)?.street, (order.delivery_address as any)?.area].filter(Boolean).join(', ')}<br />
-                  {[(order.delivery_address as any)?.city, (order.delivery_address as any)?.district].filter(Boolean).join(', ')} - {(order.delivery_address as any)?.pincode}<br />
-                  {(order.delivery_address as any)?.state}, {(order.delivery_address as any)?.country || 'India'}
-                </p>
+                {order.delivery_address && (
+                   <AddressCard address={order.delivery_address as any} title="Shipping Address" className="border-none bg-transparent p-0" />
+                )}
               </div>
               {order.delivery_instructions && (
                 <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
@@ -268,10 +230,11 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
             <textarea 
               className="input-luxe w-full h-24 text-sm resize-none"
               placeholder="Add internal notes about this order..."
-              defaultValue={order.admin_internal_notes || order.admin_notes || ''}
+              value={adminNotes}
+              onChange={(e) => setAdminNotes(e.target.value)}
             ></textarea>
             <div className="flex justify-end mt-2">
-              <button className="px-3 py-1.5 text-xs font-medium bg-white/10 text-white rounded hover:bg-white/20 transition-all">
+              <button onClick={saveAdminNotes} disabled={isUpdating} className="px-3 py-1.5 text-xs font-medium bg-white/10 text-white rounded hover:bg-white/20 transition-all">
                 Save Notes
               </button>
             </div>
@@ -279,47 +242,13 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
 
           {/* Timeline Panel */}
           <div className="glass-card p-6 border border-white/10">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-6">
-              <Clock className="w-5 h-5 text-white/50" />
-              Order Timeline
-            </h2>
-            
-            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px md:before:ml-[11px] before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/10 before:to-transparent">
-              {order.events && order.events.length > 0 ? (
-                order.events.map((event, i) => (
-                  <div key={event.id} className="relative flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="relative z-10 w-6 h-6 rounded-full bg-luxe-dark border-2 border-luxe-accent flex items-center justify-center shrink-0 mt-0.5">
-                        <CheckCircle className="w-3 h-3 text-luxe-accent" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-white">{event.title}</h4>
-                        {event.description && <p className="text-xs text-white/50 mt-1">{event.description}</p>}
-                        <p className="text-[10px] text-white/30 uppercase mt-1">{event.actor_type}</p>
-                      </div>
-                    </div>
-                    <div className="text-right whitespace-nowrap">
-                      <span className="text-xs text-white/50 block">{new Date(event.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      <span className="text-[10px] text-white/30">{new Date(event.created_at).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="relative flex items-start gap-4">
-                   <div className="relative z-10 w-6 h-6 rounded-full bg-luxe-dark border-2 border-white/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <Clock className="w-3 h-3 text-white/50" />
-                   </div>
-                   <div>
-                     <h4 className="text-sm font-semibold text-white">Order Created</h4>
-                     <p className="text-[10px] text-white/30 uppercase mt-1">System</p>
-                   </div>
-                   <div className="text-right whitespace-nowrap ml-auto">
-                      <span className="text-xs text-white/50 block">{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      <span className="text-[10px] text-white/30">{new Date(order.created_at).toLocaleDateString()}</span>
-                   </div>
-                </div>
-              )}
-            </div>
+            <h2 className="text-lg font-semibold text-white mb-6">Order Timeline</h2>
+            <OrderTimeline 
+              currentStatus={order.status}
+              events={order.events}
+              createdAt={order.created_at}
+              updatedAt={(order as any).updated_at || order.created_at}
+            />
           </div>
 
         </div>

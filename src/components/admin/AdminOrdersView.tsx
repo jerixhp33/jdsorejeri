@@ -5,26 +5,18 @@ import Link from 'next/link';
 import { Search, ChevronRight, Download, Package, Truck, CheckCircle, Clock } from 'lucide-react';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { ORDER_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from '@/lib/orders';
+import { OrderStatusBadge, PaymentStatusBadge } from '@/components/shared/orders';
 import type { Order, OrderStatus, PaymentStatus } from '@/types';
 
-const STATUSES: { value: OrderStatus | 'all'; label: string }[] = [
+const STATUSES = [
   { value: 'all', label: 'All Orders' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'confirmed', label: 'Confirmed' },
-  { value: 'packed', label: 'Packed' },
-  { value: 'shipped', label: 'Shipped' },
-  { value: 'out_for_delivery', label: 'Out for Delivery' },
-  { value: 'delivered', label: 'Delivered' },
-  { value: 'cancelled', label: 'Cancelled' },
-  { value: 'returned', label: 'Returned' },
+  ...Object.entries(ORDER_STATUS_CONFIG).map(([k, v]) => ({ value: k as OrderStatus, label: v.label }))
 ];
 
-const PAYMENT_STATUSES: { value: PaymentStatus | 'all'; label: string }[] = [
+const PAYMENT_STATUSES = [
   { value: 'all', label: 'All Payments' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'paid', label: 'Paid' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'refunded', label: 'Refunded' },
+  ...Object.entries(PAYMENT_STATUS_CONFIG).map(([k, v]) => ({ value: k as PaymentStatus, label: v.label }))
 ];
 
 export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
@@ -316,20 +308,13 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                       <p className="text-white/40 text-xs mt-0.5">{(order.delivery_address as any)?.phone || (order.user as any)?.phone || (order.user as any)?.email}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <span className={cn(
-                        "px-2 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider",
-                        (order.payment_status || 'pending') === 'paid' ? "bg-emerald-500/10 text-emerald-400" :
-                        (order.payment_status || 'pending') === 'pending' ? "bg-amber-500/10 text-amber-400" :
-                        "bg-red-500/10 text-red-400"
-                      )}>
-                        {order.payment_status || 'Pending'}
-                      </span>
+                      <PaymentStatusBadge status={order.payment_status || 'pending'} />
                     </td>
                     <td className="px-4 py-4">
                       <p className="text-white font-semibold text-sm">{formatCurrency(order.grand_total || order.total || 0)}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <span className={cn('status-' + order.status, 'text-xs')}>{order.status}</span>
+                      <OrderStatusBadge status={order.status} />
                     </td>
                     <td className="px-4 py-4 text-right">
                       <Link 

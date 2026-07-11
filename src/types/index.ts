@@ -4,7 +4,7 @@
 
 export type UserRole = 'user' | 'admin' | 'super_admin';
 export type ProductType = 'poster' | 'earring' | 'hairband' | 'bracelet' | 'keychain' | 'hair_clip' | 'other';
-export type OrderStatus = 'pending' | 'confirmed' | 'packed' | 'shipped' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'returned' | 'refund_requested' | 'refunded';
+export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'packed' | 'label_generated' | 'shipped' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'return_requested' | 'returned' | 'refund_requested' | 'refunded';
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'partially_refunded' | 'refunded';
 export type FulfillmentStatus = 'unfulfilled' | 'processing' | 'packed' | 'shipped' | 'delivered';
 export type PosterOrientation = 'portrait' | 'landscape' | 'square';

@@ -1,31 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Package, MessageCircle, ChevronDown, ChevronUp, Search, RotateCcw, Download } from 'lucide-react';
+import { Package, Search, ChevronDown, ChevronUp, RotateCcw, Download } from 'lucide-react';
 import { formatDate, formatCurrency, cn } from '@/lib/utils';
 import type { Order } from '@/types';
 import { toast } from 'sonner';
 import { useCart } from '@/hooks/useCart';
 
+import {
+  OrderStatusBadge,
+  OrderTimeline,
+  PriceSummary,
+  OrderItemRow,
+  AddressCard,
+  TrackingProgress
+} from '@/components/shared/orders';
+
 interface OrdersListProps {
   orders: Order[];
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'Pending',
-  confirmed: 'Confirmed',
-  packed: 'Packed',
-  ready: 'Out for Delivery',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
-};
-
 export function OrdersList({ orders }: OrdersListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [expandedTrackingId, setExpandedTrackingId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'past'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -37,7 +35,7 @@ export function OrdersList({ orders }: OrdersListProps) {
     setAddingItem(item.id);
     await addItem(
       item.product_id,
-      item.total_price / item.quantity,
+      item.unit_price ?? item.price_at_time, // Fallback for old records
       1,
       item.poster_size_id
     );
@@ -47,7 +45,8 @@ export function OrdersList({ orders }: OrdersListProps) {
   };
 
   const handleDownloadInvoice = (order: Order) => {
-    const text = `INVOICE - Order #${order.order_number}\nDate: ${formatDate(order.created_at)}\nStatus: ${order.status.toUpperCase()}\n\nItems:\n${order.items?.map(i => `- ${i.product?.name} (Qty: ${i.quantity}) - ${formatCurrency(i.total_price)}`).join('\n')}\n\nSubtotal: ${formatCurrency(order.subtotal)}\nDelivery: ${formatCurrency(order.delivery_charge)}\nTotal: ${formatCurrency(order.total)}\n\nShipping To:\n${order.delivery_address?.full_name}\n${order.delivery_address?.house_no}, ${order.delivery_address?.street}\n${order.delivery_address?.city}, ${order.delivery_address?.district} - ${order.delivery_address?.pincode}\n`;
+    // Basic fallback invoice generation
+    const text = `INVOICE - Order #${order.order_number}\nDate: ${formatDate(order.created_at)}\nStatus: ${order.status.toUpperCase()}\n\n`;
     const blob = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -58,16 +57,6 @@ export function OrdersList({ orders }: OrdersListProps) {
     toast.success('Invoice downloaded');
   };
 
-  const getTimelineSteps = (status: string, courierName?: string, trackingNumber?: string) => {
-    return [
-      { label: 'Order Placed', desc: 'We have received your order.', active: true },
-      { label: 'Confirmed', desc: 'Your order has been verified and confirmed.', active: ['confirmed', 'packed', 'ready', 'delivered'].includes(status) },
-      { label: 'Packed', desc: 'Your package has been prepared and boxed.', active: ['packed', 'ready', 'delivered'].includes(status) },
-      { label: 'Dispatched', desc: courierName ? `Shipped via ${courierName}` : 'Handed over to courier.', active: ['ready', 'delivered'].includes(status) },
-      { label: 'Delivered', desc: 'Package successfully delivered.', active: status === 'delivered' },
-    ];
-  };
-
   const filteredOrders = orders.filter((order) => {
     const query = searchQuery.toLowerCase();
     const matchesSearch = 
@@ -75,10 +64,10 @@ export function OrdersList({ orders }: OrdersListProps) {
       order.items?.some((item: any) => item.product?.name?.toLowerCase().includes(query));
       
     if (filterStatus === 'active') {
-      return ['pending', 'confirmed', 'packed', 'ready'].includes(order.status) && matchesSearch;
+      return ['pending', 'confirmed', 'processing', 'packed', 'label_generated', 'shipped', 'out_for_delivery'].includes(order.status) && matchesSearch;
     }
     if (filterStatus === 'past') {
-      return ['delivered', 'cancelled'].includes(order.status) && matchesSearch;
+      return ['delivered', 'cancelled', 'return_requested', 'returned', 'refund_requested', 'refunded'].includes(order.status) && matchesSearch;
     }
     return matchesSearch;
   });
@@ -144,11 +133,14 @@ export function OrdersList({ orders }: OrdersListProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
-          className="glass-card overflow-hidden"
+          className="glass-card overflow-hidden flex flex-col"
         >
-          {/* Order header */}
+          {/* Progress Bar Header */}
+          <TrackingProgress status={order.status} className="px-5 pt-5 mb-2" />
+
+          {/* Order Header */}
           <div
-            className="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition-colors gap-2"
+            className="p-4 sm:px-5 pb-5 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition-colors gap-2"
             onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
           >
             <div className="flex items-center gap-2 sm:gap-4">
@@ -161,10 +153,10 @@ export function OrdersList({ orders }: OrdersListProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-              <span className={cn('status-' + order.status, 'text-[10px] sm:text-xs')}>{STATUS_LABELS[order.status]}</span>
+            <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+              <OrderStatusBadge status={order.status} />
               <p className="text-white font-semibold text-sm hidden sm:block">
-                {formatCurrency(order.total)}
+                {formatCurrency(order.grand_total ?? order.total ?? 0)}
               </p>
               {expandedId === order.id ? (
                 <ChevronUp className="w-4 h-4 text-white/40" />
@@ -176,185 +168,64 @@ export function OrdersList({ orders }: OrdersListProps) {
 
           {/* Expanded details */}
           {expandedId === order.id && (
-            <div className="border-t border-white/10 p-4 sm:p-5 space-y-5">
-              {/* Items */}
-              <div>
-                <p className="text-white/50 text-xs uppercase tracking-wide mb-3">Items</p>
-                <div className="space-y-3">
-                  {order.items?.map((item) => {
-                    const img = (item.product?.images as any[])?.find((i: any) => i.is_primary) ||
-                      (item.product?.images as any[])?.[0];
-                    return (
-                      <div key={item.id} className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-luxe-dark flex-shrink-0">
-                          {img && (
-                            <Image src={img.url} alt={item.product?.name || ''} width={48} height={48} className="object-cover w-full h-full" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm truncate">{item.product?.name}</p>
-                          <p className="text-white/40 text-xs">
-                            {(item.poster_size as any)?.label && `${(item.poster_size as any).label} · `}
-                            Qty: {item.quantity}
-                          </p>
-                        </div>
-                        <div className="flex flex-col items-end gap-2 shrink-0">
-                          <p className="text-white text-sm font-medium">
-                            {formatCurrency(item.total_price)}
-                          </p>
+            <div className="border-t border-zinc-800 bg-zinc-950/50 p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              <div className="lg:col-span-2 space-y-8">
+                {/* Items */}
+                <div>
+                  <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Items Ordered</h3>
+                  <div className="space-y-2 divide-y divide-zinc-800/50 border border-zinc-800/50 rounded-xl p-2 bg-zinc-900/30">
+                    {order.items?.map((item) => (
+                      <div key={item.id} className="relative group">
+                        <OrderItemRow item={item} className="px-2" />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleBuyAgain(item); }}
                             disabled={addingItem === item.id || addedItem === item.id}
-                            className={cn(
-                              "flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold transition-all px-2 py-1 rounded-md",
-                              addedItem === item.id 
-                                ? "bg-green-500/20 text-green-400 border border-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.2)]" 
-                                : "text-luxe-accent hover:text-white hover:bg-white/5"
-                            )}
+                            className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5"
                           >
-                            {addingItem === item.id ? (
-                              <span className="animate-pulse">Adding...</span>
-                            ) : addedItem === item.id ? (
-                              'Added!'
-                            ) : (
-                              <>
-                                <RotateCcw className="w-3 h-3" />
-                                Buy Again
-                              </>
-                            )}
+                            {addedItem === item.id ? 'Added' : <><RotateCcw className="w-3 h-3"/> Buy Again</>}
                           </button>
                         </div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Timeline */}
+                <div>
+                  <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Order Tracking</h3>
+                  <div className="p-5 border border-zinc-800/50 rounded-xl bg-zinc-900/30">
+                    <OrderTimeline 
+                      currentStatus={order.status}
+                      createdAt={order.created_at}
+                      updatedAt={(order as any).updated_at ?? order.created_at}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Address */}
-              {order.delivery_address && (
+              {/* Sidebar Info */}
+              <div className="space-y-6">
                 <div>
-                  <p className="text-white/50 text-xs uppercase tracking-wide mb-2">Delivery Address</p>
-                  <p className="text-white/70 text-sm">
-                    {order.delivery_address.house_no}, {order.delivery_address.street},{' '}
-                    {order.delivery_address.area}, {order.delivery_address.city} –{' '}
-                    {order.delivery_address.pincode}, {order.delivery_address.district}
-                  </p>
-                </div>
-              )}
-
-              {/* Tracking */}
-              {order.status !== 'cancelled' && (
-                <div className="space-y-4">
-                  <div className="bg-white/5 border border-white/5 rounded-lg p-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-white/50 text-xs uppercase tracking-wide mb-0.5">Order Tracking</p>
-                      {((order as any).tracking_number) ? (
-                        <>
-                          <p className="text-white text-sm font-medium">{(order as any).courier_name || 'ST Courier'}</p>
-                          <p className="text-white/70 text-xs">AWB: {(order as any).tracking_number}</p>
-                        </>
-                      ) : (
-                        <p className="text-white/70 text-xs">Status: {STATUS_LABELS[order.status]}</p>
-                      )}
-                    </div>
+                  <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Payment Summary</h3>
+                  <div className="p-5 border border-zinc-800/50 rounded-xl bg-zinc-900/30">
+                    <PriceSummary order={order} />
                     <button
-                      onClick={() => setExpandedTrackingId(expandedTrackingId === order.id ? null : order.id)}
-                      className="text-xs font-semibold bg-luxe-accent text-black px-4 py-2 rounded-xl hover:bg-white transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)] flex items-center gap-1"
+                      onClick={() => handleDownloadInvoice(order)}
+                      className="mt-6 w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-lg text-xs font-medium transition-colors"
                     >
-                      <span>Track Order</span>
-                      {expandedTrackingId === order.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      <Download className="w-4 h-4" />
+                      Download Invoice
                     </button>
                   </div>
-
-                  {expandedTrackingId === order.id && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      className="glass-card p-5 border border-white/10 space-y-6 overflow-hidden"
-                    >
-                      <h4 className="text-white font-semibold text-xs uppercase tracking-wider mb-2">Live Tracking Timeline</h4>
-                      
-                      {/* Timeline Steps */}
-                      <div className="relative pl-6 space-y-6">
-                        {/* Connecting Line */}
-                        <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-white/10" />
-
-                        {getTimelineSteps(order.status, (order as any).courier_name, (order as any).tracking_number).map((step, idx) => (
-                          <div key={idx} className="relative flex gap-4">
-                            {/* Circle Node */}
-                            <div className={cn(
-                              "absolute left-[-24px] top-1.5 w-3.5 h-3.5 rounded-full border-2 transition-all duration-300",
-                              step.active 
-                                ? "bg-luxe-accent border-luxe-accent shadow-[0_0_8px_#d4af37]" 
-                                : "bg-luxe-black border-white/20"
-                            )} />
-                            
-                            <div>
-                              <p className={cn(
-                                "text-xs font-semibold uppercase tracking-wider",
-                                step.active ? "text-luxe-accent" : "text-white/30"
-                              )}>
-                                {step.label}
-                              </p>
-                              <p className="text-xs text-white/50 mt-0.5">{step.desc}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Direct Courier Tracking Link */}
-                      {((order as any).tracking_number) && (
-                        <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row gap-3 items-center justify-between">
-                          <span className="text-[10px] text-white/40 font-mono">Carrier: {(order as any).courier_name || 'ST Courier'} AWB#{(order as any).tracking_number}</span>
-                          <a
-                            href="https://stcourier.com/track/shipment"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => {
-                              navigator.clipboard.writeText((order as any).tracking_number);
-                              toast.success('AWB number copied to clipboard! Paste it on the tracking page.');
-                            }}
-                            className="text-xs font-semibold border border-luxe-accent text-luxe-accent hover:bg-luxe-accent hover:text-black transition-all px-4 py-2 rounded-xl text-center w-full sm:w-auto"
-                          >
-                            Go to Official Courier Portal
-                          </a>
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
                 </div>
-              )}
 
-              {/* Total */}
-              <div className="flex justify-between items-center pt-3 border-t border-white/10">
-                <div className="text-sm text-white/50">
-                  Subtotal {formatCurrency(order.subtotal)} + Delivery{' '}
-                  {order.delivery_charge === 0 ? 'FREE' : formatCurrency(order.delivery_charge)}
-                </div>
-                <p className="text-white font-bold">{formatCurrency(order.total)}</p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-4 pt-2">
-                {order.status === 'pending' && (
-                  <a
-                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919999999999'}?text=${encodeURIComponent(`Hi! Following up on my order #${order.order_number}`)}`}
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-green-400 text-sm hover:text-green-300 transition-colors"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Follow up via WhatsApp
-                  </a>
-                )}
-                
-                {['delivered', 'cancelled'].includes(order.status) && (
-                  <button
-                    onClick={() => handleDownloadInvoice(order)}
-                    className="flex items-center gap-2 text-white/60 hover:text-white text-sm transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download Invoice
-                  </button>
+                {order.delivery_address && (
+                  <div>
+                    <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Delivery Details</h3>
+                    <AddressCard address={order.delivery_address} />
+                  </div>
                 )}
               </div>
             </div>
