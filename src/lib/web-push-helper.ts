@@ -65,7 +65,7 @@ export async function sendWebPushToUser(userId: string, payload: { title: string
   }
 }
 
-export async function broadcastWebPush(payload: { title: string; body: string; url?: string }) {
+export async function broadcastWebPush(payload: { title: string; body: string; url?: string; image?: string; icon?: string }) {
   try {
     // Note: for very large user bases, this should be paginated or sent to a queue
     const { data: subscriptions } = await supabase
