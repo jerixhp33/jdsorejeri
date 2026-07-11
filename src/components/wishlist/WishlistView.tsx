@@ -76,13 +76,15 @@ export function WishlistView() {
               const activeSizes = product.sizes?.filter((s: any) => s.is_active !== false) ?? [];
               const inStockSizes = activeSizes.filter((s: any) => s.stock > 0);
               
-              const isInStock = product.product_type === 'poster' 
+              const hasVariants = activeSizes.length > 0;
+              
+              const isInStock = hasVariants 
                 ? inStockSizes.length > 0 
                 : (product.stock ?? 0) > 0;
                 
               const cheapestSize = inStockSizes.sort((a: any, b: any) => a.price - b.price)[0];
               
-              const displayPrice = product.product_type === 'poster' 
+              const displayPrice = hasVariants 
                 ? (cheapestSize?.price || activeSizes[0]?.price || 0)
                 : (product.price || 0);
 
@@ -119,7 +121,7 @@ export function WishlistView() {
                           </span>
                         ) : (
                           <p className="text-white font-semibold text-sm sm:text-lg">
-                            {product.product_type === 'poster' && displayPrice > 0 && <span className="text-white/40 text-[10px] sm:text-xs font-normal mr-1">From</span>}
+                            {hasVariants && displayPrice > 0 && <span className="text-white/40 text-[10px] sm:text-xs font-normal mr-1">From</span>}
                             {displayPrice > 0 ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(displayPrice) : 'Coming Soon'}
                           </p>
                         )}

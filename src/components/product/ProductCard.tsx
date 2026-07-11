@@ -58,15 +58,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const activeSizes = product.sizes?.filter((s) => s.is_active !== false) ?? [];
   const sizePrices = activeSizes.map((s) => s.price).filter((p) => p > 0);
-  const displayPrice =
-    product.product_type === 'poster'
-      ? (sizePrices.length > 0 ? Math.min(...sizePrices) : 0)
-      : product.price || 0;
+  const hasVariants = activeSizes.length > 0;
 
-  const isInStock =
-    product.product_type === 'poster'
-      ? activeSizes.some((s) => s.stock > 0)
-      : (product.stock ?? 0) > 0;
+  const displayPrice = hasVariants
+    ? (sizePrices.length > 0 ? Math.min(...sizePrices) : 0)
+    : product.price || 0;
+
+  const isInStock = hasVariants
+    ? activeSizes.some((s) => s.stock > 0)
+    : (product.stock ?? 0) > 0;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -251,7 +251,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 </span>
               ) : (
                 <div className="flex items-baseline gap-1">
-                  {product.product_type === 'poster' && displayPrice > 0 && (
+                  {hasVariants && displayPrice > 0 && (
                     <span className="text-white/40 text-[10px] uppercase tracking-widest">From</span>
                   )}
                   <span className="text-white font-semibold text-sm sm:text-base">
