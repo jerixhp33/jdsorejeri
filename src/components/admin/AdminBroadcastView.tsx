@@ -259,7 +259,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
 
       {/* Compose modal */}
       {showCompose && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div data-lenis-prevent="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowCompose(false)}

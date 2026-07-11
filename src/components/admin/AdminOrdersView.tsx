@@ -527,7 +527,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
 
       {/* Dispatch Details Modal */}
       {dispatchOrder && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+        <div data-lenis-prevent="true" className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <div className="glass-card max-w-md w-full p-6 border border-white/15 space-y-6">
             <div>
               <h3 className="text-lg font-bold text-white mb-1">Dispatch Details</h3>
