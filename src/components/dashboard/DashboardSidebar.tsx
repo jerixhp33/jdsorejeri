@@ -10,10 +10,14 @@ import { createClient } from '@/lib/supabase/client';
 import { cn, getInitials } from '@/lib/utils';
 import { toast } from 'sonner';
 
+const LogoIcon = ({ className }: { className?: string }) => (
+  <img src="/icon-192x192.png" alt="JD Store" className={cn("w-5 h-5 object-contain", className)} />
+);
+
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Profile', icon: User, exact: true },
   { href: '/dashboard/orders', label: 'Orders', icon: Package },
-  { href: '/dashboard/notifications', label: 'Notifs', icon: Bell },
+  { href: '/dashboard/notifications', label: 'Notifs', icon: LogoIcon },
   { href: '/wishlist', label: 'Wishlist', icon: Heart },
   { href: '/dashboard/addresses', label: 'Addresses', icon: MapPin },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
