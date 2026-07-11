@@ -297,19 +297,19 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
       
       <form 
         onSubmit={handleSubmit(onSubmit, () => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }))} 
-        className="relative w-full max-w-4xl max-h-[calc(100vh-2rem)] sm:max-h-[85vh] grid grid-rows-[auto_auto_minmax(0,1fr)_auto] glass-card shadow-2xl overflow-hidden"
+        className="relative w-full max-w-4xl max-h-[calc(100vh-2rem)] sm:max-h-[85vh] flex flex-col glass-card shadow-2xl overflow-hidden"
       >
         
-        {/* Header (Row 1) */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
+        {/* Header (Fixed) */}
+        <div className="flex-shrink-0 sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
           <h2 className="text-white font-semibold text-lg">{product ? 'Edit Product' : 'Add New Product'}</h2>
           <button type="button" onClick={onClose} className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Tab Navigation (Row 2) */}
-        <div className="flex items-center gap-2 p-4 border-b border-white/5 overflow-x-auto scrollbar-hide">
+        {/* Tab Navigation (Fixed) */}
+        <div className="flex-shrink-0 flex items-center gap-2 p-4 border-b border-white/5 overflow-x-auto scrollbar-hide">
           {tabs.map(tab => {
             const Icon = tab.icon;
             const active = activeTab === tab.key;
@@ -336,8 +336,8 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
           })}
         </div>
 
-        {/* Scrollable Form Area (Row 3) */}
-        <div ref={scrollContainerRef} className={cn("p-6 overscroll-contain min-h-0", isCategoryOpen ? "overflow-hidden" : "overflow-y-auto")}>
+        {/* Scrollable Form Area (Flexible) */}
+        <div ref={scrollContainerRef} className={cn("flex-1 p-6 overscroll-contain min-h-0", isCategoryOpen ? "overflow-hidden" : "overflow-y-auto")}>
           
           {/* GENERAL TAB */}
           <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'general' && 'hidden')}>
@@ -672,8 +672,8 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
 
         </div>
 
-        {/* Footer Actions (Row 4) */}
-        <div className="flex items-center justify-between p-5 border-t border-white/10 bg-black/20">
+        {/* Footer Actions (Fixed) */}
+        <div className="flex-shrink-0 flex items-center justify-between p-5 border-t border-white/10 bg-black/20">
           {isSubmitted && Object.keys(errors).length > 0 ? (
             <p className="text-red-400 text-sm font-medium">Please fix errors in previous tabs.</p>
           ) : <div />}
