@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jd-store-offline-v4';
+const CACHE_NAME = 'jd-store-offline-v5';
 const OFFLINE_URL = '/offline.html';
 
 // Install event - Cache the offline page
