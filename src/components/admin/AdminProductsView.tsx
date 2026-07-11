@@ -245,7 +245,7 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
                   )}
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => { setEditProduct(product); setShowModal(true); }}
+                      onClick={() => { setEditProduct(product); setShowV2(true); }}
                       className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-xs transition-all"
                     >
                       <Edit2 className="w-3 h-3" />Edit
@@ -258,7 +258,10 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
                       {product.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                     </button>
                     <button
-                      onClick={() => duplicateProduct(product)}
+                      onClick={() => {
+                        setEditProduct({ ...product, id: '', name: `${product.name} (Copy)`, slug: '' });
+                        setShowV2(true);
+                      }}
                       className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all"
                       title="Duplicate"
                     >
@@ -299,7 +302,43 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
 
       {showV2 && (
         <ProductWorkspace
+          initialData={editProduct ? {
+            id: editProduct.id,
+            name: editProduct.name,
+            slug: editProduct.slug,
+            description: editProduct.description || '',
+            short_description: editProduct.short_description || '',
+            product_type: editProduct.product_type || '',
+            category_id: editProduct.category_id || '',
+            tags: editProduct.tags || [],
+            price: editProduct.price || 0,
+            original_price: editProduct.original_price || 0,
+            cost_price: editProduct.cost_price || 0,
+            stock: editProduct.stock || 0,
+            sku: editProduct.sku || '',
+            status: (editProduct.status as any) || (editProduct.is_active ? 'active' : 'draft'),
+            is_featured: editProduct.is_featured || false,
+            weight_grams: editProduct.weight_grams || 0,
+            length_cm: editProduct.length_cm || 0,
+            width_cm: editProduct.width_cm || 0,
+            height_cm: editProduct.height_cm || 0,
+            seo_title: editProduct.seo_title || '',
+            seo_description: editProduct.seo_description || '',
+            seo_keywords: editProduct.seo_keywords || '',
+            attributes: editProduct.attributes || {},
+            variant_options: [],
+            variant_combinations: (editProduct.sizes || []).map(s => ({
+              id: s.id,
+              options: { Size: s.label },
+              price: s.price,
+              stock: s.stock,
+              sku: s.sku,
+              is_active: s.is_active
+            })),
+            images: editProduct.images || []
+          } : null}
           onClose={() => { setShowV2(false); setEditProduct(null); }}
+          onSaved={handleSaved}
         />
       )}
 

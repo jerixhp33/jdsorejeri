@@ -57,4 +57,6 @@ export interface ProductFormData {
   
   // Media
   images: ProductImage[];
+  deletedImageIds?: string[];
+  deletedStoragePaths?: string[];
 }

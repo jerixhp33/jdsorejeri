@@ -9,6 +9,7 @@ import { ProductFormData } from './types';
 import { SECTIONS } from './constants';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { toast } from 'sonner';
+import { generateSlug } from '@/lib/utils';
 
 // Hooks
 import { useProductForm } from './hooks/useProductForm';
@@ -29,12 +30,15 @@ import { AttributesSection } from './sections/AttributesSection';
 import { MarketingSection } from './sections/MarketingSection';
 import { SEOSection } from './sections/SEOSection';
 
+import { Product } from '@/types';
+
 interface ProductWorkspaceProps {
   initialData?: ProductFormData | null;
   onClose: () => void;
+  onSaved?: (product: Product) => void;
 }
 
-export function ProductWorkspace({ initialData, onClose }: ProductWorkspaceProps) {
+export function ProductWorkspace({ initialData, onClose, onSaved }: ProductWorkspaceProps) {
   useScrollLock(true);
   
   const { formData, setFormData, updateField, updateAttribute, removeAttribute, undo, redo, canUndo, canRedo } = useProductForm(initialData);
@@ -51,8 +55,124 @@ export function ProductWorkspace({ initialData, onClose }: ProductWorkspaceProps
 
   // Auto-Save Hook (15s debounce)
   const saveAction = async (data: ProductFormData) => {
-    console.log('API Request: Saving Draft', data);
-    // await fetch('/api/admin/products', { method: 'POST', body: JSON.stringify(data) });
+    try {
+      if (!data.name || !data.category_id || !data.product_type) {
+        throw new Error('Name, Category, and Product Type are required.');
+      }
+      
+      const slug = data.slug || (generateSlug(data.name) + '-' + Math.random().toString(36).substring(2, 6));
+
+      const payload = {
+        name: data.name,
+        slug,
+        description: data.description,
+        short_description: data.short_description,
+        product_type: data.product_type,
+        category_id: data.category_id,
+        tags: data.tags,
+        price: data.price,
+        original_price: data.original_price,
+        cost_price: data.cost_price,
+        stock: data.stock,
+        sku: data.sku,
+        status: data.status,
+        is_featured: data.is_featured,
+        weight_grams: data.weight_grams,
+        length_cm: data.length_cm,
+        width_cm: data.width_cm,
+        height_cm: data.height_cm,
+        seo_title: data.seo_title,
+        seo_description: data.seo_description,
+        seo_keywords: data.seo_keywords,
+        attributes: data.attributes,
+        updated_at: new Date().toISOString(),
+      };
+
+      let savedProduct;
+
+      if (data.id) {
+        const res = await fetch('/api/admin/products', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: data.id, ...payload })
+        });
+        if (!res.ok) throw new Error('Failed to update product');
+        savedProduct = await res.json();
+      } else {
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, created_at: new Date().toISOString() })
+        });
+        if (!res.ok) throw new Error('Failed to create product');
+        savedProduct = await res.json();
+        
+        // Update the form data with the new ID so subsequent saves are PATCHes
+        updateField('id', savedProduct.id);
+        data.id = savedProduct.id; // update local ref for subsequent calls in this block
+      }
+
+      // Handle Poster Sizes
+      if (data.product_type === 'poster' && data.variant_combinations && data.variant_combinations.length > 0) {
+        const validSizes = data.variant_combinations.filter(c => c.is_active);
+        
+        await fetch('/api/admin/poster-sizes', {
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            product_id: savedProduct.id, 
+            sizes: validSizes.map(s => {
+              const label = Object.values(s.options)[0] || 'Unknown';
+              return { 
+                label, 
+                width_cm: null, 
+                height_cm: null, 
+                price: s.price || 0, 
+                stock: s.stock || 0, 
+                sku: s.sku || null, 
+                is_active: true 
+              };
+            }) 
+          }),
+        });
+      }
+
+      // Handle Images
+      if (data.images && data.images.length > 0) {
+        await fetch('/api/admin/product-images', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product_id: savedProduct.id,
+            images: data.images.map((img, i) => {
+              const imgPayload: any = { 
+                url: img.url, 
+                storage_path: img.storage_path, 
+                display_order: i, 
+                is_primary: img.is_primary || false 
+              };
+              if (img.id && img.id.length > 20 && !img.id.startsWith('temp-')) {
+                imgPayload.id = img.id;
+              }
+              return imgPayload;
+            }),
+            deletedImageIds: data.deletedImageIds || [],
+            deletedStoragePaths: data.deletedStoragePaths || [],
+          }),
+        });
+        
+        // Clear deleted tracking after successful save
+        updateField('deletedImageIds', []);
+        updateField('deletedStoragePaths', []);
+      }
+      
+      return savedProduct;
+
+    } catch (err: any) {
+      console.error('Save failed', err);
+      toast.error(err.message || 'Failed to save product');
+      throw err;
+    }
   };
   const { isSaving, lastSavedTime, hasUnsavedChanges } = useAutoSave(formData, saveAction, 15000);
 
@@ -62,13 +182,15 @@ export function ProductWorkspace({ initialData, onClose }: ProductWorkspaceProps
   // Actions
   const handleSaveDraft = async () => {
     updateField('status', 'draft');
-    await saveAction({ ...formData, status: 'draft' });
+    const p = await saveAction({ ...formData, status: 'draft' });
+    if (p && onSaved) onSaved(p);
   };
 
   const handlePublish = async () => {
     updateField('status', 'active');
-    await saveAction({ ...formData, status: 'active' });
+    const p = await saveAction({ ...formData, status: 'active' });
     toast.success('Product published successfully!');
+    if (p && onSaved) onSaved(p);
     onClose();
   };
 
