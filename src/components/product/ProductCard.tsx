@@ -228,7 +228,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   ? 'Out of Stock'
                   : product.product_type === 'poster'
                     ? 'Select Poster'
-                    : 'Select Earring'}
+                    : `Select ${product.product_type === 'other' ? 'Option' : product.product_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}`}
               </button>
             </Tooltip>
           </div>

@@ -176,7 +176,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
         >
           <div>
             <p className="text-luxe-accent text-sm tracking-widest uppercase mb-2">
-              {productType === 'poster' ? 'Wall Art' : 'Jewelry'}
+              {productType === 'poster' ? 'Wall Art' : productType === 'other' ? 'Accessories' : productType.replace('_', ' ')}
             </p>
             <h1 className="section-title mb-1">{title}</h1>
             <p className="text-white/40 text-sm">{subtitle}</p>

@@ -15,6 +15,8 @@ export const DEFAULT_FORM_DATA: ProductFormData = {
   sku: '',
   status: 'draft',
   is_featured: false,
+  is_trending: false,
+  is_best_seller: false,
   weight_grams: 0,
   length_cm: 0,
   width_cm: 0,

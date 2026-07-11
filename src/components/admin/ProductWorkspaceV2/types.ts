@@ -36,6 +36,8 @@ export interface ProductFormData {
   // Status
   status: 'active' | 'draft' | 'archived' | 'out_of_stock';
   is_featured: boolean;
+  is_trending: boolean;
+  is_best_seller: boolean;
   
   // Shipping
   weight_grams: number;

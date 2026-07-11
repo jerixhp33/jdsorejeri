@@ -85,6 +85,8 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         sku: data.sku,
         status: data.status,
         is_featured: data.is_featured,
+        is_trending: data.is_trending,
+        is_best_seller: data.is_best_seller,
         weight_grams: data.weight_grams,
         length_cm: data.length_cm,
         width_cm: data.width_cm,
