@@ -191,6 +191,20 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         updateField('deletedStoragePaths', []);
       }
       
+      // Inject relations so the UI can render correctly without a page refresh
+      savedProduct.images = data.images || [];
+      savedProduct.category = categories.find(c => c.id === data.category_id) || null;
+      if (data.variant_combinations) {
+        savedProduct.sizes = data.variant_combinations.map(c => ({
+          id: c.id,
+          label: Object.values(c.options).join(' / '),
+          price: c.price,
+          stock: c.stock,
+          sku: c.sku,
+          is_active: c.is_active
+        }));
+      }
+
       return savedProduct;
 
     } catch (err: any) {
