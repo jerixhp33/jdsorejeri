@@ -124,7 +124,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     )
     .eq('slug', slug)
     .eq('is_active', true)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching product:', error);

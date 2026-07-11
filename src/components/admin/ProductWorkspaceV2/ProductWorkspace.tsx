@@ -99,6 +99,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
             combinations: data.variant_combinations
           }
         },
+        is_active: data.status === 'active',
         updated_at: new Date().toISOString(),
       };
 
