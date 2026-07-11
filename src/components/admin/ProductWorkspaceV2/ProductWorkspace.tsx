@@ -131,7 +131,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
 
       // Handle Generic Variants (mapped to poster_sizes for legacy compatibility)
       if (data.variant_combinations && data.variant_combinations.length > 0) {
-        const validSizes = data.variant_combinations.filter(c => c.is_active);
+        const validSizes = data.variant_combinations.filter(c => c.is_active !== false);
         
         await fetch('/api/admin/poster-sizes', {
           method: 'POST', 

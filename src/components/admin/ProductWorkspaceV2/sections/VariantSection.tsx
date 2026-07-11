@@ -230,7 +230,7 @@ export function VariantSection({ formData, setFormData }: Props) {
                       <td className="py-2 text-center">
                         <input 
                           type="checkbox" 
-                          checked={combo.is_active}
+                          checked={combo.is_active !== false}
                           onChange={(e) => {
                             const newCombos = [...formData.variant_combinations];
                             newCombos[idx].is_active = e.target.checked;

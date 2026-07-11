@@ -16,7 +16,7 @@ export function LivePreview({ formData }: LivePreviewProps) {
   const { score } = useProductHealth(formData);
 
   const primaryImage = formData.images?.find(i => i.is_primary) || formData.images?.[0];
-  const activeCombinations = formData.variant_combinations?.filter(c => c.is_active) || [];
+  const activeCombinations = formData.variant_combinations?.filter(c => c.is_active !== false) || [];
   
   // Calculate display price based on variants if applicable
   const displayPrice = activeCombinations.length > 0 
