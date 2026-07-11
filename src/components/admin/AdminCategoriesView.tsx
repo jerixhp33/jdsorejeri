@@ -152,8 +152,9 @@ export function AdminCategoriesView({ initialCategories }: AdminCategoriesViewPr
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() =></div> setShowModal(false)} />
           <div className="relative w-full max-w-md glass-card p-6">
             <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
               <h2 className="text-xl font-semibold text-white">{editCategory ? 'Edit Category' : 'New Category'}</h2>

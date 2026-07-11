@@ -214,8 +214,9 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() =></div> setShowModal(false)} />
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto glass-card">
             <div className="sticky top-0 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
               <h2 className="text-white font-semibold">{editCollection ? 'Edit Collection' : 'New Collection'}</h2>

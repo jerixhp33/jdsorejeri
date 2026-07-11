@@ -159,8 +159,9 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() =></div> setShowModal(false)} />
           <div className="relative w-full max-w-md glass-card p-6 space-y-4">
             <h2 className="text-white font-semibold text-lg">{editCoupon ? 'Edit Coupon' : 'New Coupon'}</h2>
             

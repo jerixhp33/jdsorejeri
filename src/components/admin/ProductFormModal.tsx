@@ -295,7 +295,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       
-      <div ref={scrollContainerRef} className="relative w-full max-w-4xl max-h-[calc(100vh-2rem)] flex flex-col glass-card overflow-hidden shadow-2xl">
+      <div ref={scrollContainerRef} className="relative w-full max-w-4xl h-[calc(100vh-2rem)] sm:h-[85vh] flex flex-col glass-card overflow-hidden shadow-2xl">
         
         {/* Header */}
         <div className="flex-shrink-0 sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
@@ -334,8 +334,8 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
         </div>
 
         {/* Scrollable Form Area */}
-        <form onSubmit={handleSubmit(onSubmit, () => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }))} className="flex-1 flex flex-col overflow-hidden">
-          <div className={cn("flex-1 p-6 overscroll-contain", isCategoryOpen ? "overflow-hidden" : "overflow-y-auto")}>
+        <form onSubmit={handleSubmit(onSubmit, () => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }))} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className={cn("flex-1 p-6 overscroll-contain min-h-0", isCategoryOpen ? "overflow-hidden" : "overflow-y-auto")}>
             
             {/* GENERAL TAB */}
             <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-2", activeTab !== 'general' && 'hidden')}>
