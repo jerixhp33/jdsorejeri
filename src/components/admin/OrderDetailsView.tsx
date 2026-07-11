@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ChevronLeft, Printer, FileText, User, CreditCard } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { Order, OrderStatus } from '@/types';
+import type { Order, OrderStatus, PaymentStatus } from '@/types';
 
 import {
   OrderStatusBadge,
@@ -16,27 +16,58 @@ import {
   AddressCard,
   ShippingCard,
 } from '@/components/shared/orders';
+import { ShipmentModal, type ShipmentModalData } from './ShipmentModal';
 
 export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
   const [order, setOrder] = useState(initialOrder);
   const [isUpdating, setIsUpdating] = useState(false);
   const [adminNotes, setAdminNotes] = useState(order.admin_internal_notes || order.admin_notes || '');
+  
+  // Shipment Modal State
+  const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
+  const [shipmentModalTarget, setShipmentModalTarget] = useState<'shipped' | 'out_for_delivery'>('shipped');
 
-  const handlePrint = () => {
-    window.print();
-  };
 
-  const updateStatus = async (newStatus: OrderStatus) => {
+
+  const updateStatus = async (newStatus: OrderStatus, trackingData?: ShipmentModalData) => {
     setIsUpdating(true);
     try {
+      const payload: any = { id: order.id, status: newStatus, updated_at: new Date().toISOString() };
+      
+      if (trackingData) {
+        payload.tracking_data = trackingData;
+      }
+
       const res = await fetch('/api/admin/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: order.id, status: newStatus, updated_at: new Date().toISOString() }),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
-        setOrder({ ...order, status: newStatus });
+        const { order: updatedOrder } = await res.json();
+        if (updatedOrder) {
+           setOrder(updatedOrder);
+        } else {
+           setOrder({ ...order, status: newStatus });
+        }
         toast.success(`Order marked as ${newStatus}`);
+
+        // Notify WhatsApp if checked
+        if (trackingData?.notify_whatsapp) {
+           const phone = order.delivery_address?.phone || '';
+           if (phone) {
+             const cleanPhone = phone.replace(/\D/g, '');
+             const waNumber = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
+             
+             let trackUrl = trackingData.tracking_url;
+             if (trackingData.provider.toLowerCase().includes('st') && !trackUrl) {
+               trackUrl = `https://stcourier.com/track/shipment`;
+             }
+             
+             const text = `Hi ${order.delivery_address?.full_name?.split(' ')[0] || 'Customer'},\n\nYour JD Luxe order #${order.order_number} has been shipped via ${trackingData.provider}.\n\nTracking Number: ${trackingData.tracking_number}\n${trackUrl ? `Track here: ${trackUrl}` : ''}\n\nThank you for shopping with us!`;
+             window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`, '_blank');
+           }
+        }
       } else {
         toast.error('Failed to update status');
       }
@@ -45,6 +76,10 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleShipmentModalSubmit = async (data: ShipmentModalData) => {
+    await updateStatus(shipmentModalTarget, data);
   };
 
   const saveAdminNotes = async () => {
@@ -87,10 +122,14 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
         </div>
 
         <div className="flex gap-3">
-          <button onClick={handlePrint} className="btn-secondary flex items-center gap-2">
+          <Link href={`/admin/orders/${order.id}/invoice`} className="btn-secondary flex items-center gap-2">
             <Printer className="w-4 h-4" />
             <span>Print Invoice</span>
-          </button>
+          </Link>
+          <Link href={`/admin/orders/${order.id}/label`} className="btn-secondary flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            <span>Print Label</span>
+          </Link>
           
           {order.status === 'pending' && (
             <button onClick={() => updateStatus('confirmed')} disabled={isUpdating} className="btn-primary">
@@ -113,12 +152,43 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
             </button>
           )}
           {order.status === 'label_generated' && (
-            <button onClick={() => updateStatus('shipped')} disabled={isUpdating} className="btn-primary">
+            <button 
+              onClick={() => {
+                setShipmentModalTarget('shipped');
+                setIsShipmentModalOpen(true);
+              }} 
+              disabled={isUpdating} 
+              className="btn-primary"
+            >
               Ship Order
+            </button>
+          )}
+          {order.status === 'shipped' && (
+            <button 
+              onClick={() => {
+                setShipmentModalTarget('out_for_delivery');
+                setIsShipmentModalOpen(true);
+              }} 
+              disabled={isUpdating} 
+              className="btn-primary"
+            >
+              Out for Delivery
+            </button>
+          )}
+          {order.status === 'out_for_delivery' && (
+            <button onClick={() => updateStatus('delivered')} disabled={isUpdating} className="btn-primary">
+              Mark Delivered
             </button>
           )}
         </div>
       </div>
+
+      <ShipmentModal 
+        isOpen={isShipmentModalOpen}
+        onClose={() => setIsShipmentModalOpen(false)}
+        onSubmit={handleShipmentModalSubmit}
+        status={shipmentModalTarget}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -168,8 +238,41 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
                 </div>
               ) : (
                 <div className="text-white/50 text-sm">
-                  <p>Method: Online Payment</p>
-                  <p className="mt-2"><PaymentStatusBadge status={order.payment_status || 'pending'} /></p>
+                  <p className="mb-3">Method: Online Payment</p>
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={order.payment_status || 'pending'}
+                      onChange={async (e) => {
+                        const newStatus = e.target.value;
+                        setIsUpdating(true);
+                        try {
+                          const res = await fetch('/api/admin/orders', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: order.id, payment_status: newStatus }),
+                          });
+                          if (res.ok) {
+                            setOrder({ ...order, payment_status: newStatus as PaymentStatus });
+                            toast.success(`Payment marked as ${newStatus}`);
+                          } else {
+                            toast.error('Failed to update payment');
+                          }
+                        } catch (err) {
+                          toast.error('Failed to update payment');
+                        } finally {
+                          setIsUpdating(false);
+                        }
+                      }}
+                      disabled={isUpdating}
+                      className="bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#C1A063]"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="paid">Paid</option>
+                      <option value="failed">Failed</option>
+                      <option value="refunded">Refunded</option>
+                    </select>
+                    <PaymentStatusBadge status={(order.payment_status as PaymentStatus) || 'pending'} />
+                  </div>
                 </div>
               )}
             </div>

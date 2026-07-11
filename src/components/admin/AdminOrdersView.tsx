@@ -7,6 +7,7 @@ import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { ORDER_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from '@/lib/orders';
 import { OrderStatusBadge, PaymentStatusBadge } from '@/components/shared/orders';
+import { StatusSelect } from './StatusSelect';
 import type { Order, OrderStatus, PaymentStatus } from '@/types';
 
 const STATUSES = [
@@ -27,6 +28,33 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkActionStatus, setBulkActionStatus] = useState<OrderStatus | ''>('');
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
+
+  // Individual update functions
+  const updateInlineStatus = async (id: string, newStatus: string, type: 'status' | 'payment_status') => {
+    setUpdatingIds(prev => new Set(prev).add(id));
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, [type]: newStatus }),
+      });
+      if (res.ok) {
+        setOrders(orders.map(o => o.id === id ? { ...o, [type]: newStatus } : o));
+        toast.success(`Order ${type.replace('_', ' ')} updated`);
+      } else {
+        toast.error(`Failed to update ${type.replace('_', ' ')}`);
+      }
+    } catch (err) {
+      toast.error(`Failed to update ${type.replace('_', ' ')}`);
+    } finally {
+      setUpdatingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
+  };
 
   // KPI Calculations
   const kpis = useMemo(() => {
@@ -308,13 +336,31 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                       <p className="text-white/40 text-xs mt-0.5">{(order.delivery_address as any)?.phone || (order.user as any)?.phone || (order.user as any)?.email}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <PaymentStatusBadge status={order.payment_status || 'pending'} />
+                      <div className="w-full max-w-[120px]">
+                        <StatusSelect
+                          type="payment"
+                          value={order.payment_status || 'pending'}
+                          onChange={(val) => updateInlineStatus(order.id, val as PaymentStatus, 'payment_status')}
+                          disabled={updatingIds.has(order.id)}
+                          isUpdating={updatingIds.has(order.id)}
+                          options={PAYMENT_STATUSES}
+                        />
+                      </div>
                     </td>
                     <td className="px-4 py-4">
                       <p className="text-white font-semibold text-sm">{formatCurrency(order.grand_total || order.total || 0)}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <OrderStatusBadge status={order.status} />
+                      <div className="w-full max-w-[130px]">
+                        <StatusSelect
+                          type="order"
+                          value={order.status}
+                          onChange={(val) => updateInlineStatus(order.id, val as OrderStatus, 'status')}
+                          disabled={updatingIds.has(order.id)}
+                          isUpdating={updatingIds.has(order.id)}
+                          options={STATUSES}
+                        />
+                      </div>
                     </td>
                     <td className="px-4 py-4 text-right">
                       <Link 

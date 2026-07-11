@@ -7,7 +7,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function sendWebPushToUser(userId: string, payload: { title: string; body: string; url?: string }) {
+export async function sendWebPushToUser(userId: string, payload: { title: string; body: string; url?: string; image?: string; icon?: string }) {
   try {
     // The userId passed from orders is usually the profile.id, but push_subscriptions uses profile.uid
     const { data: profile } = await supabase
@@ -45,6 +45,8 @@ export async function sendWebPushToUser(userId: string, payload: { title: string
             title: payload.title,
             body: payload.body,
             url: payload.url || '/',
+            image: payload.image,
+            icon: payload.icon
           })
         );
       } catch (err: any) {

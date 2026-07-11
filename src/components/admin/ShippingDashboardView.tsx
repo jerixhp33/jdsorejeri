@@ -4,7 +4,9 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, ChevronRight, Package, Truck, AlertTriangle, CheckCircle, Clock, Download } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
-import type { Shipment } from '@/types';
+import { toast } from 'sonner';
+import { ShipmentModal, type ShipmentModalData } from './ShipmentModal';
+import type { Shipment, OrderStatus } from '@/types';
 
 type ShipmentStatus = Shipment['status'] | 'all';
 
@@ -20,11 +22,88 @@ const STATUSES: { value: ShipmentStatus; label: string }[] = [
   { value: 'returned_to_sender', label: 'Returned' },
 ];
 
-export function ShippingDashboardView({ initialShipments }: { initialShipments: any[] }) {
-  const [shipments, setShipments] = useState(initialShipments);
+export function ShippingDashboardView({ initialShipments, pendingOrders = [] }: { initialShipments: any[], pendingOrders?: any[] }) {
+  const [shipments, setShipments] = useState(() => {
+    const existingOrderIds = new Set(initialShipments.map(s => s.order_id));
+    const synthesized = pendingOrders
+      .filter(order => !existingOrderIds.has(order.id))
+      .map(order => ({
+        id: `pending-${order.id}`,
+        order_id: order.id,
+        provider: 'Pending Assignment',
+        tracking_number: 'Not assigned',
+        status: order.status === 'shipped' ? 'label_generated' : 'pending',
+        created_at: order.created_at,
+        updated_at: order.created_at,
+        order: order
+      }));
+    return [...synthesized, ...initialShipments];
+  });
   const [filter, setFilter] = useState<ShipmentStatus>('all');
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [targetOrderId, setTargetOrderId] = useState<string | null>(null);
+
+  const handleUpdateTracking = async (data: ShipmentModalData) => {
+    if (!targetOrderId) return;
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: targetOrderId,
+          status: 'shipped',
+          tracking_data: data
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update order');
+      
+      toast.success('Tracking details assigned and order shipped!');
+      setIsModalOpen(false);
+
+      // WhatsApp logic
+      if (data.notify_whatsapp) {
+        const targetShipment = shipments.find(s => s.order_id === targetOrderId);
+        const phone = targetShipment?.order?.delivery_address?.phone;
+        const customerName = targetShipment?.order?.delivery_address?.full_name?.split(' ')[0] || 'Customer';
+        const orderNumber = targetShipment?.order?.order_number;
+        
+        if (phone) {
+          const cleanPhone = phone.replace(/\D/g, '');
+          const waNumber = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
+          
+          let trackUrl = data.tracking_url;
+          // Force ST Courier link if ST Courier is chosen and tracking_url is empty
+          if (data.provider.toLowerCase().includes('st') && !trackUrl) {
+            trackUrl = `https://stcourier.com/track/shipment`;
+          }
+          
+          const text = `Hi ${customerName},\n\nYour JD Luxe order #${orderNumber} has been shipped via ${data.provider}.\n\nTracking Number: ${data.tracking_number}\n${trackUrl ? `Track here: ${trackUrl}` : ''}\n\nThank you for shopping with us!`;
+          window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`, '_blank');
+        }
+      }
+      
+      // Update local UI immediately
+      setShipments(prev => prev.map(s => 
+        s.order_id === targetOrderId 
+          ? { 
+              ...s, 
+              status: 'in_transit', 
+              provider: data.provider, 
+              tracking_number: data.tracking_number,
+              tracking_url: data.tracking_url 
+            } 
+          : s
+      ));
+    } catch (err) {
+      toast.error('Failed to assign tracking details');
+      console.error(err);
+    }
+  };
 
   // KPIs
   const kpis = useMemo(() => {
@@ -193,8 +272,8 @@ export function ShippingDashboardView({ initialShipments }: { initialShipments: 
                       <span className="px-2 py-1 rounded bg-white/5 text-white/70 text-xs font-medium capitalize border border-white/10">{s.provider?.replace('_', ' ')}</span>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-white text-sm font-medium">{s.order?.delivery_address?.city || 'Unknown'}</p>
-                      <p className="text-white/40 text-xs mt-0.5">{s.order?.delivery_address?.state}</p>
+                      <p className="text-white text-sm font-medium">{s.order?.delivery_address?.city || s.order?.delivery_address?.district || 'Unknown'}</p>
+                      <p className="text-white/40 text-xs mt-0.5">{s.order?.delivery_address?.state || ''}</p>
                     </td>
                     <td className="px-4 py-4">
                       <span className={cn(
@@ -209,12 +288,18 @@ export function ShippingDashboardView({ initialShipments }: { initialShipments: 
                     </td>
                     <td className="px-4 py-4 text-right">
                       {s.label_url ? (
-                        <a href={s.label_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 text-white/70 text-xs font-medium hover:bg-white/10 hover:text-white transition-all opacity-0 group-hover:opacity-100">
+                        <a href={s.label_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 text-white/70 text-xs font-medium hover:bg-white/10 hover:text-white transition-all">
                           Print Label
                         </a>
                       ) : (
-                        <button className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-luxe-accent/20 text-luxe-accent text-xs font-medium hover:bg-luxe-accent hover:text-black transition-all opacity-0 group-hover:opacity-100">
-                          Create Label
+                        <button 
+                          onClick={() => {
+                            setTargetOrderId(s.order_id);
+                            setIsModalOpen(true);
+                          }}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-luxe-accent text-black text-xs font-bold hover:bg-white hover:text-black transition-all"
+                        >
+                          Assign Tracking
                         </button>
                       )}
                     </td>
@@ -225,6 +310,13 @@ export function ShippingDashboardView({ initialShipments }: { initialShipments: 
           </table>
         </div>
       </div>
+
+      <ShipmentModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleUpdateTracking}
+        status="shipped"
+      />
     </div>
   );
 }

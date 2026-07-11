@@ -20,6 +20,8 @@ export default async function OrdersPage() {
     .select(`
       *,
       delivery_address:delivery_addresses(*),
+      shipments(*),
+      events:order_events(*),
       items:order_items(
         *,
         product:products(id, name, slug, images:product_images(url, is_primary)),

@@ -17,7 +17,13 @@ export function OrderItemRow({ item, className = '' }: Props) {
   if ((item as any).selected_size) options.push(`Size: ${(item as any).selected_size}`);
   if ((item as any).selected_color) options.push(`Color: ${(item as any).selected_color}`);
   if ((item as any).selected_material) options.push(`Material: ${(item as any).selected_material}`);
-  if ((item as any).poster_size) options.push(`Poster Size: ${(item as any).poster_size}`);
+  
+  const pSize = (item as any).poster_size;
+  if (pSize) {
+    const sizeStr = typeof pSize === 'object' ? pSize.label : pSize;
+    options.push(`Poster Size: ${sizeStr}`);
+  }
+  
   if ((item as any).poster_frame) options.push(`Frame: ${(item as any).poster_frame}`);
   if ((item as any).poster_finish) options.push(`Finish: ${(item as any).poster_finish}`);
 

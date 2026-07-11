@@ -48,12 +48,18 @@ self.addEventListener('push', function (event) {
       const data = event.data.json();
       const options = {
         body: data.body,
-        icon: '/notification-icon.png',
-        badge: '/notification-icon.png',
-        vibrate: [100, 50, 100],
+        icon: data.icon || '/notification-icon.png',
+        badge: '/badge-icon.png',
+        image: data.image,
+        vibrate: [200, 100, 200, 100, 200, 100, 200],
+        requireInteraction: true, // Keep it visible until the user interacts
         data: {
           url: data.url || '/'
-        }
+        },
+        actions: [
+          { action: 'open', title: 'View Details' },
+          { action: 'close', title: 'Dismiss' }
+        ]
       };
       event.waitUntil(self.registration.showNotification(data.title, options));
     } catch (e) {

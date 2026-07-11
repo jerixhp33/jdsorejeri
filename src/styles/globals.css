@@ -132,6 +132,21 @@
   }
   .btn-luxe:active { transform: scale(0.98); }
 
+  .btn-primary {
+    @apply bg-white text-black font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply bg-zinc-800 text-white font-medium px-4 py-2 rounded-lg hover:bg-zinc-700 border border-zinc-700 transition-colors inline-flex items-center justify-center gap-2;
+  }
+
+  /* Style native dropdown options */
+  select option {
+    background-color: #18181b;
+    color: white;
+    padding: 8px;
+  }
+
   .btn-luxe-outline {
     position: relative;
     overflow: hidden;

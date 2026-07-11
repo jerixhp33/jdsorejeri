@@ -7,14 +7,26 @@ interface Props {
 }
 
 export function PriceSummary({ order, className = '' }: Props) {
-  // Use new fields or fall back to legacy fields for backward compatibility
-  const grandTotal = order.grand_total ?? order.total ?? 0;
   const shipping = order.shipping_cost ?? order.delivery_charge ?? 0;
   const tax = order.tax ?? 0;
   const discount = order.discount_amount ?? 0;
   
-  // Calculate subtotal if it's not explicitly available
-  const subtotal = grandTotal - tax - shipping + discount;
+  // Calculate items total as fallback
+  const itemsTotal = (order.items || []).reduce((sum: number, item: any) => {
+    return sum + ((item.unit_price || 0) * (item.quantity || 1));
+  }, 0);
+
+  let grandTotal = order.grand_total ?? order.total ?? 0;
+  let subtotal = 0;
+
+  if (grandTotal > 0) {
+    // If we have a stored grand total, reverse-engineer the subtotal
+    subtotal = grandTotal - tax - shipping + discount;
+  } else {
+    // Fallback: calculate from items
+    subtotal = itemsTotal;
+    grandTotal = subtotal + tax + shipping - discount;
+  }
 
   return (
     <div className={`space-y-3 ${className}`}>

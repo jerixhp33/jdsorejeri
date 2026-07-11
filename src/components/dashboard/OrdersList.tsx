@@ -44,18 +44,7 @@ export function OrdersList({ orders }: OrdersListProps) {
     setTimeout(() => setAddedItem(null), 2000);
   };
 
-  const handleDownloadInvoice = (order: Order) => {
-    // Basic fallback invoice generation
-    const text = `INVOICE - Order #${order.order_number}\nDate: ${formatDate(order.created_at)}\nStatus: ${order.status.toUpperCase()}\n\n`;
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Invoice_${order.order_number}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('Invoice downloaded');
-  };
+
 
   const filteredOrders = orders.filter((order) => {
     const query = searchQuery.toLowerCase();
@@ -156,7 +145,7 @@ export function OrdersList({ orders }: OrdersListProps) {
             <div className="flex items-center gap-3 sm:gap-6 shrink-0">
               <OrderStatusBadge status={order.status} />
               <p className="text-white font-semibold text-sm hidden sm:block">
-                {formatCurrency(order.grand_total ?? order.total ?? 0)}
+                {formatCurrency(order.grand_total || order.total || 0)}
               </p>
               {expandedId === order.id ? (
                 <ChevronUp className="w-4 h-4 text-white/40" />
@@ -192,16 +181,44 @@ export function OrdersList({ orders }: OrdersListProps) {
                   </div>
                 </div>
 
-                {/* Timeline */}
-                <div>
-                  <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Order Tracking</h3>
-                  <div className="p-5 border border-zinc-800/50 rounded-xl bg-zinc-900/30">
-                    <OrderTimeline 
-                      currentStatus={order.status}
-                      createdAt={order.created_at}
-                      updatedAt={(order as any).updated_at ?? order.created_at}
-                    />
+                {/* Timeline and Tracking */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Order Tracking</h3>
+                    <div className="p-5 border border-zinc-800/50 rounded-xl bg-zinc-900/30">
+                      <OrderTimeline 
+                        currentStatus={order.status}
+                        createdAt={order.created_at}
+                        updatedAt={(order as any).updated_at ?? order.created_at}
+                      />
+                    </div>
                   </div>
+
+                  {order.shipments && order.shipments.length > 0 && (
+                    <div>
+                      <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Shipment Details</h3>
+                      <div className="p-5 border border-zinc-800/50 rounded-xl bg-zinc-900/30 space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/40">Courier:</span>
+                          <span className="text-white font-medium uppercase tracking-wider">{order.shipments[0].provider}</span>
+                        </div>
+                        <div className="flex justify-between text-sm items-center">
+                          <span className="text-white/40">Tracking (AWB):</span>
+                          <span className="font-mono text-white tracking-widest">{order.shipments[0].tracking_number}</span>
+                        </div>
+                        {order.shipments[0].tracking_url && (
+                          <a 
+                            href={order.shipments[0].tracking_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="mt-4 w-full flex items-center justify-center bg-luxe-accent text-black font-semibold py-2 rounded-lg text-sm hover:bg-white transition-colors"
+                          >
+                            Track Package
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -211,13 +228,14 @@ export function OrdersList({ orders }: OrdersListProps) {
                   <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Payment Summary</h3>
                   <div className="p-5 border border-zinc-800/50 rounded-xl bg-zinc-900/30">
                     <PriceSummary order={order} />
-                    <button
-                      onClick={() => handleDownloadInvoice(order)}
+                    <Link
+                      href={`/dashboard/orders/${order.id}/invoice`}
+                      prefetch={true}
                       className="mt-6 w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-lg text-xs font-medium transition-colors"
                     >
                       <Download className="w-4 h-4" />
-                      Download Invoice
-                    </button>
+                      View & Download Invoice
+                    </Link>
                   </div>
                 </div>
 
