@@ -33,7 +33,11 @@ export function PrintButton({
         filename:     filename,
         image:        { type: 'jpeg' as const, quality: 1.0 },
         html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'in', format: targetId.includes('label') ? ([4, 6] as [number, number]) : 'a4', orientation: 'portrait' as const }
+        jsPDF:        { 
+          unit: 'px', 
+          format: targetId.includes('label') ? [384, 576] : [element.offsetWidth, element.offsetHeight], // 4x6 inches in px or dynamic invoice size
+          orientation: 'portrait' as const 
+        }
       };
 
       await html2pdf().set(opt).from(element).save();

@@ -604,10 +604,10 @@ export function CheckoutForm() {
             Send Payment Screenshot
           </a>
           
-          <button onClick={() => window.print()} className="btn-luxe flex w-full items-center justify-center gap-2 mb-8 py-3 text-sm">
+          <Link href={`/dashboard/orders/${placedOrderData.id}/invoice`} className="btn-luxe flex w-full items-center justify-center gap-2 mb-8 py-3 text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-            Download PDF Receipt
-          </button>
+            View & Download Invoice
+          </Link>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Link prefetch={true} href="/dashboard/orders" className="btn-gold flex-1 text-center text-sm">View My Orders</Link>
