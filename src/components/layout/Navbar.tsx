@@ -109,7 +109,18 @@ export function Navbar({ categories = [] }: NavbarProps) {
     return type.charAt(0).toUpperCase() + type.slice(1) + 's';
   };
 
-  const dynamicCategoryLinks = uniqueTypes.map(type => ({
+  const typeOrder = ['poster', 'earring', 'hairband', 'bracelet', 'keychain'];
+  
+  const sortedUniqueTypes = [...uniqueTypes].sort((a, b) => {
+    const idxA = typeOrder.indexOf(a as string);
+    const idxB = typeOrder.indexOf(b as string);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return (a as string).localeCompare(b as string);
+  });
+
+  const dynamicCategoryLinks = sortedUniqueTypes.map(type => ({
     href: `/category/${type}`,
     label: formatTypeLabel(type as string)
   }));
@@ -477,26 +488,26 @@ export function Navbar({ categories = [] }: NavbarProps) {
                           transition={{ duration: 0.1 }}
                           className="absolute right-0 top-full mt-2 w-56 glass-card overflow-hidden"
                         >
-                          <div className="p-3 border-b border-white/10">
+                          <Link prefetch={true} href="/dashboard" onClick={() => setProfileOpen(false)} className="block p-3 border-b border-white/10 hover:bg-white/5 transition-all">
                             <p className="text-sm font-medium text-white truncate">
                               {profile?.name}
                             </p>
                             <p className="text-xs text-white/50 truncate">
                               {profile?.email}
                             </p>
-                          </div>
+                          </Link>
                           <div className="p-1">
-                            <Link prefetch={true} href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                              <User className="w-4 h-4" />
-                              My Profile
-                            </Link>
-                            <Link prefetch={true} href="/dashboard/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
+                            <Link prefetch={true} href="/dashboard/orders" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
                               <Package className="w-4 h-4" />
                               My Orders
                             </Link>
-                            <Link prefetch={true} href="/dashboard/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
+                            <Link prefetch={true} href="/dashboard/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
                               <Settings className="w-4 h-4" />
                               Settings
+                            </Link>
+                            <Link prefetch={true} href="/dashboard/addresses" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
+                              <User className="w-4 h-4" />
+                              Addresses
                             </Link>
                             {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
                               <Link prefetch={true} href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-luxe-accent hover:bg-white/10 transition-all">
@@ -639,7 +650,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
 
                   {/* Profile info */}
                   {profile && (
-                    <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-white/[0.08] backdrop-blur-md rounded-2xl border border-white/10 shadow-lg">
+                    <Link prefetch={true} href="/dashboard" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 mb-2 bg-white/[0.08] backdrop-blur-md rounded-2xl border border-white/10 shadow-lg hover:bg-white/10 transition-all">
                       {profile.profile_picture ? (
                         <Image src={profile.profile_picture} alt={profile.name} width={40} height={40} className="rounded-full ring-2 ring-white/10" />
                       ) : (
@@ -651,17 +662,16 @@ export function Navbar({ categories = [] }: NavbarProps) {
                         <p className="text-white text-sm font-semibold truncate tracking-wide">{profile.name}</p>
                         <p className="text-white/40 text-xs truncate">{profile.email}</p>
                       </div>
-                    </div>
+                    </Link>
                   )}
 
                   <div className="space-y-1 mt-2">
                     {[
-                      { href: '/dashboard', label: 'My Profile', icon: User },
                       { href: '/dashboard/orders', label: 'My Orders', icon: Package },
                       { href: '/dashboard/notifications', label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, icon: Bell },
-                      { href: '/cart', label: `Cart${itemCount > 0 ? ` (${itemCount})` : ''}`, icon: ShoppingCart },
                       { href: '/wishlist', label: 'Wishlist', icon: Heart },
                       { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+                      { href: '/dashboard/addresses', label: 'Addresses', icon: User },
                     ].map((item) => (
                       <Link
                         prefetch={true}
