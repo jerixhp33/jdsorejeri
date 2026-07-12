@@ -36,7 +36,7 @@ export function DashboardSidebar() {
   return (
     <>
       {/* ── Mobile: horizontal tab bar ── */}
-      <div className="md:hidden">
+      <div className="md:hidden print:hidden">
         {/* Back button */}
         <div className="flex items-center mb-4">
           <Link prefetch={true} href="/" className="btn-glass !py-2 !px-4 text-xs group">
@@ -100,7 +100,7 @@ export function DashboardSidebar() {
       </div>
 
       {/* ── Desktop: vertical sidebar ── */}
-      <div className="hidden md:block md:col-span-1">
+      <div className="hidden md:block md:col-span-1 print:hidden">
         <div className="mb-6">
           <Link prefetch={true} href="/" className="btn-glass !py-2 !px-4 text-sm group">
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />

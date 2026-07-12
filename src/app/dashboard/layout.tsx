@@ -26,10 +26,10 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="page-container pt-6 pb-16 md:pb-20">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <div className="page-container pt-6 pb-16 md:pb-20 print:p-0 print:m-0 print:max-w-none">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 print:gap-0 print:block">
         <DashboardSidebar />
-        <div className="md:col-span-3">{children}</div>
+        <div className="md:col-span-3 print:col-span-1">{children}</div>
       </div>
     </div>
   );
