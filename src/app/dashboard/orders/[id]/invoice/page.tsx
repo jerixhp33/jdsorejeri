@@ -58,7 +58,7 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4 font-sans print:bg-white print:p-0">
       
       {/* Controls Container (Always OUTSIDE the PDF target) */}
-      <div className="w-full max-w-[21cm] mb-6 print:hidden flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+      <div className="w-full max-w-3xl mb-6 print:hidden flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
         <a href={`/dashboard/orders`} className="text-gray-500 hover:text-black flex items-center gap-2 font-medium transition-colors">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
           Back to Orders
@@ -66,8 +66,10 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
         <PrintButton label="Download PDF" isPdf={true} filename={`JDStore_Invoice_${order.order_number}.pdf`} targetId="invoice-content" />
       </div>
 
-      {/* Printable Area - EXACT PIXEL PERFECT FORMAT FOR A SINGLE PAGE PDF */}
-      <div id="invoice-content" className="w-full max-w-[21cm] bg-white pt-16 pb-12 px-12 shadow-2xl print:shadow-none print:m-0 relative overflow-hidden">
+      {/* Wrapper for horizontal scroll on mobile */}
+      <div className="w-full overflow-x-auto pb-8 flex justify-center print:block print:overflow-visible print:pb-0">
+        {/* Printable Area - EXACT PIXEL PERFECT FORMAT FOR A SINGLE PAGE PDF */}
+        <div id="invoice-content" className="w-[800px] min-w-[800px] flex-shrink-0 bg-white pt-16 pb-12 px-12 shadow-2xl print:shadow-none print:m-0 relative overflow-hidden">
         
         {/* Invoice Header Centered */}
         <div className="text-center pb-8 border-b-2 border-gray-100 mb-8">
@@ -201,6 +203,7 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
           <p className="font-bold text-gray-900 mb-1 uppercase tracking-widest text-[10px]">Thank you for shopping with JD Store</p>
           <p className="text-[9px]">This is a computer-generated document and does not require a signature.</p>
         </div>
+      </div>
       </div>
     </div>
   );
