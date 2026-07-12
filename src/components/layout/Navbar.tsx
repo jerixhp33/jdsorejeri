@@ -505,10 +505,6 @@ export function Navbar({ categories = [] }: NavbarProps) {
                               <Settings className="w-4 h-4" />
                               Settings
                             </Link>
-                            <Link prefetch={true} href="/dashboard/addresses" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                              <User className="w-4 h-4" />
-                              Addresses
-                            </Link>
                             {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
                               <Link prefetch={true} href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-luxe-accent hover:bg-white/10 transition-all">
                                 <Settings className="w-4 h-4" />
@@ -671,7 +667,6 @@ export function Navbar({ categories = [] }: NavbarProps) {
                       { href: '/dashboard/notifications', label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, icon: Bell },
                       { href: '/wishlist', label: 'Wishlist', icon: Heart },
                       { href: '/dashboard/settings', label: 'Settings', icon: Settings },
-                      { href: '/dashboard/addresses', label: 'Addresses', icon: User },
                     ].map((item) => (
                       <Link
                         prefetch={true}
