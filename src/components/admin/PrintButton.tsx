@@ -23,27 +23,10 @@ export function PrintButton({
     }
 
     try {
-      setLoading(true);
-      const html2pdf = (await import('html2pdf.js')).default;
-      const element = document.getElementById(targetId);
-      if (!element) return;
-
-      const opt = {
-        margin:       0,
-        filename:     filename,
-        image:        { type: 'jpeg' as const, quality: 1.0 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: element.scrollWidth, windowHeight: element.scrollHeight },
-        jsPDF:        { 
-          unit: 'px', 
-          format: targetId.includes('label') ? [384, 576] : [element.scrollWidth, element.scrollHeight],
-          orientation: 'portrait' as const 
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-
-      await html2pdf().set(opt).from(element).save();
+      // Use native window.print() which provides a better scaling experience natively on all devices
+      window.print();
     } catch (error) {
-      console.error('PDF generation failed:', error);
+      console.error('Print failed:', error);
     } finally {
       setLoading(false);
     }

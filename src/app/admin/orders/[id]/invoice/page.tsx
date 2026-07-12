@@ -51,144 +51,104 @@ export default async function InvoicePage({ params }: PageProps) {
         <PrintButton label="Download PDF" isPdf={true} filename={`JDStore_Invoice_${order.order_number}.pdf`} targetId="invoice-content" />
       </div>
 
-      {/* Wrapper for horizontal scroll on mobile */}
-      <div className="w-full overflow-x-auto pb-8 flex justify-center print:block print:overflow-visible print:pb-0">
-        {/* Printable Area - EXACT PIXEL PERFECT FORMAT FOR A SINGLE PAGE PDF */}
-        <div id="invoice-content" className="w-[800px] min-w-[800px] flex-shrink-0 bg-white pt-16 pb-12 px-12 shadow-2xl print:shadow-none print:m-0 relative overflow-hidden">
+      {/* Printable Area */}
+      <div id="invoice-content" className="w-full max-w-2xl bg-white text-black p-8 sm:p-12 min-h-screen print:p-0 print:min-h-0 mx-auto shadow-sm">
         
-        {/* Invoice Header Centered */}
-        <div className="text-center pb-8 border-b-2 border-gray-100 mb-8">
-          <h1 className="text-4xl font-serif font-black text-black tracking-tighter uppercase mb-2">JD Store</h1>
-          <p className="text-sm text-gray-500 mb-4">
-            No 6, Sathivel Nagar, Thiruverkadu, Chennai-77<br/>
-            GSTIN: 27AABCU9603R1ZX
-          </p>
-          <div className="inline-block px-6 py-2 bg-gray-50 border border-gray-200 rounded-lg">
-             <span className="font-bold text-gray-900 tracking-widest uppercase text-xs">Tax Invoice</span>
-          </div>
+        <div className="text-center mb-8 border-b-2 border-gray-200 pb-6">
+          <h1 className="text-4xl font-serif font-bold text-black tracking-tight mb-2">JD Store</h1>
+          <p className="text-gray-500 font-medium tracking-wide uppercase text-xs tracking-widest">Official Order Receipt</p>
         </div>
-
-        {/* Order Info & Payment */}
-        <div className="flex justify-between items-start mb-8 text-sm">
+        
+        <div className="flex justify-between mb-10">
           <div>
-            <span className="block text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Order No.</span>
-            <span className="font-bold text-lg text-black">#{order.order_number}</span>
-          </div>
-          <div className="text-right">
-            <span className="block text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Date</span>
-            <span className="font-semibold text-gray-900 block mb-3">{formatDate(order.created_at)}</span>
-            
-            <span className="block text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Payment Method</span>
-            <span className="font-semibold text-gray-900 uppercase block">{order.payments?.[0]?.payment_method || 'UPI'}</span>
-            
-            {order.payments?.[0]?.transaction_id && (
-              <>
-                <span className="block text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1 mt-3">Transaction ID</span>
-                <span className="font-semibold text-gray-900 font-mono text-xs block">{order.payments[0].transaction_id}</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Addresses */}
-        <div className="flex gap-8 mb-10">
-          <div className="flex-1">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 border-b border-gray-100 pb-2">Billed To</h3>
-            <p className="font-bold text-gray-900 mb-1">{order.delivery_address?.full_name}</p>
-            <p className="text-sm text-gray-600">Ph: {order.delivery_address?.phone}</p>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 border-b border-gray-100 pb-2">Shipped To</h3>
-            <p className="font-bold text-gray-900 mb-1">{order.delivery_address?.full_name}</p>
-            <p className="text-sm text-gray-600 leading-snug">
-              {order.delivery_address?.house_no}, {order.delivery_address?.street}<br/>
-              {order.delivery_address?.area && <>{order.delivery_address?.area}<br/></>}
-              {order.delivery_address?.city}, {order.delivery_address?.district} {order.delivery_address?.pincode}
+            <h3 className="font-bold text-lg mb-2 text-black uppercase tracking-wider text-xs">Billed To</h3>
+            <p className="font-semibold text-lg text-black">{order.delivery_address?.full_name}</p>
+            <p className="text-gray-700">{order.delivery_address?.phone}</p>
+            <p className="max-w-xs text-gray-700 mt-1">
+              {order.delivery_address?.house_no}, {order.delivery_address?.street}
+              {order.delivery_address?.area ? `, ${order.delivery_address?.area}` : ''}, {order.delivery_address?.city}
             </p>
           </div>
+          <div className="text-right">
+            <h3 className="font-bold text-lg mb-2 text-black uppercase tracking-wider text-xs">Order Info</h3>
+            <p className="text-gray-700">Order ID: <strong className="text-black">#{order.order_number}</strong></p>
+            <p className="text-gray-700">Date: <span className="font-medium text-black">{formatDate(order.created_at)}</span></p>
+            <p className="text-gray-700">Status: <span className="text-amber-600 font-semibold uppercase">{order.status}</span></p>
+          </div>
         </div>
 
-        {/* Order Items */}
-        <table className="w-full mb-10 text-left border-collapse">
+        <table className="w-full text-left mb-10 border-collapse">
           <thead>
-            <tr className="border-b-2 border-black">
-              <th className="py-3 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 w-16">Image</th>
-              <th className="py-3 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Description</th>
-              <th className="py-3 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center w-20">Qty</th>
-              <th className="py-3 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-right w-24">Price</th>
-              <th className="py-3 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-right w-28">Total</th>
+            <tr className="border-b-2 border-black/80">
+              <th className="py-3 text-black uppercase text-xs tracking-wider font-bold w-[50%]">Item Description</th>
+              <th className="py-3 text-center text-black uppercase text-xs tracking-wider font-bold">Qty</th>
+              <th className="py-3 text-right text-black uppercase text-xs tracking-wider font-bold">Price</th>
+              <th className="py-3 text-right text-black uppercase text-xs tracking-wider font-bold">Total</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
-            {order.items?.map((item: any, index: number) => {
+          <tbody>
+            {order.items?.map((item: any, idx: number) => {
               const productName = item.product?.name || item.product_name || 'Unknown Product';
-              const primaryImage = item.product?.images?.find((img: any) => img.is_primary)?.url 
-                                || item.product?.images?.[0]?.url;
+              const primaryImage = item.product?.images?.find((img: any) => img.is_primary)?.url || item.product?.images?.[0]?.url;
               return (
-                <tr key={index}>
-                  <td className="py-4 px-2">
-                    {primaryImage ? (
-                      <img src={primaryImage} alt={productName} className="w-12 h-12 object-cover rounded shadow-sm border border-gray-200" crossOrigin="anonymous" />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
-                        <span className="text-gray-300 text-[8px] uppercase">No img</span>
+                <tr key={idx} className="border-b border-gray-200/60">
+                  <td className="py-5 pr-4">
+                    <div className="flex items-center gap-4">
+                      {primaryImage && (
+                        <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                          <img src={primaryImage} alt={productName} className="w-full h-full object-cover" crossOrigin="anonymous" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-bold text-base text-black leading-snug">{productName}</p>
+                        {item.selected_size && <p className="text-sm text-gray-500 mt-0.5">Size: {item.selected_size}</p>}
+                        {item.poster_frame && <p className="text-sm text-gray-500 mt-0.5">Frame: {item.poster_frame}</p>}
                       </div>
-                    )}
-                  </td>
-                  <td className="py-4 px-2">
-                    <div className="font-bold text-gray-900 text-sm mb-1">{productName}</div>
-                    <div className="flex gap-2">
-                      {item.selected_size && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium">Size: {item.selected_size}</span>}
-                      {item.poster_frame && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium">Frame: {item.poster_frame}</span>}
                     </div>
                   </td>
-                  <td className="py-4 px-2 text-center align-middle font-semibold text-gray-900">{item.quantity}</td>
-                  <td className="py-4 px-2 text-right align-middle font-medium text-gray-600">₹{Number(item.unit_price).toFixed(2)}</td>
-                  <td className="py-4 px-2 text-right align-middle font-bold text-gray-900">₹{(Number(item.unit_price) * item.quantity).toFixed(2)}</td>
+                  <td className="py-5 text-center text-black font-medium">{item.quantity}</td>
+                  <td className="py-5 text-right text-gray-700">₹{Number(item.unit_price).toFixed(2)}</td>
+                  <td className="py-5 text-right font-bold text-black">₹{(Number(item.unit_price) * item.quantity).toFixed(2)}</td>
                 </tr>
-              );
+              )
             })}
           </tbody>
         </table>
 
-        {/* Totals Section */}
         <div className="flex justify-end mb-16">
-          <div className="w-full sm:w-1/2 lg:w-2/5">
-            <div className="flex justify-between py-2 text-sm">
-              <span className="text-gray-500">Subtotal</span>
-              <span className="font-semibold text-gray-900">₹{subTotalValue.toFixed(2)}</span>
+          <div className="w-72 space-y-3 bg-gray-50/50 p-6 rounded-xl border border-gray-100 print:border-none print:p-0">
+            <div className="flex justify-between items-center text-gray-600 text-sm">
+              <span>Subtotal</span>
+              <span className="font-medium text-black">₹{subTotalValue.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between py-2 text-sm">
-              <span className="text-gray-500">Shipping</span>
-              <span className="font-semibold text-gray-900">
-                {shippingAmount === 0 ? 'Free' : `₹${shippingAmount.toFixed(2)}`}
-              </span>
+            <div className="flex justify-between items-center text-gray-600 text-sm">
+              <span>Delivery</span>
+              <span className="font-medium text-black">{shippingAmount === 0 ? 'FREE' : `₹${shippingAmount.toFixed(2)}`}</span>
             </div>
-            {taxAmount > 0 && (
-              <div className="flex justify-between py-2 text-sm">
-                <span className="text-gray-500">Tax</span>
-                <span className="font-semibold text-gray-900">₹{taxAmount.toFixed(2)}</span>
-              </div>
-            )}
             {discountAmount > 0 && (
-              <div className="flex justify-between py-2 text-sm text-green-600">
-                <span>Discount {order.coupon_code ? `(${order.coupon_code})` : ''}</span>
-                <span className="font-bold">-₹{discountAmount.toFixed(2)}</span>
+              <div className="flex justify-between items-center text-green-600 text-sm font-medium">
+                <span>Discount</span>
+                <span>-₹{discountAmount.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between py-4 mt-2 border-t-2 border-black">
-              <span className="font-black text-lg text-gray-900 uppercase tracking-tight">Grand Total</span>
-              <span className="font-black text-xl text-black">₹{grandTotalValue.toFixed(2)}</span>
+            {taxAmount > 0 && (
+              <div className="flex justify-between items-center text-gray-600 text-sm">
+                <span>Tax</span>
+                <span className="font-medium text-black">₹{taxAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between items-end text-xl font-black border-t-2 border-black/80 pt-4 mt-2 text-black">
+              <span className="text-base uppercase tracking-wider text-black">Grand Total</span>
+              <span>₹{grandTotalValue.toFixed(2)}</span>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="text-center text-gray-400 mt-auto border-t border-gray-100 pt-8">
-          <p className="font-bold text-gray-900 mb-1 uppercase tracking-widest text-[10px]">Thank you for shopping with JD Store</p>
-          <p className="text-[9px]">This is a computer-generated document and does not require a signature.</p>
+        <div className="text-center text-gray-500 text-sm pt-8 border-t border-gray-200">
+          <p className="font-serif italic text-lg text-black mb-1">Thank you for shopping with JD Store!</p>
+          <p>For support or queries, contact us via WhatsApp.</p>
+          <p className="mt-4 text-xs text-gray-400">Generated on {new Date().toLocaleString('en-IN')}</p>
         </div>
-      </div>
       </div>
     </div>
   );
