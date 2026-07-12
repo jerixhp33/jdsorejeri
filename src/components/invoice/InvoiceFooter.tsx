@@ -15,7 +15,7 @@ export function InvoiceFooter() {
         <div className="flex justify-between items-end">
           <div className="text-[10px] text-gray-500 space-y-1">
             <p><span className="font-bold text-gray-800">Email:</span> jdstore.jeri@gmail.com</p>
-            <p><span className="font-bold text-gray-800">Website:</span> https://jdsorejeri.vercel.app/</p>
+            <p><span className="font-bold text-gray-800">Website:</span> https://jdstorejeri.vercel.app/</p>
             <p className="mt-2 text-[9px] text-gray-400">
               Generated: {now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} • {now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
             </p>

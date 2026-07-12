@@ -29,9 +29,9 @@ const playfair = Playfair_Display({
 });
 
 const getBaseUrl = () => {
-  const url = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdsorejeri.vercel.app';
+  const url = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
   if (url.includes('localhost') && process.env.NODE_ENV === 'production') {
-    return 'https://jdsorejeri.vercel.app';
+    return 'https://jdstorejeri.vercel.app';
   }
   return url;
 };

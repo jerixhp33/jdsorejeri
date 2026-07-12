@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       if (users && users.length > 0) {
         const { sendEmail } = await import('@/lib/email');
         // Force the live site URL for emails so it never links to localhost, even when testing locally
-        const siteUrl = 'https://jdsorejeri.vercel.app';
+        const siteUrl = 'https://jdstorejeri.vercel.app';
         
         await Promise.all(users.map(async (u) => {
           const html = `

@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES = [
           </p>
           <table role="presentation" cellpadding="0" cellspacing="0">
             <tr><td style="background:#c8a96e;border-radius:50px;">
-              <a href="https://jdsorejeri.vercel.app" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:bold;color:#000000;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:1px;">Shop New Arrivals</a>
+              <a href="https://jdstorejeri.vercel.app" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:bold;color:#000000;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:1px;">Shop New Arrivals</a>
             </td></tr>
           </table>
         </td></tr>
@@ -80,7 +80,7 @@ const EMAIL_TEMPLATES = [
           </p>
           <table role="presentation" cellpadding="0" cellspacing="0">
             <tr><td style="background:#c8a96e;border-radius:50px;">
-              <a href="https://jdsorejeri.vercel.app" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:bold;color:#000000;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:1px;">Grab the Deal</a>
+              <a href="https://jdstorejeri.vercel.app" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:bold;color:#000000;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:1px;">Grab the Deal</a>
             </td></tr>
           </table>
           <p style="margin:24px 0 0;font-size:12px;color:#999999;">Offer valid this weekend only. While stocks last.</p>
