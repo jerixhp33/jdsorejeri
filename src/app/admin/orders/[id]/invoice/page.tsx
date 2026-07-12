@@ -52,7 +52,7 @@ export default async function InvoicePage({ params }: PageProps) {
       </div>
 
       {/* Printable Area */}
-      <div id="invoice-content" className="w-full max-w-2xl bg-white text-black p-8 sm:p-12 min-h-screen print:p-0 print:min-h-0 mx-auto shadow-sm">
+      <div id="invoice-content" className="print-receipt-container w-full max-w-2xl bg-white text-black p-8 sm:p-12 min-h-screen print:p-0 print:min-h-0 mx-auto shadow-sm">
         
         <div className="text-center mb-8 border-b-2 border-gray-200 pb-6">
           <h1 className="text-4xl font-serif font-bold text-black tracking-tight mb-2">JD Store</h1>
