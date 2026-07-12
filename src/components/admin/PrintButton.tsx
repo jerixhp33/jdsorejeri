@@ -32,12 +32,13 @@ export function PrintButton({
         margin:       0,
         filename:     filename,
         image:        { type: 'jpeg' as const, quality: 1.0 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: element.scrollWidth, windowHeight: element.scrollHeight },
         jsPDF:        { 
           unit: 'px', 
-          format: targetId.includes('label') ? [384, 576] : [element.offsetWidth, element.offsetHeight], // 4x6 inches in px or dynamic invoice size
+          format: targetId.includes('label') ? [384, 576] : [element.scrollWidth, element.scrollHeight],
           orientation: 'portrait' as const 
-        }
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
 
       await html2pdf().set(opt).from(element).save();

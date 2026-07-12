@@ -69,45 +69,38 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
       {/* Printable Area - EXACT PIXEL PERFECT FORMAT FOR A SINGLE PAGE PDF */}
       <div id="invoice-content" className="w-full max-w-[21cm] bg-white pt-16 pb-12 px-12 shadow-2xl print:shadow-none print:m-0 relative overflow-hidden">
         
-        {/* Luxury Top Border */}
-        <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-gray-900 via-gray-700 to-black"></div>
-
-        {/* Invoice Header */}
-        <div className="flex flex-row justify-between items-start pb-8 mb-8 border-b-2 border-gray-100">
-          <div>
-            <h1 className="text-5xl font-serif font-black text-black tracking-tighter uppercase mb-2">Invoice</h1>
-            <p className="text-gray-500 font-medium tracking-wide">#{order.order_number}</p>
-          </div>
-          <div className="text-right">
-            <div className="text-3xl font-serif font-black tracking-tighter uppercase mb-1">JD Store</div>
-            <div className="text-xs text-gray-500 leading-relaxed">
-              No 6, Sathivel Nagar<br/>
-              Thiruverkadu, Chennai-77<br/>
-              GSTIN: 27AABCU9603R1ZX
-            </div>
+        {/* Invoice Header Centered */}
+        <div className="text-center pb-8 border-b-2 border-gray-100 mb-8">
+          <h1 className="text-4xl font-serif font-black text-black tracking-tighter uppercase mb-2">JD Store</h1>
+          <p className="text-sm text-gray-500 mb-4">
+            No 6, Sathivel Nagar, Thiruverkadu, Chennai-77<br/>
+            GSTIN: 27AABCU9603R1ZX
+          </p>
+          <div className="inline-block px-6 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+             <span className="font-bold text-gray-900 tracking-widest uppercase text-xs">Tax Invoice</span>
           </div>
         </div>
 
-        {/* Order Details Banner */}
-        <div className="flex bg-gray-50 p-4 rounded-lg mb-8 text-sm border border-gray-100">
-          <div className="flex-1">
-            <span className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Date</span>
-            <span className="font-semibold text-gray-900">{formatDate(order.created_at)}</span>
+        {/* Order Info & Payment */}
+        <div className="flex justify-between items-start mb-8 text-sm">
+          <div>
+            <span className="block text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Order No.</span>
+            <span className="font-bold text-lg text-black">#{order.order_number}</span>
           </div>
-          <div className="flex-1">
-            <span className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Payment Method</span>
-            <span className="font-semibold text-gray-900 uppercase">{order.payments?.[0]?.payment_method || 'UPI'}</span>
+          <div className="text-right">
+            <span className="block text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Date</span>
+            <span className="font-semibold text-gray-900 block mb-3">{formatDate(order.created_at)}</span>
+            
+            <span className="block text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Payment Method</span>
+            <span className="font-semibold text-gray-900 uppercase block">{order.payments?.[0]?.payment_method || 'UPI'}</span>
+            
+            {order.payments?.[0]?.transaction_id && (
+              <>
+                <span className="block text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1 mt-3">Transaction ID</span>
+                <span className="font-semibold text-gray-900 font-mono text-xs block">{order.payments[0].transaction_id}</span>
+              </>
+            )}
           </div>
-          <div className="flex-1">
-            <span className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Status</span>
-            <span className="font-semibold text-green-600 uppercase">{order.status === 'pending' ? 'Processing' : order.status}</span>
-          </div>
-          {order.payments?.[0]?.transaction_id && (
-            <div className="flex-1">
-              <span className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Transaction ID</span>
-              <span className="font-semibold text-gray-900 font-mono text-xs">{order.payments[0].transaction_id}</span>
-            </div>
-          )}
         </div>
 
         {/* Addresses */}

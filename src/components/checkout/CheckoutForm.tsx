@@ -455,93 +455,8 @@ export function CheckoutForm() {
 
     return (
       <>
-        {/* Printable Receipt (Hidden on Screen, Visible on Print) */}
-        {placedOrderData && (
-          <div className="hidden print-receipt-container bg-white text-black p-8 min-h-screen">
-            <div className="text-center mb-8 border-b-2 border-gray-200 pb-6">
-              <h1 className="text-4xl font-serif font-bold text-black tracking-tight mb-2">JD Store</h1>
-              <p className="text-gray-500 font-medium tracking-wide">OFFICIAL ORDER RECEIPT</p>
-            </div>
-            
-            <div className="flex justify-between mb-10">
-              <div>
-                <h3 className="font-bold text-lg mb-2 text-black uppercase tracking-wider text-xs">Billed To</h3>
-                <p className="font-semibold text-lg text-black">{placedOrderData.customerName}</p>
-                <p className="text-gray-700">{placedOrderData.phone}</p>
-                <p className="max-w-xs text-gray-700 mt-1">{placedOrderData.address}</p>
-              </div>
-              <div className="text-right">
-                <h3 className="font-bold text-lg mb-2 text-black uppercase tracking-wider text-xs">Order Info</h3>
-                <p className="text-gray-700">Order ID: <strong className="text-black">#{placedOrderData.orderNumber}</strong></p>
-                <p className="text-gray-700">Date: <span className="font-medium text-black">{new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span></p>
-                <p className="text-gray-700">Status: <span className="text-amber-600 font-semibold">Payment Pending Verification</span></p>
-              </div>
-            </div>
-
-            <table className="w-full text-left mb-10 border-collapse">
-              <thead>
-                <tr className="border-b-2 border-black/80">
-                  <th className="py-3 text-black uppercase text-xs tracking-wider font-bold w-[50%]">Item Description</th>
-                  <th className="py-3 text-center text-black uppercase text-xs tracking-wider font-bold">Qty</th>
-                  <th className="py-3 text-right text-black uppercase text-xs tracking-wider font-bold">Price</th>
-                  <th className="py-3 text-right text-black uppercase text-xs tracking-wider font-bold">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {placedOrderData.items.map((item: any, idx: number) => (
-                  <tr key={idx} className="border-b border-gray-200/60">
-                    <td className="py-5 pr-4">
-                      <div className="flex items-center gap-4">
-                        {item.image && (
-                          <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
-                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" crossOrigin="anonymous" />
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-bold text-base text-black leading-snug">{item.name}</p>
-                          {item.size && <p className="text-sm text-gray-500 mt-0.5">Size: {item.size}</p>}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-5 text-center text-black font-medium">{item.quantity}</td>
-                    <td className="py-5 text-right text-gray-700">{formatCurrency(item.price)}</td>
-                    <td className="py-5 text-right font-bold text-black">{formatCurrency(item.price * item.quantity)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            <div className="flex justify-end mb-16">
-              <div className="w-72 space-y-3 bg-gray-50/50 p-6 rounded-xl border border-gray-100">
-                <div className="flex justify-between items-center text-gray-600 text-sm">
-                  <span>Subtotal</span>
-                  <span className="font-medium text-black">{formatCurrency(placedOrderData.subtotal)}</span>
-                </div>
-                <div className="flex justify-between items-center text-gray-600 text-sm">
-                  <span>Delivery</span>
-                  <span className="font-medium text-black">{placedOrderData.deliveryCharge === 0 ? 'FREE' : formatCurrency(placedOrderData.deliveryCharge)}</span>
-                </div>
-                {placedOrderData.discountAmount > 0 && (
-                  <div className="flex justify-between items-center text-green-600 text-sm font-medium">
-                    <span>Discount</span>
-                    <span>-{formatCurrency(placedOrderData.discountAmount)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between items-end text-xl font-black border-t-2 border-black/80 pt-4 mt-2 text-black">
-                  <span className="text-base uppercase tracking-wider text-black">Grand Total</span>
-                  <span>{formatCurrency(placedOrderData.total)}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center text-gray-500 text-sm pt-8 border-t border-gray-200">
-              <p className="font-serif italic text-lg text-black mb-1">Thank you for shopping with JD Store!</p>
-              <p>For support or queries, contact us via WhatsApp.</p>
-              <p className="mt-4 text-xs text-gray-400">Generated on {new Date().toLocaleString('en-IN')}</p>
-            </div>
-          </div>
-        )}
-
+        {/* Removed legacy hidden print receipt */}
+        
       <div className="page-container py-24 text-center max-w-lg mx-auto print:hidden">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
           <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6"
@@ -610,7 +525,7 @@ export function CheckoutForm() {
           </Link>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link prefetch={true} href="/dashboard/orders" className="btn-gold flex-1 text-center text-sm">View My Orders</Link>
+            <Link prefetch={true} href="/dashboard/orders" className="btn-secondary flex-1 text-center text-sm">View My Orders</Link>
             <Link prefetch={true} href="/" className="btn-luxe-outline flex-1 text-center text-sm">Continue Shopping</Link>
           </div>
         </motion.div>
