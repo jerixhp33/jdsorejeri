@@ -8,6 +8,7 @@ import { useCart } from '@/hooks/useCart';
 import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
+// @ts-ignore
 import Persp from 'perspective-transform';
 import { toJpeg } from 'html-to-image';
 import { ROOM_THEMES, FRAME_STYLES, GALLERY_PRESETS, RoomTheme, FrameStyle } from './VirtualTryOnConfig';
