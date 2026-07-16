@@ -40,7 +40,15 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
   }
 
   // Security check: Only allow the order owner or an admin to view
-  if (order.user_id !== user.id && !isAdmin) {
+  let isOwner = false;
+  if (user) {
+    const { data: profile } = await adminClient.from('user_profiles').select('id').eq('uid', user.id).single();
+    if (profile && profile.id === order.user_id) {
+      isOwner = true;
+    }
+  }
+
+  if (!isOwner && !isAdmin) {
     return notFound();
   }
 
