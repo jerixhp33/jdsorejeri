@@ -63,6 +63,13 @@ export function CheckoutForm() {
   const [placedOrderTotal, setPlacedOrderTotal] = useState(0);
   const [placedOrderData, setPlacedOrderData] = useState<any>(null);
 
+  // Payment Method States
+  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'whatsapp'>('upi');
+  const [utrNumber, setUtrNumber] = useState('');
+  const [utrSubmitting, setUtrSubmitting] = useState(false);
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
+  const [utrSubmitted, setUtrSubmitted] = useState(false);
+
 
 
   // Coupon States
@@ -346,8 +353,9 @@ export function CheckoutForm() {
       });
 
       await supabase.from('orders').update({
-        whatsapp_sent: true,
+        whatsapp_sent: paymentMethod === 'whatsapp',
         whatsapp_message: decodeURIComponent(whatsappMsg),
+        admin_notes: `PAYMENT METHOD: ${paymentMethod.toUpperCase()}`
       }).eq('id', order.id);
 
       await supabase.from('activity_logs').insert({
@@ -388,6 +396,7 @@ export function CheckoutForm() {
 
       setOrderNumber(ordNum);
       setPlacedOrderTotal(finalTotal);
+      setCreatedOrderId(order.id);
       setPlacedOrderData({
         orderNumber: ordNum,
         customerName: data.full_name,
@@ -418,10 +427,12 @@ export function CheckoutForm() {
       const successWaUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(screenshotMsg)}`;
       setSuccessWhatsappUrl(successWaUrl);
       
-      // Auto-open WhatsApp directly (uses location.href to avoid popup blocker in PWA standalone)
-      setTimeout(() => {
-        window.location.href = fullMsgWaUrl;
-      }, 100);
+      if (paymentMethod === 'whatsapp') {
+        // Auto-open WhatsApp directly
+        setTimeout(() => {
+          window.location.href = fullMsgWaUrl;
+        }, 100);
+      }
       
       // Clear cart last to prevent race conditions with component unmounting
       await clearCart();
@@ -446,6 +457,33 @@ export function CheckoutForm() {
       </div>
     );
   }
+
+  const submitUTR = async () => {
+    if (utrNumber.length < 12) {
+      toast.error('Please enter a valid 12-digit UTR number');
+      return;
+    }
+    setUtrSubmitting(true);
+    try {
+      const { error } = await supabase.from('orders').update({
+        admin_notes: `PAYMENT METHOD: UPI\nUTR: ${utrNumber}`,
+        payment_status: 'pending' // Admin will verify this
+      }).eq('id', createdOrderId);
+      
+      if (error) throw error;
+      
+      toast.success('Payment verified successfully!');
+      setUtrSubmitted(true);
+      
+      setTimeout(() => {
+        window.location.href = '/dashboard/orders';
+      }, 2000);
+    } catch (err) {
+      toast.error('Failed to submit UTR. Please try again.');
+    } finally {
+      setUtrSubmitting(false);
+    }
+  };
 
   if (orderPlaced) {
     const upiId = 'manikandanjanani67@oksbi';
@@ -540,6 +578,8 @@ export function CheckoutForm() {
               <p className="mt-4 text-xs text-gray-400">Generated on {new Date().toLocaleString('en-IN')}</p>
             </div>
           </div>
+            </div>
+          </div>
         )}
 
       <div className="page-container py-24 text-center max-w-lg mx-auto print:hidden">
@@ -551,61 +591,87 @@ export function CheckoutForm() {
           <h1 className="font-display text-3xl font-bold text-white mb-2">Order Placed!</h1>
           <p className="text-white/40 text-sm mb-6">Order #{orderNumber}</p>
           
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-xl border border-white/20 inline-block w-full max-w-xs relative group">
-            {/* Tooltip */}
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-10 shadow-lg scale-95 group-hover:scale-100">
-              ✨ Tap QR code to pay! (Amount auto-fills)
-              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-            </div>
-            
-            <a href={upiString} className="relative aspect-square w-full mb-4 block cursor-pointer hover:scale-105 transition-transform">
-              <Image 
-                src={qrUrl}
-                alt="Dynamic UPI QR Code" 
-                fill
-                className="rounded-lg object-contain"
-                unoptimized
-              />
-            </a>
-            <p className="text-black font-bold mt-2 text-lg">Scan to pay: {formatCurrency(placedOrderTotal)}</p>
-            <p className="text-black/60 text-xs mt-1 font-mono">UPI: {upiId}</p>
-            
-            {/* Mobile tap to pay button */}
-            <a 
-              href={upiString}
-              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-colors sm:hidden leading-tight"
-            >
-              <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
-                <span>Tap to Pay with UPI App</span>
+          {paymentMethod === 'whatsapp' ? (
+            <>
+              <div className="glass-card p-5 mb-8 text-left border-green-500/30 bg-green-500/5">
+                <p className="text-green-400 font-semibold mb-3 flex items-center gap-2">
+                  <Check className="w-4 h-4" /> Next Steps
+                </p>
+                <p className="text-white/80 text-sm mb-3">
+                  Your order is currently pending. Please message us on WhatsApp to confirm the order and arrange payment.
+                </p>
               </div>
-              <span className="text-white/70 text-[10px] font-normal tracking-wide">(Amount auto-fills)</span>
-            </a>
-          </div>
 
-          <div className="glass-card p-5 mb-8 text-left border-green-500/30 bg-green-500/5">
-            <p className="text-green-400 font-semibold mb-3 flex items-center gap-2">
-              <Check className="w-4 h-4" /> Payment Instructions
-            </p>
-            <ol className="space-y-3 list-decimal list-inside text-sm text-white/80">
-              <li className="hidden sm:list-item">Scan the QR code above with any UPI app (GPay, PhonePe, Paytm).</li>
-              <li className="sm:hidden">Tap the QR code or the blue button to open your UPI app.</li>
-              <li>Pay the exact total amount: <strong>{formatCurrency(placedOrderTotal)}</strong>.</li>
-              <li>Take a <strong>screenshot</strong> of your successful payment.</li>
-              <li>Click the WhatsApp button below to send your order details, and <strong>attach your payment screenshot</strong>.</li>
-              <li>JD Store will verify your payment and update your order status in the app!</li>
-            </ol>
-          </div>
+              <a href={successWhatsappUrl} rel="noopener noreferrer" className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full flex items-center justify-center gap-2 mb-4 py-4 text-base font-semibold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-colors">
+                <MessageCircle className="w-5 h-5" />
+                Message on WhatsApp
+              </a>
+            </>
+          ) : utrSubmitted ? (
+            <div className="glass-card p-8 mb-8 border-green-500/30 bg-green-500/5">
+              <h3 className="text-green-400 font-bold text-xl mb-2">Payment Submitted! 🎉</h3>
+              <p className="text-white/80 text-sm">
+                Thank you! We are verifying your UTR: <strong>{utrNumber}</strong>. Your order will be processed shortly. Redirecting you to orders...
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="bg-white rounded-2xl p-6 mb-6 shadow-xl border border-white/20 inline-block w-full max-w-xs relative group">
+                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-10 shadow-lg scale-95 group-hover:scale-100">
+                  ✨ Tap QR code to pay! (Amount auto-fills)
+                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                </div>
+                
+                <a href={upiString} className="relative aspect-square w-full mb-4 block cursor-pointer hover:scale-105 transition-transform">
+                  <Image 
+                    src={qrUrl}
+                    alt="Dynamic UPI QR Code" 
+                    fill
+                    className="rounded-lg object-contain"
+                    unoptimized
+                  />
+                </a>
+                <p className="text-black font-bold mt-2 text-lg">Scan to pay: {formatCurrency(placedOrderTotal)}</p>
+                <p className="text-black/60 text-xs mt-1 font-mono">UPI: {upiId}</p>
+                
+                <a 
+                  href={upiString}
+                  className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-colors sm:hidden leading-tight"
+                >
+                  <div className="flex items-center gap-2">
+                    <Check className="w-5 h-5" />
+                    <span>Tap to Pay with UPI App</span>
+                  </div>
+                  <span className="text-white/70 text-[10px] font-normal tracking-wide">(Amount auto-fills)</span>
+                </a>
+              </div>
 
-          <a href={successWhatsappUrl} rel="noopener noreferrer" className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full flex items-center justify-center gap-2 mb-4 py-4 text-base font-semibold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
-            </svg>
-            Send Payment Screenshot
-          </a>
+              <div className="glass-card p-5 mb-8 text-left">
+                <p className="text-white font-semibold mb-3">Confirm Payment</p>
+                <p className="text-white/60 text-xs mb-4">After paying {formatCurrency(placedOrderTotal)}, please enter your 12-digit UTR (Reference ID) below.</p>
+                
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input 
+                    type="text" 
+                    value={utrNumber}
+                    onChange={(e) => setUtrNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                    maxLength={12}
+                    placeholder="Enter 12-digit UTR..." 
+                    className="input-luxe flex-1"
+                  />
+                  <button 
+                    onClick={submitUTR}
+                    disabled={utrSubmitting || utrNumber.length < 12}
+                    className="btn-gold px-6 whitespace-nowrap disabled:opacity-50"
+                  >
+                    {utrSubmitting ? 'Verifying...' : 'Submit UTR'}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
           
           <button onClick={() => window.print()} className="btn-luxe flex w-full items-center justify-center gap-2 mb-8 py-3 text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
             Download PDF Receipt
           </button>
 
@@ -835,12 +901,46 @@ export function CheckoutForm() {
             </div>
           </div>
 
+          {/* Payment Method */}
+          <div className="glass-card p-6 border border-luxe-accent/20 bg-luxe-dark">
+            <h2 className="text-white font-semibold text-base mb-5">Payment Method</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button 
+                type="button" 
+                onClick={() => setPaymentMethod('upi')} 
+                className={cn('p-4 rounded-xl border flex flex-col items-start gap-2 text-left transition-all', paymentMethod === 'upi' ? 'border-luxe-accent bg-luxe-accent/10' : 'border-white/10 hover:border-white/30')}
+              >
+                <div className="flex justify-between w-full items-center">
+                  <span className="text-white font-medium text-sm">Direct UPI (QR Code)</span>
+                  <div className={cn("w-5 h-5 rounded-full flex items-center justify-center border", paymentMethod === 'upi' ? "bg-luxe-accent border-luxe-accent" : "border-white/30")}>
+                    {paymentMethod === 'upi' && <Check className="w-3 h-3 text-black" />}
+                  </div>
+                </div>
+                <span className="text-white/50 text-xs mt-1">Fast & Secure. Scan QR and pay directly via GPay, PhonePe, Paytm, etc.</span>
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setPaymentMethod('whatsapp')} 
+                className={cn('p-4 rounded-xl border flex flex-col items-start gap-2 text-left transition-all', paymentMethod === 'whatsapp' ? 'border-[#25D366] bg-[#25D366]/10' : 'border-white/10 hover:border-white/30')}
+              >
+                <div className="flex justify-between w-full items-center">
+                  <span className="text-white font-medium text-sm">Order via WhatsApp</span>
+                  <div className={cn("w-5 h-5 rounded-full flex items-center justify-center border", paymentMethod === 'whatsapp' ? "bg-[#25D366] border-[#25D366]" : "border-white/30")}>
+                    {paymentMethod === 'whatsapp' && <Check className="w-3 h-3 text-black" />}
+                  </div>
+                </div>
+                <span className="text-white/50 text-xs mt-1">Chat with our team to arrange manual payment and confirmation.</span>
+              </button>
+            </div>
+          </div>
+
           <button type="submit" disabled={submitting} className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full flex items-center justify-center gap-3 py-4 text-base font-semibold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-colors">
             {submitting
               ? <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
               : <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/></svg>
             }
-            {submitting ? 'Processing...' : 'Place Order via WhatsApp'}
+            {submitting ? 'Processing...' : paymentMethod === 'upi' ? 'Place Order & Pay' : 'Place Order via WhatsApp'}
           </button>
         </form>
 
@@ -952,11 +1052,11 @@ export function CheckoutForm() {
 
             <div className="mt-5 p-3 rounded-xl space-y-2" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)' }}>
               <div className="flex items-center gap-2 text-xs" style={{ color: '#4ade80' }}>
-                <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>Confirm order via WhatsApp — No upfront payment</span>
+                <Check className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>Secure SSL checkout</span>
               </div>
               <div className="text-[10px] text-green-400/70 pl-5 leading-tight">
-                * We do not accept Cash on Delivery (COD). After you send the WhatsApp message, our team will provide a UPI scanner or number to complete your payment.
+                * We do not accept Cash on Delivery (COD). All orders require online payment.
               </div>
             </div>
           </div>
