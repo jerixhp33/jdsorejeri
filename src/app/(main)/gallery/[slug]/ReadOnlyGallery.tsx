@@ -53,7 +53,6 @@ export default function ReadOnlyGallery({ layout }: { layout: any }) {
         src={layout.room_theme_url} 
         alt="Room" 
         className="absolute inset-0 w-full h-full object-cover z-0"
-        crossOrigin="anonymous"
       />
       
       {/* Lighting Gradient */}

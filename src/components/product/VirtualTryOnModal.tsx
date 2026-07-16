@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Download, ZoomIn, ZoomOut, Sparkles, ShoppingCart, Share2 } from 'lucide-react';
+import { X, Upload, Download, ZoomIn, ZoomOut, Sparkles, ShoppingCart, Share2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCart } from '@/hooks/useCart';
 import type { Product } from '@/types';
@@ -76,6 +76,48 @@ async function detectWallLightingDirection(imgUrl: string): Promise<'left' | 'ri
     img.src = imgUrl;
   });
 }
+
+const compressAndBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(event.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
+
 export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }: VirtualTryOnModalProps) {
   const [customWallImage, setCustomWallImage] = useState<string | null>(null);
   const [prevRoomThemeUrl, setPrevRoomThemeUrl] = useState<string | null>(null);
@@ -92,9 +134,8 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   const [wallCorners, setWallCorners] = useState<{x: number, y: number}[] | null>(null);
   const [warpMatrix, setWarpMatrix] = useState<string>('none');
   
-  // Live AR State
-  const [isArMode, setIsArMode] = useState(false);
-  const [arStream, setArStream] = useState<MediaStream | null>(null);
+  // UI State
+  const [showControls, setShowControls] = useState(true);
   
   const [galleryPosters, setGalleryPosters] = useState<RenderedPoster[]>([]);
   const [activePosterId, setActivePosterId] = useState<string | null>(null);
@@ -213,17 +254,14 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       return;
     }
     
-    // Cleanup previous object url if exists
-    if (customWallImage && customWallImage.startsWith('blob:')) {
-      URL.revokeObjectURL(customWallImage);
-    }
-    
-    const url = URL.createObjectURL(file);
-    setCustomWallImage(url);
-    setPrevRoomThemeUrl(customWallImage);
     setIsAutoDesigning(true);
+    let url = '';
     
     try {
+      url = await compressAndBase64(file);
+      setCustomWallImage(url);
+      setPrevRoomThemeUrl(customWallImage);
+
       // Smart Lighting Detection
       const direction = await detectWallLightingDirection(url);
       setLightSource(direction);
@@ -299,14 +337,12 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       let spreadX = 60, spreadY = 60, centerX = 0, centerY = 0;
       let scaleMult = 1;
       let activeBg = customWallImage;
-      if (!activeBg && !isArMode) {
+      if (!activeBg) {
          toast.error("Please upload a wall first!");
          setIsAutoDesigning(false);
          return;
       }
       
-      // If AR Mode, we skip detection or run detection on a snapshot?
-      // For now, if no custom wall image, we assume AR or blank. We only run ML on an image.
       if (activeBg) {
         const wallBounds = await detectWallBounds(activeBg);
         if (wallBounds) {
@@ -475,26 +511,6 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
 
   const handleBack = () => onClose();
 
-  const toggleArMode = async () => {
-    if (isArMode) {
-      setIsArMode(false);
-      if (arStream) {
-        arStream.getTracks().forEach(t => t.stop());
-        setArStream(null);
-      }
-    } else {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        setArStream(stream);
-        setIsArMode(true);
-        // Force light source to center for AR
-        setLightSource('center');
-      } catch (err) {
-        toast.error("Camera access denied or unavailable on this device.");
-      }
-    }
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -506,27 +522,9 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           className="fixed inset-0 z-[200] flex flex-col md:flex-row bg-black"
         >
           {/* Background Layer (Full Screen) */}
-          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-[#0a0a0a]">
             <AnimatePresence mode="popLayout">
-              {isArMode && (
-                <motion.video
-                  key="ar-video"
-                  ref={el => {
-                    if (el && arStream && el.srcObject !== arStream) {
-                      el.srcObject = arStream;
-                      el.play().catch(console.error);
-                    }
-                  }}
-                  autoPlay
-                  playsInline
-                  muted
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              )}
-              {!isArMode && prevRoomThemeUrl && (
+              {prevRoomThemeUrl && (
                 <motion.img 
                   key={prevRoomThemeUrl}
                   src={prevRoomThemeUrl} 
@@ -535,7 +533,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                   transition={{ duration: 1.2, ease: "easeInOut" }}
                 />
               )}
-              {!isArMode && customWallImage && (
+              {customWallImage && (
                 <motion.img 
                   key={customWallImage}
                   src={customWallImage} 
@@ -544,13 +542,24 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 1.2, ease: "easeInOut" }}
-                  crossOrigin="anonymous"
                 />
               )}
             </AnimatePresence>
           </div>
+
+          {/* Eye Toggle for Clean View */}
+          <div className="absolute top-4 right-4 z-[100] md:right-6">
+            <button
+              onClick={() => setShowControls(!showControls)}
+              className="p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white/70 hover:text-white border border-white/10 active:scale-95 transition-all shadow-lg"
+              title={showControls ? "Hide Controls" : "Show Controls"}
+            >
+              {showControls ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+
           {/* Mobile Header */}
-          <div className="md:hidden flex items-center justify-between p-4 bg-gradient-to-b from-black/80 to-transparent z-50 absolute top-0 w-full">
+          <div className={cn("md:hidden flex items-center justify-between p-4 bg-gradient-to-b from-black/80 to-transparent z-50 absolute top-0 w-full transition-opacity duration-300", showControls ? "opacity-100" : "opacity-0 pointer-events-none")}>
             <h3 className="font-display text-lg font-bold text-white tracking-wide truncate pr-4">
               {currentProduct.name}
             </h3>
@@ -563,7 +572,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           </div>
 
           {/* Left Panel */}
-          <div className="w-full md:w-[360px] lg:w-[420px] bg-black/80 md:bg-[#0c0c0c] border-r border-white/5 flex flex-col z-40 order-2 md:order-1 backdrop-blur-2xl md:backdrop-blur-none max-h-[45vh] md:max-h-none rounded-t-3xl md:rounded-none overflow-y-auto shadow-[0_-20px_40px_rgba(0,0,0,0.5)] md:shadow-none">
+          <div className={cn(
+            "w-full md:w-[360px] lg:w-[420px] bg-black/80 md:bg-[#0c0c0c] border-r border-white/5 flex flex-col z-40 order-2 md:order-1 backdrop-blur-2xl md:backdrop-blur-none max-h-[45vh] md:max-h-none rounded-t-3xl md:rounded-none overflow-y-auto shadow-[0_-20px_40px_rgba(0,0,0,0.5)] md:shadow-none transition-transform duration-500 ease-in-out",
+            showControls ? "translate-y-0 md:translate-x-0" : "translate-y-full md:-translate-x-full md:translate-y-0"
+          )}>
             
             <div className="hidden md:flex items-center justify-between p-6 border-b border-white/5">
               <h3 className="font-display text-xl font-bold text-white tracking-wide truncate">
@@ -604,19 +616,6 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                     <span className="text-xs font-bold text-luxe-accent">
                       {isAutoDesigning ? 'Detecting AI...' : 'Auto Design'}
                     </span>
-                  </button>
-                  <button 
-                    onClick={toggleArMode}
-                    className={cn(
-                      "flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all group active:scale-95",
-                      isArMode ? "bg-white/20 border-white" : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30"
-                    )}
-                  >
-                    <svg className={cn("w-5 h-5 transition-colors", isArMode ? "text-white" : "text-white/60 group-hover:text-white")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                      <circle cx="12" cy="13" r="4" />
-                    </svg>
-                    <span className={cn("text-xs font-medium", isArMode ? "text-white font-bold" : "text-white/80")}>Live AR</span>
                   </button>
                 </div>
               </div>
