@@ -67,14 +67,16 @@ export function DashboardSidebar() {
         </div>
       </div>
 
+      {/* ── Desktop & Mobile: Back Button ── */}
+      <div className="mb-6 col-span-1 md:block">
+        <Link prefetch={true} href="/" className="btn-glass !py-2 !px-4 text-sm group flex w-fit">
+          <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          Back to Home
+        </Link>
+      </div>
+
       {/* ── Desktop: vertical sidebar ── */}
       <div className="hidden md:block md:col-span-1 print:hidden">
-        <div className="mb-6">
-          <Link prefetch={true} href="/" className="btn-glass !py-2 !px-4 text-sm group">
-            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Back to Home
-          </Link>
-        </div>
         <div className="glass-card p-5 sticky top-24">
           {/* Avatar & name */}
           <div className="flex flex-col items-center text-center pb-5 border-b border-white/10 mb-5">

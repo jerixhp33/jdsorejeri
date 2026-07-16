@@ -636,7 +636,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-[80vw] max-w-[320px] h-[100dvh] bg-[#0a0a0a]/80 backdrop-blur-2xl border-l border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-l-[2rem] flex flex-col md:hidden overflow-hidden"
+              className="fixed top-0 right-0 bottom-0 z-50 w-[70vw] max-w-[280px] h-[100dvh] bg-[#0a0a0a]/80 backdrop-blur-2xl border-l border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-l-[2rem] flex flex-col md:hidden overflow-hidden"
             >
               <div className="side-edge-light" />
               
@@ -800,6 +800,12 @@ export function Navbar({ categories = [] }: NavbarProps) {
                   )}
 
                   <div className="space-y-1 mt-2">
+                    {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
+                      <Link prefetch={true} href="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-luxe-accent hover:bg-white/5 transition-all">
+                        <Settings className="w-4 h-4 flex-shrink-0" />
+                        Admin Panel
+                      </Link>
+                    )}
                     <button
                       onClick={() => { handleSignOut(); setMobileOpen(false); }}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-red-400 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 transition-all"
