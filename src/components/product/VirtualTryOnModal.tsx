@@ -12,7 +12,7 @@ import { createClient } from '@/lib/supabase/client';
 import Persp from 'perspective-transform';
 import { toJpeg } from 'html-to-image';
 import { detectWallBounds } from '@/lib/ml/wallDetector';
-import { ROOM_THEMES, FRAME_STYLES, GALLERY_PRESETS, RoomTheme, FrameStyle } from './VirtualTryOnConfig';
+import { FRAME_STYLES, GALLERY_PRESETS, FrameStyle } from './VirtualTryOnConfig';
 
 interface VirtualTryOnModalProps {
   isOpen: boolean;
@@ -77,7 +77,6 @@ async function detectWallLightingDirection(imgUrl: string): Promise<'left' | 'ri
   });
 }
 export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }: VirtualTryOnModalProps) {
-  const [roomTheme, setRoomTheme] = useState<RoomTheme>(ROOM_THEMES[0]);
   const [customWallImage, setCustomWallImage] = useState<string | null>(null);
   const [prevRoomThemeUrl, setPrevRoomThemeUrl] = useState<string | null>(null);
   
@@ -95,7 +94,16 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   
   // Live AR State
   const [isArMode, setIsArMode] = useState(false);
+  const [arStream, setArStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Hook to attach stream when video mounts
+  useEffect(() => {
+    if (videoRef.current && arStream) {
+      videoRef.current.srcObject = arStream;
+      videoRef.current.play().catch(console.error);
+    }
+  }, [videoRef.current, arStream, isArMode]);
   
   const [galleryPosters, setGalleryPosters] = useState<RenderedPoster[]>([]);
   const [activePosterId, setActivePosterId] = useState<string | null>(null);
@@ -202,7 +210,6 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     if (!isOpen && customWallImage && customWallImage.startsWith('blob:')) {
       URL.revokeObjectURL(customWallImage);
       setCustomWallImage(null);
-      setRoomTheme(ROOM_THEMES[0]);
     }
   }, [isOpen, customWallImage]);
 
@@ -222,7 +229,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     
     const url = URL.createObjectURL(file);
     setCustomWallImage(url);
-    setPrevRoomThemeUrl(roomTheme.url);
+    setPrevRoomThemeUrl(customWallImage);
     
     // Smart Lighting Detection
     const direction = await detectWallLightingDirection(url);
@@ -230,17 +237,14 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     
     // Reset input
     e.target.value = '';
-  }, [customWallImage, roomTheme]);
+  }, [customWallImage]);
 
   const handleAutoDesign = async () => {
     setIsAutoDesigning(true);
-    setPrevRoomThemeUrl(customWallImage || roomTheme.url);
+    setPrevRoomThemeUrl(customWallImage);
     
     try {
-      // 1. Choose Room Theme
-      const nextTheme = ROOM_THEMES[Math.floor(Math.random() * ROOM_THEMES.length)];
-      
-      // 2. Choose Layout
+      // 1. Choose Layout
       const layout = GALLERY_PRESETS[Math.floor(Math.random() * GALLERY_PRESETS.length)];
       const numSupporting = layout.posters.filter(p => !p.isHero).length;
       
@@ -267,13 +271,33 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
 
       // Edge ML Wall Detection
       let spreadX = 60, spreadY = 60, centerX = 0, centerY = 0;
-      const wallBounds = await detectWallBounds(customWallImage || roomTheme.url);
-      if (wallBounds) {
-        spreadX = wallBounds.width * 100 * 0.8;
-        spreadY = wallBounds.height * 100 * 0.8;
-        centerX = (wallBounds.x + wallBounds.width / 2) * 100 - 50;
-        centerY = (wallBounds.y + wallBounds.height / 2) * 100 - 50;
-        toast.success('Wall boundary detected via Edge ML!');
+      let scaleMult = 1;
+      let activeBg = customWallImage;
+      if (!activeBg && !isArMode) {
+         toast.error("Please upload a wall first!");
+         setIsAutoDesigning(false);
+         return;
+      }
+      
+      // If AR Mode, we skip detection or run detection on a snapshot?
+      // For now, if no custom wall image, we assume AR or blank. We only run ML on an image.
+      if (activeBg) {
+        const wallBounds = await detectWallBounds(activeBg);
+        if (wallBounds) {
+          spreadX = wallBounds.width * 100 * 0.8;
+          spreadY = wallBounds.height * 100 * 0.8;
+          centerX = (wallBounds.x + wallBounds.width / 2) * 100 - 50;
+          centerY = (wallBounds.y + wallBounds.height / 2) * 100 - 50;
+          // Scale posters down slightly if wall is small
+          scaleMult = Math.min(1.2, Math.max(0.4, wallBounds.width * 1.5));
+          toast.success('Wall boundary detected via Edge ML!');
+          
+          // Reset perspective when ML bounds are found
+          setIsPerspectiveMode(false);
+          setWallCorners(null);
+        } else {
+          toast.error('AI could not detect a wall perfectly, using full canvas.');
+        }
       }
 
       // 4. Build Layout
@@ -297,7 +321,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
             isHero: true,
             xPercent: centerX + (pos.xPercent * (spreadX / 60)),
             yPercent: centerY + (pos.yPercent * (spreadY / 60)),
-            scaleFactor: baseHeroScale * pos.scaleFactor,
+            scaleFactor: baseHeroScale * pos.scaleFactor * scaleMult,
             rotation: rotation,
             frame: frameStyle
           });
@@ -316,7 +340,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                 isHero: false,
                 xPercent: centerX + (pos.xPercent * (spreadX / 60)),
                 yPercent: centerY + (pos.yPercent * (spreadY / 60)),
-                scaleFactor: baseSuppScale * pos.scaleFactor,
+                scaleFactor: baseSuppScale * pos.scaleFactor * scaleMult,
                 rotation: rotation,
                 frame: frameStyle
               });
@@ -325,7 +349,6 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
         }
       });
       
-      setRoomTheme(nextTheme);
       setCustomWallImage(null);
       setGalleryPosters(newGallery);
       setGlobalScale(1);
@@ -333,11 +356,6 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       // Clear prev theme url after animation duration
       setTimeout(() => setPrevRoomThemeUrl(null), 300);
       setGalleryPosters(newGallery);
-      if (wallBounds) {
-        // Automatically disable perspective mode if auto design is used so boundaries make sense visually
-        setIsPerspectiveMode(false);
-        setWallCorners(null);
-      }
     } catch (err) {
       console.error(err);
       toast.error('Failed to auto-design layout.');
@@ -407,7 +425,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       const slug = Math.random().toString(36).substring(2, 8);
       const { error } = await supabase.from('saved_layouts').insert({
         slug,
-        room_theme_url: customWallImage || roomTheme.url,
+        room_theme_url: customWallImage || '',
         light_source: lightSource,
         wall_corners: wallCorners ? JSON.parse(JSON.stringify(wallCorners)) : null,
         posters: JSON.parse(JSON.stringify(galleryPosters))
@@ -434,16 +452,15 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   const toggleArMode = async () => {
     if (isArMode) {
       setIsArMode(false);
-      if (videoRef.current && videoRef.current.srcObject) {
-        (videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
+      if (arStream) {
+        arStream.getTracks().forEach(t => t.stop());
+        setArStream(null);
       }
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        setArStream(stream);
         setIsArMode(true);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
         // Force light source to center for AR
         setLightSource('center');
       } catch (err) {
@@ -514,7 +531,9 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                     ) : (
                       <Sparkles className="w-5 h-5 text-luxe-accent" />
                     )}
-                    <span className="text-xs font-bold text-luxe-accent">Auto Design</span>
+                    <span className="text-xs font-bold text-luxe-accent">
+                      {isAutoDesigning ? 'Detecting AI...' : 'Auto Design'}
+                    </span>
                   </button>
                   <button 
                     onClick={toggleArMode}
@@ -570,7 +589,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
 
           {/* Main Viewport */}
           <div 
-            className="flex-1 relative overflow-hidden bg-black/90 flex items-center justify-center h-[55vh] md:h-auto" 
+            className="flex-1 relative overflow-hidden bg-black flex items-center justify-center h-full min-h-[55vh]" 
             ref={containerRef}
             onPointerDown={() => setActivePosterId(null)}
           >
@@ -599,10 +618,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                 />
               )}
               
-              {!isArMode && (
+              {!isArMode && customWallImage && (
                 <motion.img 
-                  key={customWallImage || roomTheme.url}
-                  src={customWallImage || roomTheme.url} 
+                  key={customWallImage}
+                  src={customWallImage} 
                   alt="Room" 
                   ref={bgImageRef}
                   className="absolute inset-0 w-full h-full object-cover z-0"
