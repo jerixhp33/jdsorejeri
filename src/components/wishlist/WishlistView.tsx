@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { Heart, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useHaptic } from '@/hooks/useHaptic';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
 
@@ -16,7 +17,8 @@ import { toast } from 'sonner';
 
 export function WishlistView() {
   const { items, loading, toggle, remove } = useWishlist();
-  const { addItem } = useCart();
+  const { addItem, items: cartItems } = useCart();
+  const haptic = useHaptic();
   const [addingItem, setAddingItem] = useState<string | null>(null);
 
   const router = useRouter();
@@ -90,13 +92,31 @@ export function WishlistView() {
 
               return (
                 <motion.div
-                  key={item.id}
+                  key={product.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="glass-card overflow-hidden flex flex-row items-stretch"
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative overflow-hidden rounded-2xl h-[160px] sm:h-[220px]"
                 >
-                  <Link prefetch={true} href={`/product/${product.slug}`} className="block w-28 sm:w-48 shrink-0 relative">
+                  {/* Background swipe-to-delete action layer */}
+                  <div className="absolute inset-0 bg-red-500/20 flex items-center justify-end px-6 z-0">
+                    <Heart className="w-6 h-6 text-red-500 fill-current" />
+                  </div>
+
+                  <motion.div
+                    drag="x"
+                    dragConstraints={{ left: -100, right: 0 }}
+                    dragElastic={0.2}
+                    onDragEnd={(e, info) => {
+                      if (info.offset.x < -80) {
+                        haptic('heavy');
+                        toggle(product.id);
+                      }
+                    }}
+                    className="flex bg-black glass-card h-full relative z-10"
+                  >
+                    <Link prefetch={true} href={`/product/${product.slug}`} className="block w-28 sm:w-48 shrink-0 relative pointer-events-none md:pointer-events-auto">
                     {img ? (
                       <Image src={img.url} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 112px, 200px" />
                     ) : (
@@ -143,6 +163,7 @@ export function WishlistView() {
                       </button>
                     </div>
                   </div>
+                  </motion.div>
                 </motion.div>
               );
             })}

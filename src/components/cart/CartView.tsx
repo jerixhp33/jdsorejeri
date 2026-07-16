@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, X, ChevronLeft } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
+import { useHaptic } from '@/hooks/useHaptic';
 import { useCouponStore } from '@/hooks/useCouponStore';
 import { formatCurrency, cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -14,6 +15,7 @@ import { toast } from 'sonner';
 export function CartView() {
   const { items, itemCount, subtotal, deliveryCharge, total, loading, updateQuantity, removeItem, deliverySettings } =
     useCart();
+  const haptic = useHaptic();
     
   const { appliedCoupon, setAppliedCoupon } = useCouponStore();
   const [couponCode, setCouponCode] = useState('');
@@ -159,90 +161,108 @@ export function CartView() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="glass-card p-4 md:p-5"
+                    className="relative overflow-hidden rounded-2xl"
                   >
-                    <div className="flex gap-4">
-                      {/* Image */}
-                      <Link prefetch={true} href={`/product/${item.product?.slug}`}
-                        className="flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-luxe-dark"
-                      >
-                        {primaryImage ? (
-                          <Image
-                            src={primaryImage.url}
-                            alt={item.product?.name || 'Product'}
-                            width={96}
-                            height={96}
-                            className="object-cover w-full h-full"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white/10">
-                            ✦
-                          </div>
-                        )}
-                      </Link>
+                    {/* Background swipe-to-delete action layer */}
+                    <div className="absolute inset-0 bg-red-500/20 flex items-center justify-end px-6 z-0">
+                      <Trash2 className="w-6 h-6 text-red-500" />
+                    </div>
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
+                    <motion.div
+                      drag="x"
+                      dragConstraints={{ left: -100, right: 0 }}
+                      dragElastic={0.2}
+                      onDragEnd={(e, info) => {
+                        if (info.offset.x < -80) {
+                          haptic('heavy');
+                          removeItem(item.id);
+                        }
+                      }}
+                      className="glass-card p-4 md:p-5 relative z-10 bg-black"
+                    >
+                      <div className="flex gap-4">
+                        {/* Image */}
                         <Link prefetch={true} href={`/product/${item.product?.slug}`}
-                          className="text-white text-sm font-medium hover:text-luxe-accent transition-colors line-clamp-2 mb-1"
+                          className="flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-luxe-dark pointer-events-none md:pointer-events-auto"
                         >
-                          {item.product?.name}
+                          {primaryImage ? (
+                            <Image
+                              src={primaryImage.url}
+                              alt={item.product?.name || 'Product'}
+                              width={96}
+                              height={96}
+                              className="object-cover w-full h-full"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white/10">
+                              ✦
+                            </div>
+                          )}
                         </Link>
 
-                        {/* Size badge */}
-                        {item.poster_size && (
-                          <span className="badge-luxe text-[10px] mb-2">
-                            {item.poster_size.label}
-                          </span>
-                        )}
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <Link prefetch={true} href={`/product/${item.product?.slug}`}
+                            className="text-white text-sm font-medium hover:text-luxe-accent transition-colors line-clamp-2 mb-1"
+                          >
+                            {item.product?.name}
+                          </Link>
 
-                        <div className="flex items-center justify-between mt-2">
-                          {/* Price */}
-                          <p className="text-white font-semibold">
-                            {formatCurrency(item.unit_price * item.quantity)}
-                          </p>
-
-                          {/* Quantity control */}
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center"
-                              aria-label="Decrease quantity"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <span className="w-8 text-center text-white text-sm">
-                              {item.quantity}
+                          {/* Size badge */}
+                          {item.poster_size && (
+                            <span className="badge-luxe text-[10px] mb-2">
+                              {item.poster_size.label}
                             </span>
-                            <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              disabled={
-                                item.quantity >= (
-                                  item.poster_size?.stock ?? item.product?.stock ?? 0
-                                )
-                              }
-                              className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
-                              aria-label="Increase quantity"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
+                          )}
+
+                          <div className="flex items-center justify-between mt-2">
+                            {/* Price */}
+                            <p className="text-white font-semibold">
+                              {formatCurrency(item.unit_price * item.quantity)}
+                            </p>
+
+                            {/* Quantity control */}
+                            <div className="flex items-center gap-1 relative z-20">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); haptic('light'); updateQuantity(item.id, item.quantity - 1); }}
+                                className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center"
+                                aria-label="Decrease quantity"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <span className="w-8 text-center text-white text-sm">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); haptic('light'); updateQuantity(item.id, item.quantity + 1); }}
+                                disabled={
+                                  item.quantity >= (
+                                    item.poster_size?.stock ?? item.product?.stock ?? 0
+                                  )
+                                }
+                                className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+                                aria-label="Increase quantity"
+                              >
+                                <Plus className="w-3 h-3" />
+                              </button>
+                            </div>
                           </div>
+
+                          <p className="text-white/30 text-xs mt-1">
+                            {formatCurrency(item.unit_price)} each
+                          </p>
                         </div>
 
-                        <p className="text-white/30 text-xs mt-1">
-                          {formatCurrency(item.unit_price)} each
-                        </p>
+                        {/* Desktop Remove Button */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); haptic('heavy'); removeItem(item.id); }}
+                          className="hidden md:flex flex-shrink-0 p-3 sm:p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all relative z-20 h-fit"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
-
-                      {/* Remove */}
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="flex-shrink-0 p-3 sm:p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all"
-                        aria-label="Remove item"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    </motion.div>
                   </motion.div>
                 );
               })}

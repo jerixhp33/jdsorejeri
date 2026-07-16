@@ -11,6 +11,7 @@ import { PushNotificationPrompt } from '@/components/shared/PushNotificationProm
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/Providers';
 import { ContentProtector } from '@/components/shared/ContentProtector';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import '@/styles/globals.css';
@@ -114,6 +115,7 @@ export default function RootLayout({
             <PushNotificationPrompt />
             <PageLoader />
             {children}
+            <MobileBottomNav />
             <Toaster
               position="top-right"
               expand={true}

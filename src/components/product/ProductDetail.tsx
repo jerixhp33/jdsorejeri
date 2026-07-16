@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useHaptic } from '@/hooks/useHaptic';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { Product, PosterSize, Review } from '@/types';
 import { toast } from 'sonner';
@@ -146,6 +147,8 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     }
   }, [availableStock, quantity]);
 
+  const haptic = useHaptic();
+
   const handleAddToCart = async () => {
     const hasVariants = product.sizes && product.sizes.length > 0;
     if (hasVariants && !selectedSize) {
@@ -153,6 +156,8 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
       return;
     }
     if (!inStock || cartQuantity >= dbStock) return;
+    
+    haptic('heavy');
     setAddingToCart(true);
     await addItem(
       product.id,
@@ -586,7 +591,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             {/* Wishlist + Share */}
             <div className="flex items-center gap-3 mb-8">
               <button
-                onClick={() => toggle(product.id)}
+                onClick={() => { haptic('light'); toggle(product.id); }}
                 className={cn(
                   'flex-1 flex items-center justify-center gap-2 py-3 rounded-full border text-sm font-medium transition-all backdrop-blur-md',
                   wishlisted

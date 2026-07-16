@@ -8,6 +8,7 @@ import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-rea
 import { useInView } from 'react-intersection-observer';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useHaptic } from '@/hooks/useHaptic';
 import { formatCurrency, cn } from '@/lib/utils';
 import { Tooltip } from '@/components/shared/Tooltip';
 import type { Product } from '@/types';
@@ -68,15 +69,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     ? activeSizes.some((s) => s.stock > 0)
     : (product.stock ?? 0) > 0;
 
+  const haptic = useHaptic();
+
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    haptic('light');
     router.push(`/product/${product.slug}`);
   };
 
   const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    haptic('light');
     await toggle(product.id);
   };
 
