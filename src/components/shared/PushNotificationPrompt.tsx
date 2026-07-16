@@ -32,7 +32,7 @@ export function PushNotificationPrompt() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [user, isSupported, isSubscribed]);
+  }, [user?.id, isSupported, isSubscribed]);
 
   const handleSubscribeClick = async () => {
     setIsSubscribing(true);
