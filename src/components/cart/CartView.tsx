@@ -164,7 +164,7 @@ export function CartView() {
                     className="relative overflow-hidden rounded-2xl"
                   >
                     <div className="absolute inset-0 bg-red-500/20 flex items-center justify-end px-6 z-0">
-                      <motion.div initial={{ scale: 0.8 }} whileInView={{ scale: 1 }} transition={{ type: "spring", stiffness: 300 }}>
+                      <motion.div initial={{ scale: 0.5, rotate: -20 }} whileInView={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
                         <Trash2 className="w-6 h-6 text-red-500" />
                       </motion.div>
                     </div>
@@ -173,9 +173,9 @@ export function CartView() {
                       drag="x"
                       dragConstraints={{ left: -100, right: 0 }}
                       dragElastic={0.1}
-                      dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+                      dragTransition={{ bounceStiffness: 800, bounceDamping: 25 }}
                       onDragEnd={(e, info) => {
-                        if (info.offset.x < -60) {
+                        if (info.offset.x < -50 || info.velocity.x < -500) {
                           haptic('heavy');
                           removeItem(item.id);
                         }

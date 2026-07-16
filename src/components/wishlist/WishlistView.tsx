@@ -101,15 +101,18 @@ export function WishlistView() {
                 >
                   {/* Background swipe-to-delete action layer */}
                   <div className="absolute inset-0 bg-red-500/20 flex items-center justify-end px-6 z-0">
-                    <Heart className="w-6 h-6 text-red-500 fill-current" />
+                    <motion.div initial={{ scale: 0.5, rotate: -20 }} whileInView={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
+                      <Heart className="w-6 h-6 text-red-500 fill-current" />
+                    </motion.div>
                   </div>
 
                   <motion.div
                     drag="x"
                     dragConstraints={{ left: -100, right: 0 }}
-                    dragElastic={0.2}
+                    dragElastic={0.1}
+                    dragTransition={{ bounceStiffness: 800, bounceDamping: 25 }}
                     onDragEnd={(e, info) => {
-                      if (info.offset.x < -80) {
+                      if (info.offset.x < -50 || info.velocity.x < -500) {
                         haptic('heavy');
                         toggle(product.id);
                       }
