@@ -12,7 +12,7 @@ const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: s
   order:   { icon: Package,   color: 'text-blue-400',   bg: 'bg-blue-400/10' },
   product: { icon: Star,      color: 'text-purple-400', bg: 'bg-purple-400/10' },
   offer:   { icon: Tag,       color: 'text-luxe-accent', bg: 'bg-luxe-accent/10' },
-  system:  { icon: Settings,  color: 'text-white/50',   bg: 'bg-white/5' },
+  system:  { icon: Settings,  color: 'text-foreground/',   bg: 'bg-foreground/' },
   admin:   { icon: Info,      color: 'text-red-400',    bg: 'bg-red-400/10' },
 };
 
@@ -38,8 +38,8 @@ function NotificationItem({
       className={cn(
         'flex items-start gap-4 p-4 rounded-xl border transition-all',
         notification.is_read
-          ? 'border-white/5 bg-white/2 opacity-60 hover:opacity-100'
-          : 'border-white/10 bg-white/5 cursor-pointer hover:bg-white/8',
+          ? 'border-foreground/ bg-foreground/ opacity-60 hover:opacity-100'
+          : 'border-foreground/ bg-foreground/ cursor-pointer hover:bg-foreground/',
         notification.action_url && 'cursor-pointer'
       )}
     >
@@ -51,15 +51,15 @@ function NotificationItem({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className={cn('text-sm md:text-base font-medium leading-snug', notification.is_read ? 'text-white/60' : 'text-white')}>
+          <p className={cn('text-sm md:text-base font-medium leading-snug', notification.is_read ? 'text-foreground/' : 'text-foreground')}>
             {notification.title}
           </p>
           {!notification.is_read && (
             <Circle className="w-2.5 h-2.5 text-luxe-accent fill-luxe-accent flex-shrink-0 mt-1" />
           )}
         </div>
-        <p className="text-xs md:text-sm text-white/50 mt-1 leading-relaxed">{notification.body}</p>
-        <p className="text-[11px] md:text-xs text-white/30 mt-1.5">{formatRelativeTime(notification.created_at)}</p>
+        <p className="text-xs md:text-sm text-foreground/ mt-1 leading-relaxed">{notification.body}</p>
+        <p className="text-[11px] md:text-xs text-foreground/ mt-1.5">{formatRelativeTime(notification.created_at)}</p>
       </div>
     </div>
   );
@@ -76,8 +76,8 @@ export function NotificationsView() {
           <div className="flex items-center gap-3">
             <Bell className="w-5 h-5 text-luxe-accent" />
             <div>
-              <h1 className="font-display text-xl font-bold text-white">Notifications</h1>
-              <p className="text-white/40 text-xs mt-0.5">
+              <h1 className="font-display text-xl font-bold text-foreground">Notifications</h1>
+              <p className="text-foreground/ text-xs mt-0.5">
                 {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
               </p>
             </div>
@@ -85,7 +85,7 @@ export function NotificationsView() {
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className="flex items-center gap-1.5 text-xs text-luxe-accent hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/10"
+              className="flex items-center gap-1.5 text-xs text-luxe-accent hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-foreground/"
             >
               <CheckCheck className="w-3.5 h-3.5" />
               Mark all read
@@ -104,14 +104,14 @@ export function NotificationsView() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 rounded-xl bg-white/5 animate-pulse" />
+              <div key={i} className="h-16 rounded-xl bg-foreground/ animate-pulse" />
             ))}
           </div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Bell className="w-10 h-10 text-white/10 mb-3" />
-            <p className="text-white/40 text-sm">No notifications yet</p>
-            <p className="text-white/20 text-xs mt-1">We'll notify you about orders and offers</p>
+            <Bell className="w-10 h-10 text-foreground/ mb-3" />
+            <p className="text-foreground/ text-sm">No notifications yet</p>
+            <p className="text-foreground/ text-xs mt-1">We'll notify you about orders and offers</p>
           </div>
         ) : (
           <div className="space-y-2">

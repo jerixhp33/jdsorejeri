@@ -100,7 +100,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         draggable={false}
       >
         {/* Image Container */}
-        <div className="relative aspect-[3/4] overflow-hidden rounded-t-[1rem] bg-luxe-gray">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-t-[1rem] bg-secondary">
           {images.length > 0 ? (
             <div 
               className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
@@ -128,8 +128,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               ))}
             </div>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-luxe-gray">
-              <span className="text-white/20 text-4xl">✦</span>
+            <div className="absolute inset-0 flex items-center justify-center bg-secondary">
+              <span className="text-foreground/ text-4xl">✦</span>
             </div>
           )}
 
@@ -138,14 +138,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             <>
               <button
                 onClick={prevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 border border-white/20 text-white hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100 z-20"
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 border border-foreground/ text-foreground hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100 z-20"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={nextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 border border-white/20 text-white hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100 z-20"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 border border-foreground/ text-foreground hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100 z-20"
                 aria-label="Next image"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -153,7 +153,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               {/* Dots indicator - moves up when cart button slides up */}
               <div className="absolute bottom-16 sm:bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 transition-all duration-300 sm:group-hover:bottom-16">
                 {images.map((_, idx) => (
-                  <div key={idx} className={cn("transition-all duration-300 rounded-full", idx === imageIndex ? "w-2 h-2 bg-white" : "w-1.5 h-1.5 bg-white/40")} />
+                  <div key={idx} className={cn("transition-all duration-300 rounded-full", idx === imageIndex ? "w-2 h-2 bg-white" : "w-1.5 h-1.5 bg-foreground/")} />
                 ))}
               </div>
             </>
@@ -176,7 +176,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               <span className="inline-block px-2 py-0.5 rounded-full bg-[#1a150f]/90 border border-luxe-accent/30 text-luxe-accent text-[10px] font-semibold tracking-wider uppercase">Best Seller</span>
             )}
             {product.is_trending && (
-              <span className="inline-block px-2 py-0.5 rounded-full bg-black/70 border border-white/20 text-white text-[10px] font-semibold tracking-wider uppercase">Trending</span>
+              <span className="inline-block px-2 py-0.5 rounded-full bg-black/70 border border-foreground/ text-foreground text-[10px] font-semibold tracking-wider uppercase">Trending</span>
             )}
             {!isInStock && (
               <span className="inline-block px-2 py-0.5 rounded-full bg-[#200505]/90 border border-red-500/30 text-red-400 text-[10px] font-semibold tracking-wider uppercase">Out of Stock</span>
@@ -198,7 +198,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 'p-2 rounded-full border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center',
                 wishlisted
                   ? 'bg-[#200505]/90 border-red-500/40 text-red-400'
-                  : 'bg-black/60 border-white/20 text-white hover:bg-black/80'
+                  : 'bg-black/60 border-foreground/ text-foreground hover:bg-black/80'
               )}
               aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
@@ -220,7 +220,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   'w-full py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 transition-all duration-200 min-h-[36px]',
                   isInStock
                     ? 'bg-white text-black hover:bg-luxe-accent'
-                    : 'bg-black/80 border border-white/10 text-white/50 cursor-not-allowed'
+                    : 'bg-black/80 border border-foreground/ text-foreground/ cursor-not-allowed'
                 )}
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
@@ -237,8 +237,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* Product Info */}
         <div className="p-3 sm:p-4 flex flex-col justify-between h-[90px] sm:h-[104px]">
           <div>
-            <p className="text-white/40 text-[10px] sm:text-[11px] mb-0.5 leading-none">{product.category?.name}</p>
-            <h3 className="text-white text-xs sm:text-sm font-medium leading-snug line-clamp-2 group-hover:text-luxe-accent transition-colors">
+            <p className="text-foreground/ text-[10px] sm:text-[11px] mb-0.5 leading-none">{product.category?.name}</p>
+            <h3 className="text-foreground text-xs sm:text-sm font-medium leading-snug line-clamp-2 group-hover:text-luxe-accent transition-colors">
               {product.name}
             </h3>
           </div>
@@ -246,15 +246,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center h-6">
               {!isInStock ? (
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-black/70 border border-white/20 text-white/80 text-[10px] font-semibold tracking-wider uppercase">
+                <span className="inline-block px-2.5 py-0.5 rounded-full bg-black/70 border border-foreground/ text-foreground/ text-[10px] font-semibold tracking-wider uppercase">
                   Coming Soon
                 </span>
               ) : (
                 <div className="flex items-baseline gap-1">
                   {hasVariants && displayPrice > 0 && (
-                    <span className="text-white/40 text-[10px] uppercase tracking-widest">From</span>
+                    <span className="text-foreground/ text-[10px] uppercase tracking-widest">From</span>
                   )}
-                  <span className="text-white font-semibold text-sm sm:text-base">
+                  <span className="text-foreground font-semibold text-sm sm:text-base">
                     {displayPrice > 0 ? formatCurrency(displayPrice) : 'Coming Soon'}
                   </span>
                 </div>
@@ -263,7 +263,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {(product.average_rating ?? 0) > 0 && (
                <div className="flex items-center gap-0.5">
                  <Star className="w-3 h-3 text-luxe-accent fill-current" />
-                 <span className="text-white/50 text-xs">
+                 <span className="text-foreground/ text-xs">
                    {(product.average_rating ?? 0).toFixed(1)}
                  </span>
                </div>

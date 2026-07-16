@@ -12,9 +12,9 @@ export function SEOSection({ formData, updateField, onGenerateSEO, isGeneratingS
     <div className="space-y-6">
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-white/50 text-xs uppercase tracking-wide block">SEO Title</label>
+          <label className="text-foreground/ text-xs uppercase tracking-wide block">SEO Title</label>
           <div className="flex items-center gap-4">
-            <span className="text-white/30 text-xs">{formData.seo_title?.length || 0} / 60</span>
+            <span className="text-foreground/ text-xs">{formData.seo_title?.length || 0} / 60</span>
             <button 
               onClick={onGenerateSEO}
               disabled={isGeneratingSEO || !formData.name}
@@ -36,8 +36,8 @@ export function SEOSection({ formData, updateField, onGenerateSEO, isGeneratingS
       
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-white/50 text-xs uppercase tracking-wide block">SEO Description</label>
-          <span className="text-white/30 text-xs">{formData.seo_description?.length || 0} / 160</span>
+          <label className="text-foreground/ text-xs uppercase tracking-wide block">SEO Description</label>
+          <span className="text-foreground/ text-xs">{formData.seo_description?.length || 0} / 160</span>
         </div>
         <textarea 
           value={formData.seo_description}
@@ -49,7 +49,7 @@ export function SEOSection({ formData, updateField, onGenerateSEO, isGeneratingS
       </div>
 
       <div>
-        <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Keywords</label>
+        <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Keywords</label>
         <input 
           type="text"
           value={formData.seo_keywords}
@@ -61,8 +61,8 @@ export function SEOSection({ formData, updateField, onGenerateSEO, isGeneratingS
 
       {/* Google Preview */}
       {(formData.seo_title || formData.name) && (
-        <div className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10">
-          <p className="text-xs text-white/50 uppercase tracking-wide mb-3">Search Engine Preview</p>
+        <div className="mt-6 p-4 bg-foreground/ rounded-xl border border-foreground/">
+          <p className="text-xs text-foreground/ uppercase tracking-wide mb-3">Search Engine Preview</p>
           <div className="space-y-1">
             <p className="text-sm text-[#8ab4f8] truncate cursor-pointer hover:underline">
               {formData.seo_title || formData.name} - JD Store

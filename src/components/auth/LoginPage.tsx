@@ -74,7 +74,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-luxe-black flex">
+    <div className="min-h-screen bg-background flex">
       {/* Left decorative panel - hidden on mobile */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 relative overflow-hidden items-center justify-center">
         {/* Background gradient */}
@@ -96,15 +96,15 @@ export function LoginPage() {
         <div className="relative z-10 p-12 max-w-lg">
           <Link prefetch={true} href="/" className="flex items-center gap-2.5 mb-12">
             <JDLogo size={42} />
-            <span className="font-display text-2xl font-bold text-white">JD Store</span>
+            <span className="font-display text-2xl font-bold text-foreground">JD Store</span>
           </Link>
 
-          <h1 className="font-display text-4xl xl:text-5xl font-bold text-white mb-4 leading-tight">
+          <h1 className="font-display text-4xl xl:text-5xl font-bold text-foreground mb-4 leading-tight">
             Art for your <span className="text-gradient-gold">walls</span>,
             <br />
             jewelry for your <span className="text-gradient-gold">soul</span>
           </h1>
-          <p className="text-white/50 text-base leading-relaxed mb-12">
+          <p className="text-foreground/ text-base leading-relaxed mb-12">
             Join thousands of customers who trust JD Store for premium wall posters and handcrafted
             earrings delivered across Tamil Nadu.
           </p>
@@ -115,7 +115,7 @@ export function LoginPage() {
                 <div className="w-8 h-8 rounded-lg bg-luxe-accent/15 border border-luxe-accent/25 flex items-center justify-center flex-shrink-0">
                   <item.icon className="w-4 h-4 text-luxe-accent" />
                 </div>
-                <span className="text-white/60 text-sm">{item.text}</span>
+                <span className="text-foreground/ text-sm">{item.text}</span>
               </div>
             ))}
           </div>
@@ -133,11 +133,11 @@ export function LoginPage() {
           {/* Mobile logo */}
           <Link prefetch={true} href="/" className="flex items-center gap-2.5 mb-10 lg:hidden">
             <JDLogo size={34} />
-            <span className="font-display text-xl font-bold text-white">JD Store</span>
+            <span className="font-display text-xl font-bold text-foreground">JD Store</span>
           </Link>
 
-          <h2 className="font-display text-3xl font-bold text-white mb-2">Welcome back</h2>
-          <p className="text-white/50 text-sm mb-10">
+          <h2 className="font-display text-3xl font-bold text-foreground mb-2">Welcome back</h2>
+          <p className="text-foreground/ text-sm mb-10">
             Sign in with your Google account to continue
           </p>
 
@@ -152,7 +152,7 @@ export function LoginPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white text-black font-semibold py-4 rounded-2xl hover:bg-white/90 transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-3 bg-white text-black font-semibold py-4 rounded-2xl hover:bg-foreground/ transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <div className="w-5 h-5 rounded-full border-2 border-black/20 border-t-black animate-spin" />
@@ -180,23 +180,23 @@ export function LoginPage() {
           </button>
 
           <div className="mt-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="text-white/25 text-xs">only Google Sign-In supported</span>
-            <div className="h-px flex-1 bg-white/10" />
+            <div className="h-px flex-1 bg-foreground/" />
+            <span className="text-foreground/ text-xs">only Google Sign-In supported</span>
+            <div className="h-px flex-1 bg-foreground/" />
           </div>
 
-          <p className="text-white/30 text-xs text-center mt-8 leading-relaxed">
+          <p className="text-foreground/ text-xs text-center mt-8 leading-relaxed">
             By signing in, you agree to our{' '}
-            <Link prefetch={true} href="/about#terms" className="text-white/50 hover:text-white underline">
+            <Link prefetch={true} href="/about#terms" className="text-foreground/ hover:text-foreground underline">
               Terms
             </Link>{' '}
             and{' '}
-            <Link prefetch={true} href="/about#privacy" className="text-white/50 hover:text-white underline">
+            <Link prefetch={true} href="/about#privacy" className="text-foreground/ hover:text-foreground underline">
               Privacy Policy
             </Link>
           </p>
 
-          <div className="mt-8 pt-8 border-t border-white/10 text-center">
+          <div className="mt-8 pt-8 border-t border-foreground/ text-center">
             <Link prefetch={true} href="/" className="btn-glass !py-2 !px-4 text-xs group mt-4">
               <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
               Back to store

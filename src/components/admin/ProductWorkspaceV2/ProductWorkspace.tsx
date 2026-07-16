@@ -362,17 +362,17 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       data-lenis-prevent="true"
       className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col overflow-hidden"
     >
-      <div className="h-14 border-b border-white/10 flex items-center justify-between px-6 flex-shrink-0 bg-black/50">
+      <div className="h-14 border-b border-foreground/ flex items-center justify-between px-6 flex-shrink-0 bg-black/50">
         <div className="flex items-center gap-4">
-          <h1 className="text-white font-display text-lg">
+          <h1 className="text-foreground font-display text-lg">
             {initialData ? 'Edit Product' : 'New Product'}
           </h1>
           {/* Save Status Indicator */}
-          <div className="text-xs text-white/50">
+          <div className="text-xs text-foreground/">
             {isSaving ? 'Saving...' : lastSavedTime ? `Saved at ${lastSavedTime.toLocaleTimeString()}` : hasUnsavedChanges ? 'Unsaved changes' : 'Draft'}
           </div>
         </div>
-        <button onClick={handleCancel} className="text-white/50 hover:text-white text-sm">
+        <button onClick={handleCancel} className="text-foreground/ hover:text-foreground text-sm">
           Close
         </button>
       </div>
@@ -384,10 +384,10 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
           <div className="max-w-3xl mx-auto space-y-12">
             {SECTIONS.map((section) => (
               <div key={section.id} id={`section-${section.id}`} className="scroll-mt-10">
-                <h3 className="text-white text-xl font-semibold mb-6 border-b border-white/10 pb-2">
+                <h3 className="text-foreground text-xl font-semibold mb-6 border-b border-foreground/ pb-2">
                   {section.label}
                 </h3>
-                <div className="glass-card p-6 md:p-8 rounded-xl shadow-xl border-white/5">
+                <div className="glass-card p-6 md:p-8 rounded-xl shadow-xl border-foreground/">
                   {renderSection(section.id)}
                 </div>
               </div>

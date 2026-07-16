@@ -152,8 +152,8 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-white">Testimonials</h1>
-          <p className="text-white/40 text-sm mt-1">{items.length} total · {items.filter((t) => t.is_active).length} active</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">Testimonials</h1>
+          <p className="text-foreground/ text-sm mt-1">{items.length} total · {items.filter((t) => t.is_active).length} active</p>
         </div>
         <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-luxe-accent text-black font-semibold text-sm hover:bg-luxe-accent/90 transition-all">
           <Plus className="w-4 h-4" />
@@ -164,8 +164,8 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
       {/* List */}
       {items.length === 0 ? (
         <div className="glass-card p-12 text-center">
-          <Star className="w-10 h-10 text-white/20 mx-auto mb-3" />
-          <p className="text-white/40">No testimonials yet. Add your first one.</p>
+          <Star className="w-10 h-10 text-foreground/ mx-auto mb-3" />
+          <p className="text-foreground/">No testimonials yet. Add your first one.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -182,15 +182,15 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
                 <button
                   onClick={() => moveOrder(t, -1)}
                   disabled={idx === 0}
-                  className="p-1 rounded text-white/30 hover:text-white disabled:opacity-20 transition-colors"
+                  className="p-1 rounded text-foreground/ hover:text-foreground disabled:opacity-20 transition-colors"
                 >
                   <ChevronUp className="w-3.5 h-3.5" />
                 </button>
-                <span className="text-white/20 text-[10px] text-center">{t.display_order}</span>
+                <span className="text-foreground/ text-[10px] text-center">{t.display_order}</span>
                 <button
                   onClick={() => moveOrder(t, 1)}
                   disabled={idx === items.length - 1}
-                  className="p-1 rounded text-white/30 hover:text-white disabled:opacity-20 transition-colors"
+                  className="p-1 rounded text-foreground/ hover:text-foreground disabled:opacity-20 transition-colors"
                 >
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
@@ -199,9 +199,9 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
-                  <p className="text-white font-medium text-sm">{t.author_name}</p>
+                  <p className="text-foreground font-medium text-sm">{t.author_name}</p>
                   {t.author_location && (
-                    <span className="text-white/30 text-xs">· {t.author_location}</span>
+                    <span className="text-foreground/ text-xs">· {t.author_location}</span>
                   )}
                   {/* Stars */}
                   <div className="flex items-center gap-0.5 ml-auto">
@@ -210,13 +210,13 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
                         key={i}
                         className={cn(
                           'w-3 h-3',
-                          i < t.rating ? 'text-luxe-accent fill-current' : 'text-white/20'
+                          i < t.rating ? 'text-luxe-accent fill-current' : 'text-foreground/'
                         )}
                       />
                     ))}
                   </div>
                 </div>
-                <p className="text-white/50 text-sm line-clamp-2">{t.body}</p>
+                <p className="text-foreground/ text-sm line-clamp-2">{t.body}</p>
               </div>
 
               {/* Actions */}
@@ -227,7 +227,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
                     'p-2 rounded-lg transition-all',
                     t.is_active
                       ? 'text-green-400 hover:bg-green-500/10'
-                      : 'text-white/30 hover:bg-white/5'
+                      : 'text-foreground/ hover:bg-foreground/'
                   )}
                   title={t.is_active ? 'Hide' : 'Show'}
                 >
@@ -235,7 +235,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
                 </button>
                 <button
                   onClick={() => openEdit(t)}
-                  className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5 transition-all"
+                  className="p-2 rounded-lg text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all"
                   title="Edit"
                 >
                   <Pencil className="w-4 h-4" />
@@ -243,7 +243,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
                 <button
                   onClick={() => handleDelete(t.id)}
                   disabled={deletingId === t.id}
-                  className="p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                  className="p-2 rounded-lg text-foreground/ hover:text-red-400 hover:bg-red-500/10 transition-all"
                   title="Delete"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -271,17 +271,17 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
               className="glass-card w-full max-w-lg p-6 space-y-4"
             >
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-white font-semibold text-lg">
+                <h2 className="text-foreground font-semibold text-lg">
                   {modal.data.id ? 'Edit Testimonial' : 'Add Testimonial'}
                 </h2>
-                <button onClick={closeModal} className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all">
+                <button onClick={closeModal} className="p-2 rounded-lg text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all">
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Author name */}
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Author Name *</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Author Name *</label>
                 <input
                   value={modal.data.author_name || ''}
                   onChange={(e) => set('author_name', e.target.value)}
@@ -292,7 +292,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
 
               {/* Author location */}
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Location</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Location</label>
                 <input
                   value={modal.data.author_location || ''}
                   onChange={(e) => set('author_location', e.target.value)}
@@ -303,7 +303,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
 
               {/* Rating */}
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Rating</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Rating</label>
                 <div className="flex items-center gap-2">
                   {[1, 2, 3, 4, 5].map((r) => (
                     <button
@@ -316,7 +316,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
                           'w-6 h-6 transition-colors',
                           r <= (modal.data.rating ?? 5)
                             ? 'text-luxe-accent fill-current'
-                            : 'text-white/20'
+                            : 'text-foreground/'
                         )}
                       />
                     </button>
@@ -326,7 +326,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
 
               {/* Body */}
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Review *</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Review *</label>
                 <textarea
                   value={modal.data.body || ''}
                   onChange={(e) => set('body', e.target.value)}
@@ -338,7 +338,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
 
               {/* Display order */}
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Display Order</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Display Order</label>
                 <input
                   type="number"
                   min="0"
@@ -350,12 +350,12 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
 
               {/* Active toggle */}
               <div className="flex items-center gap-3">
-                <label className="text-white/50 text-sm">Visible on homepage</label>
+                <label className="text-foreground/ text-sm">Visible on homepage</label>
                 <button
                   onClick={() => set('is_active', !modal.data.is_active)}
                   className={cn(
                     'relative w-10 h-5 rounded-full transition-colors',
-                    modal.data.is_active ? 'bg-luxe-accent' : 'bg-white/20'
+                    modal.data.is_active ? 'bg-luxe-accent' : 'bg-foreground/'
                   )}
                 >
                   <span
@@ -369,7 +369,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
 
               {/* Save */}
               <div className="flex justify-end gap-3 pt-2">
-                <button onClick={closeModal} className="px-4 py-2 rounded-xl border border-white/10 text-white/50 text-sm hover:border-white/20 hover:text-white transition-all">
+                <button onClick={closeModal} className="px-4 py-2 rounded-xl border border-foreground/ text-foreground/ text-sm hover:border-foreground/ hover:text-foreground transition-all">
                   Cancel
                 </button>
                 <button

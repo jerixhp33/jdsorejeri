@@ -12,7 +12,7 @@ export function InventorySection({ formData, updateField }: Props) {
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">SKU (Stock Keeping Unit)</label>
+          <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">SKU (Stock Keeping Unit)</label>
           <input 
             type="text"
             value={formData.sku}
@@ -24,7 +24,7 @@ export function InventorySection({ formData, updateField }: Props) {
         </div>
         
         <div>
-          <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Quantity in Stock *</label>
+          <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Quantity in Stock *</label>
           <input 
             type="number"
             value={formData.stock}
@@ -37,13 +37,13 @@ export function InventorySection({ formData, updateField }: Props) {
       </div>
       
       {hasVariants && (
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white/60">
+        <div className="bg-foreground/ border border-foreground/ rounded-xl p-4 text-sm text-foreground/">
           Inventory and SKU are managed at the variant level because this product has variants.
         </div>
       )}
 
       <div>
-        <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Product Status</label>
+        <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Product Status</label>
         <select 
           value={formData.status}
           onChange={(e) => updateField('status', e.target.value as any)}

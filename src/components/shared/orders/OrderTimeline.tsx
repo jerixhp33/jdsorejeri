@@ -50,7 +50,7 @@ export function OrderTimeline({ currentStatus, events, createdAt, updatedAt }: P
                 <div className="flex items-center justify-between">
                   <h4 className={`text-sm font-medium ${
                     step.isCurrent 
-                      ? 'text-white' 
+                      ? 'text-foreground' 
                       : step.isCompleted ? 'text-zinc-200' : 'text-zinc-500'
                   }`}>
                     {step.title}

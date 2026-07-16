@@ -115,7 +115,7 @@ export function CollectionCard({ collection, index }: { collection: Collection; 
             </>
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-luxe-gray to-luxe-dark flex items-center justify-center">
-              <span className="text-white/10 text-6xl font-display font-bold">
+              <span className="text-foreground/ text-6xl font-display font-bold">
                 {collection.name[0]}
               </span>
             </div>
@@ -125,11 +125,11 @@ export function CollectionCard({ collection, index }: { collection: Collection; 
 
         {/* Info */}
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
-          <h3 className="text-white font-display text-base md:text-xl font-bold mb-1">
+          <h3 className="text-foreground font-display text-base md:text-xl font-bold mb-1">
             {collection.name}
           </h3>
           {collection.description && (
-            <p className="text-white/50 text-xs md:text-sm line-clamp-2 mb-2 md:mb-3">
+            <p className="text-foreground/ text-xs md:text-sm line-clamp-2 mb-2 md:mb-3">
               {collection.description}
             </p>
           )}

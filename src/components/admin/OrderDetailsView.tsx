@@ -108,16 +108,16 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 print:hidden">
         <div className="flex items-center gap-4">
-          <Link href="/admin/orders" className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors">
+          <Link href="/admin/orders" className="p-2 rounded-xl bg-foreground/ hover:bg-foreground/ text-foreground/ hover:text-foreground transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="font-display text-2xl font-bold text-white">Order #{order.order_number}</h1>
+              <h1 className="font-display text-2xl font-bold text-foreground">Order #{order.order_number}</h1>
               <OrderStatusBadge status={order.status} />
               <PaymentStatusBadge status={order.payment_status || 'pending'} />
             </div>
-            <p className="text-white/50 text-sm mt-1">{formatDate(order.created_at)}</p>
+            <p className="text-foreground/ text-sm mt-1">{formatDate(order.created_at)}</p>
           </div>
         </div>
 
@@ -198,7 +198,7 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
           {/* Products Panel */}
           <div className="glass-card overflow-hidden print-hide-glass">
             <div className="p-4 border-b border-zinc-800 bg-white/[0.02]">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 Products ({order.items?.length || 0})
               </h2>
             </div>
@@ -218,26 +218,26 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
           
           {/* Payment & Courier Panels */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:hidden">
-            <div className="glass-card p-6 border border-white/10">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-                <CreditCard className="w-5 h-5 text-white/50" />
+            <div className="glass-card p-6 border border-foreground/">
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+                <CreditCard className="w-5 h-5 text-foreground/" />
                 Payment Details
               </h2>
               {order.payments && order.payments.length > 0 ? (
                 <div className="space-y-4">
                   {order.payments.map((p, i) => (
-                    <div key={i} className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <div key={i} className="bg-foreground/ rounded-lg p-3 border border-foreground/">
                       <div className="flex justify-between mb-2">
-                        <span className="text-white text-sm font-medium capitalize">{p.provider.replace('_', ' ')}</span>
+                        <span className="text-foreground text-sm font-medium capitalize">{p.provider.replace('_', ' ')}</span>
                         <PaymentStatusBadge status={p.status} />
                       </div>
-                      <p className="text-white/50 text-xs">Txn: {p.transaction_id || 'N/A'}</p>
-                      <p className="text-white/50 text-xs mt-1">Amount: {p.amount}</p>
+                      <p className="text-foreground/ text-xs">Txn: {p.transaction_id || 'N/A'}</p>
+                      <p className="text-foreground/ text-xs mt-1">Amount: {p.amount}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-white/50 text-sm">
+                <div className="text-foreground/ text-sm">
                   <p className="mb-3">Method: Online Payment</p>
                   <div className="flex items-center gap-3">
                     <select
@@ -264,7 +264,7 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
                         }
                       }}
                       disabled={isUpdating}
-                      className="bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#C1A063]"
+                      className="bg-black/50 border border-foreground/ rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-[#C1A063]"
                     >
                       <option value="pending">Pending</option>
                       <option value="paid">Paid</option>
@@ -277,7 +277,7 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
               )}
             </div>
 
-            <div className="glass-card p-6 border border-white/10">
+            <div className="glass-card p-6 border border-foreground/">
               {order.shipments && order.shipments.length > 0 ? (
                 <div className="space-y-4">
                   {order.shipments.map((s, i) => (
@@ -285,8 +285,8 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
                   ))}
                 </div>
               ) : (
-                <div className="text-white/50 text-sm">
-                  <h2 className="text-lg font-semibold text-white mb-4">Fulfillment</h2>
+                <div className="text-foreground/ text-sm">
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Fulfillment</h2>
                   <p>Status: {order.fulfillment_status}</p>
                   <p className="mt-1 text-xs">No active shipments yet.</p>
                 </div>
@@ -300,17 +300,17 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
         <div className="space-y-6 print:hidden">
           
           {/* Customer Panel */}
-          <div className="glass-card p-6 border border-white/10">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-              <User className="w-5 h-5 text-white/50" />
+          <div className="glass-card p-6 border border-foreground/">
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+              <User className="w-5 h-5 text-foreground/" />
               Customer
             </h2>
             <div className="space-y-4">
               <div>
-                <p className="text-white font-medium">{(order.delivery_address as any)?.full_name || (order.user as any)?.name}</p>
-                <p className="text-white/50 text-sm mt-1">{(order.user as any)?.email || 'Guest Checkout'}</p>
+                <p className="text-foreground font-medium">{(order.delivery_address as any)?.full_name || (order.user as any)?.name}</p>
+                <p className="text-foreground/ text-sm mt-1">{(order.user as any)?.email || 'Guest Checkout'}</p>
               </div>
-              <div className="pt-4 border-t border-white/10">
+              <div className="pt-4 border-t border-foreground/">
                 {order.delivery_address && (
                    <AddressCard address={order.delivery_address as any} title="Shipping Address" className="border-none bg-transparent p-0" />
                 )}
@@ -318,16 +318,16 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
               {order.delivery_instructions && (
                 <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
                   <p className="text-amber-400 text-xs font-semibold uppercase mb-1">Delivery Notes</p>
-                  <p className="text-white/80 text-sm">{order.delivery_instructions}</p>
+                  <p className="text-foreground/ text-sm">{order.delivery_instructions}</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Notes Panel */}
-          <div className="glass-card p-6 border border-white/10">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-              <FileText className="w-5 h-5 text-white/50" />
+          <div className="glass-card p-6 border border-foreground/">
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+              <FileText className="w-5 h-5 text-foreground/" />
               Admin Notes
             </h2>
             <textarea 
@@ -337,15 +337,15 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
               onChange={(e) => setAdminNotes(e.target.value)}
             ></textarea>
             <div className="flex justify-end mt-2">
-              <button onClick={saveAdminNotes} disabled={isUpdating} className="px-3 py-1.5 text-xs font-medium bg-white/10 text-white rounded hover:bg-white/20 transition-all">
+              <button onClick={saveAdminNotes} disabled={isUpdating} className="px-3 py-1.5 text-xs font-medium bg-foreground/ text-foreground rounded hover:bg-foreground/ transition-all">
                 Save Notes
               </button>
             </div>
           </div>
 
           {/* Timeline Panel */}
-          <div className="glass-card p-6 border border-white/10">
-            <h2 className="text-lg font-semibold text-white mb-6">Order Timeline</h2>
+          <div className="glass-card p-6 border border-foreground/">
+            <h2 className="text-lg font-semibold text-foreground mb-6">Order Timeline</h2>
             <OrderTimeline 
               currentStatus={order.status}
               events={order.events}

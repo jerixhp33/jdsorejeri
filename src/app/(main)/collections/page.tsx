@@ -35,7 +35,7 @@ export default async function CollectionsPage() {
         </div>
       ) : (
         <div className="text-center py-20 sm:py-24">
-          <p className="text-white/30">No collections yet. Check back soon.</p>
+          <p className="text-foreground/">No collections yet. Check back soon.</p>
         </div>
       )}
     </div>

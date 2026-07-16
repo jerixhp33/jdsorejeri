@@ -118,16 +118,16 @@ export default function RootLayout({
               position="top-right"
               expand={true}
               richColors
-              theme="dark"
+              theme="system"
               toastOptions={{
                 classNames: {
-                  toast: 'bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl !rounded-2xl',
-                  title: 'text-white font-semibold text-sm tracking-wide',
-                  description: 'text-white/60 text-xs',
+                  toast: 'bg-background/60 backdrop-blur-xl border border-foreground/10 shadow-2xl !rounded-2xl',
+                  title: 'text-foreground font-semibold text-sm tracking-wide',
+                  description: 'text-foreground/60 text-xs',
                   actionButton: 'bg-luxe-accent text-black font-semibold !rounded-xl',
-                  cancelButton: 'bg-white/10 text-white hover:bg-white/20 !rounded-xl',
-                  success: '!bg-green-500/10 !border-green-500/20 !text-green-400',
-                  error: '!bg-red-500/10 !border-red-500/20 !text-red-400',
+                  cancelButton: 'bg-foreground/10 text-foreground hover:bg-foreground/20 !rounded-xl',
+                  success: '!bg-green-500/10 !border-green-500/20 !text-green-500',
+                  error: '!bg-red-500/10 !border-red-500/20 !text-red-500',
                 },
               }}
             />

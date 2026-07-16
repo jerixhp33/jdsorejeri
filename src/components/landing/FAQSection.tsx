@@ -42,7 +42,7 @@ export function FAQSection({ faqs }: FAQSectionProps) {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-white/40 text-sm"
+              className="text-foreground/ text-sm"
             >
               Can't find an answer? Contact us via WhatsApp and we'll respond within an hour.
             </motion.p>
@@ -57,8 +57,8 @@ export function FAQSection({ faqs }: FAQSectionProps) {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
                 className={cn(
-                  'rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden transition-all duration-500 hover:bg-white/10 hover:border-white/20',
-                  openIndex === i && 'border-white/20'
+                  'rounded-[2rem] border border-foreground/ bg-foreground/ backdrop-blur-md overflow-hidden transition-all duration-500 hover:bg-foreground/ hover:border-foreground/',
+                  openIndex === i && 'border-foreground/'
                 )}
               >
                 <button
@@ -69,7 +69,7 @@ export function FAQSection({ faqs }: FAQSectionProps) {
                   <span
                     className={cn(
                       'text-sm font-medium transition-colors',
-                      openIndex === i ? 'text-white' : 'text-white/70'
+                      openIndex === i ? 'text-foreground' : 'text-foreground/'
                     )}
                   >
                     {faq.question}
@@ -78,7 +78,7 @@ export function FAQSection({ faqs }: FAQSectionProps) {
                     {openIndex === i ? (
                       <Minus className="w-4 h-4 text-luxe-accent" />
                     ) : (
-                      <Plus className="w-4 h-4 text-white/40" />
+                      <Plus className="w-4 h-4 text-foreground/" />
                     )}
                   </span>
                 </button>
@@ -92,8 +92,8 @@ export function FAQSection({ faqs }: FAQSectionProps) {
                       transition={{ duration: 0.25 }}
                     >
                       <div className="px-5 pb-5">
-                        <div className="h-px bg-white/10 mb-4" />
-                        <p className="text-white/50 text-sm leading-relaxed">{faq.answer}</p>
+                        <div className="h-px bg-foreground/ mb-4" />
+                        <p className="text-foreground/ text-sm leading-relaxed">{faq.answer}</p>
                       </div>
                     </motion.div>
                   )}

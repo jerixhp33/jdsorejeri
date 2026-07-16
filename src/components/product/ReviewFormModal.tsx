@@ -77,7 +77,7 @@ export function ReviewFormModal({ isOpen, onClose, productId, productName, onSuc
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-black/80 border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden"
+          className="relative w-full max-w-md bg-black/80 border border-foreground/ rounded-3xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden"
         >
           {/* Subtle inner glow */}
           <div className="absolute inset-0 pointer-events-none"
@@ -85,18 +85,18 @@ export function ReviewFormModal({ isOpen, onClose, productId, productName, onSuc
 
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-white/50 hover:text-white transition-colors"
+            className="absolute top-4 right-4 p-2 text-foreground/ hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <h3 className="text-xl font-display font-semibold text-white mb-1">Write a Review</h3>
-          <p className="text-white/50 text-sm mb-6">Share your thoughts on {productName}</p>
+          <h3 className="text-xl font-display font-semibold text-foreground mb-1">Write a Review</h3>
+          <p className="text-foreground/ text-sm mb-6">Share your thoughts on {productName}</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Star Rating */}
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">Overall Rating *</label>
+              <label className="block text-sm font-medium text-foreground/ mb-2">Overall Rating *</label>
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -112,7 +112,7 @@ export function ReviewFormModal({ isOpen, onClose, productId, productName, onSuc
                         "w-8 h-8 transition-colors",
                         (hoverRating || rating) >= star
                           ? "text-luxe-accent fill-current"
-                          : "text-white/20"
+                          : "text-foreground/"
                       )}
                     />
                   </button>
@@ -122,8 +122,8 @@ export function ReviewFormModal({ isOpen, onClose, productId, productName, onSuc
 
             {/* Title */}
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-white/70 mb-2">
-                Review Title <span className="text-white/30">(Optional)</span>
+              <label htmlFor="title" className="block text-sm font-medium text-foreground/ mb-2">
+                Review Title <span className="text-foreground/">(Optional)</span>
               </label>
               <input
                 type="text"
@@ -131,14 +131,14 @@ export function ReviewFormModal({ isOpen, onClose, productId, productName, onSuc
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="E.g. Absolutely beautiful!"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-luxe-accent/50 transition-colors"
+                className="w-full bg-foreground/ border border-foreground/ rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/ focus:outline-none focus:border-luxe-accent/50 transition-colors"
               />
             </div>
 
             {/* Body */}
             <div>
-              <label htmlFor="body" className="block text-sm font-medium text-white/70 mb-2">
-                Review <span className="text-white/30">(Optional)</span>
+              <label htmlFor="body" className="block text-sm font-medium text-foreground/ mb-2">
+                Review <span className="text-foreground/">(Optional)</span>
               </label>
               <textarea
                 id="body"
@@ -146,7 +146,7 @@ export function ReviewFormModal({ isOpen, onClose, productId, productName, onSuc
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Tell others what you loved about this product..."
                 rows={4}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-luxe-accent/50 transition-colors resize-none"
+                className="w-full bg-foreground/ border border-foreground/ rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/ focus:outline-none focus:border-luxe-accent/50 transition-colors resize-none"
               />
             </div>
 

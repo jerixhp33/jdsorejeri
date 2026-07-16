@@ -334,8 +334,8 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a] backdrop-blur-3xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 z-20 bg-black/40 backdrop-blur-xl">
-            <h3 className="font-display text-xl text-white font-bold tracking-wide">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-foreground/ z-20 bg-black/40 backdrop-blur-xl">
+            <h3 className="font-display text-xl text-foreground font-bold tracking-wide">
               {posterGrid.length > 1 ? 'Wall Design Generator' : 'Virtual Try-On'}
             </h3>
             <div className="flex items-center gap-4">
@@ -355,7 +355,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
               )}
               <button 
                 onClick={handleBack}
-                className="px-5 py-2.5 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md text-white font-semibold text-sm hover:bg-white/20 active:scale-95 transition-all border border-white/20 shadow-lg"
+                className="px-5 py-2.5 rounded-full flex items-center justify-center bg-foreground/ backdrop-blur-md text-foreground font-semibold text-sm hover:bg-foreground/ active:scale-95 transition-all border border-foreground/ shadow-lg"
               >
                 Back
               </button>
@@ -373,8 +373,8 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                 >
                   <ImageIcon className="w-10 h-10 text-luxe-accent" />
                 </motion.div>
-                <h4 className="font-display text-3xl font-bold text-white mb-3">Upload your wall</h4>
-                <p className="text-white/50 text-base mb-10 max-w-sm leading-relaxed">
+                <h4 className="font-display text-3xl font-bold text-foreground mb-3">Upload your wall</h4>
+                <p className="text-foreground/ text-base mb-10 max-w-sm leading-relaxed">
                   Take a photo of your room to see exactly how these posters will look on your wall.
                 </p>
                 <label className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-luxe-accent to-[#d4b982] text-black font-bold text-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer shadow-xl">
@@ -400,7 +400,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                 />
 
                 {/* Floating "Change Photo" Button */}
-                <label className="absolute top-6 right-6 px-5 py-2.5 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 active:scale-95 transition-all cursor-pointer z-20 shadow-lg">
+                <label className="absolute top-6 right-6 px-5 py-2.5 rounded-full backdrop-blur-md bg-foreground/ border border-foreground/ text-foreground text-sm font-medium hover:bg-foreground/ active:scale-95 transition-all cursor-pointer z-20 shadow-lg">
                   Change Photo
                   <input 
                     type="file" 
@@ -436,14 +436,14 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                         transformOrigin: 'center center'
                       }}
                       whileDrag={{ cursor: 'grabbing', scale: globalScale * 1.05 }}
-                      className="collage-poster-img pointer-events-auto border-4 border-white/10 bg-white/5 filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]"
+                      className="collage-poster-img pointer-events-auto border-4 border-foreground/ bg-foreground/ filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]"
                       crossOrigin="anonymous"
                     />
                   ))}
                 </div>
 
                 {/* Footer Dock */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center justify-between w-[90%] max-w-md px-4 py-3 rounded-2xl backdrop-blur-xl bg-black/40 border border-white/10 shadow-2xl z-30">
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center justify-between w-[90%] max-w-md px-4 py-3 rounded-2xl backdrop-blur-xl bg-black/40 border border-foreground/ shadow-2xl z-30">
                   
                   {/* Left: Auto Design */}
                   <button 
@@ -460,16 +460,16 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                   </button>
 
                   {/* Center: Zoom Controls */}
-                  <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10">
+                  <div className="flex items-center gap-1 bg-foreground/ rounded-full p-1 border border-foreground/">
                     <button 
                       onClick={() => setGlobalScale(s => Math.max(0.3, s - 0.1))}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-foreground/ hover:text-foreground hover:bg-foreground/ active:scale-95 transition-all"
                     >
                       <ZoomOut className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={() => setGlobalScale(s => Math.min(2.5, s + 0.1))}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-foreground/ hover:text-foreground hover:bg-foreground/ active:scale-95 transition-all"
                     >
                       <ZoomIn className="w-4 h-4" />
                     </button>
@@ -479,10 +479,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                   <button 
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 text-white text-sm font-semibold hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-foreground/ text-foreground text-sm font-semibold hover:bg-foreground/ active:scale-95 transition-all disabled:opacity-50"
                   >
                     {saving ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                      <div className="w-4 h-4 rounded-full border-2 border-foreground/ border-t-white animate-spin" />
                     ) : (
                       <Download className="w-4 h-4" />
                     )}

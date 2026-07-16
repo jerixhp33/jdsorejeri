@@ -437,7 +437,7 @@ export function CheckoutForm() {
     return (
       <div className="page-container py-24 text-center">
         <div className="max-w-md mx-auto glass-card p-12">
-          <p className="text-white/50 mb-6">Your cart is empty</p>
+          <p className="text-foreground/ mb-6">Your cart is empty</p>
           <Link prefetch={true} href="/" className="btn-glass !w-auto !px-8">
             <ChevronLeft className="w-4 h-4" />
             Back to Shop
@@ -548,12 +548,12 @@ export function CheckoutForm() {
             style={{ background: 'rgba(34,197,94,0.2)', border: '2px solid rgba(34,197,94,0.4)' }}>
             <Check className="w-10 h-10 text-green-400" />
           </div>
-          <h1 className="font-display text-3xl font-bold text-white mb-2">Order Placed!</h1>
-          <p className="text-white/40 text-sm mb-6">Order #{orderNumber}</p>
+          <h1 className="font-display text-3xl font-bold text-foreground mb-2">Order Placed!</h1>
+          <p className="text-foreground/ text-sm mb-6">Order #{orderNumber}</p>
           
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-xl border border-white/20 inline-block w-full max-w-xs relative group">
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-xl border border-foreground/ inline-block w-full max-w-xs relative group">
             {/* Tooltip */}
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-10 shadow-lg scale-95 group-hover:scale-100">
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-foreground text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-10 shadow-lg scale-95 group-hover:scale-100">
               ✨ Tap QR code to pay! (Amount auto-fills)
               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
             </div>
@@ -573,13 +573,13 @@ export function CheckoutForm() {
             {/* Mobile tap to pay button */}
             <a 
               href={upiString}
-              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-colors sm:hidden leading-tight"
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-foreground font-medium py-3 px-4 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-colors sm:hidden leading-tight"
             >
               <div className="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
                 <span>Tap to Pay with UPI App</span>
               </div>
-              <span className="text-white/70 text-[10px] font-normal tracking-wide">(Amount auto-fills)</span>
+              <span className="text-foreground/ text-[10px] font-normal tracking-wide">(Amount auto-fills)</span>
             </a>
           </div>
 
@@ -587,7 +587,7 @@ export function CheckoutForm() {
             <p className="text-green-400 font-semibold mb-3 flex items-center gap-2">
               <Check className="w-4 h-4" /> Payment Instructions
             </p>
-            <ol className="space-y-3 list-decimal list-inside text-sm text-white/80">
+            <ol className="space-y-3 list-decimal list-inside text-sm text-foreground/">
               <li className="hidden sm:list-item">Scan the QR code above with any UPI app (GPay, PhonePe, Paytm).</li>
               <li className="sm:hidden">Tap the QR code or the blue button to open your UPI app.</li>
               <li>Pay the exact total amount: <strong>{formatCurrency(placedOrderTotal)}</strong>.</li>
@@ -597,7 +597,7 @@ export function CheckoutForm() {
             </ol>
           </div>
 
-          <a href={successWhatsappUrl} rel="noopener noreferrer" className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full flex items-center justify-center gap-2 mb-4 py-4 text-base font-semibold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-colors">
+          <a href={successWhatsappUrl} rel="noopener noreferrer" className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-foreground rounded-full flex items-center justify-center gap-2 mb-4 py-4 text-base font-semibold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
               <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
             </svg>
@@ -632,8 +632,8 @@ export function CheckoutForm() {
             <div className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center mb-4 mx-auto">
               <Trash2 className="w-5 h-5 text-red-400" />
             </div>
-            <h3 className="text-white font-semibold text-lg text-center mb-2">Delete Address?</h3>
-            <p className="text-white/60 text-sm text-center mb-6">
+            <h3 className="text-foreground font-semibold text-lg text-center mb-2">Delete Address?</h3>
+            <p className="text-foreground/ text-sm text-center mb-6">
               Are you sure you want to delete this saved address? This action cannot be undone.
             </p>
             <div className="flex gap-3">
@@ -647,7 +647,7 @@ export function CheckoutForm() {
               <button 
                 type="button"
                 onClick={() => handleDeleteAddress(addressToDelete)}
-                className="flex-1 py-2.5 text-sm rounded-xl font-semibold bg-red-500/80 hover:bg-red-500 text-white transition-all shadow-lg shadow-red-500/20"
+                className="flex-1 py-2.5 text-sm rounded-xl font-semibold bg-red-500/80 hover:bg-red-500 text-foreground transition-all shadow-lg shadow-red-500/20"
               >
                 Yes, Delete
               </button>
@@ -658,15 +658,15 @@ export function CheckoutForm() {
 
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-8">
-          <Link prefetch={true} href="/cart" className="text-white/50 hover:text-white transition-colors">
+          <Link prefetch={true} href="/cart" className="text-foreground/ hover:text-foreground transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="font-display text-2xl font-bold text-white">Checkout</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">Checkout</h1>
         </div>
 
         {/* Progress Indicator */}
         <div className="flex items-center justify-between relative max-w-sm mx-auto mb-10">
-          <div className="absolute left-0 top-3 -translate-y-1/2 w-full h-[2px] bg-white/10 -z-10 rounded-full"></div>
+          <div className="absolute left-0 top-3 -translate-y-1/2 w-full h-[2px] bg-foreground/ -z-10 rounded-full"></div>
           <div className="absolute left-0 top-3 -translate-y-1/2 w-[35%] h-[2px] bg-luxe-accent -z-10 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(200,169,110,0.5)]"></div>
           
           <div className="flex flex-col items-center gap-2">
@@ -677,12 +677,12 @@ export function CheckoutForm() {
             <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-luxe-accent font-semibold text-center w-16">Delivery</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-black border border-luxe-accent text-luxe-accent flex items-center justify-center text-[10px] font-bold">2</div>
-            <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-white/70 font-medium text-center w-16">Review</span>
+            <div className="w-6 h-6 rounded-full bg-background border border-luxe-accent text-luxe-accent flex items-center justify-center text-[10px] font-bold">2</div>
+            <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-foreground/ font-medium text-center w-16">Review</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-black border border-white/20 text-white/30 flex items-center justify-center text-[10px] font-bold">3</div>
-            <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-white/30 text-center w-16">Payment</span>
+            <div className="w-6 h-6 rounded-full bg-background border border-foreground/ text-foreground/ flex items-center justify-center text-[10px] font-bold">3</div>
+            <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-foreground/ text-center w-16">Payment</span>
           </div>
         </div>
       </div>
@@ -696,7 +696,7 @@ export function CheckoutForm() {
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-luxe-accent" />
-                  <h2 className="text-white font-semibold text-sm">Select Delivery Address</h2>
+                  <h2 className="text-foreground font-semibold text-sm">Select Delivery Address</h2>
                 </div>
                 {!showForm && (
                   <button type="button" onClick={() => setShowForm(true)} className="text-luxe-accent text-sm hover:underline">
@@ -714,7 +714,7 @@ export function CheckoutForm() {
                       'p-4 rounded-xl border cursor-pointer transition-all relative group',
                       !showForm && selectedAddressId === addr.id 
                         ? 'bg-luxe-accent/10 border-luxe-accent' 
-                        : 'bg-white/5 border-white/10 hover:border-white/20'
+                        : 'bg-foreground/ border-foreground/ hover:border-foreground/'
                     )}
                   >
                     <button 
@@ -723,14 +723,14 @@ export function CheckoutForm() {
                         e.stopPropagation();
                         setAddressToDelete(addr.id);
                       }}
-                      className="absolute top-3 right-3 p-1.5 text-white/30 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
+                      className="absolute top-3 right-3 p-1.5 text-foreground/ hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
                       title="Delete Address"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <p className="text-white font-medium text-sm mb-1 pr-8">{addr.full_name}</p>
-                    <p className="text-white/60 text-xs mb-2">{addr.phone}</p>
-                    <p className="text-white/50 text-xs leading-relaxed line-clamp-2">
+                    <p className="text-foreground font-medium text-sm mb-1 pr-8">{addr.full_name}</p>
+                    <p className="text-foreground/ text-xs mb-2">{addr.phone}</p>
+                    <p className="text-foreground/ text-xs leading-relaxed line-clamp-2">
                       {[addr.house_no, addr.street, addr.area, addr.city, addr.pincode].filter(Boolean).join(', ')}
                     </p>
                   </div>
@@ -744,7 +744,7 @@ export function CheckoutForm() {
             <div className="glass-card p-6">
             <div className="flex items-center gap-2 mb-5">
               <User className="w-4 h-4 text-luxe-accent" />
-              <h2 className="text-white font-semibold text-sm">Personal Information</h2>
+              <h2 className="text-foreground font-semibold text-sm">Personal Information</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
@@ -754,7 +754,7 @@ export function CheckoutForm() {
                 { name: 'alternate_phone', label: 'Alternate Phone', placeholder: 'Optional', type: 'text', maxLength: 10 },
               ].map((field) => (
                 <div key={field.name}>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">{field.label}</label>
+                  <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">{field.label}</label>
                   <input
                     {...register(field.name as keyof CheckoutFormData)}
                     type={field.type}
@@ -776,7 +776,7 @@ export function CheckoutForm() {
           <div className="glass-card p-6">
             <div className="flex items-center gap-2 mb-5">
               <MapPin className="w-4 h-4 text-luxe-accent" />
-              <h2 className="text-white font-semibold text-sm">Delivery Address</h2>
+              <h2 className="text-foreground font-semibold text-sm">Delivery Address</h2>
               <span className="badge-gold text-[10px]">Tamil Nadu Only</span>
             </div>
 
@@ -790,7 +790,7 @@ export function CheckoutForm() {
                 { name: 'city',     label: 'City *',            placeholder: 'City' },
               ].map((field) => (
                 <div key={field.name}>
-                  <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">{field.label}</label>
+                  <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">{field.label}</label>
                   <input {...register(field.name as keyof CheckoutFormData)} className="input-luxe" placeholder={field.placeholder} />
                   {errors[field.name as keyof CheckoutFormData] && (
                     <p className="text-red-400 text-xs mt-1">{errors[field.name as keyof CheckoutFormData]?.message}</p>
@@ -798,14 +798,14 @@ export function CheckoutForm() {
                 </div>
               ))}
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">
                   Pincode * {isFetchingPincode && <span className="text-luxe-accent lowercase">(auto-filling...)</span>}
                 </label>
                 <input {...register('pincode')} className="input-luxe" placeholder="6-digit pincode" maxLength={6} />
                 {errors.pincode && <p className="text-red-400 text-xs mt-1">{errors.pincode.message}</p>}
               </div>
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">District *</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">District *</label>
                 <select {...register('district')} className="input-luxe">
                   <option value="">Select District</option>
                   {TAMIL_NADU_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
@@ -813,7 +813,7 @@ export function CheckoutForm() {
                 {errors.district && <p className="text-red-400 text-xs mt-1">{errors.district.message}</p>}
               </div>
               <div className="sm:col-span-2">
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Nearby Landmark</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Nearby Landmark</label>
                 <input {...register('landmark')} className="input-luxe" placeholder="e.g. Near SBI Bank" />
               </div>
             </div>
@@ -822,22 +822,22 @@ export function CheckoutForm() {
 
           {/* Notes */}
           <div className="glass-card p-6">
-            <h2 className="text-white font-semibold text-sm mb-5">Additional Notes</h2>
+            <h2 className="text-foreground font-semibold text-sm mb-5">Additional Notes</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Delivery Notes</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Delivery Notes</label>
                 <textarea {...register('delivery_notes')} className="input-luxe resize-none" rows={2} placeholder="Any special instructions for delivery..." />
               </div>
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Order Notes</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Order Notes</label>
                 <textarea {...register('delivery_instructions')} className="input-luxe resize-none" rows={2} placeholder="Gift wrapping, custom framing requests, etc." />
               </div>
             </div>
           </div>
 
-          <button type="submit" disabled={submitting} className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full flex items-center justify-center gap-3 py-4 text-base font-semibold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-colors">
+          <button type="submit" disabled={submitting} className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-foreground rounded-full flex items-center justify-center gap-3 py-4 text-base font-semibold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-colors">
             {submitting
-              ? <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+              ? <div className="w-5 h-5 rounded-full border-2 border-foreground/ border-t-white animate-spin" />
               : <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/></svg>
             }
             {submitting ? 'Processing...' : 'Place Order via WhatsApp'}
@@ -847,27 +847,27 @@ export function CheckoutForm() {
         {/* Summary */}
         <div>
           <div className="glass-card p-6 sticky top-24">
-            <h2 className="text-white font-semibold mb-5">Order Summary</h2>
+            <h2 className="text-foreground font-semibold mb-5">Order Summary</h2>
             <div className="space-y-3 mb-5">
               {items.map((item) => (
                 <div key={item.id} className="flex justify-between text-sm">
-                  <span className="text-white/60 flex-1 truncate pr-2">
+                  <span className="text-foreground/ flex-1 truncate pr-2">
                     {item.product?.name}
                     {(item.poster_size as { label?: string } | null)?.label && ` · ${(item.poster_size as { label: string }).label}`}
                     {item.quantity > 1 && ` ×${item.quantity}`}
                   </span>
-                  <span className="text-white flex-shrink-0">{formatCurrency(item.unit_price * item.quantity)}</span>
+                  <span className="text-foreground flex-shrink-0">{formatCurrency(item.unit_price * item.quantity)}</span>
                 </div>
               ))}
             </div>
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }} className="pt-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-white/50">Subtotal</span>
-                <span className="text-white">{formatCurrency(subtotal)}</span>
+                <span className="text-foreground/">Subtotal</span>
+                <span className="text-foreground">{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-white/50">Delivery</span>
-                <span className={deliveryCharge === 0 ? 'text-green-400' : 'text-white'}>
+                <span className="text-foreground/">Delivery</span>
+                <span className={deliveryCharge === 0 ? 'text-green-400' : 'text-foreground'}>
                   {deliveryCharge === 0 ? 'FREE' : formatCurrency(deliveryCharge)}
                 </span>
               </div>
@@ -883,8 +883,8 @@ export function CheckoutForm() {
               )}
               
               <div className="flex justify-between font-semibold pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                <span className="text-white">Total</span>
-                <span className="text-white text-lg">{formatCurrency(finalTotal)}</span>
+                <span className="text-foreground">Total</span>
+                <span className="text-foreground text-lg">{formatCurrency(finalTotal)}</span>
               </div>
             </div>
             
@@ -903,7 +903,7 @@ export function CheckoutForm() {
                       type="button"
                       onClick={() => applyCoupon()}
                       disabled={applyingCoupon || !couponCode}
-                      className="px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all disabled:opacity-50"
+                      className="px-4 rounded-xl bg-foreground/ hover:bg-foreground/ text-foreground text-sm font-medium transition-all disabled:opacity-50"
                     >
                       {applyingCoupon ? '...' : 'Apply'}
                     </button>
@@ -912,19 +912,19 @@ export function CheckoutForm() {
                   
                   {availableCoupons.length > 0 && (
                     <div className="space-y-2">
-                      <p className="text-white/40 text-[10px] uppercase tracking-wider mb-2">Available Coupons</p>
+                      <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-2">Available Coupons</p>
                       {availableCoupons.map(c => (
                         <button
                           key={c.id}
                           type="button"
                           onClick={() => { setCouponCode(c.code); applyCoupon(c.code); }}
-                          className="w-full text-left p-2.5 rounded-xl border border-white/10 hover:border-luxe-accent/50 hover:bg-white/5 transition-all flex justify-between items-center group"
+                          className="w-full text-left p-2.5 rounded-xl border border-foreground/ hover:border-luxe-accent/50 hover:bg-foreground/ transition-all flex justify-between items-center group"
                         >
                           <div className="flex items-center gap-2">
                             <Tag className="w-3.5 h-3.5 text-luxe-accent group-hover:scale-110 transition-transform" />
                             <div>
-                              <span className="text-white text-sm font-mono block">{c.code}</span>
-                              <span className="text-white/40 text-[10px] block">
+                              <span className="text-foreground text-sm font-mono block">{c.code}</span>
+                              <span className="text-foreground/ text-[10px] block">
                                 Min order: {formatCurrency(c.min_order_amount)}
                               </span>
                             </div>
@@ -943,7 +943,7 @@ export function CheckoutForm() {
                     <Tag className="w-4 h-4" />
                     <span className="text-sm font-medium font-mono">{appliedCoupon.code}</span>
                   </div>
-                  <button type="button" onClick={removeCoupon} className="text-white/40 hover:text-white transition-colors">
+                  <button type="button" onClick={removeCoupon} className="text-foreground/ hover:text-foreground transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>

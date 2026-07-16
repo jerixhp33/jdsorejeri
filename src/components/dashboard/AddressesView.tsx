@@ -123,7 +123,7 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="font-display text-2xl font-bold text-white">Saved Addresses</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground">Saved Addresses</h1>
         <button
           onClick={() => openModal()}
           className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-luxe-accent hover:bg-[#b5952f] text-black text-sm font-bold transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)]"
@@ -135,9 +135,9 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
 
       {addresses.length === 0 ? (
         <div className="glass-card p-8 sm:p-16 text-center">
-          <MapPin className="w-10 h-10 text-white/20 mx-auto mb-4" />
-          <p className="text-white/50 mb-2">No saved addresses</p>
-          <p className="text-white/30 text-sm mb-6">
+          <MapPin className="w-10 h-10 text-foreground/ mx-auto mb-4" />
+          <p className="text-foreground/ mb-2">No saved addresses</p>
+          <p className="text-foreground/ text-sm mb-6">
             Add a delivery address to make checkout faster.
           </p>
           <button onClick={() => openModal()} className="btn-luxe-outline text-sm">Add Address</button>
@@ -159,27 +159,27 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="text-white font-medium">{address.full_name}</p>
+                      <p className="text-foreground font-medium">{address.full_name}</p>
                       {address.is_default && (
                         <span className="badge-gold text-[10px]">Default</span>
                       )}
                     </div>
-                    <p className="text-white/60 text-sm">
+                    <p className="text-foreground/ text-sm">
                       {address.house_no}, {address.street}, {address.area}
                     </p>
-                    <p className="text-white/60 text-sm">
+                    <p className="text-foreground/ text-sm">
                       {address.city}, {address.district} — {address.pincode}
                     </p>
                     {address.landmark && (
-                      <p className="text-white/40 text-xs mt-1">Near: {address.landmark}</p>
+                      <p className="text-foreground/ text-xs mt-1">Near: {address.landmark}</p>
                     )}
-                    <p className="text-white/50 text-sm mt-1">📞 {address.phone}</p>
+                    <p className="text-foreground/ text-sm mt-1">📞 {address.phone}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto w-full sm:w-auto justify-end sm:justify-start border-t border-white/5 sm:border-0 pt-3 sm:pt-0 mt-2 sm:mt-0">
+                <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto w-full sm:w-auto justify-end sm:justify-start border-t border-foreground/ sm:border-0 pt-3 sm:pt-0 mt-2 sm:mt-0">
                   <button
                     onClick={() => openModal(address)}
-                    className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                    className="p-2 rounded-lg text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all"
                     title="Edit address"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -187,7 +187,7 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
                   {!address.is_default && (
                     <button
                       onClick={() => setDefault(address.id)}
-                      className="p-2 rounded-lg text-white/40 hover:text-luxe-accent hover:bg-luxe-accent/10 transition-all"
+                      className="p-2 rounded-lg text-foreground/ hover:text-luxe-accent hover:bg-luxe-accent/10 transition-all"
                       title="Set as default"
                     >
                       <Star className="w-4 h-4" />
@@ -196,7 +196,7 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
                   <button
                     onClick={() => deleteAddress(address.id)}
                     disabled={deletingId === address.id}
-                    className="p-2 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
+                    className="p-2 rounded-lg text-foreground/ hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
                     title="Delete address"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -221,13 +221,13 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              className="relative w-full max-w-lg bg-[#0a0a0a] border border-foreground/ rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <div className="p-4 sm:p-6 border-b border-white/10 flex justify-between items-center bg-black/40">
-                <h2 className="text-xl font-bold text-white font-display">
+              <div className="p-4 sm:p-6 border-b border-foreground/ flex justify-between items-center bg-black/40">
+                <h2 className="text-xl font-bold text-foreground font-display">
                   {editingId ? 'Edit Address' : 'Add New Address'}
                 </h2>
-                <button onClick={closeModal} className="text-white/50 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors">
+                <button onClick={closeModal} className="text-foreground/ hover:text-foreground p-1 rounded-full hover:bg-foreground/ transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -236,50 +236,50 @@ export function AddressesView({ addresses: initial, userProfileId }: AddressesVi
                 <form id="address-form" onSubmit={handleSaveAddress} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs uppercase tracking-wide text-white/50 mb-1.5">Full Name</label>
+                      <label className="block text-xs uppercase tracking-wide text-foreground/ mb-1.5">Full Name</label>
                       <input required type="text" value={formData.full_name || ''} onChange={e => setFormData({...formData, full_name: e.target.value})} className="input-luxe w-full" placeholder="John Doe" />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-wide text-white/50 mb-1.5">Phone Number</label>
+                      <label className="block text-xs uppercase tracking-wide text-foreground/ mb-1.5">Phone Number</label>
                       <input required type="tel" value={formData.phone || ''} onChange={e => setFormData({...formData, phone: e.target.value})} className="input-luxe w-full" placeholder="10-digit number" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs uppercase tracking-wide text-white/50 mb-1.5">House / Flat No.</label>
+                      <label className="block text-xs uppercase tracking-wide text-foreground/ mb-1.5">House / Flat No.</label>
                       <input required type="text" value={formData.house_no || ''} onChange={e => setFormData({...formData, house_no: e.target.value})} className="input-luxe w-full" placeholder="e.g. 42A" />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-wide text-white/50 mb-1.5">Street / Area</label>
+                      <label className="block text-xs uppercase tracking-wide text-foreground/ mb-1.5">Street / Area</label>
                       <input required type="text" value={formData.street || ''} onChange={e => setFormData({...formData, street: e.target.value})} className="input-luxe w-full" placeholder="Main Street" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-white/50 mb-1.5">Area / Locality</label>
+                    <label className="block text-xs uppercase tracking-wide text-foreground/ mb-1.5">Area / Locality</label>
                     <input required type="text" value={formData.area || ''} onChange={e => setFormData({...formData, area: e.target.value})} className="input-luxe w-full" placeholder="Gandhipuram" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs uppercase tracking-wide text-white/50 mb-1.5">City</label>
+                      <label className="block text-xs uppercase tracking-wide text-foreground/ mb-1.5">City</label>
                       <input required type="text" value={formData.city || ''} onChange={e => setFormData({...formData, city: e.target.value})} className="input-luxe w-full" />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-wide text-white/50 mb-1.5">Pincode</label>
+                      <label className="block text-xs uppercase tracking-wide text-foreground/ mb-1.5">Pincode</label>
                       <input required type="text" value={formData.pincode || ''} onChange={e => setFormData({...formData, pincode: e.target.value})} className="input-luxe w-full" placeholder="641001" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-white/50 mb-1.5">Landmark (Optional)</label>
+                    <label className="block text-xs uppercase tracking-wide text-foreground/ mb-1.5">Landmark (Optional)</label>
                     <input type="text" value={formData.landmark || ''} onChange={e => setFormData({...formData, landmark: e.target.value})} className="input-luxe w-full" placeholder="Near post office" />
                   </div>
                 </form>
               </div>
 
-              <div className="p-4 sm:p-6 border-t border-white/10 bg-black/40 flex justify-end gap-3">
+              <div className="p-4 sm:p-6 border-t border-foreground/ bg-black/40 flex justify-end gap-3">
                 <button type="button" onClick={closeModal} className="btn-glass px-6">Cancel</button>
                 <button form="address-form" type="submit" disabled={isSaving} className="btn-gold px-8">
                   {isSaving ? 'Saving...' : 'Save Address'}

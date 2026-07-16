@@ -21,9 +21,9 @@ export function DescriptionSection({
     <div className="space-y-6">
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-white/50 text-xs uppercase tracking-wide block">Short Description</label>
+          <label className="text-foreground/ text-xs uppercase tracking-wide block">Short Description</label>
           <div className="flex items-center gap-4">
-            <span className="text-white/30 text-xs">{formData.short_description?.length || 0} / 150</span>
+            <span className="text-foreground/ text-xs">{formData.short_description?.length || 0} / 150</span>
             <button 
               onClick={onGenerateShortDesc}
               disabled={isGeneratingShortDesc || !formData.name}
@@ -44,7 +44,7 @@ export function DescriptionSection({
       
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-white/50 text-xs uppercase tracking-wide block">Full Description</label>
+          <label className="text-foreground/ text-xs uppercase tracking-wide block">Full Description</label>
           <button 
             onClick={onGenerateFullDesc}
             disabled={isGeneratingFullDesc || !formData.name}

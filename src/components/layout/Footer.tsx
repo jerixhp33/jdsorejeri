@@ -25,7 +25,7 @@ const FOOTER_LINKS = {
 
 export function Footer() {
   return (
-    <footer className="bg-transparent border-t border-white/10">
+    <footer className="bg-transparent border-t border-foreground/">
       {/* Main footer */}
       <div className="page-container py-16 lg:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
@@ -33,26 +33,26 @@ export function Footer() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
               <JDLogo size={36} />
-              <span className="font-display text-xl font-bold text-white">JD Store</span>
+              <span className="font-display text-xl font-bold text-foreground">JD Store</span>
             </div>
-            <p className="text-white/50 text-sm leading-relaxed max-w-xs mb-6">
+            <p className="text-foreground/ text-sm leading-relaxed max-w-xs mb-6">
               Premium wall posters and artisan earrings crafted for those who appreciate beauty in
               every detail. Delivered across Tamil Nadu.
             </p>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-white/50 text-sm">
+              <div className="flex items-center gap-3 text-foreground/ text-sm">
                 <MapPin className="w-4 h-4 text-luxe-accent flex-shrink-0" />
                 Tamil Nadu, India
               </div>
-              <div className="flex items-center gap-3 text-white/50 text-sm">
+              <div className="flex items-center gap-3 text-foreground/ text-sm">
                 <Phone className="w-4 h-4 text-luxe-accent flex-shrink-0" />
-                <a href="tel:+919360490974" className="hover:text-white transition-colors">
+                <a href="tel:+919360490974" className="hover:text-foreground transition-colors">
                   +91 9360490974
                 </a>
               </div>
-              <div className="flex items-center gap-3 text-white/50 text-sm">
+              <div className="flex items-center gap-3 text-foreground/ text-sm">
                 <Mail className="w-4 h-4 text-luxe-accent flex-shrink-0" />
-                <a href="mailto:jdstore.jeri@gmail.com" className="hover:text-white transition-colors">
+                <a href="mailto:jdstore.jeri@gmail.com" className="hover:text-foreground transition-colors">
                   jdstore.jeri@gmail.com
                 </a>
               </div>
@@ -61,7 +61,7 @@ export function Footer() {
               <a
                 href="https://www.instagram.com/wtxs_jexi?igsh=bXhldGV2ZmppMXhy"
                 rel="noopener noreferrer"
-                className="p-2.5 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
+                className="p-2.5 rounded-full bg-foreground/ border border-foreground/ text-foreground/ hover:text-foreground hover:border-foreground/ transition-all"
                 aria-label="Instagram"
               >
                 <Instagram className="w-4 h-4" />
@@ -69,7 +69,7 @@ export function Footer() {
               <a
                 href="https://twitter.com"
                 rel="noopener noreferrer"
-                className="p-2.5 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
+                className="p-2.5 rounded-full bg-foreground/ border border-foreground/ text-foreground/ hover:text-foreground hover:border-foreground/ transition-all"
                 aria-label="Twitter"
               >
                 <Twitter className="w-4 h-4" />
@@ -77,7 +77,7 @@ export function Footer() {
               <a
                 href="https://wa.me/919360490974"
                 rel="noopener noreferrer"
-                className="p-2.5 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
+                className="p-2.5 rounded-full bg-foreground/ border border-foreground/ text-foreground/ hover:text-foreground hover:border-foreground/ transition-all"
                 aria-label="WhatsApp"
               >
                 <ExternalLink className="w-4 h-4" />
@@ -88,12 +88,12 @@ export function Footer() {
           {/* Links */}
           {Object.entries(FOOTER_LINKS).map(([section, links]) => (
             <div key={section}>
-              <h3 className="text-white font-semibold text-sm mb-4">{section}</h3>
+              <h3 className="text-foreground font-semibold text-sm mb-4">{section}</h3>
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
                     <Link prefetch={true} href={link.href}
-                      className="text-white/40 text-sm hover:text-white transition-colors"
+                      className="text-foreground/ text-sm hover:text-foreground transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -106,20 +106,20 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/5">
+      <div className="border-t border-foreground/">
         <div className="page-container py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-white/30 text-xs">
+            <p className="text-foreground/ text-xs">
               © {new Date().getFullYear()} JD Store. All rights reserved.
             </p>
             <div className="flex items-center gap-5">
               <Link prefetch={true} href="/about#privacy"
-                className="text-white/30 text-xs hover:text-white/60 transition-colors"
+                className="text-foreground/ text-xs hover:text-foreground/ transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link prefetch={true} href="/about#terms"
-                className="text-white/30 text-xs hover:text-white/60 transition-colors"
+                className="text-foreground/ text-xs hover:text-foreground/ transition-colors"
               >
                 Terms of Service
               </Link>

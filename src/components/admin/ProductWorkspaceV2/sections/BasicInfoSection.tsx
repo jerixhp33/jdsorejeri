@@ -13,7 +13,7 @@ export function BasicInfoSection({ formData, updateField, onGenerateTags, isGene
   return (
     <div className="space-y-6">
       <div>
-        <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Product Name *</label>
+        <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Product Name *</label>
         <input 
           type="text"
           value={formData.name}
@@ -24,19 +24,19 @@ export function BasicInfoSection({ formData, updateField, onGenerateTags, isGene
       </div>
       
       <div>
-        <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">URL Slug</label>
+        <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">URL Slug</label>
         <input 
           type="text"
           value={formData.slug}
           onChange={(e) => updateField('slug', e.target.value)}
-          className="input-luxe w-full text-white/50"
+          className="input-luxe w-full text-foreground/"
           placeholder="golden-butterfly-earrings"
         />
-        <p className="text-white/30 text-xs mt-1">Leave empty to auto-generate from name.</p>
+        <p className="text-foreground/ text-xs mt-1">Leave empty to auto-generate from name.</p>
       </div>
       
       <div>
-        <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Product Type</label>
+        <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Product Type</label>
         <select 
           value={formData.product_type}
           onChange={(e) => updateField('product_type', e.target.value as any)}
@@ -53,7 +53,7 @@ export function BasicInfoSection({ formData, updateField, onGenerateTags, isGene
       </div>
 
       <div>
-        <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Category *</label>
+        <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Category *</label>
         <select 
           value={formData.category_id}
           onChange={(e) => updateField('category_id', e.target.value)}
@@ -71,7 +71,7 @@ export function BasicInfoSection({ formData, updateField, onGenerateTags, isGene
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-white/50 text-xs uppercase tracking-wide block">Tags</label>
+          <label className="text-foreground/ text-xs uppercase tracking-wide block">Tags</label>
           <button 
             onClick={onGenerateTags}
             disabled={isGeneratingTags || !formData.name}

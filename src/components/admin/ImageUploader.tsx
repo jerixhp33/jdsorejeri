@@ -145,7 +145,7 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
               onDrop={(e) => onThumbDrop(e, i)}
               onDragEnd={onThumbDragEnd}
               className={cn(
-                'group relative aspect-square rounded-xl overflow-hidden bg-white/5 border-2 transition-all cursor-move',
+                'group relative aspect-square rounded-xl overflow-hidden bg-foreground/ border-2 transition-all cursor-move',
                 dropIndex === i ? 'border-luxe-accent scale-105 shadow-xl' : 'border-transparent',
                 img.is_primary ? 'ring-2 ring-luxe-accent ring-offset-2 ring-offset-luxe-black sm:col-span-2 sm:row-span-2' : ''
               )}
@@ -158,7 +158,7 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
                     onClick={() => setPrimary(i)}
                     className={cn(
                       "p-1.5 rounded-lg transition-all",
-                      img.is_primary ? "bg-luxe-accent text-luxe-black" : "bg-white/20 text-white hover:bg-luxe-accent hover:text-luxe-black"
+                      img.is_primary ? "bg-luxe-accent text-luxe-black" : "bg-foreground/ text-foreground hover:bg-luxe-accent hover:text-luxe-black"
                     )}
                     title="Set as Primary Cover"
                   >
@@ -167,13 +167,13 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
                   <button
                     type="button"
                     onClick={() => removeImage(i)}
-                    className="p-1.5 rounded-lg bg-red-500/80 text-white hover:bg-red-500 transition-colors"
+                    className="p-1.5 rounded-lg bg-red-500/80 text-foreground hover:bg-red-500 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="flex justify-center">
-                  <GripVertical className="w-5 h-5 text-white/50" />
+                  <GripVertical className="w-5 h-5 text-foreground/" />
                 </div>
               </div>
               {img.is_primary && (
@@ -184,7 +184,7 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
             </div>
           ))}
           {uploading.map((url, i) => (
-            <div key={i} className="aspect-square rounded-xl bg-white/5 flex items-center justify-center animate-pulse">
+            <div key={i} className="aspect-square rounded-xl bg-foreground/ flex items-center justify-center animate-pulse">
               <Loader2 className="w-6 h-6 text-luxe-accent animate-spin" />
             </div>
           ))}
@@ -202,17 +202,17 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
             'relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 py-8',
             dragOver
               ? 'border-luxe-accent bg-luxe-accent/10 scale-[1.01]'
-              : 'border-white/15 hover:border-white/30 hover:bg-white/5'
+              : 'border-foreground/ hover:border-foreground/ hover:bg-foreground/'
           )}
         >
-          <div className="p-3 rounded-full bg-white/5">
-            <Upload className="w-5 h-5 text-white/40" />
+          <div className="p-3 rounded-full bg-foreground/">
+            <Upload className="w-5 h-5 text-foreground/" />
           </div>
           <div className="text-center">
-            <p className="text-white/60 text-sm">
+            <p className="text-foreground/ text-sm">
               Drop images here or <span className="text-luxe-accent">browse</span>
             </p>
-            <p className="text-white/25 text-xs mt-0.5">
+            <p className="text-foreground/ text-xs mt-0.5">
               JPG, PNG, WebP · max 5 MB each · up to {maxImages} images
             </p>
           </div>

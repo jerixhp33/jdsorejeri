@@ -38,10 +38,10 @@ function CustomSelect({ value, onChange, options, minWidth = 150 }: {
     <div className="relative" style={{ minWidth }}>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors focus:outline-none focus:border-white/20"
+        className="w-full flex items-center justify-between rounded-full border border-foreground/ bg-foreground/ backdrop-blur-md px-4 py-2 text-sm text-foreground hover:bg-foreground/ transition-colors focus:outline-none focus:border-foreground/"
       >
         <span className="truncate pr-4">{options.find(o => o.value === value)?.label || 'Select'}</span>
-        <ChevronDown className="w-4 h-4 text-white/30 flex-shrink-0 transition-transform duration-200" style={{ transform: open ? 'rotate(180deg)' : 'none' }} />
+        <ChevronDown className="w-4 h-4 text-foreground/ flex-shrink-0 transition-transform duration-200" style={{ transform: open ? 'rotate(180deg)' : 'none' }} />
       </button>
       
       <AnimatePresence>
@@ -53,7 +53,7 @@ function CustomSelect({ value, onChange, options, minWidth = 150 }: {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full mt-2 left-0 w-full z-50 rounded-2xl border border-white/10 bg-black/60 backdrop-blur-xl overflow-hidden shadow-2xl"
+              className="absolute top-full mt-2 left-0 w-full z-50 rounded-2xl border border-foreground/ bg-black/60 backdrop-blur-xl overflow-hidden shadow-2xl"
             >
               <div className="max-h-60 overflow-y-auto">
                 {options.map((opt) => (
@@ -67,7 +67,7 @@ function CustomSelect({ value, onChange, options, minWidth = 150 }: {
                       "w-full text-left px-4 py-2.5 text-sm transition-colors",
                       value === opt.value
                         ? "bg-luxe-accent/20 text-luxe-accent font-medium"
-                        : "text-white/70 hover:bg-white/10 hover:text-white"
+                        : "text-foreground/ hover:bg-foreground/ hover:text-foreground"
                     )}
                   >
                     {opt.label}
@@ -179,19 +179,19 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
               {productType === 'poster' ? 'Wall Art' : productType === 'other' ? 'Accessories' : productType.replace('_', ' ')}
             </p>
             <h1 className="section-title mb-1">{title}</h1>
-            <p className="text-white/40 text-sm">{subtitle}</p>
+            <p className="text-foreground/ text-sm">{subtitle}</p>
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none z-10" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/ pointer-events-none z-10" />
               <input
                 type="text"
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded-full border border-white/10 bg-white/5 backdrop-blur-md pl-9 pr-4 py-2 text-sm text-white w-40 md:w-56 hover:bg-white/10 transition-colors placeholder-white/40 focus:outline-none focus:border-white/20"
+                className="rounded-full border border-foreground/ bg-foreground/ backdrop-blur-md pl-9 pr-4 py-2 text-sm text-foreground w-40 md:w-56 hover:bg-foreground/ transition-colors placeholder-white/40 focus:outline-none focus:border-foreground/"
               />
             </div>
 
@@ -210,7 +210,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
                 'flex items-center gap-2 px-5 py-2 rounded-full border text-sm transition-all backdrop-blur-md',
                 filtersOpen
                   ? 'border-luxe-accent bg-luxe-accent/10 text-luxe-accent'
-                  : 'border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10'
+                  : 'border-foreground/ bg-foreground/ text-foreground/ hover:border-foreground/ hover:bg-foreground/'
               )}
             >
               <SlidersHorizontal className="w-4 h-4" />
@@ -228,7 +228,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
             style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}
           >
             <div>
-              <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Category</label>
+              <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Category</label>
               <CustomSelect
                 value={selectedCategory}
                 onChange={setSelectedCategory}
@@ -240,8 +240,8 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
               />
             </div>
             <div>
-              <label className="text-white/50 text-xs uppercase tracking-wide mb-2 flex justify-between">
-                Max Price <span className="text-white">{formatCurrency(maxPrice)}</span>
+              <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 flex justify-between">
+                Max Price <span className="text-foreground">{formatCurrency(maxPrice)}</span>
               </label>
               <input type="range" min={100} max={sliderMax} step={sliderStep} value={maxPrice}
                 onChange={e => setMaxPrice(Number(e.target.value))}
@@ -250,7 +250,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
             <div className="flex items-center gap-3 pt-5">
               <input type="checkbox" id="inStock" checked={inStockOnly} onChange={e => setInStockOnly(e.target.checked)}
                 className="w-4 h-4" style={{ accentColor: '#c8a96e' }} />
-              <label htmlFor="inStock" className="text-white/60 text-sm cursor-pointer">In stock only</label>
+              <label htmlFor="inStock" className="text-foreground/ text-sm cursor-pointer">In stock only</label>
             </div>
           </motion.div>
         )}
@@ -258,20 +258,20 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
         {/* Active filter chips */}
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-2 mt-4">
-            <span className="text-white/30 text-xs">Active:</span>
+            <span className="text-foreground/ text-xs">Active:</span>
             {selectedCategory && (
-              <button onClick={() => clearFilter('category')} className="badge-luxe flex items-center gap-1 hover:bg-white/20 transition-all">
+              <button onClick={() => clearFilter('category')} className="badge-luxe flex items-center gap-1 hover:bg-foreground/ transition-all">
                 {categories.find(c => c.id === selectedCategory)?.name}
                 <X className="w-3 h-3" />
               </button>
             )}
             {search && (
-              <button onClick={() => clearFilter('search')} className="badge-luxe flex items-center gap-1 hover:bg-white/20 transition-all">
+              <button onClick={() => clearFilter('search')} className="badge-luxe flex items-center gap-1 hover:bg-foreground/ transition-all">
                 &ldquo;{search}&rdquo; <X className="w-3 h-3" />
               </button>
             )}
             {inStockOnly && (
-              <button onClick={() => clearFilter('inStock')} className="badge-luxe flex items-center gap-1 hover:bg-white/20 transition-all">
+              <button onClick={() => clearFilter('inStock')} className="badge-luxe flex items-center gap-1 hover:bg-foreground/ transition-all">
                 In Stock <X className="w-3 h-3" />
               </button>
             )}
@@ -282,7 +282,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
       {/* Grid */}
       <div className="page-container py-10">
         {!isLoading && (
-          <p className="text-white/30 text-sm mb-6">
+          <p className="text-foreground/ text-sm mb-6">
             {total} product{total !== 1 ? 's' : ''} found
           </p>
         )}
@@ -291,12 +291,12 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
           <ProductGridSkeleton count={LIMIT} />
         ) : products.length === 0 ? (
           <div className="text-center py-24">
-            <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-5"
+            <div className="w-20 h-20 rounded-full bg-foreground/ flex items-center justify-center mx-auto mb-5"
               style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
-              <Search className="w-8 h-8 text-white/20" />
+              <Search className="w-8 h-8 text-foreground/" />
             </div>
-            <h3 className="text-white font-semibold text-lg mb-2">No products found</h3>
-            <p className="text-white/40 text-sm mb-6">Try adjusting your filters or search term</p>
+            <h3 className="text-foreground font-semibold text-lg mb-2">No products found</h3>
+            <p className="text-foreground/ text-sm mb-6">Try adjusting your filters or search term</p>
             <button
               onClick={() => { setSearch(''); setSelectedCategory(''); setInStockOnly(false); setMaxPrice(sliderMax); }}
               className="btn-luxe-outline text-sm"

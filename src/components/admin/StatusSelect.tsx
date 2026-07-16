@@ -59,8 +59,8 @@ export function StatusSelect({ type, value, options, onChange, disabled, isUpdat
                 onClick={(e) => { e.stopPropagation(); handleSelect(opt.value); }}
                 className={`w-full text-left px-4 py-2.5 transition-colors ${
                   value === opt.value 
-                    ? 'bg-zinc-800 text-white font-medium' 
-                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                    ? 'bg-zinc-800 text-foreground font-medium' 
+                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-foreground'
                 }`}
               >
                 {opt.label}

@@ -68,10 +68,10 @@ export function OrdersList({ orders }: OrdersListProps) {
           animate={{ y: [0, -10, 0] }} 
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
-          <Package className="w-12 h-12 text-white/20 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+          <Package className="w-12 h-12 text-foreground/ mx-auto mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
         </motion.div>
-        <h2 className="text-white font-semibold text-lg mb-2">No orders yet</h2>
-        <p className="text-white/40 text-sm mb-6">Start shopping and your orders will appear here</p>
+        <h2 className="text-foreground font-semibold text-lg mb-2">No orders yet</h2>
+        <p className="text-foreground/ text-sm mb-6">Start shopping and your orders will appear here</p>
         <Link prefetch={true} href="/" className="btn-gold text-sm">Start Shopping</Link>
       </div>
     );
@@ -80,29 +80,29 @@ export function OrdersList({ orders }: OrdersListProps) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="font-display text-2xl font-bold text-white">My Orders</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground">My Orders</h1>
       </div>
       
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/ pointer-events-none" />
           <input
             type="text"
             placeholder="Search by Order ID or Product name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-luxe-accent transition-colors"
+            className="w-full bg-foreground/ border border-foreground/ rounded-xl pl-9 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-luxe-accent transition-colors"
           />
         </div>
-        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 shrink-0">
+        <div className="flex bg-foreground/ p-1 rounded-xl border border-foreground/ shrink-0">
           {(['all', 'active', 'past'] as const).map((status) => (
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
               className={cn(
                 "px-4 py-1.5 rounded-lg text-xs font-medium capitalize transition-all",
-                filterStatus === status ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white"
+                filterStatus === status ? "bg-foreground/ text-foreground shadow-sm" : "text-foreground/ hover:text-foreground"
               )}
             >
               {status}
@@ -112,8 +112,8 @@ export function OrdersList({ orders }: OrdersListProps) {
       </div>
 
       {filteredOrders.length === 0 ? (
-        <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
-          <p className="text-white/50">No orders match your filters.</p>
+        <div className="text-center py-12 bg-foreground/ rounded-2xl border border-foreground/">
+          <p className="text-foreground/">No orders match your filters.</p>
           <button onClick={() => { setSearchQuery(''); setFilterStatus('all'); }} className="mt-3 text-luxe-accent text-sm underline">Clear Filters</button>
         </div>
       ) : filteredOrders.map((order, i) => (
@@ -133,24 +133,24 @@ export function OrdersList({ orders }: OrdersListProps) {
             onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
           >
             <div className="flex items-center gap-2 sm:gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                <Package className="w-4 h-4 text-white/50" />
+              <div className="w-10 h-10 rounded-xl bg-foreground/ border border-foreground/ flex items-center justify-center shrink-0">
+                <Package className="w-4 h-4 text-foreground/" />
               </div>
               <div className="min-w-0">
-                <p className="text-white font-medium text-sm">Order #{order.order_number}</p>
-                <p className="text-white/40 text-xs">{formatDate(order.created_at)}</p>
+                <p className="text-foreground font-medium text-sm">Order #{order.order_number}</p>
+                <p className="text-foreground/ text-xs">{formatDate(order.created_at)}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 sm:gap-6 shrink-0">
               <OrderStatusBadge status={order.status} />
-              <p className="text-white font-semibold text-sm hidden sm:block">
+              <p className="text-foreground font-semibold text-sm hidden sm:block">
                 {formatCurrency(order.grand_total || order.total || 0)}
               </p>
               {expandedId === order.id ? (
-                <ChevronUp className="w-4 h-4 text-white/40" />
+                <ChevronUp className="w-4 h-4 text-foreground/" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-white/40" />
+                <ChevronDown className="w-4 h-4 text-foreground/" />
               )}
             </div>
           </div>
@@ -162,7 +162,7 @@ export function OrdersList({ orders }: OrdersListProps) {
               <div className="lg:col-span-2 space-y-8">
                 {/* Items */}
                 <div>
-                  <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Items Ordered</h3>
+                  <h3 className="text-foreground/ font-medium mb-4 text-sm tracking-wide uppercase">Items Ordered</h3>
                   <div className="space-y-2 divide-y divide-zinc-800/50 border border-zinc-800/50 rounded-xl p-2 bg-zinc-900/30">
                     {order.items?.map((item) => (
                       <div key={item.id} className="relative group">
@@ -171,7 +171,7 @@ export function OrdersList({ orders }: OrdersListProps) {
                           <button
                             onClick={(e) => { e.stopPropagation(); handleBuyAgain(item); }}
                             disabled={addingItem === item.id || addedItem === item.id}
-                            className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5"
+                            className="bg-zinc-800 hover:bg-zinc-700 text-foreground px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5"
                           >
                             {addedItem === item.id ? 'Added' : <><RotateCcw className="w-3 h-3"/> Buy Again</>}
                           </button>
@@ -184,7 +184,7 @@ export function OrdersList({ orders }: OrdersListProps) {
                 {/* Timeline and Tracking */}
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Order Tracking</h3>
+                    <h3 className="text-foreground/ font-medium mb-4 text-sm tracking-wide uppercase">Order Tracking</h3>
                     <div className="p-5 border border-zinc-800/50 rounded-xl bg-zinc-900/30">
                       <OrderTimeline 
                         currentStatus={order.status}
@@ -196,15 +196,15 @@ export function OrdersList({ orders }: OrdersListProps) {
 
                   {order.shipments && order.shipments.length > 0 && (
                     <div>
-                      <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Shipment Details</h3>
+                      <h3 className="text-foreground/ font-medium mb-4 text-sm tracking-wide uppercase">Shipment Details</h3>
                       <div className="p-5 border border-zinc-800/50 rounded-xl bg-zinc-900/30 space-y-3">
                         <div className="flex justify-between text-sm">
-                          <span className="text-white/40">Courier:</span>
-                          <span className="text-white font-medium uppercase tracking-wider">{order.shipments[0].provider}</span>
+                          <span className="text-foreground/">Courier:</span>
+                          <span className="text-foreground font-medium uppercase tracking-wider">{order.shipments[0].provider}</span>
                         </div>
                         <div className="flex justify-between text-sm items-center">
-                          <span className="text-white/40">Tracking (AWB):</span>
-                          <span className="font-mono text-white tracking-widest">{order.shipments[0].tracking_number}</span>
+                          <span className="text-foreground/">Tracking (AWB):</span>
+                          <span className="font-mono text-foreground tracking-widest">{order.shipments[0].tracking_number}</span>
                         </div>
                         {order.shipments[0].tracking_url && (
                           <a 
@@ -225,13 +225,13 @@ export function OrdersList({ orders }: OrdersListProps) {
               {/* Sidebar Info */}
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Payment Summary</h3>
+                  <h3 className="text-foreground/ font-medium mb-4 text-sm tracking-wide uppercase">Payment Summary</h3>
                   <div className="p-5 border border-zinc-800/50 rounded-xl bg-zinc-900/30">
                     <PriceSummary order={order} />
                     <Link
                       href={`/dashboard/orders/${order.id}/invoice`}
                       prefetch={true}
-                      className="mt-6 w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-lg text-xs font-medium transition-colors"
+                      className="mt-6 w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-foreground py-2 rounded-lg text-xs font-medium transition-colors"
                     >
                       <Download className="w-4 h-4" />
                       View & Download Invoice
@@ -241,7 +241,7 @@ export function OrdersList({ orders }: OrdersListProps) {
 
                 {order.delivery_address && (
                   <div>
-                    <h3 className="text-white/80 font-medium mb-4 text-sm tracking-wide uppercase">Delivery Details</h3>
+                    <h3 className="text-foreground/ font-medium mb-4 text-sm tracking-wide uppercase">Delivery Details</h3>
                     <AddressCard address={order.delivery_address} />
                   </div>
                 )}

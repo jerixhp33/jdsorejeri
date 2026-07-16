@@ -110,13 +110,13 @@ export function CartView() {
           <motion.div 
             animate={{ y: [0, -15, 0] }} 
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="w-24 h-24 rounded-full bg-white/5 border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] flex items-center justify-center mx-auto mb-6 relative"
+            className="w-24 h-24 rounded-full bg-foreground/ border border-foreground/ shadow-[0_0_30px_rgba(255,255,255,0.05)] flex items-center justify-center mx-auto mb-6 relative"
           >
-            <ShoppingBag className="w-10 h-10 text-white/40" />
-            <div className="absolute inset-0 rounded-full border border-white/20 animate-ping opacity-20" style={{ animationDuration: '3s' }}></div>
+            <ShoppingBag className="w-10 h-10 text-foreground/" />
+            <div className="absolute inset-0 rounded-full border border-foreground/ animate-ping opacity-20" style={{ animationDuration: '3s' }}></div>
           </motion.div>
-          <h2 className="font-display text-2xl font-bold text-white mb-3">Your cart is empty</h2>
-          <p className="text-white/40 text-sm mb-8">
+          <h2 className="font-display text-2xl font-bold text-foreground mb-3">Your cart is empty</h2>
+          <p className="text-foreground/ text-sm mb-8">
             Browse our collections and add something you love
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -135,8 +135,8 @@ export function CartView() {
   return (
     <div className="page-container py-10 md:py-16">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-        <h1 className="font-display text-3xl font-bold text-white mb-2">Shopping Cart</h1>
-        <p className="text-white/40 text-sm mb-10">
+        <h1 className="font-display text-3xl font-bold text-foreground mb-2">Shopping Cart</h1>
+        <p className="text-foreground/ text-sm mb-10">
           {itemCount} item{itemCount !== 1 ? 's' : ''} in your cart
         </p>
 
@@ -164,7 +164,7 @@ export function CartView() {
                     <div className="flex gap-4">
                       {/* Image */}
                       <Link prefetch={true} href={`/product/${item.product?.slug}`}
-                        className="flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-luxe-dark"
+                        className="flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-card"
                       >
                         {primaryImage ? (
                           <Image
@@ -175,7 +175,7 @@ export function CartView() {
                             className="object-cover w-full h-full"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white/10">
+                          <div className="w-full h-full flex items-center justify-center text-foreground/">
                             ✦
                           </div>
                         )}
@@ -184,7 +184,7 @@ export function CartView() {
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <Link prefetch={true} href={`/product/${item.product?.slug}`}
-                          className="text-white text-sm font-medium hover:text-luxe-accent transition-colors line-clamp-2 mb-1"
+                          className="text-foreground text-sm font-medium hover:text-luxe-accent transition-colors line-clamp-2 mb-1"
                         >
                           {item.product?.name}
                         </Link>
@@ -198,7 +198,7 @@ export function CartView() {
 
                         <div className="flex items-center justify-between mt-2">
                           {/* Price */}
-                          <p className="text-white font-semibold">
+                          <p className="text-foreground font-semibold">
                             {formatCurrency(item.unit_price * item.quantity)}
                           </p>
 
@@ -206,12 +206,12 @@ export function CartView() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center"
+                              className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-foreground/ text-foreground hover:bg-foreground/ active:scale-95 transition-all flex items-center justify-center"
                               aria-label="Decrease quantity"
                             >
                               <Minus className="w-3 h-3" />
                             </button>
-                            <span className="w-8 text-center text-white text-sm">
+                            <span className="w-8 text-center text-foreground text-sm">
                               {item.quantity}
                             </span>
                             <button
@@ -221,7 +221,7 @@ export function CartView() {
                                   item.poster_size?.stock ?? item.product?.stock ?? 0
                                 )
                               }
-                              className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-foreground/ text-foreground hover:bg-foreground/ active:scale-95 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
                               aria-label="Increase quantity"
                             >
                               <Plus className="w-3 h-3" />
@@ -229,7 +229,7 @@ export function CartView() {
                           </div>
                         </div>
 
-                        <p className="text-white/30 text-xs mt-1">
+                        <p className="text-foreground/ text-xs mt-1">
                           {formatCurrency(item.unit_price)} each
                         </p>
                       </div>
@@ -237,7 +237,7 @@ export function CartView() {
                       {/* Remove */}
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="flex-shrink-0 p-3 sm:p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all"
+                        className="flex-shrink-0 p-3 sm:p-2 rounded-lg text-foreground/ hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all"
                         aria-label="Remove item"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -262,23 +262,23 @@ export function CartView() {
           {/* ─── Order Summary ─── */}
           <div className="lg:col-span-1">
             <div className="glass-card p-6 sticky top-24">
-              <h2 className="text-white font-semibold text-base mb-5">Order Summary</h2>
+              <h2 className="text-foreground font-semibold text-base mb-5">Order Summary</h2>
 
               <div className="space-y-3 mb-5">
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/50">
+                  <span className="text-foreground/">
                     Subtotal ({itemCount} item{itemCount !== 1 ? 's' : ''})
                   </span>
-                  <span className="text-white">{formatCurrency(subtotal)}</span>
+                  <span className="text-foreground">{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/50">Delivery</span>
-                  <span className={cn('text-white', deliveryCharge === 0 && 'text-green-400')}>
+                  <span className="text-foreground/">Delivery</span>
+                  <span className={cn('text-foreground', deliveryCharge === 0 && 'text-green-400')}>
                     {deliveryCharge === 0 ? 'FREE' : formatCurrency(deliveryCharge)}
                   </span>
                 </div>
                 {deliveryCharge > 0 && (
-                  <p className="text-white/30 text-xs">
+                  <p className="text-foreground/ text-xs">
                     Add{' '}
                     <span className="text-luxe-accent">
                       {formatCurrency(deliverySettings.threshold - subtotal)}
@@ -298,10 +298,10 @@ export function CartView() {
                 </div>
               )}
 
-              <div className="border-t border-white/10 pt-4 mb-6">
+              <div className="border-t border-foreground/ pt-4 mb-6">
                 <div className="flex justify-between">
-                  <span className="text-white font-semibold">Total</span>
-                  <span className="text-white font-bold text-lg">{formatCurrency(finalTotal)}</span>
+                  <span className="text-foreground font-semibold">Total</span>
+                  <span className="text-foreground font-bold text-lg">{formatCurrency(finalTotal)}</span>
                 </div>
               </div>
               
@@ -320,7 +320,7 @@ export function CartView() {
                         type="button"
                         onClick={() => applyCoupon()}
                         disabled={applyingCoupon || !couponCode}
-                        className="px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all disabled:opacity-50"
+                        className="px-4 rounded-xl bg-foreground/ hover:bg-foreground/ text-foreground text-sm font-medium transition-all disabled:opacity-50"
                       >
                         {applyingCoupon ? '...' : 'Apply'}
                       </button>
@@ -329,19 +329,19 @@ export function CartView() {
                     
                     {availableCoupons.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-white/40 text-[10px] uppercase tracking-wider mb-2">Available Coupons</p>
+                        <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-2">Available Coupons</p>
                         {availableCoupons.map(c => (
                           <button
                             key={c.id}
                             type="button"
                             onClick={() => { setCouponCode(c.code); applyCoupon(c.code); }}
-                            className="w-full text-left p-2.5 rounded-xl border border-white/10 hover:border-luxe-accent/50 hover:bg-white/5 transition-all flex justify-between items-center group"
+                            className="w-full text-left p-2.5 rounded-xl border border-foreground/ hover:border-luxe-accent/50 hover:bg-foreground/ transition-all flex justify-between items-center group"
                           >
                             <div className="flex items-center gap-2">
                               <Tag className="w-3.5 h-3.5 text-luxe-accent group-hover:scale-110 transition-transform" />
                               <div>
-                                <span className="text-white text-sm font-mono block">{c.code}</span>
-                                <span className="text-white/40 text-[10px] block">
+                                <span className="text-foreground text-sm font-mono block">{c.code}</span>
+                                <span className="text-foreground/ text-[10px] block">
                                   Min order: {formatCurrency(c.min_order_amount)}
                                 </span>
                               </div>
@@ -360,7 +360,7 @@ export function CartView() {
                       <Tag className="w-4 h-4" />
                       <span className="text-sm font-medium font-mono">{appliedCoupon.code}</span>
                     </div>
-                    <button type="button" onClick={removeCoupon} className="text-white/40 hover:text-white transition-colors">
+                    <button type="button" onClick={removeCoupon} className="text-foreground/ hover:text-foreground transition-colors">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -375,7 +375,7 @@ export function CartView() {
               </Link>
 
               {/* Delivery info */}
-              <p className="text-white/30 text-xs text-center mt-4">
+              <p className="text-foreground/ text-xs text-center mt-4">
                 Orders delivered across Tamil Nadu via WhatsApp checkout
               </p>
             </div>

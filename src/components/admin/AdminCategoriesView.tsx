@@ -89,7 +89,7 @@ export function AdminCategoriesView({ initialCategories }: AdminCategoriesViewPr
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-white">Categories</h1>
+        <h1 className="font-display text-3xl font-bold text-foreground">Categories</h1>
         <button
           onClick={() => { 
             setEditCategory(null); 
@@ -105,7 +105,7 @@ export function AdminCategoriesView({ initialCategories }: AdminCategoriesViewPr
 
       <div className="glass-card p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/" />
           <input
             type="text"
             placeholder="Search categories by name or type..."
@@ -121,12 +121,12 @@ export function AdminCategoriesView({ initialCategories }: AdminCategoriesViewPr
           <div key={cat.id} className={cn("glass-card p-5 relative overflow-hidden", !cat.is_active && 'opacity-50')}>
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-white/5 text-luxe-accent">
+                <div className="p-2.5 rounded-xl bg-foreground/ text-luxe-accent">
                   <Tag className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-white font-medium">{cat.name}</h3>
-                  <p className="text-white/40 text-xs">/{cat.slug}</p>
+                  <h3 className="text-foreground font-medium">{cat.name}</h3>
+                  <p className="text-foreground/ text-xs">/{cat.slug}</p>
                 </div>
               </div>
             </div>
@@ -135,7 +135,7 @@ export function AdminCategoriesView({ initialCategories }: AdminCategoriesViewPr
               <span className="badge-luxe text-xs font-mono">Type: {cat.product_type}</span>
             </div>
 
-            <div className="flex gap-2 border-t border-white/5 pt-4">
+            <div className="flex gap-2 border-t border-foreground/ pt-4">
               <button onClick={() => {
                 setEditCategory(cat);
                 setFormData({ name: cat.name, product_type: cat.product_type, is_active: cat.is_active });
@@ -143,7 +143,7 @@ export function AdminCategoriesView({ initialCategories }: AdminCategoriesViewPr
               }} className="flex-1 btn-luxe-outline py-2 text-xs flex justify-center items-center gap-1.5">
                 <Edit3 className="w-3.5 h-3.5" /> Edit
               </button>
-              <button onClick={() => handleDelete(cat.id)} className="px-3 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition-colors flex justify-center items-center">
+              <button onClick={() => handleDelete(cat.id)} className="px-3 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-foreground transition-colors flex justify-center items-center">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -155,26 +155,26 @@ export function AdminCategoriesView({ initialCategories }: AdminCategoriesViewPr
         <div data-lenis-prevent="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
           <div className="relative w-full max-w-md glass-card p-6">
-            <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-              <h2 className="text-xl font-semibold text-white">{editCategory ? 'Edit Category' : 'New Category'}</h2>
-              <button onClick={() => setShowModal(false)} className="text-white/50 hover:text-white"><X className="w-5 h-5"/></button>
+            <div className="flex justify-between items-center mb-6 border-b border-foreground/ pb-4">
+              <h2 className="text-xl font-semibold text-foreground">{editCategory ? 'Edit Category' : 'New Category'}</h2>
+              <button onClick={() => setShowModal(false)} className="text-foreground/ hover:text-foreground"><X className="w-5 h-5"/></button>
             </div>
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Category Name *</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Category Name *</label>
                 <input required value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className="input-luxe" placeholder="e.g. Scented Candles" />
               </div>
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Product Type (System ID) *</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Product Type (System ID) *</label>
                 <input required value={formData.product_type} onChange={e => setFormData(p => ({ ...p, product_type: e.target.value }))} className="input-luxe font-mono text-sm" placeholder="e.g. candle" />
-                <p className="text-white/30 text-[10px] mt-1.5 leading-tight">This tells the system what fields to display. You can type an existing type (poster, earring) or a brand new one (candle, mug).</p>
+                <p className="text-foreground/ text-[10px] mt-1.5 leading-tight">This tells the system what fields to display. You can type an existing type (poster, earring) or a brand new one (candle, mug).</p>
               </div>
               <label className="flex items-center gap-2 cursor-pointer mt-4">
                 <input type="checkbox" checked={formData.is_active} onChange={e => setFormData(p => ({ ...p, is_active: e.target.checked }))} className="w-4 h-4 accent-luxe-accent" />
-                <span className="text-white/60 text-sm">Active (Visible in store)</span>
+                <span className="text-foreground/ text-sm">Active (Visible in store)</span>
               </label>
               
-              <div className="pt-4 border-t border-white/10 flex gap-3">
+              <div className="pt-4 border-t border-foreground/ flex gap-3">
                 <button type="button" onClick={() => setShowModal(false)} className="btn-luxe-outline flex-1">Cancel</button>
                 <button type="submit" className="btn-gold flex-1">{editCategory ? 'Update' : 'Create'}</button>
               </div>

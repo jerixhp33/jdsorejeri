@@ -102,7 +102,7 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-white">Coupons</h1>
+        <h1 className="font-display text-3xl font-bold text-foreground">Coupons</h1>
         <button onClick={openCreate} className="btn-gold flex items-center gap-2 text-sm">
           <Plus className="w-4 h-4" />
           Add Coupon
@@ -120,16 +120,16 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
           >
             <div className="flex items-center gap-2 mb-3">
               <Ticket className="w-4 h-4 text-luxe-accent" />
-              <h3 className="text-white font-mono font-bold text-lg tracking-wider">{coupon.code}</h3>
+              <h3 className="text-foreground font-mono font-bold text-lg tracking-wider">{coupon.code}</h3>
             </div>
             <div className="space-y-1 mb-4">
-              <p className="text-white/80 text-sm">
-                Discount: <span className="font-semibold text-white">
+              <p className="text-foreground/ text-sm">
+                Discount: <span className="font-semibold text-foreground">
                   {coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `₹${coupon.discount_value}`}
                 </span>
               </p>
-              <p className="text-white/50 text-xs">Min Order: ₹{coupon.min_order_amount}</p>
-              <p className="text-white/50 text-xs">
+              <p className="text-foreground/ text-xs">Min Order: ₹{coupon.min_order_amount}</p>
+              <p className="text-foreground/ text-xs">
                 Uses: {coupon.used_count} {coupon.usage_limit ? `/ ${coupon.usage_limit}` : '(unlimited)'}
               </p>
             </div>
@@ -137,11 +137,11 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => openEdit(coupon)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-xs transition-all"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-foreground/ text-foreground/ hover:bg-foreground/ hover:text-foreground text-xs transition-all"
               >
                 <Edit2 className="w-3 h-3" />Edit
               </button>
-              <button onClick={() => deleteCoupon(coupon.id)} className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-red-500/20 hover:text-red-400 transition-all">
+              <button onClick={() => deleteCoupon(coupon.id)} className="p-2 rounded-lg bg-foreground/ text-foreground/ hover:bg-red-500/20 hover:text-red-400 transition-all">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -152,7 +152,7 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
           </motion.div>
         ))}
         {coupons.length === 0 && (
-          <div className="col-span-full glass-card p-16 text-center text-white/30">
+          <div className="col-span-full glass-card p-16 text-center text-foreground/">
             No coupons found. Create one to start offering discounts!
           </div>
         )}
@@ -162,11 +162,11 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
         <div data-lenis-prevent="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
           <div className="relative w-full max-w-md glass-card p-6 space-y-4">
-            <h2 className="text-white font-semibold text-lg">{editCoupon ? 'Edit Coupon' : 'New Coupon'}</h2>
+            <h2 className="text-foreground font-semibold text-lg">{editCoupon ? 'Edit Coupon' : 'New Coupon'}</h2>
             
             <div className="space-y-3">
               <div>
-                <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Coupon Code *</label>
+                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Coupon Code *</label>
                 <input
                   value={form.code}
                   onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
@@ -176,7 +176,7 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Type *</label>
+                  <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Type *</label>
                   <select
                     value={form.discount_type}
                     onChange={e => setForm(f => ({ ...f, discount_type: e.target.value }))}
@@ -187,7 +187,7 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
                   </select>
                 </div>
                 <div>
-                  <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Value *</label>
+                  <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Value *</label>
                   <input
                     type="number"
                     value={form.discount_value}
@@ -199,7 +199,7 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Min Order (₹)</label>
+                  <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Min Order (₹)</label>
                   <input
                     type="number"
                     value={form.min_order_amount}
@@ -209,7 +209,7 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
                   />
                 </div>
                 <div>
-                  <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Usage Limit</label>
+                  <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Usage Limit</label>
                   <input
                     type="number"
                     value={form.usage_limit}
@@ -227,7 +227,7 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
                   onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))}
                   className="w-4 h-4 accent-luxe-accent"
                 />
-                <label htmlFor="couponActive" className="text-white/60 text-sm cursor-pointer">
+                <label htmlFor="couponActive" className="text-foreground/ text-sm cursor-pointer">
                   Active (can be used)
                 </label>
               </div>

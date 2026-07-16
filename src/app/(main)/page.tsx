@@ -99,7 +99,7 @@ export default async function HomePage() {
       </div>
       
       <div className="mb-4 lg:mb-6">
-        <Suspense fallback={<div className="py-12 animate-pulse bg-white/5 rounded-3xl mx-4 md:mx-12 h-[300px]" />}>
+        <Suspense fallback={<div className="py-12 animate-pulse bg-foreground/ rounded-3xl mx-4 md:mx-12 h-[300px]" />}>
           <TestimonialsData />
         </Suspense>
       </div>
@@ -109,7 +109,7 @@ export default async function HomePage() {
       </div>
 
       <div className="mb-4 lg:mb-6">
-        <Suspense fallback={<div className="py-12 animate-pulse bg-white/5 rounded-3xl mx-4 md:mx-12 h-[300px]" />}>
+        <Suspense fallback={<div className="py-12 animate-pulse bg-foreground/ rounded-3xl mx-4 md:mx-12 h-[300px]" />}>
           <FAQData />
         </Suspense>
       </div>

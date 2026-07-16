@@ -47,7 +47,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
               viewport={{ once: true }}
               transition={{ delay: i * 0.07 }}
               className={cn(
-                'rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group',
+                'rounded-2xl md:rounded-[2rem] border border-foreground/ bg-foreground/ backdrop-blur-md p-4 md:p-8 hover:bg-foreground/ hover:border-foreground/ transition-all duration-500 group',
                 i === 0 && 'md:col-span-2 lg:col-span-1'
               )}
             >
@@ -60,7 +60,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
                       'w-3 h-3 md:w-4 md:h-4',
                       j < testimonial.rating
                         ? 'text-luxe-accent fill-current'
-                        : 'text-white/20'
+                        : 'text-foreground/'
                     )}
                   />
                 ))}
@@ -70,12 +70,12 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
               <Quote className="w-4 h-4 md:w-6 md:h-6 text-luxe-accent/30 mb-2 md:mb-3" />
 
               {/* Body */}
-              <p className="text-white/70 text-[11px] md:text-sm leading-relaxed mb-3 md:mb-5 line-clamp-4">
+              <p className="text-foreground/ text-[11px] md:text-sm leading-relaxed mb-3 md:mb-5 line-clamp-4">
                 {testimonial.body}
               </p>
 
               {/* Author */}
-              <div className="flex items-center gap-2 md:gap-3 pt-3 md:pt-4 border-t border-white/10">
+              <div className="flex items-center gap-2 md:gap-3 pt-3 md:pt-4 border-t border-foreground/">
                 {testimonial.author_image ? (
                   <Image
                     src={testimonial.author_image}
@@ -92,9 +92,9 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="text-white text-xs md:text-sm font-medium truncate">{testimonial.author_name}</p>
+                  <p className="text-foreground text-xs md:text-sm font-medium truncate">{testimonial.author_name}</p>
                   {testimonial.author_location && (
-                    <p className="text-white/40 text-[10px] md:text-xs truncate">{testimonial.author_location}</p>
+                    <p className="text-foreground/ text-[10px] md:text-xs truncate">{testimonial.author_location}</p>
                   )}
                 </div>
               </div>

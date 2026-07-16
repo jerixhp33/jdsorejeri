@@ -74,7 +74,7 @@ export function Tooltip({
             exit={variants[position].exit}
             transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
             className={cn(
-              'absolute z-[9999] px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-white/90 whitespace-nowrap bg-black/85 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl pointer-events-none',
+              'absolute z-[9999] px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-foreground/ whitespace-nowrap bg-black/85 backdrop-blur-md border border-foreground/ rounded-lg shadow-2xl pointer-events-none',
               positionStyles[position]
             )}
           >

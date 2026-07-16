@@ -58,12 +58,12 @@ export function AdminSettingsView({ settings: initial }: AdminSettingsViewProps)
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-3xl font-bold text-white">Settings</h1>
+      <h1 className="font-display text-3xl font-bold text-foreground">Settings</h1>
 
       <div className="glass-card p-6">
         <div className="flex items-center gap-2 mb-6">
           <Settings className="w-4 h-4 text-luxe-accent" />
-          <h2 className="text-white font-semibold">Store Configuration</h2>
+          <h2 className="text-foreground font-semibold">Store Configuration</h2>
         </div>
 
         <div className="space-y-5">
@@ -73,12 +73,12 @@ export function AdminSettingsView({ settings: initial }: AdminSettingsViewProps)
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center py-4 border-b border-white/5 last:border-0"
+              className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center py-4 border-b border-foreground/ last:border-0"
             >
               <div>
-                <p className="text-white text-sm font-medium font-mono">{setting.key}</p>
+                <p className="text-foreground text-sm font-medium font-mono">{setting.key}</p>
                 {setting.description && (
-                  <p className="text-white/40 text-xs mt-0.5">{setting.description}</p>
+                  <p className="text-foreground/ text-xs mt-0.5">{setting.description}</p>
                 )}
               </div>
               <div className="md:col-span-2 flex items-center gap-3">
@@ -115,7 +115,7 @@ export function AdminSettingsView({ settings: initial }: AdminSettingsViewProps)
       {/* Danger zone */}
       <div className="glass-card p-6 border-red-500/20">
         <h2 className="text-red-400 font-semibold mb-4">Danger Zone</h2>
-        <p className="text-white/50 text-sm mb-4">
+        <p className="text-foreground/ text-sm mb-4">
           These actions are irreversible. Please be absolutely certain before proceeding.
         </p>
         <div className="flex flex-wrap gap-3">

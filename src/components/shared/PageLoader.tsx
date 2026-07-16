@@ -73,14 +73,14 @@ export function PageLoader() {
               transition={{ delay: 0.3, duration: 0.5 }}
               className="text-center"
             >
-              <p className="font-display text-2xl font-bold tracking-widest text-white">
+              <p className="font-display text-2xl font-bold tracking-widest text-foreground">
                 JD Store
               </p>
               <motion.p
                 initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="text-white/30 text-[11px] tracking-[0.3em] uppercase mt-1"
+                className="text-foreground/ text-[11px] tracking-[0.3em] uppercase mt-1"
               >
                 Premium · Curated · Delivered
               </motion.p>
@@ -91,7 +91,7 @@ export function PageLoader() {
               initial={{ opacity: 1, scaleX: 1 }}
               animate={{ opacity: 1, scaleX: 1 }}
               transition={{ delay: 0.4 }}
-              className="w-48 h-px bg-white/10 rounded-full overflow-hidden relative"
+              className="w-48 h-px bg-foreground/ rounded-full overflow-hidden relative"
             >
               <motion.div
                 className="absolute inset-y-0 left-0 rounded-full"
@@ -116,7 +116,7 @@ export function PageLoader() {
             initial={{ opacity: 0.2 }}
             animate={{ opacity: 0.2 }}
             transition={{ delay: 0.8 }}
-            className="absolute bottom-8 text-white/40 text-[10px] tracking-[0.25em] uppercase"
+            className="absolute bottom-8 text-foreground/ text-[10px] tracking-[0.25em] uppercase"
           >
             Art for every space
           </motion.p>

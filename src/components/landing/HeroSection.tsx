@@ -135,7 +135,7 @@ function ShimmerButton({
   return (
     <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
       <Link prefetch={true} href={href}
-        className={`relative group inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-sm font-semibold overflow-hidden border border-white/20 bg-white/5 backdrop-blur-md text-white hover:border-white/40 hover:bg-white/10 transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)]`}
+        className={`relative group inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-sm font-semibold overflow-hidden border border-foreground/ bg-foreground/ backdrop-blur-md text-foreground hover:border-foreground/ hover:bg-foreground/ transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)]`}
       >
         <span className="absolute inset-0 translate-x-[-110%] group-hover:translate-x-[110%] bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out" />
         <span className="relative z-10 flex items-center gap-2">{children}</span>
@@ -259,11 +259,11 @@ export function HeroSection() {
         <motion.p
           animate={{ opacity: [0.2, 0.5, 0.2] }}
           transition={{ duration: 2.5, repeat: Infinity }}
-          className="text-white/30 text-[10px] tracking-[0.3em] uppercase"
+          className="text-foreground/ text-[10px] tracking-[0.3em] uppercase"
         >
           Scroll
         </motion.p>
-        <div className="relative w-px h-8 sm:h-10 overflow-hidden rounded-full bg-white/10">
+        <div className="relative w-px h-8 sm:h-10 overflow-hidden rounded-full bg-foreground/">
           <motion.div
             className="absolute top-0 left-0 right-0 rounded-full"
             style={{ height: '55%', background: 'linear-gradient(to bottom, #c8a96e, transparent)' }}
@@ -301,7 +301,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.7, delay: 0.15 }}
-          className="inline-flex items-center gap-2 px-5 py-2 mb-6 sm:mb-8 md:mb-10 rounded-full border border-white/10 bg-white/5 backdrop-blur-md"
+          className="inline-flex items-center gap-2 px-5 py-2 mb-6 sm:mb-8 md:mb-10 rounded-full border border-foreground/ bg-foreground/ backdrop-blur-md"
         >
           <motion.span
             animate={{ rotate: [0, 18, -18, 0] }}
@@ -340,7 +340,7 @@ export function HeroSection() {
               </motion.span>
             </span>
 
-            <SplitReveal text="your space" className="block text-white" delay={0.8} />
+            <SplitReveal text="your space" className="block text-foreground" delay={0.8} />
           </h1>
         </div>
 
@@ -364,7 +364,7 @@ export function HeroSection() {
             </motion.span>
           </ShimmerButton>
           <ShimmerButton href="/category/earring">
-            <Sparkles className="w-4 h-4 text-white/70" />
+            <Sparkles className="w-4 h-4 text-foreground/" />
             Explore Earrings
           </ShimmerButton>
         </motion.div>
@@ -386,7 +386,7 @@ export function HeroSection() {
             {itemsToRender.map((item, i) => (
               <span
                 key={`h1-${i}`}
-                className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-white/40 text-[11px] sm:text-xs tracking-[0.25em] uppercase font-semibold"
+                className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-foreground/ text-[11px] sm:text-xs tracking-[0.25em] uppercase font-semibold"
               >
                 <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-luxe-accent/50" />
                 {item}
@@ -398,7 +398,7 @@ export function HeroSection() {
             {itemsToRender.map((item, i) => (
               <span
                 key={`h2-${i}`}
-                className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-white/40 text-[11px] sm:text-xs tracking-[0.25em] uppercase font-semibold"
+                className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-foreground/ text-[11px] sm:text-xs tracking-[0.25em] uppercase font-semibold"
               >
                 <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-luxe-accent/50" />
                 {item}

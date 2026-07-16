@@ -60,7 +60,7 @@ export function PriceSummary({ order, className = '' }: Props) {
         </div>
       )}
 
-      <div className="pt-3 border-t border-zinc-800 flex justify-between font-medium text-white">
+      <div className="pt-3 border-t border-zinc-800 flex justify-between font-medium text-foreground">
         <span>Total</span>
         <span className="text-luxe-accent">{formatCurrency(grandTotal)}</span>
       </div>
