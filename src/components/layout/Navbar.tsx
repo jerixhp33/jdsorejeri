@@ -590,7 +590,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 z-40 bg-black/60 md:hidden"
+              className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm md:hidden"
               onClick={() => setMobileOpen(false)}
             />
             {/* Drawer */}
@@ -599,7 +599,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-72 max-w-[85vw] bg-black/40 backdrop-blur-3xl border-l border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-l-[2rem] flex flex-col md:hidden overflow-hidden"
+              className="fixed top-0 right-0 bottom-0 z-50 w-[85vw] max-w-sm bg-black/90 backdrop-blur-3xl border-l border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-l-[2rem] flex flex-col md:hidden overflow-hidden"
             >
               <div className="side-edge-light" />
               
