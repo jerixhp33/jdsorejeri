@@ -578,8 +578,6 @@ export function CheckoutForm() {
               <p className="mt-4 text-xs text-gray-400">Generated on {new Date().toLocaleString('en-IN')}</p>
             </div>
           </div>
-            </div>
-          </div>
         )}
 
       <div className="page-container py-24 text-center max-w-lg mx-auto print:hidden">
