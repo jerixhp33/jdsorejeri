@@ -14,26 +14,34 @@ export function MobileBottomNav() {
   const { user } = useAuth();
   
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      // Hide on ANY scroll
+      setIsVisible(false);
       
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false); // Scrolling down
-      } else {
-        setIsVisible(true); // Scrolling up
+      // Clear existing timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
       }
       
-      setLastScrollY(currentScrollY);
+      // Show again after scrolling stops for 300ms
+      const timeout = setTimeout(() => {
+        setIsVisible(true);
+      }, 300);
+      
+      setScrollTimeout(timeout);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+    };
+  }, [scrollTimeout]);
 
   // Don't show bottom nav on desktop, checkout, or admin routes
   if (pathname.includes('/checkout') || pathname.includes('/admin')) {
@@ -49,18 +57,19 @@ export function MobileBottomNav() {
   return (
     <div 
       className={cn(
-        "md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center transition-transform duration-300 ease-in-out",
-        isVisible ? "translate-y-0" : "translate-y-32"
+        "md:hidden fixed bottom-6 left-0 right-0 z-[100] flex justify-center transition-all duration-300 ease-in-out pointer-events-none",
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
       )}
     >
-      <nav className="flex items-center justify-between px-2 py-2 w-[85%] max-w-[320px] bg-background/80 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl">
+      <nav className="flex items-center gap-2 px-2 py-2 w-max bg-white/20 backdrop-blur-xl border border-white/30 rounded-[2rem] shadow-2xl pointer-events-auto">
         
         {/* Home */}
         <Link 
+          prefetch={true}
           href="/" 
           className={cn(
-            "flex items-center justify-center h-12 px-5 rounded-full transition-all duration-300", 
-            pathname === '/' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white'
+            "flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 active:scale-95", 
+            pathname === '/' ? 'bg-white/20 text-white' : 'text-white/70 hover:text-white'
           )}
         >
           <Home className="w-5 h-5" strokeWidth={pathname === '/' ? 2.5 : 2} />
@@ -68,10 +77,11 @@ export function MobileBottomNav() {
 
         {/* Wishlist */}
         <Link 
+          prefetch={true}
           href="/wishlist" 
           className={cn(
-            "flex items-center justify-center h-12 px-5 rounded-full transition-all duration-300", 
-            pathname === '/wishlist' ? 'bg-white/10 text-red-500' : 'text-white/50 hover:text-red-400'
+            "flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 active:scale-95", 
+            pathname === '/wishlist' ? 'bg-white/20 text-red-500' : 'text-white/70 hover:text-red-400'
           )}
         >
           <Heart className={cn("w-5 h-5", pathname === '/wishlist' && "fill-current text-red-500")} strokeWidth={pathname === '/wishlist' ? 2.5 : 2} />
@@ -79,15 +89,16 @@ export function MobileBottomNav() {
 
         {/* Cart */}
         <Link 
+          prefetch={true}
           href="/cart" 
           className={cn(
-            "relative flex items-center justify-center h-12 px-5 rounded-full transition-all duration-300", 
-            pathname === '/cart' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white'
+            "relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 active:scale-95", 
+            pathname === '/cart' ? 'bg-white/20 text-white' : 'text-white/70 hover:text-white'
           )}
         >
           <ShoppingCart className="w-5 h-5" strokeWidth={pathname === '/cart' ? 2.5 : 2} />
           {itemCount > 0 && (
-            <span className="absolute top-2 right-2 w-4 h-4 bg-luxe-accent rounded-full text-black text-[9px] font-bold flex items-center justify-center border-2 border-background">
+            <span className="absolute top-2 right-2 w-4 h-4 bg-luxe-accent rounded-full text-black text-[9px] font-bold flex items-center justify-center border-2 border-transparent">
               {itemCount > 9 ? '9+' : itemCount}
             </span>
           )}
@@ -95,10 +106,11 @@ export function MobileBottomNav() {
 
         {/* Profile */}
         <Link 
+          prefetch={true}
           href={user ? '/dashboard' : '/login'} 
           className={cn(
-            "flex items-center justify-center h-12 px-5 rounded-full transition-all duration-300", 
-            pathname.includes('/dashboard') ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white'
+            "flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 active:scale-95", 
+            pathname.includes('/dashboard') ? 'bg-white/20 text-white' : 'text-white/70 hover:text-white'
           )}
         >
           {profileImg ? (
