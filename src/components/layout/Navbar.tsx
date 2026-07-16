@@ -850,7 +850,10 @@ export function Navbar({ categories = [] }: NavbarProps) {
 
               <div className="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl shadow-black/50">
                 {/* Search Input */}
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
+                <form 
+                  onSubmit={(e) => { e.preventDefault(); searchInputRef.current?.blur(); }}
+                  className="flex items-center gap-3 px-5 py-4 border-b border-white/5"
+                >
                   {loadingSuggestions ? (
                     <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-luxe-accent animate-spin flex-shrink-0" />
                   ) : (
@@ -858,7 +861,8 @@ export function Navbar({ categories = [] }: NavbarProps) {
                   )}
                   <input
                     ref={searchInputRef}
-                    type="text"
+                    type="search"
+                    enterKeyHint="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search products, materials, colors..."
@@ -866,6 +870,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
                   />
                   {searchQuery && (
                     <button
+                      type="button"
                       onClick={() => { setSearchQuery(''); searchInputRef.current?.focus(); }}
                       className="p-1 rounded-md text-white/30 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
                     >
@@ -881,7 +886,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
                   >
                     <X className="w-5 h-5" />
                   </button>
-                </div>
+                </form>
 
                 {/* Results Area */}
                 <div className="max-h-[55vh] overflow-y-auto">

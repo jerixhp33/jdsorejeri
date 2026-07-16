@@ -49,8 +49,8 @@ export function OrdersList({ orders }: OrdersListProps) {
   const filteredOrders = orders.filter((order) => {
     const query = searchQuery.toLowerCase();
     const matchesSearch = 
-      order.order_number.toLowerCase().includes(query) ||
-      order.items?.some((item: any) => item.product?.name?.toLowerCase().includes(query));
+      (order.order_number && order.order_number.toLowerCase().includes(query)) ||
+      (order.items && order.items.some((item: any) => item.product?.name?.toLowerCase().includes(query)));
       
     if (filterStatus === 'active') {
       return ['pending', 'confirmed', 'processing', 'packed', 'label_generated', 'shipped', 'out_for_delivery'].includes(order.status) && matchesSearch;
@@ -85,16 +85,20 @@ export function OrdersList({ orders }: OrdersListProps) {
       
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
+        <form 
+          className="relative flex-1"
+          onSubmit={(e) => { e.preventDefault(); (document.activeElement as HTMLElement)?.blur(); }}
+        >
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
           <input
-            type="text"
+            type="search"
+            enterKeyHint="search"
             placeholder="Search by Order ID or Product name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-luxe-accent transition-colors"
           />
-        </div>
+        </form>
         <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 shrink-0">
           {(['all', 'active', 'past'] as const).map((status) => (
             <button
