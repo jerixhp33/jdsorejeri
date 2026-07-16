@@ -134,9 +134,6 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   const [wallCorners, setWallCorners] = useState<{x: number, y: number}[] | null>(null);
   const [warpMatrix, setWarpMatrix] = useState<string>('none');
   
-  // UI State
-  const [showControls, setShowControls] = useState(true);
-  
   const [galleryPosters, setGalleryPosters] = useState<RenderedPoster[]>([]);
   const [activePosterId, setActivePosterId] = useState<string | null>(null);
 
@@ -411,7 +408,6 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
         }
       });
       
-      setCustomWallImage(null);
       setGalleryPosters(newGallery);
       setGlobalScale(1);
       
@@ -494,7 +490,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       });
       if (error) {
         console.error('Supabase error:', error);
-        toast.error('Could not save to database. Have you run the 016_gallery_layouts.sql migration?');
+        toast.error(`Database error: ${error.message || 'Check migration.'}`);
         return;
       }
       
@@ -547,118 +543,9 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
             </AnimatePresence>
           </div>
 
-          {/* Eye Toggle for Clean View */}
-          <div className="absolute top-4 right-4 z-[100] md:right-6">
-            <button
-              onClick={() => setShowControls(!showControls)}
-              className="p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white/70 hover:text-white border border-white/10 active:scale-95 transition-all shadow-lg"
-              title={showControls ? "Hide Controls" : "Show Controls"}
-            >
-              {showControls ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-
-          {/* Mobile Header */}
-          <div className={cn("md:hidden flex items-center justify-between p-4 bg-gradient-to-b from-black/80 to-transparent z-50 absolute top-0 w-full transition-opacity duration-300", showControls ? "opacity-100" : "opacity-0 pointer-events-none")}>
-            <h3 className="font-display text-lg font-bold text-white tracking-wide truncate pr-4">
-              {currentProduct.name}
-            </h3>
-            <button 
-              onClick={handleBack}
-              className="p-2 bg-white/10 rounded-full text-white hover:bg-white/20 active:scale-95 transition-all shrink-0"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Left Panel */}
-          <div className={cn(
-            "w-full md:w-[360px] lg:w-[420px] bg-black/80 md:bg-[#0c0c0c] border-r border-white/5 flex flex-col z-40 order-2 md:order-1 backdrop-blur-2xl md:backdrop-blur-none max-h-[45vh] md:max-h-none rounded-t-3xl md:rounded-none overflow-y-auto shadow-[0_-20px_40px_rgba(0,0,0,0.5)] md:shadow-none transition-transform duration-500 ease-in-out",
-            showControls ? "translate-y-0 md:translate-x-0" : "translate-y-full md:-translate-x-full md:translate-y-0"
-          )}>
-            
-            <div className="hidden md:flex items-center justify-between p-6 border-b border-white/5">
-              <h3 className="font-display text-xl font-bold text-white tracking-wide truncate">
-                Wall Preview
-              </h3>
-              <button 
-                onClick={handleBack}
-                className="p-2 bg-white/5 rounded-full text-white/50 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 flex-1 flex flex-col space-y-8">
-              <div className="space-y-2 text-center md:text-left mt-2 md:mt-0">
-                <h4 className="font-display text-xl md:text-2xl font-bold text-white">{currentProduct.name}</h4>
-                <p className="text-white/50 text-sm">See how it beautifully transforms your space.</p>
-              </div>
-
-              <div className="space-y-4">
-                <h5 className="text-white/70 text-xs font-bold uppercase tracking-widest">Environment Canvas</h5>
-                <div className="grid grid-cols-2 gap-2">
-                  <label className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-luxe-accent/50 active:scale-95 transition-all group cursor-pointer">
-                    <Upload className="w-5 h-5 text-white/60 group-hover:text-luxe-accent transition-colors" />
-                    <span className="text-xs font-medium text-white/80">Upload Wall</span>
-                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
-                  </label>
-                  <button 
-                    onClick={handleAutoDesign}
-                    disabled={isAutoDesigning}
-                    className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-luxe-accent/10 border border-luxe-accent/30 hover:bg-luxe-accent/20 active:scale-95 transition-all group disabled:opacity-50"
-                  >
-                    {isAutoDesigning ? (
-                      <div className="w-5 h-5 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin" />
-                    ) : (
-                      <Sparkles className="w-5 h-5 text-luxe-accent" />
-                    )}
-                    <span className="text-xs font-bold text-luxe-accent">
-                      {isAutoDesigning ? 'Detecting AI...' : 'Auto Design'}
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-auto pt-6 border-t border-white/5 pb-6 md:pb-0 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <button 
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 text-white font-medium hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    {saving ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <Download className="w-4 h-4" />}
-                    Save
-                  </button>
-                  <button 
-                    onClick={handleShare}
-                    disabled={sharing}
-                    className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 text-white font-medium hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    {sharing ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <Share2 className="w-4 h-4" />}
-                    Share
-                  </button>
-                </div>
-
-                <button 
-                  onClick={handleAddToCart}
-                  disabled={addingToCart}
-                  className="w-full flex items-center justify-center gap-2 py-4 rounded-full bg-gradient-to-r from-luxe-accent to-[#d4b982] text-black font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-70 shadow-[0_0_20px_rgba(200,169,110,0.3)]"
-                >
-                  {addingToCart ? (
-                    <div className="w-5 h-5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-                  ) : (
-                    <ShoppingCart className="w-5 h-5" />
-                  )}
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Viewport */}
+          {/* Main Viewport (Full Screen) */}
           <div 
-            className="flex-1 relative z-10 flex items-center justify-center order-1 md:order-2 min-h-0" 
+            className="flex-1 relative z-10 flex items-center justify-center min-h-0" 
             ref={containerRef}
             onPointerDown={() => setActivePosterId(null)}
           >
@@ -825,23 +712,58 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
               )}
             </div>
 
-            {/* Bottom Dock */}
-            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 px-6 py-3 rounded-full backdrop-blur-xl bg-black/50 border border-white/20 shadow-2xl z-[110]">
-              <div className="flex items-center gap-1">
+            {/* Elegant Floating Transparent Navbar */}
+            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-4 px-4 py-3 rounded-full backdrop-blur-xl bg-black/50 border border-white/20 shadow-2xl z-[110] w-[95%] max-w-[800px] justify-between overflow-x-auto">
+              
+              {/* Close Button */}
+              <button 
+                onClick={handleBack}
+                className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white/80 bg-white/5 hover:text-white hover:bg-white/20 active:scale-95 transition-all"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="w-px h-8 bg-white/20 shrink-0" />
+
+              {/* Upload Wall */}
+              <label className="flex items-center gap-2 px-4 py-2 shrink-0 rounded-full bg-white/5 text-white/80 hover:text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer">
+                <Upload className="w-4 h-4" />
+                <span className="text-sm font-semibold hidden md:inline">Upload Wall</span>
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
+              </label>
+
+              {/* Auto Design */}
+              <button 
+                onClick={handleAutoDesign}
+                disabled={isAutoDesigning}
+                className="flex items-center gap-2 px-4 py-2 shrink-0 rounded-full bg-luxe-accent/10 border border-luxe-accent/30 text-luxe-accent font-bold hover:bg-luxe-accent/20 active:scale-95 transition-all disabled:opacity-50"
+                title="Auto Design"
+              >
+                {isAutoDesigning ? (
+                  <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                <span className="text-sm hidden md:inline">Auto Design</span>
+              </button>
+              
+              <div className="w-px h-8 bg-white/20 shrink-0 hidden md:block" />
+
+              {/* Zoom & Warp */}
+              <div className="flex items-center gap-1 shrink-0 hidden md:flex">
                 <button 
                   onClick={() => setGlobalScale(s => Math.max(0.4, s - 0.1))}
                   className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 active:scale-95 transition-all"
                 >
                   <ZoomOut className="w-5 h-5" />
                 </button>
-                <div className="w-px h-6 bg-white/20 mx-1" />
                 <button 
                   onClick={() => setGlobalScale(s => Math.min(2.5, s + 0.1))}
                   className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 active:scale-95 transition-all"
                 >
                   <ZoomIn className="w-5 h-5" />
                 </button>
-                <div className="w-px h-6 bg-white/20 mx-1" />
                 <button 
                   onClick={togglePerspectiveMode}
                   className={cn(
@@ -857,19 +779,43 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                 </button>
               </div>
               
-              <div className="w-px h-8 bg-white/20" />
+              <div className="w-px h-8 bg-white/20 shrink-0" />
               
+              {/* Save & Share */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button 
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-10 h-10 md:w-auto md:px-4 md:py-2 flex items-center justify-center gap-2 rounded-full bg-white/10 text-white font-semibold hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
+                  title="Save Photo"
+                >
+                  {saving ? <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" /> : <Download className="w-4 h-4" />}
+                  <span className="hidden md:inline text-sm">Save</span>
+                </button>
+                <button 
+                  onClick={handleShare}
+                  disabled={sharing}
+                  className="w-10 h-10 md:w-auto md:px-4 md:py-2 flex items-center justify-center gap-2 rounded-full bg-white/10 text-white font-semibold hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
+                  title="Share Gallery"
+                >
+                  {sharing ? <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" /> : <Share2 className="w-4 h-4" />}
+                  <span className="hidden md:inline text-sm">Share</span>
+                </button>
+              </div>
+
+              {/* Add to Cart */}
               <button 
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white text-sm font-semibold hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
+                onClick={handleAddToCart}
+                disabled={addingToCart}
+                className="w-10 h-10 md:w-auto md:px-4 md:py-2 shrink-0 flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-luxe-accent to-[#d4b982] text-black font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-70 shadow-[0_0_15px_rgba(200,169,110,0.3)]"
+                title="Add all to Cart"
               >
-                {saving ? (
-                  <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                {addingToCart ? (
+                  <div className="w-4 h-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
                 ) : (
-                  <Download className="w-4 h-4" />
+                  <ShoppingCart className="w-4 h-4" />
                 )}
-                <span className="hidden sm:inline">Save Photo</span>
+                <span className="hidden md:inline text-sm">Buy All</span>
               </button>
             </div>
           </div>
