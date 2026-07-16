@@ -95,15 +95,6 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   // Live AR State
   const [isArMode, setIsArMode] = useState(false);
   const [arStream, setArStream] = useState<MediaStream | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Hook to attach stream when video mounts
-  useEffect(() => {
-    if (videoRef.current && arStream) {
-      videoRef.current.srcObject = arStream;
-      videoRef.current.play().catch(console.error);
-    }
-  }, [videoRef.current, arStream, isArMode]);
   
   const [galleryPosters, setGalleryPosters] = useState<RenderedPoster[]>([]);
   const [activePosterId, setActivePosterId] = useState<string | null>(null);
@@ -230,14 +221,49 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     const url = URL.createObjectURL(file);
     setCustomWallImage(url);
     setPrevRoomThemeUrl(customWallImage);
+    setIsAutoDesigning(true);
     
-    // Smart Lighting Detection
-    const direction = await detectWallLightingDirection(url);
-    setLightSource(direction);
+    try {
+      // Smart Lighting Detection
+      const direction = await detectWallLightingDirection(url);
+      setLightSource(direction);
+      
+      const wallBounds = await detectWallBounds(url);
+      let centerX = 0, centerY = 0;
+      let scaleMult = 1;
+
+      if (wallBounds) {
+        centerX = (wallBounds.x + wallBounds.width / 2) * 100 - 50;
+        centerY = (wallBounds.y + wallBounds.height / 2) * 100 - 50;
+        scaleMult = Math.min(1.5, Math.max(0.5, wallBounds.width * 2));
+        toast.success('Wall boundary detected via Edge ML!');
+        setIsPerspectiveMode(false);
+        setWallCorners(null);
+      }
+
+      setGalleryPosters([{
+        id: 'init-' + currentProduct.id,
+        productId: currentProduct.id,
+        productName: currentProduct.name,
+        url: posterUrl,
+        price: currentProduct.sizes?.[0]?.price || currentProduct.price || 0,
+        sizeId: currentProduct.sizes?.[0]?.id,
+        isHero: true,
+        xPercent: centerX,
+        yPercent: centerY,
+        scaleFactor: 0.36 * scaleMult,
+        rotation: 0,
+        frame: FRAME_STYLES[0]
+      }]);
+    } catch (err) {
+      toast.error("Failed to process wall image.");
+    } finally {
+      setIsAutoDesigning(false);
+    }
     
     // Reset input
     e.target.value = '';
-  }, [customWallImage]);
+  }, [customWallImage, currentProduct, posterUrl]);
 
   const handleAutoDesign = async () => {
     setIsAutoDesigning(true);
@@ -598,7 +624,12 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
               {isArMode && (
                 <motion.video
                   key="ar-video"
-                  ref={videoRef}
+                  ref={el => {
+                    if (el && arStream && el.srcObject !== arStream) {
+                      el.srcObject = arStream;
+                      el.play().catch(console.error);
+                    }
+                  }}
                   autoPlay
                   playsInline
                   muted
