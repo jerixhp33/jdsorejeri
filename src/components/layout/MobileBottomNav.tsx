@@ -44,7 +44,7 @@ export function MobileBottomNav() {
   }, [scrollTimeout]);
 
   // Don't show bottom nav on desktop, checkout, admin, or dashboard routes
-  if (pathname.includes('/checkout') || pathname.includes('/admin') || pathname.includes('/dashboard')) {
+  if (pathname === '/cart' || pathname.includes('/checkout') || pathname.includes('/admin') || pathname.includes('/dashboard')) {
     return null;
   }
 
