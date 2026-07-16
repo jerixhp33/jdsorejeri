@@ -152,10 +152,11 @@ export function useCart() {
     productId: string,
     unitPrice: number,
     quantity = 1,
-    posterSizeId?: string
+    posterSizeId?: string,
+    silent: boolean = false
   ) => {
     if (!profile) {
-      toast.error('Please sign in to add items to cart');
+      if (!silent) toast.error('Please sign in to add items to cart');
       return;
     }
 
