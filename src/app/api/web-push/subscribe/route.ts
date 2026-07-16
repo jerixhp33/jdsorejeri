@@ -35,28 +35,7 @@ export async function POST(req: NextRequest) {
       throw error;
     }
 
-    // Send a welcome message immediately upon successful subscription
-    try {
-      let customerName = 'Valued Customer';
-      const { data: profile } = await admin
-        .from('user_profiles')
-        .select('name')
-        .eq('uid', user.id)
-        .single();
-      if (profile?.name) customerName = profile.name;
-
-      await webpush.sendNotification(
-        subscription,
-        JSON.stringify({
-          title: `Welcome to JD Store, ${customerName}! 🎉`,
-          body: 'Your notifications are successfully set up! You will receive updates about your orders.',
-          url: '/dashboard'
-        })
-      );
-    } catch (pushErr) {
-      console.error('Failed to send welcome push notification:', pushErr);
-      // We don't fail the request if the welcome push fails, as long as it was saved
-    }
+    // User subscription saved. No welcome push notification sent as per user request.
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
