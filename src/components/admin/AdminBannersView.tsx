@@ -154,7 +154,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-foreground">Banners</h1>
+        <h1 className="font-display text-3xl font-bold text-white">Banners</h1>
         <button onClick={openCreate} className="btn-gold flex items-center gap-2 text-sm">
           <Plus className="w-4 h-4" />
           Add Banner
@@ -170,11 +170,11 @@ export function AdminBannersView({ banners: initial, products = [], categories =
             transition={{ delay: i * 0.04 }}
             className={cn('glass-card overflow-hidden', !banner.is_active && 'opacity-60')}
           >
-            <div className="relative aspect-video bg-card">
+            <div className="relative aspect-video bg-luxe-dark">
               {banner.image_url ? (
                 <Image src={banner.image_url} alt={banner.title} fill className="object-cover" />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-foreground/ text-4xl">🖼</div>
+                <div className="absolute inset-0 flex items-center justify-center text-white/10 text-4xl">🖼</div>
               )}
               <div className="absolute top-2 left-2">
                 <span className="badge-luxe text-[10px] capitalize">{banner.position}</span>
@@ -186,22 +186,22 @@ export function AdminBannersView({ banners: initial, products = [], categories =
               )}
             </div>
             <div className="p-4">
-              <p className="text-foreground font-medium text-sm mb-0.5">{banner.title}</p>
-              {banner.subtitle && <p className="text-foreground/ text-xs mb-2">{banner.subtitle}</p>}
+              <p className="text-white font-medium text-sm mb-0.5">{banner.title}</p>
+              {banner.subtitle && <p className="text-white/40 text-xs mb-2">{banner.subtitle}</p>}
               {banner.cta_text && (
                 <p className="text-luxe-accent text-xs mb-3">CTA: {banner.cta_text} → {banner.cta_url}</p>
               )}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => openEdit(banner)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-foreground/ text-foreground/ hover:bg-foreground/ hover:text-foreground text-xs transition-all"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-xs transition-all"
                 >
                   <Edit2 className="w-3 h-3" />Edit
                 </button>
-                <button onClick={() => toggleActive(banner)} className="p-2 rounded-lg bg-foreground/ text-foreground/ hover:bg-foreground/ transition-all">
+                <button onClick={() => toggleActive(banner)} className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-all">
                   {banner.is_active ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
-                <button onClick={() => deleteBanner(banner.id)} className="p-2 rounded-lg bg-foreground/ text-foreground/ hover:bg-red-500/20 hover:text-red-400 transition-all">
+                <button onClick={() => deleteBanner(banner.id)} className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-red-500/20 hover:text-red-400 transition-all">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -209,7 +209,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
           </motion.div>
         ))}
         {banners.length === 0 && (
-          <div className="col-span-full glass-card p-16 text-center text-foreground/">
+          <div className="col-span-full glass-card p-16 text-center text-white/30">
             No banners yet. Create one to display on the store.
           </div>
         )}
@@ -220,12 +220,12 @@ export function AdminBannersView({ banners: initial, products = [], categories =
         <div data-lenis-prevent="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
           <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto glass-card p-6 space-y-4">
-            <h2 className="text-foreground font-semibold text-lg">{editBanner ? 'Edit Banner' : 'New Banner'}</h2>
+            <h2 className="text-white font-semibold text-lg">{editBanner ? 'Edit Banner' : 'New Banner'}</h2>
 
             {/* Title & subtitle */}
             <div className="space-y-3">
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Title *</label>
+                <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Title *</label>
                 <input
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
@@ -234,7 +234,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
                 />
               </div>
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Subtitle</label>
+                <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Subtitle</label>
                 <input
                   value={form.subtitle}
                   onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
@@ -246,7 +246,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
 
             {/* Desktop image upload */}
             <div>
-              <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">
+              <label className="text-white/40 text-xs uppercase tracking-wide mb-2 block">
                 Desktop Image *
               </label>
               <ImageUploader images={desktopImages} onChange={setDesktopImages} maxImages={1} />
@@ -254,9 +254,9 @@ export function AdminBannersView({ banners: initial, products = [], categories =
 
             {/* Mobile image upload */}
             <div>
-              <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">
+              <label className="text-white/40 text-xs uppercase tracking-wide mb-2 block">
                 Mobile Image
-                <span className="text-foreground/ normal-case ml-1">(optional — falls back to desktop)</span>
+                <span className="text-white/25 normal-case ml-1">(optional — falls back to desktop)</span>
               </label>
               <ImageUploader images={mobileImages} onChange={setMobileImages} maxImages={1} />
             </div>
@@ -264,7 +264,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
             {/* CTA + position */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">CTA Text</label>
+                <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">CTA Text</label>
                 <input
                   value={form.cta_text}
                   onChange={e => setForm(f => ({ ...f, cta_text: e.target.value }))}
@@ -274,7 +274,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
               </div>
               <div className="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Link Type</label>
+                  <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Link Type</label>
                   <select
                     value={linkType}
                     onChange={e => {
@@ -291,7 +291,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
                 
                 {linkType !== 'custom' && (
                   <div>
-                    <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Filter by Type</label>
+                    <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Filter by Type</label>
                     <select
                       value={productTypeFilter}
                       onChange={e => {
@@ -312,7 +312,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
                 )}
 
                 <div className={linkType === 'custom' ? "col-span-2" : "col-span-2 md:col-span-1"}>
-                  <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">CTA URL Target</label>
+                  <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">CTA URL Target</label>
                   {linkType === 'custom' ? (
                     <input
                       value={form.cta_url}
@@ -352,7 +352,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
                 </div>
               </div>
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Position</label>
+                <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Position</label>
                 <select
                   value={form.position}
                   onChange={e => setForm(f => ({ ...f, position: e.target.value as any }))}
@@ -362,7 +362,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
                 </select>
               </div>
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Display Order</label>
+                <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Display Order</label>
                 <input
                   type="number"
                   value={form.display_order}
@@ -380,7 +380,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
                 onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))}
                 className="w-4 h-4 accent-luxe-accent"
               />
-              <label htmlFor="bannerActive" className="text-foreground/ text-sm cursor-pointer">
+              <label htmlFor="bannerActive" className="text-white/60 text-sm cursor-pointer">
                 Active (visible on store)
               </label>
             </div>

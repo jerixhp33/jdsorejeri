@@ -180,8 +180,8 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">Orders Dashboard</h1>
-          <p className="text-foreground/ text-sm mt-1">Manage and track all store orders</p>
+          <h1 className="font-display text-3xl font-bold text-white">Orders Dashboard</h1>
+          <p className="text-white/50 text-sm mt-1">Manage and track all store orders</p>
         </div>
         <button onClick={exportCSV} className="btn-secondary flex items-center gap-2">
           <Download className="w-4 h-4" />
@@ -191,34 +191,34 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="glass-card p-4 rounded-xl border border-foreground/ bg-white/[0.02]">
-          <p className="text-foreground/ text-xs uppercase tracking-wider mb-1">Today's Revenue</p>
+        <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.02]">
+          <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Today's Revenue</p>
           <p className="text-2xl font-bold text-emerald-400">{formatCurrency(kpis.todayRevenue)}</p>
         </div>
-        <div className="glass-card p-4 rounded-xl border border-foreground/ bg-white/[0.02]">
+        <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.02]">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-foreground/ text-xs uppercase tracking-wider">Today's Orders</p>
-            <Package className="w-4 h-4 text-foreground/" />
+            <p className="text-white/50 text-xs uppercase tracking-wider">Today's Orders</p>
+            <Package className="w-4 h-4 text-white/30" />
           </div>
-          <p className="text-2xl font-bold text-foreground">{kpis.todayOrders}</p>
+          <p className="text-2xl font-bold text-white">{kpis.todayOrders}</p>
         </div>
-        <div className="glass-card p-4 rounded-xl border border-foreground/ bg-white/[0.02]">
+        <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.02]">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-foreground/ text-xs uppercase tracking-wider">Pending</p>
+            <p className="text-white/50 text-xs uppercase tracking-wider">Pending</p>
             <Clock className="w-4 h-4 text-amber-400/50" />
           </div>
           <p className="text-2xl font-bold text-amber-400">{kpis.pendingCount}</p>
         </div>
-        <div className="glass-card p-4 rounded-xl border border-foreground/ bg-white/[0.02]">
+        <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.02]">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-foreground/ text-xs uppercase tracking-wider">Packed</p>
+            <p className="text-white/50 text-xs uppercase tracking-wider">Packed</p>
             <CheckCircle className="w-4 h-4 text-blue-400/50" />
           </div>
           <p className="text-2xl font-bold text-blue-400">{kpis.packedCount}</p>
         </div>
-        <div className="glass-card p-4 rounded-xl border border-foreground/ bg-white/[0.02]">
+        <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.02]">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-foreground/ text-xs uppercase tracking-wider">Shipped</p>
+            <p className="text-white/50 text-xs uppercase tracking-wider">Shipped</p>
             <Truck className="w-4 h-4 text-purple-400/50" />
           </div>
           <p className="text-2xl font-bold text-purple-400">{kpis.shippedCount}</p>
@@ -229,7 +229,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
       <div className="glass-card p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4 flex-1">
           <div className="relative max-w-sm w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input
               type="text"
               placeholder="Search ID, Customer, Phone..."
@@ -242,7 +242,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
           <select 
             value={filter} 
             onChange={(e) => setFilter(e.target.value as OrderStatus | 'all')}
-            className="input-luxe text-sm py-2 px-3 bg-card border-foreground/"
+            className="input-luxe text-sm py-2 px-3 bg-luxe-dark border-white/10"
           >
             {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
@@ -250,7 +250,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
           <select 
             value={paymentFilter} 
             onChange={(e) => setPaymentFilter(e.target.value as PaymentStatus | 'all')}
-            className="input-luxe text-sm py-2 px-3 bg-card border-foreground/"
+            className="input-luxe text-sm py-2 px-3 bg-luxe-dark border-white/10"
           >
             {PAYMENT_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
@@ -263,7 +263,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
             <select 
               value={bulkActionStatus} 
               onChange={e => setBulkActionStatus(e.target.value as OrderStatus)}
-              className="input-luxe py-1 text-xs bg-black/50 border-foreground/ outline-none focus:ring-0"
+              className="input-luxe py-1 text-xs bg-black/50 border-white/10 outline-none focus:ring-0"
             >
               <option value="">Update Status...</option>
               {STATUSES.filter(s => s.value !== 'all').map(s => (
@@ -286,28 +286,28 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-foreground/ bg-white/[0.02]">
+              <tr className="border-b border-white/10 bg-white/[0.02]">
                 <th className="px-4 py-4 text-left w-12">
                   <input
                     type="checkbox"
-                    className="rounded border-foreground/ bg-foreground/ accent-luxe-accent cursor-pointer"
+                    className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer"
                     checked={selectedIds.size === filtered.length && filtered.length > 0}
                     onChange={toggleAll}
                   />
                 </th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Order</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Date</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Customer</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Payment</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Total</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Status</th>
-                <th className="px-4 py-4 text-right text-foreground/ text-xs uppercase tracking-wider font-semibold">Action</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Order</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Date</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Customer</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Payment</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Total</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Status</th>
+                <th className="px-4 py-4 text-right text-white/40 text-xs uppercase tracking-wider font-semibold">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center text-foreground/ text-sm">
+                  <td colSpan={8} className="px-4 py-16 text-center text-white/30 text-sm">
                     No orders match your criteria.
                   </td>
                 </tr>
@@ -317,23 +317,23 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                     <td className="px-4 py-4">
                       <input
                         type="checkbox"
-                        className="rounded border-foreground/ bg-foreground/ accent-luxe-accent cursor-pointer"
+                        className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer"
                         checked={selectedIds.has(order.id)}
                         onChange={() => toggleSelection(order.id)}
                       />
                     </td>
                     <td className="px-4 py-4">
-                      <Link href={`/admin/orders/${order.id}`} className="text-foreground font-medium hover:text-luxe-accent transition-colors block">
+                      <Link href={`/admin/orders/${order.id}`} className="text-white font-medium hover:text-luxe-accent transition-colors block">
                         #{order.order_number}
                       </Link>
-                      <p className="text-foreground/ text-xs mt-0.5">{order.items?.length || 0} items</p>
+                      <p className="text-white/40 text-xs mt-0.5">{order.items?.length || 0} items</p>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-foreground/ text-sm">{formatDate(order.created_at)}</p>
+                      <p className="text-white/70 text-sm">{formatDate(order.created_at)}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-foreground text-sm font-medium">{(order.delivery_address as any)?.full_name || (order.user as any)?.name || 'Unknown'}</p>
-                      <p className="text-foreground/ text-xs mt-0.5">{(order.delivery_address as any)?.phone || (order.user as any)?.phone || (order.user as any)?.email}</p>
+                      <p className="text-white text-sm font-medium">{(order.delivery_address as any)?.full_name || (order.user as any)?.name || 'Unknown'}</p>
+                      <p className="text-white/40 text-xs mt-0.5">{(order.delivery_address as any)?.phone || (order.user as any)?.phone || (order.user as any)?.email}</p>
                     </td>
                     <td className="px-4 py-4">
                       <div className="w-full max-w-[120px]">
@@ -348,7 +348,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-foreground font-semibold text-sm">{formatCurrency(order.grand_total || order.total || 0)}</p>
+                      <p className="text-white font-semibold text-sm">{formatCurrency(order.grand_total || order.total || 0)}</p>
                     </td>
                     <td className="px-4 py-4">
                       <div className="w-full max-w-[130px]">
@@ -365,7 +365,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
                     <td className="px-4 py-4 text-right">
                       <Link 
                         href={`/admin/orders/${order.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-foreground/ text-foreground/ text-xs font-medium hover:bg-foreground/ hover:text-foreground transition-all"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 text-white/70 text-xs font-medium hover:bg-white/10 hover:text-white transition-all"
                       >
                         Details
                         <ChevronRight className="w-3.5 h-3.5" />

@@ -151,8 +151,8 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">FAQs</h1>
-          <p className="text-foreground/ text-sm mt-1">
+          <h1 className="font-display text-3xl font-bold text-white">FAQs</h1>
+          <p className="text-white/40 text-sm mt-1">
             {items.length} total · {items.filter((f) => f.is_active).length} active
           </p>
         </div>
@@ -168,8 +168,8 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
       {/* List */}
       {items.length === 0 ? (
         <div className="glass-card p-12 text-center">
-          <HelpCircle className="w-10 h-10 text-foreground/ mx-auto mb-3" />
-          <p className="text-foreground/">No FAQs yet. Add your first one.</p>
+          <HelpCircle className="w-10 h-10 text-white/20 mx-auto mb-3" />
+          <p className="text-white/40">No FAQs yet. Add your first one.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -187,15 +187,15 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
                   <button
                     onClick={() => moveOrder(f, -1)}
                     disabled={idx === 0}
-                    className="p-1 rounded text-foreground/ hover:text-foreground disabled:opacity-20 transition-colors"
+                    className="p-1 rounded text-white/30 hover:text-white disabled:opacity-20 transition-colors"
                   >
                     <ChevronUp className="w-3.5 h-3.5" />
                   </button>
-                  <span className="text-foreground/ text-[10px] text-center">{f.display_order}</span>
+                  <span className="text-white/20 text-[10px] text-center">{f.display_order}</span>
                   <button
                     onClick={() => moveOrder(f, 1)}
                     disabled={idx === items.length - 1}
-                    className="p-1 rounded text-foreground/ hover:text-foreground disabled:opacity-20 transition-colors"
+                    className="p-1 rounded text-white/30 hover:text-white disabled:opacity-20 transition-colors"
                   >
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
@@ -206,7 +206,7 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
                   <div className="flex items-start justify-between gap-2">
                     <button
                       onClick={() => setExpanded(expanded === f.id ? null : f.id)}
-                      className="text-foreground text-sm font-medium text-left hover:text-luxe-accent transition-colors"
+                      className="text-white text-sm font-medium text-left hover:text-luxe-accent transition-colors"
                     >
                       {f.question}
                     </button>
@@ -224,7 +224,7 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <p className="text-foreground/ text-sm mt-2 leading-relaxed">{f.answer}</p>
+                        <p className="text-white/50 text-sm mt-2 leading-relaxed">{f.answer}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -238,7 +238,7 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
                       'p-2 rounded-lg transition-all',
                       f.is_active
                         ? 'text-green-400 hover:bg-green-500/10'
-                        : 'text-foreground/ hover:bg-foreground/'
+                        : 'text-white/30 hover:bg-white/5'
                     )}
                     title={f.is_active ? 'Hide' : 'Show'}
                   >
@@ -246,7 +246,7 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
                   </button>
                   <button
                     onClick={() => openEdit(f)}
-                    className="p-2 rounded-lg text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all"
+                    className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5 transition-all"
                     title="Edit"
                   >
                     <Pencil className="w-4 h-4" />
@@ -254,7 +254,7 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
                   <button
                     onClick={() => handleDelete(f.id)}
                     disabled={deletingId === f.id}
-                    className="p-2 rounded-lg text-foreground/ hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    className="p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all"
                     title="Delete"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -283,12 +283,12 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
               className="glass-card w-full max-w-lg p-6 space-y-4"
             >
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-foreground font-semibold text-lg">
+                <h2 className="text-white font-semibold text-lg">
                   {modal.data.id ? 'Edit FAQ' : 'Add FAQ'}
                 </h2>
                 <button
                   onClick={closeModal}
-                  className="p-2 rounded-lg text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all"
+                  className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -296,7 +296,7 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
 
               {/* Question */}
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Question *</label>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Question *</label>
                 <input
                   value={modal.data.question || ''}
                   onChange={(e) => set('question', e.target.value)}
@@ -307,7 +307,7 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
 
               {/* Answer */}
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Answer *</label>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Answer *</label>
                 <textarea
                   value={modal.data.answer || ''}
                   onChange={(e) => set('answer', e.target.value)}
@@ -319,8 +319,8 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
 
               {/* Category */}
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">
-                  Category <span className="text-foreground/">(optional)</span>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
+                  Category <span className="text-white/20">(optional)</span>
                 </label>
                 <input
                   value={modal.data.category || ''}
@@ -336,7 +336,7 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
 
               {/* Display order */}
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Display Order</label>
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Display Order</label>
                 <input
                   type="number"
                   min="0"
@@ -348,12 +348,12 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
 
               {/* Active toggle */}
               <div className="flex items-center gap-3">
-                <label className="text-foreground/ text-sm">Visible on homepage</label>
+                <label className="text-white/50 text-sm">Visible on homepage</label>
                 <button
                   onClick={() => set('is_active', !modal.data.is_active)}
                   className={cn(
                     'relative w-10 h-5 rounded-full transition-colors',
-                    modal.data.is_active ? 'bg-luxe-accent' : 'bg-foreground/'
+                    modal.data.is_active ? 'bg-luxe-accent' : 'bg-white/20'
                   )}
                 >
                   <span
@@ -369,7 +369,7 @@ export function AdminFAQsView({ faqs: initial }: AdminFAQsViewProps) {
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   onClick={closeModal}
-                  className="px-4 py-2 rounded-xl border border-foreground/ text-foreground/ text-sm hover:border-foreground/ hover:text-foreground transition-all"
+                  className="px-4 py-2 rounded-xl border border-white/10 text-white/50 text-sm hover:border-white/20 hover:text-white transition-all"
                 >
                   Cancel
                 </button>

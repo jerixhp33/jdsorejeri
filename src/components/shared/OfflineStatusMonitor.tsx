@@ -90,19 +90,19 @@ function ReactCatcherGame() {
     <div className="w-full bg-white/[0.01] border border-white/[0.05] rounded-[24px] p-5 relative select-none">
       <div className="flex justify-between items-center mb-3">
         <span className="text-[11px] font-bold uppercase tracking-wider text-[#c8a96e]">✦ Luxe Collector ✦</span>
-        <div className="flex gap-3 text-xs text-foreground/">
-          <span>Score: <strong className="text-foreground">{score}</strong></span>
-          <span>High Score: <strong className="text-foreground">{highScore}</strong></span>
+        <div className="flex gap-3 text-xs text-white/50">
+          <span>Score: <strong className="text-white">{score}</strong></span>
+          <span>High Score: <strong className="text-white">{highScore}</strong></span>
         </div>
       </div>
 
       <div 
-        className="h-[180px] w-full bg-black/25 border border-foreground/ rounded-2xl overflow-hidden relative cursor-pointer touch-none"
+        className="h-[180px] w-full bg-black/25 border border-white/5 rounded-2xl overflow-hidden relative cursor-pointer touch-none"
         onPointerMove={handlePointerMove}
       >
         {/* Catcher */}
         <div 
-          className="absolute bottom-2 h-2.5 rounded-full border border-foreground/ shadow-lg"
+          className="absolute bottom-2 h-2.5 rounded-full border border-white/20 shadow-lg"
           style={{
             left: catcherX,
             width: '64px',
@@ -199,10 +199,10 @@ export function OfflineStatusMonitor() {
           <span className="inline-block px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-semibold tracking-wider uppercase mb-5">
             Connection Lost
           </span>
-          <h1 className="font-display text-2.5xl font-bold tracking-tight text-foreground mb-3">
+          <h1 className="font-display text-2.5xl font-bold tracking-tight text-white mb-3">
             You&apos;re Offline
           </h1>
-          <p className="text-foreground/ text-sm leading-relaxed mb-6">
+          <p className="text-white/50 text-sm leading-relaxed mb-6">
             Your connection has been lost. We will automatically return you to the store the instant your connection is restored.
           </p>
           <div className="flex items-center justify-center gap-2 text-[#c8a96e] text-xs font-semibold uppercase tracking-widest animate-pulse">
@@ -214,7 +214,7 @@ export function OfflineStatusMonitor() {
         {/* Luxe Collector interactive arcade game */}
         <ReactCatcherGame />
 
-        <div className="text-foreground/ text-xs mt-6 leading-relaxed">
+        <div className="text-white/40 text-xs mt-6 leading-relaxed">
           Need support? Contact us on WhatsApp at<br />
           <a href="https://wa.me/919360490974" target="_blank" rel="noopener noreferrer" className="text-[#c8a96e] font-medium hover:underline">
             +91 9360490974

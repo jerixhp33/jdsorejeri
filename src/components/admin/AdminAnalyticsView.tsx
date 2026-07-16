@@ -53,10 +53,10 @@ export function AdminAnalyticsView({
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-foreground">Analytics</h1>
+        <h1 className="font-display text-3xl font-bold text-white">Analytics</h1>
         <button
           onClick={exportCSV}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-foreground/ text-foreground/ hover:text-foreground hover:border-foreground/ text-sm transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/15 text-white/60 hover:text-white hover:border-white/30 text-sm transition-all"
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -72,8 +72,8 @@ export function AdminAnalyticsView({
           { label: 'Avg Order Value', value: formatCurrency(summary.average_order_value), sub: `${summary.conversion_rate}% conversion`, positive: summary.conversion_rate > 5 },
         ].map((stat) => (
           <div key={stat.label} className="glass-card p-5">
-            <p className="text-foreground/ text-xs uppercase tracking-wide mb-3">{stat.label}</p>
-            <p className="font-display text-2xl font-bold text-foreground mb-1">{stat.value}</p>
+            <p className="text-white/40 text-xs uppercase tracking-wide mb-3">{stat.label}</p>
+            <p className="font-display text-2xl font-bold text-white mb-1">{stat.value}</p>
             <div className="flex items-center gap-1 text-xs">
               {stat.positive ? (
                 <TrendingUp className="w-3 h-3 text-green-400" />
@@ -88,14 +88,14 @@ export function AdminAnalyticsView({
 
       {/* Period selector */}
       <div className="flex items-center gap-2">
-        <span className="text-foreground/ text-sm">Period:</span>
+        <span className="text-white/40 text-sm">Period:</span>
         {([7, 14, 30] as const).map((p) => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
             className={cn(
               'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
-              period === p ? 'bg-luxe-accent text-black' : 'bg-foreground/ text-foreground/ hover:bg-foreground/'
+              period === p ? 'bg-luxe-accent text-black' : 'bg-white/5 text-white/50 hover:bg-white/10'
             )}
           >
             {p} days
@@ -106,18 +106,18 @@ export function AdminAnalyticsView({
       {/* Period totals */}
       <div className="grid grid-cols-2 gap-4">
         <div className="glass-card p-4">
-          <p className="text-foreground/ text-xs mb-1">Revenue (last {period} days)</p>
+          <p className="text-white/40 text-xs mb-1">Revenue (last {period} days)</p>
           <p className="font-display text-xl font-bold text-luxe-accent">{formatCurrency(totalPeriodRevenue)}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-foreground/ text-xs mb-1">Orders (last {period} days)</p>
-          <p className="font-display text-xl font-bold text-foreground">{totalPeriodOrders}</p>
+          <p className="text-white/40 text-xs mb-1">Orders (last {period} days)</p>
+          <p className="font-display text-xl font-bold text-white">{totalPeriodOrders}</p>
         </div>
       </div>
 
       {/* Revenue chart */}
       <div className="glass-card p-6">
-        <h2 className="text-foreground font-semibold mb-6">Revenue Trend</h2>
+        <h2 className="text-white font-semibold mb-6">Revenue Trend</h2>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={chartData}>
             <defs>
@@ -142,7 +142,7 @@ export function AdminAnalyticsView({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Orders bar chart */}
         <div className="glass-card p-6">
-          <h2 className="text-foreground font-semibold mb-6">Daily Orders</h2>
+          <h2 className="text-white font-semibold mb-6">Daily Orders</h2>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -159,7 +159,7 @@ export function AdminAnalyticsView({
 
         {/* Device breakdown */}
         <div className="glass-card p-6">
-          <h2 className="text-foreground font-semibold mb-6">Device Breakdown</h2>
+          <h2 className="text-white font-semibold mb-6">Device Breakdown</h2>
           {deviceAnalytics.length > 0 ? (
             <div className="flex items-center gap-6">
               <ResponsiveContainer width="50%" height={180}>
@@ -178,43 +178,43 @@ export function AdminAnalyticsView({
                 {deviceAnalytics.map((d, i) => (
                   <div key={d.device} className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
-                    <span className="text-foreground/ text-sm">{d.device}</span>
-                    <span className="text-foreground/ text-xs">({d.count})</span>
+                    <span className="text-white/70 text-sm">{d.device}</span>
+                    <span className="text-white/40 text-xs">({d.count})</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <p className="text-foreground/ text-sm text-center py-12">No login data yet</p>
+            <p className="text-white/30 text-sm text-center py-12">No login data yet</p>
           )}
         </div>
       </div>
 
       {/* Top products */}
       <div className="glass-card p-6">
-        <h2 className="text-foreground font-semibold mb-6">Top Products by Revenue</h2>
+        <h2 className="text-white font-semibold mb-6">Top Products by Revenue</h2>
         <div className="space-y-4">
           {topProducts.map((product, i) => {
             const maxRevenue = topProducts[0]?.revenue || 1;
             const pct = (product.revenue / maxRevenue) * 100;
             return (
               <div key={product.product_id} className="flex items-center gap-4">
-                <span className="text-foreground/ text-xs w-6 text-right">{i + 1}</span>
+                <span className="text-white/30 text-xs w-6 text-right">{i + 1}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between mb-1.5">
-                    <span className="text-foreground text-sm truncate">{product.name}</span>
+                    <span className="text-white text-sm truncate">{product.name}</span>
                     <span className="text-luxe-accent text-sm font-semibold ml-2">{formatCurrency(product.revenue)}</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-foreground/ overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
                     <div className="h-full rounded-full bg-luxe-accent" style={{ width: `${pct}%` }} />
                   </div>
-                  <p className="text-foreground/ text-xs mt-1">{product.total_sold} units sold</p>
+                  <p className="text-white/30 text-xs mt-1">{product.total_sold} units sold</p>
                 </div>
               </div>
             );
           })}
           {topProducts.length === 0 && (
-            <p className="text-foreground/ text-sm text-center py-8">No sales data yet</p>
+            <p className="text-white/30 text-sm text-center py-8">No sales data yet</p>
           )}
         </div>
       </div>

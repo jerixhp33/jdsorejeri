@@ -36,7 +36,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       <div className="mb-16 flex flex-col items-center text-center">
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground/ border border-foreground/ backdrop-blur-md text-foreground/ hover:text-foreground hover:bg-foreground/ hover:border-foreground/ transition-all text-sm font-medium mb-10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] group"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-white/80 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all text-sm font-medium mb-10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Back to Home
@@ -44,9 +44,9 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-luxe-accent/10 border border-luxe-accent/20 mb-6">
           <p className="text-luxe-accent text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase">Collection</p>
         </div>
-        <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold mb-6 tracking-tight text-foreground">{collection.name}</h1>
+        <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold mb-6 tracking-tight text-white">{collection.name}</h1>
         {collection.description && (
-          <p className="text-foreground/ text-base md:text-lg max-w-2xl mx-auto leading-relaxed">{collection.description}</p>
+          <p className="text-white/60 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">{collection.description}</p>
         )}
       </div>
 
@@ -70,7 +70,7 @@ async function CollectionProductsData({ collectionId }: { collectionId: string }
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-24">
-        <p className="text-foreground/">No products in this collection yet.</p>
+        <p className="text-white/30">No products in this collection yet.</p>
       </div>
     );
   }

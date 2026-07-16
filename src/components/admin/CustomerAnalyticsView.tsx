@@ -25,8 +25,8 @@ export function CustomerAnalyticsView({ analytics, totalCustomers }: { analytics
             <div className="flex justify-between items-start mb-3">
               <k.icon className={cn("w-5 h-5", k.color)} />
             </div>
-            <p className="font-display text-2xl font-bold text-foreground mb-1">{k.value}</p>
-            <p className="text-foreground/ text-xs">{k.label}</p>
+            <p className="font-display text-2xl font-bold text-white mb-1">{k.value}</p>
+            <p className="text-white/50 text-xs">{k.label}</p>
           </div>
         ))}
       </div>
@@ -34,8 +34,8 @@ export function CustomerAnalyticsView({ analytics, totalCustomers }: { analytics
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Segment Distribution */}
         <div className="glass-card p-6">
-          <h2 className="text-foreground font-semibold mb-6 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-foreground/" />
+          <h2 className="text-white font-semibold mb-6 flex items-center gap-2">
+            <Activity className="w-4 h-4 text-white/50" />
             Customer Segments
           </h2>
           <ResponsiveContainer width="100%" height={240}>
@@ -64,8 +64,8 @@ export function CustomerAnalyticsView({ analytics, totalCustomers }: { analytics
 
         {/* Tier Distribution */}
         <div className="glass-card p-6">
-          <h2 className="text-foreground font-semibold mb-6 flex items-center gap-2">
-            <Users className="w-4 h-4 text-foreground/" />
+          <h2 className="text-white font-semibold mb-6 flex items-center gap-2">
+            <Users className="w-4 h-4 text-white/50" />
             Loyalty Tiers
           </h2>
           <ResponsiveContainer width="100%" height={240}>

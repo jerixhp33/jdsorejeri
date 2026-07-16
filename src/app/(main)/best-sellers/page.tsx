@@ -11,7 +11,7 @@ export default async function BestSellersPage() {
   return (
     <div className="pt-24 sm:pt-32 pb-20 page-container min-h-screen">
       <div className="mb-6">
-        <Link prefetch={true} href="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground/ backdrop-blur-md border border-foreground/ hover:bg-foreground/ transition-colors text-sm text-foreground">
+        <Link prefetch={true} href="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors text-sm text-white">
           <ChevronLeft className="w-4 h-4" /> Back
         </Link>
       </div>
@@ -19,7 +19,7 @@ export default async function BestSellersPage() {
         <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
           Best Sellers
         </h1>
-        <p className="text-foreground/ text-lg">
+        <p className="text-white/60 text-lg">
           Discover our most popular products, loved by our community.
         </p>
       </div>
@@ -41,7 +41,7 @@ async function BestSellersData() {
 
   if (!products || products.length === 0) {
     return (
-      <div className="text-center py-20 text-foreground/">
+      <div className="text-center py-20 text-white/50">
         No best sellers found at the moment.
       </div>
     );

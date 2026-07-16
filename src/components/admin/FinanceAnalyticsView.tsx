@@ -20,8 +20,8 @@ export function FinanceAnalyticsView({ data }: { data: any }) {
         
         {/* Waterfall / Bar Chart */}
         <div className="glass-card p-6 lg:col-span-2">
-          <h2 className="text-foreground font-semibold mb-6 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-foreground/" />
+          <h2 className="text-white font-semibold mb-6 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-white/50" />
             Financial Breakdown (30 Days)
           </h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -45,12 +45,12 @@ export function FinanceAnalyticsView({ data }: { data: any }) {
 
         {/* Ledger Summary */}
         <div className="glass-card p-6 space-y-6">
-          <h2 className="text-foreground font-semibold mb-4">P&L Summary</h2>
+          <h2 className="text-white font-semibold mb-4">P&L Summary</h2>
           
           <div className="space-y-4">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-foreground/">Gross Revenue</span>
-              <span className="text-foreground font-medium">{formatCurrency(data.grossRevenue)}</span>
+              <span className="text-white/60">Gross Revenue</span>
+              <span className="text-white font-medium">{formatCurrency(data.grossRevenue)}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-amber-400/80">- Discounts</span>
@@ -65,26 +65,26 @@ export function FinanceAnalyticsView({ data }: { data: any }) {
               <span className="text-red-400 font-medium">-{formatCurrency(data.refunds)}</span>
             </div>
             
-            <div className="pt-4 border-t border-foreground/ flex justify-between items-center">
-              <span className="text-foreground font-semibold">Net Revenue</span>
+            <div className="pt-4 border-t border-white/10 flex justify-between items-center">
+              <span className="text-white font-semibold">Net Revenue</span>
               <span className="text-luxe-accent font-bold text-lg">{formatCurrency(data.netRevenue)}</span>
             </div>
 
             <div className="flex justify-between items-center text-sm pt-4">
-              <span className="text-foreground/">Estimated COGS</span>
-              <span className="text-foreground/">-{formatCurrency(data.grossRevenue * 0.6)}</span>
+              <span className="text-white/60">Estimated COGS</span>
+              <span className="text-white/60">-{formatCurrency(data.grossRevenue * 0.6)}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
-              <span className="text-foreground/">Shipping Expense</span>
-              <span className="text-foreground/">-{formatCurrency(data.shippingExpense)}</span>
+              <span className="text-white/60">Shipping Expense</span>
+              <span className="text-white/60">-{formatCurrency(data.shippingExpense)}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
-              <span className="text-foreground/">Taxes (GST)</span>
-              <span className="text-foreground/">-{formatCurrency(data.taxes)}</span>
+              <span className="text-white/60">Taxes (GST)</span>
+              <span className="text-white/60">-{formatCurrency(data.taxes)}</span>
             </div>
 
-            <div className="pt-4 border-t border-foreground/ flex justify-between items-center">
-              <span className="text-foreground font-semibold">Estimated Profit</span>
+            <div className="pt-4 border-t border-white/10 flex justify-between items-center">
+              <span className="text-white font-semibold">Estimated Profit</span>
               <span className={cn("font-bold text-lg", data.estimatedProfit >= 0 ? "text-emerald-400" : "text-red-400")}>
                 {formatCurrency(data.estimatedProfit)}
               </span>

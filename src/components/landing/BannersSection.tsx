@@ -109,7 +109,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.25 }}
-                className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-2"
+                className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
                 style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
               >
                 {banner.title}
@@ -122,7 +122,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.35 }}
-                className="text-foreground/ text-xs md:text-base mb-6 leading-relaxed"
+                className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
               >
                 {banner.subtitle}
               </motion.p>
@@ -238,7 +238,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, delay: 0.25 }}
-                    className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-2"
+                    className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
                     style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
                   >
                     {banners[current].title}
@@ -249,7 +249,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
                     initial={{ opacity: 0, x: -16 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.35 }}
-                    className="text-foreground/ text-xs md:text-base mb-6 leading-relaxed"
+                    className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
                   >
                     {banners[current].subtitle}
                   </motion.p>
@@ -280,13 +280,13 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
 
         <button
           onClick={prev}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-foreground/ hover:bg-foreground/ backdrop-blur-md text-foreground border border-foreground/"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={next}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-foreground/ hover:bg-foreground/ backdrop-blur-md text-foreground border border-foreground/"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -298,7 +298,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
               onClick={() => setCurrent(i)}
               className={cn(
                 "w-2 h-2 rounded-full transition-all duration-300",
-                i === current ? "w-6 bg-white" : "bg-foreground/ hover:bg-foreground/"
+                i === current ? "w-6 bg-white" : "bg-white/40 hover:bg-white/60"
               )}
             />
           ))}
@@ -404,7 +404,7 @@ function SidebarBannerCard({ banner, priority }: { banner: Banner; priority: boo
 
         {banner.title && (
           <h3
-            className="font-display text-xl font-bold text-foreground leading-tight mb-1"
+            className="font-display text-xl font-bold text-white leading-tight mb-1"
             style={{ textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}
           >
             {banner.title}
@@ -412,7 +412,7 @@ function SidebarBannerCard({ banner, priority }: { banner: Banner; priority: boo
         )}
 
         {banner.subtitle && (
-          <p className="text-foreground/ text-xs mb-4 leading-relaxed line-clamp-2">
+          <p className="text-white/65 text-xs mb-4 leading-relaxed line-clamp-2">
             {banner.subtitle}
           </p>
         )}
@@ -581,7 +581,7 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
               />
               
               <motion.div 
-                className="absolute inset-0 bg-background"
+                className="absolute inset-0 bg-black"
                 animate={{ opacity: isCenter ? 0 : 0.4 }}
                 transition={{ duration: 1.2 }}
               />
@@ -595,12 +595,12 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
               >
                  <div className="w-6 h-0.5 bg-[#c8a96e] mb-3" />
                  {banner.title && (
-                   <h3 className="font-display text-lg font-bold text-foreground mb-2 leading-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}>
+                   <h3 className="font-display text-lg font-bold text-white mb-2 leading-tight" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}>
                      {banner.title}
                    </h3>
                  )}
                  {banner.subtitle && (
-                   <p className="text-foreground/ text-xs mb-4 line-clamp-2">
+                   <p className="text-white/70 text-xs mb-4 line-clamp-2">
                      {banner.subtitle}
                    </p>
                  )}
@@ -688,7 +688,7 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
 
         {banner.title && (
           <h3
-            className="font-display text-base font-bold text-foreground leading-snug mb-1"
+            className="font-display text-base font-bold text-white leading-snug mb-1"
             style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}
           >
             {banner.title}
@@ -696,7 +696,7 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
         )}
 
         {banner.subtitle && (
-          <p className="text-foreground/ text-[11px] mb-3 leading-relaxed line-clamp-2">
+          <p className="text-white/60 text-[11px] mb-3 leading-relaxed line-clamp-2">
             {banner.subtitle}
           </p>
         )}

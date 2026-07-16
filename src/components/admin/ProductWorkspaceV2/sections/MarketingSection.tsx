@@ -16,13 +16,13 @@ export function MarketingSection({ formData, updateField }: Props) {
           "flex flex-col items-center justify-center p-6 rounded-xl border transition-all text-center gap-3",
           formData.is_featured 
             ? "border-luxe-accent bg-luxe-accent/10" 
-            : "border-foreground/ bg-foreground/ hover:bg-foreground/"
+            : "border-white/10 bg-white/5 hover:bg-white/10"
         )}
       >
-        <Star className={cn("w-6 h-6", formData.is_featured ? "text-luxe-accent fill-luxe-accent" : "text-foreground/")} />
+        <Star className={cn("w-6 h-6", formData.is_featured ? "text-luxe-accent fill-luxe-accent" : "text-white/40")} />
         <div>
-          <h4 className={cn("font-medium", formData.is_featured ? "text-luxe-accent" : "text-foreground/")}>Featured</h4>
-          <p className="text-xs text-foreground/ mt-1">Showcase on the homepage</p>
+          <h4 className={cn("font-medium", formData.is_featured ? "text-luxe-accent" : "text-white/80")}>Featured</h4>
+          <p className="text-xs text-white/40 mt-1">Showcase on the homepage</p>
         </div>
       </button>
 
@@ -32,13 +32,13 @@ export function MarketingSection({ formData, updateField }: Props) {
           "flex flex-col items-center justify-center p-6 rounded-xl border transition-all text-center gap-3",
           formData.is_trending 
             ? "border-luxe-accent bg-luxe-accent/10" 
-            : "border-foreground/ bg-foreground/ hover:bg-foreground/"
+            : "border-white/10 bg-white/5 hover:bg-white/10"
         )}
       >
-        <TrendingUp className={cn("w-6 h-6", formData.is_trending ? "text-luxe-accent" : "text-foreground/")} />
+        <TrendingUp className={cn("w-6 h-6", formData.is_trending ? "text-luxe-accent" : "text-white/40")} />
         <div>
-          <h4 className={cn("font-medium", formData.is_trending ? "text-luxe-accent" : "text-foreground/")}>Trending</h4>
-          <p className="text-xs text-foreground/ mt-1">Highlight as popular</p>
+          <h4 className={cn("font-medium", formData.is_trending ? "text-luxe-accent" : "text-white/80")}>Trending</h4>
+          <p className="text-xs text-white/40 mt-1">Highlight as popular</p>
         </div>
       </button>
           
@@ -48,13 +48,13 @@ export function MarketingSection({ formData, updateField }: Props) {
           "flex flex-col items-center justify-center p-6 rounded-xl border transition-all text-center gap-3",
           formData.is_best_seller 
             ? "border-luxe-accent bg-luxe-accent/10" 
-            : "border-foreground/ bg-foreground/ hover:bg-foreground/"
+            : "border-white/10 bg-white/5 hover:bg-white/10"
         )}
       >
-        <Flame className={cn("w-6 h-6", formData.is_best_seller ? "text-luxe-accent" : "text-foreground/")} />
+        <Flame className={cn("w-6 h-6", formData.is_best_seller ? "text-luxe-accent" : "text-white/40")} />
         <div>
-          <h4 className={cn("font-medium", formData.is_best_seller ? "text-luxe-accent" : "text-foreground/")}>Best Seller</h4>
-          <p className="text-xs text-foreground/ mt-1">Mark as top selling</p>
+          <h4 className={cn("font-medium", formData.is_best_seller ? "text-luxe-accent" : "text-white/80")}>Best Seller</h4>
+          <p className="text-xs text-white/40 mt-1">Mark as top selling</p>
         </div>
       </button>
     </div>

@@ -36,7 +36,7 @@ export function PrintButton({
     <button 
       onClick={handlePrint}
       disabled={loading}
-      className="bg-background text-foreground px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition shadow-md flex items-center gap-2 disabled:opacity-70"
+      className="bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition shadow-md flex items-center gap-2 disabled:opacity-70"
     >
       {loading ? (
         <Loader2 className="w-5 h-5 animate-spin" />

@@ -34,7 +34,7 @@ export function ImagesSection({ formData, setFormData }: Props) {
 
   return (
     <div className="space-y-6">
-      <p className="text-foreground/ text-sm mb-4">
+      <p className="text-white/50 text-sm mb-4">
         Upload beautiful, high-quality images. Select the <Star className="inline w-4 h-4 text-luxe-accent"/> to choose the primary cover image.
       </p>
       

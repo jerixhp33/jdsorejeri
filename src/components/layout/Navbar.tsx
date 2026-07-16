@@ -34,7 +34,6 @@ import { toast } from 'sonner';
 import type { Notification } from '@/types';
 import { JDLogo } from '@/components/shared/JDLogo';
 import { Tooltip } from '@/components/shared/Tooltip';
-import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
 import type { Category } from '@/types';
 
@@ -50,7 +49,7 @@ const typeColor: Record<string, string> = {
   order:   'text-blue-400',
   product: 'text-purple-400',
   offer:   'text-yellow-400',
-  system:  'text-foreground/',
+  system:  'text-white/50',
   admin:   'text-red-400',
 };
 
@@ -77,19 +76,19 @@ function NotifItem({
       onClick={handleClick}
       className={cn(
         'flex items-start gap-3 px-4 py-3 transition-all cursor-pointer',
-        n.is_read ? 'opacity-50 hover:opacity-80' : 'hover:bg-foreground/'
+        n.is_read ? 'opacity-50 hover:opacity-80' : 'hover:bg-white/5'
       )}
     >
-      <Icon className={cn('w-4 h-4 mt-0.5 flex-shrink-0', typeColor[n.type] ?? 'text-foreground/')} />
+      <Icon className={cn('w-4 h-4 mt-0.5 flex-shrink-0', typeColor[n.type] ?? 'text-white/40')} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <p className={cn('text-xs font-medium truncate', n.is_read ? 'text-foreground/' : 'text-foreground')}>
+          <p className={cn('text-xs font-medium truncate', n.is_read ? 'text-white/60' : 'text-white')}>
             {n.title}
           </p>
           {!n.is_read && <Circle className="w-1.5 h-1.5 text-yellow-400 fill-yellow-400 flex-shrink-0" />}
         </div>
-        <p className="text-[11px] text-foreground/ mt-0.5 line-clamp-1">{n.body}</p>
-        <p className="text-[10px] text-foreground/ mt-1">{formatRelativeTime(n.created_at)}</p>
+        <p className="text-[11px] text-white/40 mt-0.5 line-clamp-1">{n.body}</p>
+        <p className="text-[10px] text-white/25 mt-1">{formatRelativeTime(n.created_at)}</p>
       </div>
     </div>
   );
@@ -290,8 +289,8 @@ export function Navbar({ categories = [] }: NavbarProps) {
           className={cn(
             'w-full pointer-events-auto relative z-20 rounded-[2rem] transition-all duration-500',
             scrolled
-              ? 'bg-white/[0.08] backdrop-blur-2xl border border-foreground/ shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-foreground/'
-              : 'bg-black/40 backdrop-blur-md border border-white/[0.05] shadow-lg hover:bg-black/60 hover:border-foreground/'
+              ? 'bg-white/[0.08] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-white/20'
+              : 'bg-black/40 backdrop-blur-md border border-white/[0.05] shadow-lg hover:bg-black/60 hover:border-white/10'
           )}
         >
         {/* 1-minute sweeping edge light effect starting from left (270deg) */}
@@ -302,7 +301,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
             {/* Logo */}
             <Link prefetch={true} href="/" className="flex items-center gap-2 group" aria-label="JD Store home">
               <JDLogo size={32} />
-              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-luxe-accent transition-colors">
+              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-white group-hover:text-luxe-accent transition-colors">
                 JD Store
               </span>
             </Link>
@@ -317,8 +316,8 @@ export function Navbar({ categories = [] }: NavbarProps) {
                   className={cn(
                     'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
                     pathname === link.href
-                      ? 'text-foreground bg-foreground/'
-                      : 'text-foreground/ hover:text-foreground hover:bg-foreground/'
+                      ? 'text-white bg-white/10'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
                   )}
                 >
                   {link.label}
@@ -332,7 +331,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
               <Tooltip content="Search">
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-2 rounded-full text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                  className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
                   aria-label="Search"
                 >
                   <Search className="w-5 h-5" />
@@ -348,7 +347,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
                           setNotifOpen(!notifOpen);
                           setProfileOpen(false);
                         }}
-                        className="relative p-2 rounded-full text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                        className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
                         aria-label="Notifications"
                       >
                         <Bell className="w-5 h-5" />
@@ -369,10 +368,10 @@ export function Navbar({ categories = [] }: NavbarProps) {
                           transition={{ duration: 0.1 }}
                           className="absolute right-0 top-full mt-2 w-80 glass-card overflow-hidden"
                         >
-                          <div className="flex items-center justify-between px-4 py-3 border-b border-foreground/">
+                          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
                             <div className="flex items-center gap-2">
                               <Bell className="w-3.5 h-3.5 text-luxe-accent" />
-                              <span className="text-sm font-semibold text-foreground">Notifications</span>
+                              <span className="text-sm font-semibold text-white">Notifications</span>
                               {unreadCount > 0 && (
                                 <span className="px-1.5 py-0.5 rounded-full bg-luxe-accent text-black text-[10px] font-bold">
                                   {unreadCount}
@@ -382,7 +381,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
                             {unreadCount > 0 && (
                               <button
                                 onClick={markAllAsRead}
-                                className="flex items-center gap-1 text-[11px] text-foreground/ hover:text-luxe-accent transition-colors"
+                                className="flex items-center gap-1 text-[11px] text-white/40 hover:text-luxe-accent transition-colors"
                               >
                                 <CheckCheck className="w-3 h-3" />
                                 Mark all read
@@ -392,8 +391,8 @@ export function Navbar({ categories = [] }: NavbarProps) {
                           <div className="max-h-72 overflow-y-auto divide-y divide-white/5">
                             {recentNotifs.length === 0 ? (
                               <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-                                <Bell className="w-7 h-7 text-foreground/ mb-2" />
-                                <p className="text-foreground/ text-xs">No notifications yet</p>
+                                <Bell className="w-7 h-7 text-white/10 mb-2" />
+                                <p className="text-white/30 text-xs">No notifications yet</p>
                               </div>
                             ) : (
                               recentNotifs.map((n) => (
@@ -406,10 +405,10 @@ export function Navbar({ categories = [] }: NavbarProps) {
                               ))
                             )}
                           </div>
-                          <div className="border-t border-foreground/">
+                          <div className="border-t border-white/10">
                             <Link prefetch={true} href="/dashboard/notifications"
                               onClick={() => setNotifOpen(false)}
-                              className="flex items-center justify-center gap-1.5 py-3 text-xs font-medium text-luxe-accent hover:bg-foreground/ transition-all"
+                              className="flex items-center justify-center gap-1.5 py-3 text-xs font-medium text-luxe-accent hover:bg-white/5 transition-all"
                             >
                               View all notifications
                               <ChevronDown className="w-3 h-3 -rotate-90" />
@@ -423,22 +422,17 @@ export function Navbar({ categories = [] }: NavbarProps) {
                   {/* Wishlist — desktop only */}
                   <Tooltip content="Wishlist">
                     <Link prefetch={true} href="/wishlist"
-                      className="hidden sm:flex p-2 rounded-full text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all min-w-[40px] min-h-[40px] items-center justify-center"
+                      className="hidden sm:flex p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] items-center justify-center"
                       aria-label="Wishlist"
                     >
                       <Heart className="w-5 h-5" />
                     </Link>
                   </Tooltip>
 
-                  {/* Theme Toggle — desktop only */}
-                  <div className="hidden sm:flex ml-1 mr-1">
-                    <ThemeToggle />
-                  </div>
-
                   {/* Cart */}
                   <Tooltip content="Cart">
                     <Link prefetch={true} href="/cart"
-                      className="relative p-2 rounded-full text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                      className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
                       aria-label="Cart"
                     >
                       <ShoppingCart className="w-5 h-5" />
@@ -458,7 +452,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
                           setProfileOpen(!profileOpen);
                           setNotifOpen(false);
                         }}
-                        className="flex items-center gap-2 p-1 rounded-full hover:bg-foreground/ transition-all min-h-[40px]"
+                        className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-all min-h-[40px]"
                         aria-label="Profile menu"
                       >
                         {profile?.profile_picture ? (
@@ -478,7 +472,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
                         )}
                         <ChevronDown
                           className={cn(
-                            'w-4 h-4 text-foreground/ transition-transform',
+                            'w-4 h-4 text-white/60 transition-transform',
                             profileOpen && 'rotate-180'
                           )}
                         />
@@ -494,30 +488,30 @@ export function Navbar({ categories = [] }: NavbarProps) {
                           transition={{ duration: 0.1 }}
                           className="absolute right-0 top-full mt-2 w-56 glass-card overflow-hidden"
                         >
-                          <Link prefetch={true} href="/dashboard" onClick={() => setProfileOpen(false)} className="block p-3 border-b border-foreground/ hover:bg-foreground/ transition-all">
-                            <p className="text-sm font-medium text-foreground truncate">
+                          <Link prefetch={true} href="/dashboard" onClick={() => setProfileOpen(false)} className="block p-3 border-b border-white/10 hover:bg-white/5 transition-all">
+                            <p className="text-sm font-medium text-white truncate">
                               {profile?.name}
                             </p>
-                            <p className="text-xs text-foreground/ truncate">
+                            <p className="text-xs text-white/50 truncate">
                               {profile?.email}
                             </p>
                           </Link>
                           <div className="p-1">
-                            <Link prefetch={true} href="/dashboard/orders" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all">
+                            <Link prefetch={true} href="/dashboard/orders" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
                               <Package className="w-4 h-4" />
                               My Orders
                             </Link>
-                            <Link prefetch={true} href="/dashboard/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all">
+                            <Link prefetch={true} href="/dashboard/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all">
                               <Settings className="w-4 h-4" />
                               Settings
                             </Link>
                             {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
-                              <Link prefetch={true} href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-luxe-accent hover:bg-foreground/ transition-all">
+                              <Link prefetch={true} href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-luxe-accent hover:bg-white/10 transition-all">
                                 <Settings className="w-4 h-4" />
                                 Admin Panel
                               </Link>
                             )}
-                            <div className="my-1 border-t border-foreground/" />
+                            <div className="my-1 border-t border-white/10" />
                             <button
                               onClick={handleSignOut}
                               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-all"
@@ -540,7 +534,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden p-2 rounded-full text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                className="md:hidden p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
                 aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               >
                 {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -605,26 +599,23 @@ export function Navbar({ categories = [] }: NavbarProps) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-[80vw] max-w-[320px] h-[100dvh] bg-[#0a0a0a]/80 backdrop-blur-2xl border-l border-foreground/ shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-l-[2rem] flex flex-col md:hidden overflow-hidden"
+              className="fixed top-0 right-0 bottom-0 z-50 w-[80vw] max-w-[320px] h-[100dvh] bg-[#0a0a0a]/80 backdrop-blur-2xl border-l border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-l-[2rem] flex flex-col md:hidden overflow-hidden"
             >
               <div className="side-edge-light" />
               
               <div className="flex-1 flex flex-col overflow-y-auto w-full relative z-10">
               {/* Drawer header */}
-              <div className="flex items-center justify-between p-5 border-b border-foreground/">
+              <div className="flex items-center justify-between p-5 border-b border-white/10">
                 <div className="flex items-center gap-2">
                   <JDLogo size={28} />
-                  <span className="font-display text-lg font-bold text-foreground tracking-wide">JD Store</span>
+                  <span className="font-display text-lg font-bold text-white tracking-wide">JD Store</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <ThemeToggle />
-                  <button
-                    onClick={() => setMobileOpen(false)}
-                    className="p-2 rounded-xl text-foreground/ bg-foreground/ hover:text-foreground hover:bg-foreground/ transition-all border border-foreground/"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 rounded-xl text-white/50 bg-white/5 hover:text-white hover:bg-white/10 transition-all border border-white/5"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
               {/* Nav links */}
@@ -638,8 +629,8 @@ export function Navbar({ categories = [] }: NavbarProps) {
                     className={cn(
                       'flex items-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all',
                       pathname === link.href
-                        ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-foreground/ shadow-lg'
-                        : 'text-foreground/ hover:text-foreground hover:bg-foreground/'
+                        ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
+                        : 'text-white/60 hover:text-white hover:bg-white/5'
                     )}
                     onClick={() => setMobileOpen(false)}
                   >
@@ -650,12 +641,12 @@ export function Navbar({ categories = [] }: NavbarProps) {
 
               {/* User section */}
               {user && (
-                <div className="p-4 border-t border-foreground/ space-y-1">
-                  <p className="px-4 py-2 text-foreground/ text-[10px] font-bold uppercase tracking-[0.2em] mb-2">My Account</p>
+                <div className="p-4 border-t border-white/10 space-y-1">
+                  <p className="px-4 py-2 text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">My Account</p>
 
                   {/* Profile info */}
                   {profile && (
-                    <Link prefetch={true} href="/dashboard" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 mb-2 bg-white/[0.08] backdrop-blur-md rounded-2xl border border-foreground/ shadow-lg hover:bg-foreground/ transition-all">
+                    <Link prefetch={true} href="/dashboard" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 mb-2 bg-white/[0.08] backdrop-blur-md rounded-2xl border border-white/10 shadow-lg hover:bg-white/10 transition-all">
                       {profile.profile_picture ? (
                         <Image src={profile.profile_picture} alt={profile.name} width={40} height={40} className="rounded-full ring-2 ring-white/10" />
                       ) : (
@@ -664,8 +655,8 @@ export function Navbar({ categories = [] }: NavbarProps) {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="text-foreground text-sm font-semibold truncate tracking-wide">{profile.name}</p>
-                        <p className="text-foreground/ text-xs truncate">{profile.email}</p>
+                        <p className="text-white text-sm font-semibold truncate tracking-wide">{profile.name}</p>
+                        <p className="text-white/40 text-xs truncate">{profile.email}</p>
                       </div>
                     </Link>
                   )}
@@ -684,8 +675,8 @@ export function Navbar({ categories = [] }: NavbarProps) {
                         className={cn(
                           'flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all group',
                           pathname === item.href
-                            ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-foreground/ shadow-lg'
-                            : 'text-foreground/ hover:text-foreground hover:bg-foreground/'
+                            ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
+                            : 'text-white/60 hover:text-white hover:bg-white/5'
                         )}
                         onClick={() => setMobileOpen(false)}
                       >
@@ -716,7 +707,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
               )}
 
               {!loading && !user && (
-                <div className="p-4 border-t border-foreground/">
+                <div className="p-4 border-t border-white/10">
                   <Link prefetch={true} href="/login"
                     className="btn-gold w-full text-center text-sm"
                     onClick={() => setMobileOpen(false)}
@@ -752,13 +743,13 @@ export function Navbar({ categories = [] }: NavbarProps) {
               {/* Glow effect */}
               <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-luxe-accent/20 via-transparent to-transparent pointer-events-none" />
 
-              <div className="relative bg-foreground/ backdrop-blur-md border border-foreground/ rounded-[2rem] overflow-hidden shadow-2xl shadow-black/50">
+              <div className="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl shadow-black/50">
                 {/* Search Input */}
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-foreground/">
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
                   {loadingSuggestions ? (
-                    <div className="w-5 h-5 rounded-full border-2 border-foreground/ border-t-luxe-accent animate-spin flex-shrink-0" />
+                    <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-luxe-accent animate-spin flex-shrink-0" />
                   ) : (
-                    <Search className="w-5 h-5 text-foreground/ flex-shrink-0" />
+                    <Search className="w-5 h-5 text-white/30 flex-shrink-0" />
                   )}
                   <input
                     ref={searchInputRef}
@@ -766,22 +757,22 @@ export function Navbar({ categories = [] }: NavbarProps) {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search products, materials, colors..."
-                    className="flex-1 bg-transparent text-foreground placeholder:text-foreground/ outline-none text-base sm:text-lg font-light tracking-wide min-w-0"
+                    className="flex-1 bg-transparent text-white placeholder:text-white/25 outline-none text-base sm:text-lg font-light tracking-wide min-w-0"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => { setSearchQuery(''); searchInputRef.current?.focus(); }}
-                      className="p-1 rounded-md text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all flex-shrink-0"
+                      className="p-1 rounded-md text-white/30 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   )}
-                  <div className="w-px h-6 bg-foreground/ mx-1" />
-                  <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 rounded bg-foreground/ text-foreground/ text-[10px] font-mono border border-foreground/ tracking-wider">ESC</kbd>
+                  <div className="w-px h-6 bg-white/10 mx-1" />
+                  <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 rounded bg-white/5 text-white/25 text-[10px] font-mono border border-white/5 tracking-wider">ESC</kbd>
                   <button
                     type="button"
                     onClick={() => setSearchOpen(false)}
-                    className="sm:hidden p-1.5 rounded-lg text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all flex-shrink-0"
+                    className="sm:hidden p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -791,14 +782,14 @@ export function Navbar({ categories = [] }: NavbarProps) {
                 <div className="max-h-[55vh] overflow-y-auto">
                   {!searchQuery.trim() ? (
                     <div className="p-5">
-                      <p className="text-[11px] uppercase tracking-[0.2em] text-foreground/ font-semibold mb-3">Quick searches</p>
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-white/20 font-semibold mb-3">Quick searches</p>
                       <div className="flex flex-wrap gap-2">
                         {['Posters', 'Earrings', 'Gold', 'Minimal', 'A4', 'Jhumka', 'Abstract', 'Marvel'].map((term) => (
                           <button
                             key={term}
                             type="button"
                             onClick={() => setSearchQuery(term)}
-                            className="px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-foreground/ text-xs font-medium hover:bg-foreground/ hover:text-foreground hover:border-foreground/ transition-all duration-200 cursor-pointer"
+                            className="px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-white/50 text-xs font-medium hover:bg-white/10 hover:text-white hover:border-white/15 transition-all duration-200 cursor-pointer"
                           >
                             {term}
                           </button>
@@ -809,13 +800,13 @@ export function Navbar({ categories = [] }: NavbarProps) {
                     <div>
                       {loadingSuggestions ? (
                         <div className="py-12 flex flex-col items-center gap-3">
-                          <div className="w-6 h-6 rounded-full border-2 border-foreground/ border-t-luxe-accent animate-spin" />
-                          <p className="text-xs text-foreground/ tracking-wide">Searching...</p>
+                          <div className="w-6 h-6 rounded-full border-2 border-white/10 border-t-luxe-accent animate-spin" />
+                          <p className="text-xs text-white/20 tracking-wide">Searching...</p>
                         </div>
                       ) : suggestions.length > 0 ? (
                         <>
                           <div className="px-5 pt-3 pb-2 flex items-center justify-between">
-                            <p className="text-[11px] uppercase tracking-[0.2em] text-foreground/ font-semibold">
+                            <p className="text-[11px] uppercase tracking-[0.2em] text-white/20 font-semibold">
                               {suggestions.length} {suggestions.length === 1 ? 'result' : 'results'}
                             </p>
                           </div>
@@ -832,26 +823,26 @@ export function Navbar({ categories = [] }: NavbarProps) {
                                   }}
                                   className="flex items-center gap-3.5 px-3 py-3 rounded-xl hover:bg-white/[0.04] transition-all duration-200 group"
                                 >
-                                  <div className="w-12 h-12 rounded-xl bg-foreground/ overflow-hidden flex-shrink-0 relative ring-1 ring-white/5">
+                                  <div className="w-12 h-12 rounded-xl bg-white/5 overflow-hidden flex-shrink-0 relative ring-1 ring-white/5">
                                     {primaryImg ? (
                                       <Image src={primaryImg.url} alt={item.name} fill className="object-cover" sizes="48px" />
                                     ) : (
-                                      <div className="w-full h-full flex items-center justify-center text-foreground/ text-sm">✦</div>
+                                      <div className="w-full h-full flex items-center justify-center text-white/15 text-sm">✦</div>
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-foreground/ group-hover:text-foreground truncate transition-colors">{item.name}</p>
+                                    <p className="text-sm font-medium text-white/80 group-hover:text-white truncate transition-colors">{item.name}</p>
                                     <div className="flex items-center gap-2 mt-0.5">
-                                      <span className="inline-flex px-2 py-0.5 rounded-full bg-foreground/ text-[10px] font-medium uppercase tracking-wider text-foreground/ capitalize">{item.product_type}</span>
+                                      <span className="inline-flex px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-medium uppercase tracking-wider text-white/30 capitalize">{item.product_type}</span>
                                       {item.price && (
                                         <span className="text-xs font-semibold text-luxe-accent">₹{item.price}</span>
                                       )}
                                       {item.material && (
-                                        <span className="text-[10px] text-foreground/ capitalize">{item.material}</span>
+                                        <span className="text-[10px] text-white/20 capitalize">{item.material}</span>
                                       )}
                                     </div>
                                   </div>
-                                  <ArrowRight className="w-4 h-4 text-foreground/ group-hover:text-luxe-accent transition-all flex-shrink-0 opacity-0 group-hover:opacity-100 -translate-x-3 group-hover:translate-x-0" />
+                                  <ArrowRight className="w-4 h-4 text-white/10 group-hover:text-luxe-accent transition-all flex-shrink-0 opacity-0 group-hover:opacity-100 -translate-x-3 group-hover:translate-x-0" />
                                 </Link>
                               );
                             })}
@@ -859,9 +850,9 @@ export function Navbar({ categories = [] }: NavbarProps) {
                         </>
                       ) : (
                         <div className="py-12 flex flex-col items-center gap-2">
-                          <Search className="w-8 h-8 text-foreground/" />
-                          <p className="text-sm text-foreground/">No products found</p>
-                          <p className="text-xs text-foreground/">Try a different keyword</p>
+                          <Search className="w-8 h-8 text-white/10" />
+                          <p className="text-sm text-white/30">No products found</p>
+                          <p className="text-xs text-white/15">Try a different keyword</p>
                         </div>
                       )}
                     </div>

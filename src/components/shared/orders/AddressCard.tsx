@@ -24,7 +24,7 @@ export function AddressCard({ address, title = 'Delivery Address', className = '
 
   return (
     <div className={`p-5 rounded-xl border border-zinc-800 bg-zinc-900/50 space-y-4 ${className}`}>
-      <h3 className="text-foreground font-medium flex items-center gap-2">
+      <h3 className="text-white font-medium flex items-center gap-2">
         <MapPin className="w-4 h-4 text-luxe-accent" />
         {title}
       </h3>

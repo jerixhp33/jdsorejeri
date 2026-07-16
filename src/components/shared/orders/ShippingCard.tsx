@@ -21,7 +21,7 @@ export function ShippingCard({ shipment, className = '' }: Props) {
 
   return (
     <div className={`p-5 rounded-xl border border-zinc-800 bg-zinc-900/50 space-y-4 ${className}`}>
-      <h3 className="text-foreground font-medium flex items-center justify-between">
+      <h3 className="text-white font-medium flex items-center justify-between">
         <span className="flex items-center gap-2">
           <Truck className="w-4 h-4 text-sky-400" />
           Shipping Details

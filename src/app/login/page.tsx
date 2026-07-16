@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 export default function LoginRoute() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-foreground/ border-t-white animate-spin" />
+      <div className="min-h-screen bg-luxe-black flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" />
       </div>
     }>
       <LoginPage />

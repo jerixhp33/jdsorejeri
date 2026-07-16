@@ -108,7 +108,7 @@ export const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: string; co
   admin_note:          { label: 'Admin Note',            icon: 'StickyNote',   color: 'text-gray-400' },
   customer_message:    { label: 'Customer Message',      icon: 'MessageCircle', color: 'text-blue-300' },
   courier_update:      { label: 'Courier Update',        icon: 'Truck',        color: 'text-sky-300' },
-  status_change:       { label: 'Status Updated',        icon: 'RefreshCw',    color: 'text-foreground/' },
+  status_change:       { label: 'Status Updated',        icon: 'RefreshCw',    color: 'text-white/60' },
 };
 
 // ============================================================

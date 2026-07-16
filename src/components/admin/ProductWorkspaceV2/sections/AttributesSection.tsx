@@ -41,7 +41,7 @@ export function AttributesSection({ formData, updateAttribute, removeAttribute }
             />
             <button 
               onClick={() => removeAttribute(key)}
-              className="p-3 bg-foreground/ hover:bg-red-500/20 text-foreground/ hover:text-red-400 rounded-xl transition-colors"
+              className="p-3 bg-white/5 hover:bg-red-500/20 text-white/50 hover:text-red-400 rounded-xl transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -49,7 +49,7 @@ export function AttributesSection({ formData, updateAttribute, removeAttribute }
         ))}
       </div>
 
-      <div className="flex gap-3 items-center pt-4 border-t border-foreground/">
+      <div className="flex gap-3 items-center pt-4 border-t border-white/10">
         <input 
           type="text"
           value={newKey}
@@ -68,7 +68,7 @@ export function AttributesSection({ formData, updateAttribute, removeAttribute }
         <button 
           onClick={handleAdd}
           disabled={!newKey.trim() || !newValue.trim()}
-          className="p-3 bg-luxe-accent text-black disabled:opacity-50 disabled:bg-foreground/ disabled:text-foreground/ rounded-xl transition-colors flex items-center justify-center"
+          className="p-3 bg-luxe-accent text-black disabled:opacity-50 disabled:bg-white/10 disabled:text-white/30 rounded-xl transition-colors flex items-center justify-center"
         >
           <Plus className="w-4 h-4" />
         </button>

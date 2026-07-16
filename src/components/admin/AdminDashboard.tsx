@@ -49,8 +49,8 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
   return (
     <div className="space-y-5 md:space-y-8">
       <div>
-        <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-1">Executive Dashboard</h1>
-        <p className="text-foreground/ text-sm">Welcome back. Here's how your business is doing today.</p>
+        <h1 className="font-display text-2xl md:text-3xl font-bold text-white mb-1">Executive Dashboard</h1>
+        <p className="text-white/40 text-sm">Welcome back. Here's how your business is doing today.</p>
       </div>
 
       {/* Stat cards — 2 cols on mobile, 4 on lg */}
@@ -64,22 +64,22 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
             className="glass-card p-3.5 md:p-5"
           >
             <div className="flex items-start justify-between mb-3 md:mb-4">
-              <div className={cn('w-8 h-8 md:w-10 md:h-10 rounded-xl bg-foreground/ flex items-center justify-center', stat.color)}>
+              <div className={cn('w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white/5 flex items-center justify-center', stat.color)}>
                 <stat.icon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <span className="text-foreground/ text-[10px] md:text-xs hidden sm:block">{stat.sub}</span>
+              <span className="text-white/25 text-[10px] md:text-xs hidden sm:block">{stat.sub}</span>
             </div>
-            <p className="font-display text-lg md:text-2xl font-bold text-foreground mb-0.5">{stat.value}</p>
-            <p className="text-foreground/ text-[11px] md:text-sm">{stat.label}</p>
+            <p className="font-display text-lg md:text-2xl font-bold text-white mb-0.5">{stat.value}</p>
+            <p className="text-white/50 text-[11px] md:text-sm">{stat.label}</p>
             {/* sub on mobile below */}
-            <p className="text-foreground/ text-[10px] mt-1 sm:hidden">{stat.sub}</p>
+            <p className="text-white/25 text-[10px] mt-1 sm:hidden">{stat.sub}</p>
           </motion.div>
         ))}
       </div>
 
       {/* Revenue Chart */}
       <div className="glass-card p-4 md:p-6">
-        <h2 className="text-foreground font-semibold text-sm md:text-base mb-4 md:mb-6">Revenue (Last 14 Days)</h2>
+        <h2 className="text-white font-semibold text-sm md:text-base mb-4 md:mb-6">Revenue (Last 14 Days)</h2>
         <div className="overflow-x-auto -mx-4 px-4 md:overflow-visible md:mx-0 md:px-0">
           <div style={{ minWidth: 280 }}>
             <ResponsiveContainer width="100%" height={200}>
@@ -119,20 +119,20 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Top Products */}
         <div className="glass-card p-4 md:p-6">
-          <h2 className="text-foreground font-semibold text-sm md:text-base mb-4 md:mb-5">Top Products by Revenue</h2>
+          <h2 className="text-white font-semibold text-sm md:text-base mb-4 md:mb-5">Top Products by Revenue</h2>
           <div className="space-y-2.5 md:space-y-3">
             {topProducts.map((product, i) => (
               <div key={product.product_id} className="flex items-center gap-2 md:gap-3">
-                <span className="text-foreground/ text-xs w-4">{i + 1}</span>
+                <span className="text-white/30 text-xs w-4">{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-foreground text-xs md:text-sm truncate">{product.name}</p>
-                  <p className="text-foreground/ text-[11px]">{product.total_sold} sold</p>
+                  <p className="text-white text-xs md:text-sm truncate">{product.name}</p>
+                  <p className="text-white/40 text-[11px]">{product.total_sold} sold</p>
                 </div>
                 <p className="text-luxe-accent font-semibold text-xs md:text-sm flex-shrink-0">{formatCurrency(product.revenue)}</p>
               </div>
             ))}
             {topProducts.length === 0 && (
-              <p className="text-foreground/ text-sm text-center py-6">No sales data yet</p>
+              <p className="text-white/30 text-sm text-center py-6">No sales data yet</p>
             )}
           </div>
         </div>
@@ -140,24 +140,24 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
         {/* Recent Orders */}
         <div className="glass-card p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-foreground/ text-sm font-medium">Recent Orders</h3>
+            <h3 className="text-white/60 text-sm font-medium">Recent Orders</h3>
             <Link prefetch={true} href="/admin/orders" className="text-luxe-accent text-xs hover:underline">View all →</Link>
           </div>
           <div className="space-y-2.5 md:space-y-3">
             {recentOrders.slice(0, 6).map((order) => (
               <div key={order.id} className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-foreground text-xs md:text-sm font-medium truncate">#{order.order_number}</p>
-                  <p className="text-foreground/ text-[11px] truncate">{(order.user as any)?.name || 'Customer'}</p>
+                  <p className="text-white text-xs md:text-sm font-medium truncate">#{order.order_number}</p>
+                  <p className="text-white/40 text-[11px] truncate">{(order.user as any)?.name || 'Customer'}</p>
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <span className={STATUS_COLORS[order.status]}>{order.status}</span>
-                  <p className="text-foreground text-xs md:text-sm">{formatCurrency(order.total)}</p>
+                  <p className="text-white text-xs md:text-sm">{formatCurrency(order.total)}</p>
                 </div>
               </div>
             ))}
             {recentOrders.length === 0 && (
-              <p className="text-foreground/ text-sm text-center py-6">No orders yet</p>
+              <p className="text-white/30 text-sm text-center py-6">No orders yet</p>
             )}
           </div>
         </div>
@@ -165,7 +165,7 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
 
       {/* Orders bar chart */}
       <div className="glass-card p-4 md:p-6">
-        <h2 className="text-foreground font-semibold text-sm md:text-base mb-4 md:mb-6">Daily Orders (Last 14 Days)</h2>
+        <h2 className="text-white font-semibold text-sm md:text-base mb-4 md:mb-6">Daily Orders (Last 14 Days)</h2>
         <div className="overflow-x-auto -mx-4 px-4 md:overflow-visible md:mx-0 md:px-0">
           <div style={{ minWidth: 280 }}>
             <ResponsiveContainer width="100%" height={160}>

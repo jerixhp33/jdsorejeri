@@ -47,7 +47,7 @@ export function OrderItemRow({ item, className = '' }: Props) {
 
       {/* Product Details */}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <h4 className="text-foreground font-medium truncate">
+        <h4 className="text-white font-medium truncate">
           {item.product?.name || 'Unknown Product'}
         </h4>
         
@@ -62,7 +62,7 @@ export function OrderItemRow({ item, className = '' }: Props) {
 
       {/* Price & Quantity */}
       <div className="text-right flex flex-col justify-center">
-        <div className="text-foreground font-medium">{formatCurrency(total)}</div>
+        <div className="text-white font-medium">{formatCurrency(total)}</div>
         <div className="text-sm text-zinc-400 mt-1">
           {item.quantity} × {formatCurrency(price)}
         </div>

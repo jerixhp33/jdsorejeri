@@ -95,8 +95,8 @@ export function useNotifications(): NotificationsState {
               </div>
               
               <div className="relative flex-1 min-w-0 pt-0.5">
-                <p className="text-foreground font-display font-semibold text-sm mb-1.5 pr-4">{newNotif.title}</p>
-                <p className="text-foreground/ text-xs leading-relaxed line-clamp-2">{newNotif.body}</p>
+                <p className="text-white font-display font-semibold text-sm mb-1.5 pr-4">{newNotif.title}</p>
+                <p className="text-white/60 text-xs leading-relaxed line-clamp-2">{newNotif.body}</p>
                 
                 {newNotif.action_url && (
                   <button 
@@ -104,7 +104,7 @@ export function useNotifications(): NotificationsState {
                       toast.dismiss(t);
                       window.location.href = newNotif.action_url!;
                     }}
-                    className="mt-3 text-luxe-accent text-xs font-semibold hover:text-foreground transition-colors flex items-center gap-1"
+                    className="mt-3 text-luxe-accent text-xs font-semibold hover:text-white transition-colors flex items-center gap-1"
                   >
                     View Details <span className="text-lg leading-none">→</span>
                   </button>
@@ -113,7 +113,7 @@ export function useNotifications(): NotificationsState {
               
               <button 
                 onClick={() => toast.dismiss(t)}
-                className="absolute top-3 right-3 text-foreground/ hover:text-foreground transition-colors p-1"
+                className="absolute top-3 right-3 text-white/30 hover:text-white transition-colors p-1"
               >
                 <X className="w-4 h-4" />
               </button>

@@ -39,16 +39,16 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="p-4 border-b border-foreground/ flex items-center justify-between">
+      <div className="p-4 border-b border-white/10 flex items-center justify-between">
         <Link prefetch={true} href="/admin" className="flex items-center gap-2.5" onClick={onClose}>
           <JDLogo size={28} />
           <div>
-            <p className="text-foreground font-bold text-sm">JD Admin</p>
-            <p className="text-foreground/ text-[10px]">Management Panel</p>
+            <p className="text-white font-bold text-sm">JD Admin</p>
+            <p className="text-white/40 text-[10px]">Management Panel</p>
           </div>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="p-1.5 rounded-lg text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all md:hidden">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all md:hidden">
             <X className="w-4 h-4" />
           </button>
         )}
@@ -68,7 +68,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
                 isActive
                   ? 'bg-luxe-accent/15 text-luxe-accent border border-luxe-accent/20'
-                  : 'text-foreground/ hover:text-foreground hover:bg-foreground/'
+                  : 'text-white/50 hover:text-white hover:bg-white/5'
               )}
             >
               <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -79,7 +79,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-foreground/">
+      <div className="p-3 border-t border-white/10">
         <Link prefetch={true} href="/"
           onClick={onClose}
           className="btn-glass w-full justify-center group mb-2"
@@ -105,17 +105,17 @@ export function AdminSidebar() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-[#111] border-b border-foreground/ flex items-center px-4 gap-3 print:hidden">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-[#111] border-b border-white/10 flex items-center px-4 gap-3 print:hidden">
         <button
           onClick={() => setMobileOpen(true)}
-          className="p-2 rounded-lg text-foreground/ hover:text-foreground hover:bg-foreground/ transition-all"
+          className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
           <JDLogo size={24} />
-          <span className="text-foreground font-bold text-sm">JD Admin</span>
+          <span className="text-white font-bold text-sm">JD Admin</span>
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export function AdminSidebar() {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-luxe-near-black border-r border-foreground/ flex-col z-40 print:hidden">
+      <div className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-luxe-near-black border-r border-white/10 flex-col z-40 print:hidden">
         <SidebarContent />
       </div>
     </>

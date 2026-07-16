@@ -153,7 +153,7 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-foreground">Collections</h1>
+        <h1 className="font-display text-3xl font-bold text-white">Collections</h1>
         <button onClick={openCreate} className="btn-gold flex items-center gap-2 text-sm">
           <Plus className="w-4 h-4" />New Collection
         </button>
@@ -170,7 +170,7 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
           >
             {/* Cover image strip */}
             {col.cover_image_url ? (
-              <div className="relative h-28 bg-card">
+              <div className="relative h-28 bg-luxe-dark">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={col.cover_image_url} alt={col.name} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -183,24 +183,24 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
 
             <div className="p-4">
               <div className="flex items-start justify-between gap-2 mb-1">
-                <h3 className="text-foreground font-medium">{col.name}</h3>
+                <h3 className="text-white font-medium">{col.name}</h3>
                 {!col.is_active && (
                   <span className="badge-luxe !bg-red-500/20 !text-red-400 !border-red-500/30 text-[10px] shrink-0">Hidden</span>
                 )}
               </div>
-              {col.description && <p className="text-foreground/ text-xs mb-2 line-clamp-2">{col.description}</p>}
-              <p className="text-foreground/ text-xs mb-3">{(col.products || []).length} products</p>
+              {col.description && <p className="text-white/40 text-xs mb-2 line-clamp-2">{col.description}</p>}
+              <p className="text-white/30 text-xs mb-3">{(col.products || []).length} products</p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => openEdit(col)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-foreground/ text-foreground/ hover:bg-foreground/ hover:text-foreground text-xs transition-all"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-xs transition-all"
                 >
                   <Edit2 className="w-3 h-3" />Edit
                 </button>
-                <button onClick={() => toggleActive(col)} className="p-2 rounded-lg bg-foreground/ text-foreground/ hover:bg-foreground/ transition-all">
+                <button onClick={() => toggleActive(col)} className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-all">
                   {col.is_active ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
-                <button onClick={() => deleteCollection(col.id)} className="p-2 rounded-lg bg-foreground/ text-foreground/ hover:bg-red-500/20 hover:text-red-400 transition-all">
+                <button onClick={() => deleteCollection(col.id)} className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-red-500/20 hover:text-red-400 transition-all">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -208,7 +208,7 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
           </motion.div>
         ))}
         {collections.length === 0 && (
-          <div className="col-span-full glass-card p-16 text-center text-foreground/">No collections yet.</div>
+          <div className="col-span-full glass-card p-16 text-center text-white/30">No collections yet.</div>
         )}
       </div>
 
@@ -217,14 +217,14 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
         <div data-lenis-prevent="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto glass-card">
-            <div className="sticky top-0 flex items-center justify-between p-5 border-b border-foreground/ bg-card/90 backdrop-blur">
-              <h2 className="text-foreground font-semibold">{editCollection ? 'Edit Collection' : 'New Collection'}</h2>
-              <button onClick={() => setShowModal(false)} className="text-foreground/ hover:text-foreground text-xl">×</button>
+            <div className="sticky top-0 flex items-center justify-between p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
+              <h2 className="text-white font-semibold">{editCollection ? 'Edit Collection' : 'New Collection'}</h2>
+              <button onClick={() => setShowModal(false)} className="text-white/50 hover:text-white text-xl">×</button>
             </div>
 
             <div className="p-5 space-y-4">
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Name *</label>
+                <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Name *</label>
                 <input
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
@@ -233,7 +233,7 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
                 />
               </div>
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Description</label>
+                <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Description</label>
                 <textarea
                   value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
@@ -245,13 +245,13 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
 
               {/* Cover image uploader */}
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Cover Image</label>
+                <label className="text-white/40 text-xs uppercase tracking-wide mb-2 block">Cover Image</label>
                 <ImageUploader images={coverImages} onChange={setCoverImages} maxImages={1} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Display Order</label>
+                  <label className="text-white/40 text-xs uppercase tracking-wide mb-1.5 block">Display Order</label>
                   <input
                     type="number"
                     value={form.display_order}
@@ -267,13 +267,13 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
                     onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))}
                     className="w-4 h-4 accent-luxe-accent"
                   />
-                  <label htmlFor="colActive" className="text-foreground/ text-sm cursor-pointer">Active</label>
+                  <label htmlFor="colActive" className="text-white/60 text-sm cursor-pointer">Active</label>
                 </div>
               </div>
 
               {/* Products selection */}
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">
+                <label className="text-white/40 text-xs uppercase tracking-wide mb-2 block">
                   Products ({selectedProducts.length} selected)
                 </label>
                 <input
@@ -283,21 +283,21 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
                   onChange={e => setProductSearch(e.target.value)}
                   className="input-luxe text-sm mb-2"
                 />
-                <div className="max-h-48 overflow-y-auto space-y-1 border border-foreground/ rounded-xl p-2">
+                <div className="max-h-48 overflow-y-auto space-y-1 border border-white/10 rounded-xl p-2">
                   {filteredProducts.map(product => (
-                    <label key={product.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-foreground/ cursor-pointer">
+                    <label key={product.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={selectedProducts.includes(product.id)}
                         onChange={() => toggleProduct(product.id)}
                         className="w-3.5 h-3.5 accent-luxe-accent"
                       />
-                      <span className="text-foreground/ text-sm flex-1 truncate">{product.name}</span>
-                      <span className="text-foreground/ text-xs capitalize">{product.product_type}</span>
+                      <span className="text-white/70 text-sm flex-1 truncate">{product.name}</span>
+                      <span className="text-white/30 text-xs capitalize">{product.product_type}</span>
                     </label>
                   ))}
                   {filteredProducts.length === 0 && (
-                    <p className="text-foreground/ text-sm p-2">No products found</p>
+                    <p className="text-white/30 text-sm p-2">No products found</p>
                   )}
                 </div>
               </div>

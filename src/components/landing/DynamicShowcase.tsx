@@ -60,7 +60,7 @@ export function DynamicShowcase({ products }: DynamicShowcaseProps) {
                 viewport={{ once: true }}
               >
                 <Link prefetch={true} href={`/category/${type}`}
-                  className="flex items-center gap-2 text-sm text-foreground/ hover:text-foreground transition-colors group"
+                  className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors group"
                 >
                   View all {formatTitle(type).toLowerCase()}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

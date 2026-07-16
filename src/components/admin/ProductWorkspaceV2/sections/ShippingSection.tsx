@@ -9,7 +9,7 @@ export function ShippingSection({ formData, updateField }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Weight (grams)</label>
+        <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Weight (grams)</label>
         <input 
           type="number"
           value={formData.weight_grams}
@@ -20,7 +20,7 @@ export function ShippingSection({ formData, updateField }: Props) {
       </div>
       
       <div>
-        <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">Dimensions (L × W × H) cm</label>
+        <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">Dimensions (L × W × H) cm</label>
         <div className="grid grid-cols-3 gap-3">
           <input 
             type="number"

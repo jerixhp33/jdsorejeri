@@ -34,8 +34,8 @@ export function ProfileView({ profile, loginLogs, orderCount, recentOrders, reco
               <Bell className="w-5 h-5 animate-pulse" />
             </div>
             <div className="text-left">
-              <h3 className="text-foreground text-sm font-semibold">Enable Push Notifications</h3>
-              <p className="text-foreground/ text-xs mt-0.5">Stay updated on your orders, packing details, and shipping status in real-time.</p>
+              <h3 className="text-white text-sm font-semibold">Enable Push Notifications</h3>
+              <p className="text-white/50 text-xs mt-0.5">Stay updated on your orders, packing details, and shipping status in real-time.</p>
             </div>
           </div>
           <button 
@@ -58,28 +58,28 @@ export function ProfileView({ profile, loginLogs, orderCount, recentOrders, reco
             </div>
           )}
           <div className="flex-1">
-            <h1 className="font-display text-2xl font-bold text-foreground mb-1">{profile.name}</h1>
-            <p className="text-foreground/ text-sm">{profile.email}</p>
+            <h1 className="font-display text-2xl font-bold text-white mb-1">{profile.name}</h1>
+            <p className="text-white/50 text-sm">{profile.email}</p>
             <div className="flex flex-col sm:flex-row items-center gap-3 mt-3">
               <span className="badge-luxe text-xs capitalize">{profile.role}</span>
-              <span className="text-foreground/ text-xs">Member since {formatDate(profile.created_at)}</span>
+              <span className="text-white/30 text-xs">Member since {formatDate(profile.created_at)}</span>
             </div>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-foreground/">
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10">
           <div className="text-center">
-            <p className="font-display text-xl sm:text-2xl font-bold text-foreground">{orderCount}</p>
-            <p className="text-foreground/ text-xs mt-1">Orders</p>
+            <p className="font-display text-xl sm:text-2xl font-bold text-white">{orderCount}</p>
+            <p className="text-white/40 text-xs mt-1">Orders</p>
           </div>
-          <div className="text-center border-x border-foreground/">
-            <p className="font-display text-xl sm:text-2xl font-bold text-foreground">{loginLogs.length}</p>
-            <p className="text-foreground/ text-xs mt-1">Logins</p>
+          <div className="text-center border-x border-white/10">
+            <p className="font-display text-xl sm:text-2xl font-bold text-white">{loginLogs.length}</p>
+            <p className="text-white/40 text-xs mt-1">Logins</p>
           </div>
           <div className="text-center">
             <p className="font-display text-xl sm:text-2xl font-bold text-luxe-accent">✓</p>
-            <p className="text-foreground/ text-xs mt-1">Verified</p>
+            <p className="text-white/40 text-xs mt-1">Verified</p>
           </div>
         </div>
       </motion.div>
@@ -96,10 +96,10 @@ export function ProfileView({ profile, loginLogs, orderCount, recentOrders, reco
           { href: '/wishlist', icon: Heart, label: 'Wishlist', sub: 'Saved items' },
           { href: '/dashboard/addresses', icon: MapPin, label: 'Addresses', sub: 'Delivery info' },
         ].map((action) => (
-          <Link key={action.href} href={action.href} className="glass-card p-4 hover:border-foreground/ transition-all group">
+          <Link key={action.href} href={action.href} className="glass-card p-4 hover:border-white/25 transition-all group">
             <action.icon className="w-5 h-5 text-luxe-accent mb-3" />
-            <p className="text-foreground text-sm font-medium">{action.label}</p>
-            <p className="text-foreground/ text-xs mt-0.5">{action.sub}</p>
+            <p className="text-white text-sm font-medium">{action.label}</p>
+            <p className="text-white/40 text-xs mt-0.5">{action.sub}</p>
           </Link>
         ))}
       </motion.div>
@@ -115,7 +115,7 @@ export function ProfileView({ profile, loginLogs, orderCount, recentOrders, reco
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Package className="w-4 h-4 text-luxe-accent" />
-              <h2 className="text-foreground font-semibold">Active Orders</h2>
+              <h2 className="text-white font-semibold">Active Orders</h2>
             </div>
             <Link prefetch={true} href="/dashboard/orders" className="text-xs text-luxe-accent hover:underline">View All</Link>
           </div>
@@ -124,13 +124,13 @@ export function ProfileView({ profile, loginLogs, orderCount, recentOrders, reco
               const firstItem = order.items?.[0];
               const img = (firstItem?.product?.images as any[])?.find(i => i.is_primary) || (firstItem?.product?.images as any[])?.[0];
               return (
-                <div key={order.id} className="flex items-center gap-4 p-3 rounded-xl bg-foreground/ border border-foreground/">
-                  <div className="w-12 h-12 rounded-lg bg-card overflow-hidden flex-shrink-0">
+                <div key={order.id} className="flex items-center gap-4 p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="w-12 h-12 rounded-lg bg-luxe-dark overflow-hidden flex-shrink-0">
                     {img && <Image src={img.url} alt={firstItem?.product?.name || ''} width={48} height={48} className="object-cover w-full h-full" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-foreground text-sm font-medium truncate">Order #{order.order_number}</p>
-                    <p className="text-foreground/ text-xs mt-0.5">Status: <span className={cn('status-' + order.status, 'text-[10px] ml-1')}>{order.status}</span></p>
+                    <p className="text-white text-sm font-medium truncate">Order #{order.order_number}</p>
+                    <p className="text-white/50 text-xs mt-0.5">Status: <span className={cn('status-' + order.status, 'text-[10px] ml-1')}>{order.status}</span></p>
                   </div>
                   <Link prefetch={true} href="/dashboard/orders" className="btn-glass !py-1.5 !px-3 text-xs shrink-0">Track</Link>
                 </div>
@@ -149,7 +149,7 @@ export function ProfileView({ profile, loginLogs, orderCount, recentOrders, reco
           className="mt-8"
         >
           <div className="flex items-center justify-between mb-4 px-2">
-            <h2 className="text-foreground font-semibold flex items-center gap-2">
+            <h2 className="text-white font-semibold flex items-center gap-2">
               <span className="text-luxe-accent">✦</span> Recommended for You
             </h2>
           </div>
@@ -171,23 +171,23 @@ export function ProfileView({ profile, loginLogs, orderCount, recentOrders, reco
         >
           <div className="flex items-center gap-2 mb-5">
             <Shield className="w-4 h-4 text-luxe-accent" />
-            <h2 className="text-foreground font-semibold text-sm">Recent Login Activity</h2>
+            <h2 className="text-white font-semibold text-sm">Recent Login Activity</h2>
           </div>
           <div className="space-y-3">
             {loginLogs.map((log, i) => (
-              <div key={log.id} className="flex items-center justify-between py-2.5 border-b border-foreground/ last:border-0">
+              <div key={log.id} className="flex items-center justify-between py-2.5 border-b border-white/5 last:border-0">
                 <div className="flex items-center gap-3">
-                  <Monitor className="w-4 h-4 text-foreground/" />
+                  <Monitor className="w-4 h-4 text-white/30" />
                   <div>
-                    <p className="text-foreground/ text-sm">
+                    <p className="text-white/70 text-sm">
                       {log.browser || 'Unknown'} on {log.device || 'Unknown'}
                     </p>
                     {log.ip_address && (
-                      <p className="text-foreground/ text-xs">{log.ip_address}</p>
+                      <p className="text-white/30 text-xs">{log.ip_address}</p>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-foreground/ text-xs">
+                <div className="flex items-center gap-1 text-white/30 text-xs">
                   <Clock className="w-3 h-3" />
                   {formatRelativeTime(log.login_time)}
                 </div>

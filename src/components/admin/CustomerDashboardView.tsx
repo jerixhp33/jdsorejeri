@@ -103,8 +103,8 @@ export function CustomerDashboardView({ initialCustomers }: { initialCustomers: 
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">Customer CRM</h1>
-          <p className="text-foreground/ text-sm mt-1">Manage profiles, analyze segments, and track LTV</p>
+          <h1 className="font-display text-3xl font-bold text-white">Customer CRM</h1>
+          <p className="text-white/50 text-sm mt-1">Manage profiles, analyze segments, and track LTV</p>
         </div>
         <button onClick={exportToCSV} className="btn-secondary flex items-center gap-2">
           <Download className="w-4 h-4" />
@@ -114,36 +114,36 @@ export function CustomerDashboardView({ initialCustomers }: { initialCustomers: 
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-        <div className="glass-card p-3 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">Total</p>
-          <p className="text-xl font-bold text-foreground">{kpis.total}</p>
+        <div className="glass-card p-3 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Total</p>
+          <p className="text-xl font-bold text-white">{kpis.total}</p>
         </div>
-        <div className="glass-card p-3 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">New (30d)</p>
+        <div className="glass-card p-3 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">New (30d)</p>
           <p className="text-xl font-bold text-emerald-400">+{kpis.newThisMonth}</p>
         </div>
-        <div className="glass-card p-3 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">Active</p>
+        <div className="glass-card p-3 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Active</p>
           <p className="text-xl font-bold text-blue-400">{kpis.active}</p>
         </div>
-        <div className="glass-card p-3 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">VIP</p>
+        <div className="glass-card p-3 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">VIP</p>
           <p className="text-xl font-bold text-luxe-accent">{kpis.vip}</p>
         </div>
-        <div className="glass-card p-3 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">At Risk</p>
+        <div className="glass-card p-3 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">At Risk</p>
           <p className="text-xl font-bold text-amber-400">{kpis.atRisk}</p>
         </div>
-        <div className="glass-card p-3 rounded-xl border border-foreground/ col-span-3">
+        <div className="glass-card p-3 rounded-xl border border-white/5 col-span-3">
           <div className="flex items-center justify-between h-full">
             <div>
-              <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">Avg LTV</p>
-              <p className="text-xl font-bold text-foreground">{formatCurrency(kpis.avgLTV)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Avg LTV</p>
+              <p className="text-xl font-bold text-white">{formatCurrency(kpis.avgLTV)}</p>
             </div>
-            <div className="w-px h-8 bg-foreground/"></div>
+            <div className="w-px h-8 bg-white/10"></div>
             <div>
-              <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">Avg Order Value</p>
-              <p className="text-xl font-bold text-foreground">{formatCurrency(kpis.avgAOV)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Avg Order Value</p>
+              <p className="text-xl font-bold text-white">{formatCurrency(kpis.avgAOV)}</p>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ export function CustomerDashboardView({ initialCustomers }: { initialCustomers: 
       <div className="glass-card p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4 flex-1">
           <div className="relative max-w-sm w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input
               type="text"
               placeholder="Search Name, Email, or ID..."
@@ -166,7 +166,7 @@ export function CustomerDashboardView({ initialCustomers }: { initialCustomers: 
           <select 
             value={filterSegment} 
             onChange={(e) => setFilterSegment(e.target.value)}
-            className="input-luxe text-sm py-2 px-3 bg-card border-foreground/"
+            className="input-luxe text-sm py-2 px-3 bg-luxe-dark border-white/10"
           >
             <option value="all">All Segments</option>
             <option value="vip">VIP</option>
@@ -183,39 +183,39 @@ export function CustomerDashboardView({ initialCustomers }: { initialCustomers: 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-foreground/ bg-white/[0.02]">
+              <tr className="border-b border-white/10 bg-white/[0.02]">
                 <th className="px-4 py-4 text-left w-12">
-                  <input type="checkbox" className="rounded border-foreground/ bg-foreground/ accent-luxe-accent cursor-pointer" checked={selectedIds.size === filtered.length && filtered.length > 0} onChange={toggleAll} />
+                  <input type="checkbox" className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer" checked={selectedIds.size === filtered.length && filtered.length > 0} onChange={toggleAll} />
                 </th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Customer</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Segment</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Tier</th>
-                <th className="px-4 py-4 text-right text-foreground/ text-xs uppercase tracking-wider font-semibold">Orders</th>
-                <th className="px-4 py-4 text-right text-foreground/ text-xs uppercase tracking-wider font-semibold">LTV</th>
-                <th className="px-4 py-4 text-right text-foreground/ text-xs uppercase tracking-wider font-semibold">Last Order</th>
-                <th className="px-4 py-4 text-right text-foreground/ text-xs uppercase tracking-wider font-semibold">Action</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Customer</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Segment</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Tier</th>
+                <th className="px-4 py-4 text-right text-white/40 text-xs uppercase tracking-wider font-semibold">Orders</th>
+                <th className="px-4 py-4 text-right text-white/40 text-xs uppercase tracking-wider font-semibold">LTV</th>
+                <th className="px-4 py-4 text-right text-white/40 text-xs uppercase tracking-wider font-semibold">Last Order</th>
+                <th className="px-4 py-4 text-right text-white/40 text-xs uppercase tracking-wider font-semibold">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center text-foreground/ text-sm">No customers match your criteria.</td>
+                  <td colSpan={8} className="px-4 py-16 text-center text-white/30 text-sm">No customers match your criteria.</td>
                 </tr>
               ) : (
                 filtered.map((c) => (
                   <tr key={c.id} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="px-4 py-4">
-                      <input type="checkbox" className="rounded border-foreground/ bg-foreground/ accent-luxe-accent cursor-pointer" checked={selectedIds.has(c.id)} onChange={() => {
+                      <input type="checkbox" className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer" checked={selectedIds.has(c.id)} onChange={() => {
                         const newSet = new Set(selectedIds);
                         newSet.has(c.id) ? newSet.delete(c.id) : newSet.add(c.id);
                         setSelectedIds(newSet);
                       }} />
                     </td>
                     <td className="px-4 py-4">
-                      <Link href={`/admin/customers/${c.id}`} className="text-foreground font-medium hover:text-luxe-accent transition-colors block">
+                      <Link href={`/admin/customers/${c.id}`} className="text-white font-medium hover:text-luxe-accent transition-colors block">
                         {c.user_profile?.name || 'Unknown'}
                       </Link>
-                      <p className="text-foreground/ text-xs mt-0.5">{c.user_profile?.email}</p>
+                      <p className="text-white/40 text-xs mt-0.5">{c.user_profile?.email}</p>
                     </td>
                     <td className="px-4 py-4">
                       <span className={cn(
@@ -228,22 +228,22 @@ export function CustomerDashboardView({ initialCustomers }: { initialCustomers: 
                         {c.segment}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-foreground/ text-sm capitalize">
+                    <td className="px-4 py-4 text-white/70 text-sm capitalize">
                       {c.membership_tier}
                     </td>
-                    <td className="px-4 py-4 text-right text-foreground font-medium">
+                    <td className="px-4 py-4 text-right text-white font-medium">
                       {c.totalOrders}
                     </td>
-                    <td className="px-4 py-4 text-right text-foreground font-semibold">
+                    <td className="px-4 py-4 text-right text-white font-semibold">
                       {formatCurrency(c.ltv)}
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <p className="text-foreground/ text-sm">{c.lastOrder ? formatDate(c.lastOrder.created_at) : 'Never'}</p>
+                      <p className="text-white/70 text-sm">{c.lastOrder ? formatDate(c.lastOrder.created_at) : 'Never'}</p>
                     </td>
                     <td className="px-4 py-4 text-right">
                       <Link 
                         href={`/admin/customers/${c.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-foreground/ text-foreground/ text-xs font-medium hover:bg-foreground/ hover:text-foreground transition-all opacity-0 group-hover:opacity-100"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 text-white/70 text-xs font-medium hover:bg-white/10 hover:text-white transition-all opacity-0 group-hover:opacity-100"
                       >
                         Profile
                         <ChevronRight className="w-3.5 h-3.5" />

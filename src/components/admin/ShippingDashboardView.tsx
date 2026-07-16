@@ -163,8 +163,8 @@ export function ShippingDashboardView({ initialShipments, pendingOrders = [] }: 
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">Fulfillment Dashboard</h1>
-          <p className="text-foreground/ text-sm mt-1">Manage shipments, couriers, and tracking</p>
+          <h1 className="font-display text-3xl font-bold text-white">Fulfillment Dashboard</h1>
+          <p className="text-white/50 text-sm mt-1">Manage shipments, couriers, and tracking</p>
         </div>
         <div className="flex gap-3">
           <button onClick={generateBulkManifest} disabled={selectedIds.size === 0} className="btn-secondary flex items-center gap-2">
@@ -176,24 +176,24 @@ export function ShippingDashboardView({ initialShipments, pendingOrders = [] }: 
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="glass-card p-4 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">Ready to Ship</p>
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Ready to Ship</p>
           <p className="text-2xl font-bold text-amber-400">{kpis.readyToShip}</p>
         </div>
-        <div className="glass-card p-4 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">Awaiting Pickup</p>
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Awaiting Pickup</p>
           <p className="text-2xl font-bold text-blue-400">{kpis.awaitingPickup}</p>
         </div>
-        <div className="glass-card p-4 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">Picked Up Today</p>
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Picked Up Today</p>
           <p className="text-2xl font-bold text-purple-400">{kpis.pickedUpToday}</p>
         </div>
-        <div className="glass-card p-4 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">In Transit</p>
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">In Transit</p>
           <p className="text-2xl font-bold text-indigo-400">{kpis.inTransit}</p>
         </div>
-        <div className="glass-card p-4 rounded-xl border border-foreground/">
-          <p className="text-foreground/ text-[10px] uppercase tracking-wider mb-1">Delivered Today</p>
+        <div className="glass-card p-4 rounded-xl border border-white/5">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Delivered Today</p>
           <p className="text-2xl font-bold text-emerald-400">{kpis.deliveredToday}</p>
         </div>
         <div className="glass-card p-4 rounded-xl border border-red-500/20 bg-red-500/5">
@@ -206,7 +206,7 @@ export function ShippingDashboardView({ initialShipments, pendingOrders = [] }: 
       <div className="glass-card p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4 flex-1">
           <div className="relative max-w-sm w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input
               type="text"
               placeholder="Search AWB, Order ID, Customer..."
@@ -219,7 +219,7 @@ export function ShippingDashboardView({ initialShipments, pendingOrders = [] }: 
           <select 
             value={filter} 
             onChange={(e) => setFilter(e.target.value as ShipmentStatus)}
-            className="input-luxe text-sm py-2 px-3 bg-card border-foreground/"
+            className="input-luxe text-sm py-2 px-3 bg-luxe-dark border-white/10"
           >
             {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
@@ -228,7 +228,7 @@ export function ShippingDashboardView({ initialShipments, pendingOrders = [] }: 
         {selectedIds.size > 0 && (
           <div className="flex items-center gap-3">
              <span className="text-luxe-accent text-sm font-medium">{selectedIds.size} Selected</span>
-             <button className="px-3 py-1.5 text-xs font-semibold bg-foreground/ text-foreground rounded hover:bg-foreground/ transition-all">Bulk Print Labels</button>
+             <button className="px-3 py-1.5 text-xs font-semibold bg-white/10 text-white rounded hover:bg-white/20 transition-all">Bulk Print Labels</button>
           </div>
         )}
       </div>
@@ -238,42 +238,42 @@ export function ShippingDashboardView({ initialShipments, pendingOrders = [] }: 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-foreground/ bg-white/[0.02]">
+              <tr className="border-b border-white/10 bg-white/[0.02]">
                 <th className="px-4 py-4 text-left w-12">
-                  <input type="checkbox" className="rounded border-foreground/ bg-foreground/ accent-luxe-accent cursor-pointer" checked={selectedIds.size === filtered.length && filtered.length > 0} onChange={toggleAll} />
+                  <input type="checkbox" className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer" checked={selectedIds.size === filtered.length && filtered.length > 0} onChange={toggleAll} />
                 </th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Shipment / AWB</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Order</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Courier</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Destination</th>
-                <th className="px-4 py-4 text-left text-foreground/ text-xs uppercase tracking-wider font-semibold">Status</th>
-                <th className="px-4 py-4 text-right text-foreground/ text-xs uppercase tracking-wider font-semibold">Action</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Shipment / AWB</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Order</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Courier</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Destination</th>
+                <th className="px-4 py-4 text-left text-white/40 text-xs uppercase tracking-wider font-semibold">Status</th>
+                <th className="px-4 py-4 text-right text-white/40 text-xs uppercase tracking-wider font-semibold">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center text-foreground/ text-sm">No shipments match your criteria.</td>
+                  <td colSpan={7} className="px-4 py-16 text-center text-white/30 text-sm">No shipments match your criteria.</td>
                 </tr>
               ) : (
                 filtered.map((s) => (
                   <tr key={s.id} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="px-4 py-4">
-                      <input type="checkbox" className="rounded border-foreground/ bg-foreground/ accent-luxe-accent cursor-pointer" checked={selectedIds.has(s.id)} onChange={() => toggleSelection(s.id)} />
+                      <input type="checkbox" className="rounded border-white/20 bg-white/5 accent-luxe-accent cursor-pointer" checked={selectedIds.has(s.id)} onChange={() => toggleSelection(s.id)} />
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-foreground font-medium">{s.tracking_number || 'Pending Assignment'}</p>
-                      <p className="text-foreground/ text-xs mt-0.5">{formatDate(s.created_at)}</p>
+                      <p className="text-white font-medium">{s.tracking_number || 'Pending Assignment'}</p>
+                      <p className="text-white/40 text-xs mt-0.5">{formatDate(s.created_at)}</p>
                     </td>
                     <td className="px-4 py-4">
                       <Link href={`/admin/orders/${s.order_id}`} className="text-luxe-accent hover:underline text-sm font-medium">#{s.order?.order_number}</Link>
                     </td>
                     <td className="px-4 py-4">
-                      <span className="px-2 py-1 rounded bg-foreground/ text-foreground/ text-xs font-medium capitalize border border-foreground/">{s.provider?.replace('_', ' ')}</span>
+                      <span className="px-2 py-1 rounded bg-white/5 text-white/70 text-xs font-medium capitalize border border-white/10">{s.provider?.replace('_', ' ')}</span>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-foreground text-sm font-medium">{s.order?.delivery_address?.city || s.order?.delivery_address?.district || 'Unknown'}</p>
-                      <p className="text-foreground/ text-xs mt-0.5">{s.order?.delivery_address?.state || ''}</p>
+                      <p className="text-white text-sm font-medium">{s.order?.delivery_address?.city || s.order?.delivery_address?.district || 'Unknown'}</p>
+                      <p className="text-white/40 text-xs mt-0.5">{s.order?.delivery_address?.state || ''}</p>
                     </td>
                     <td className="px-4 py-4">
                       <span className={cn(
@@ -288,7 +288,7 @@ export function ShippingDashboardView({ initialShipments, pendingOrders = [] }: 
                     </td>
                     <td className="px-4 py-4 text-right">
                       {s.label_url ? (
-                        <a href={s.label_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-foreground/ text-foreground/ text-xs font-medium hover:bg-foreground/ hover:text-foreground transition-all">
+                        <a href={s.label_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 text-white/70 text-xs font-medium hover:bg-white/10 hover:text-white transition-all">
                           Print Label
                         </a>
                       ) : (

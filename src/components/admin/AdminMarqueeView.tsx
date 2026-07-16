@@ -124,8 +124,8 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground">Marquee Labels</h1>
-          <p className="text-foreground/ text-sm mt-1">Manage the rotating text in the hero section</p>
+          <h1 className="text-3xl font-display font-bold text-white">Marquee Labels</h1>
+          <p className="text-white/50 text-sm mt-1">Manage the rotating text in the hero section</p>
         </div>
         <button onClick={openCreate} className="btn-luxe flex items-center gap-2">
           <Plus className="w-4 h-4" /> Add Label
@@ -136,28 +136,28 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-foreground/ bg-foreground/">
-                <th className="py-4 px-6 text-foreground/ font-medium text-sm">Text</th>
-                <th className="py-4 px-6 text-foreground/ font-medium text-sm">Order</th>
-                <th className="py-4 px-6 text-foreground/ font-medium text-sm">Status</th>
-                <th className="py-4 px-6 text-right text-foreground/ font-medium text-sm">Actions</th>
+              <tr className="border-b border-white/10 bg-white/5">
+                <th className="py-4 px-6 text-white/50 font-medium text-sm">Text</th>
+                <th className="py-4 px-6 text-white/50 font-medium text-sm">Order</th>
+                <th className="py-4 px-6 text-white/50 font-medium text-sm">Status</th>
+                <th className="py-4 px-6 text-right text-white/50 font-medium text-sm">Actions</th>
               </tr>
             </thead>
             <tbody>
               {items.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)).map((item) => (
-                <tr key={item.id} className="border-b border-foreground/ hover:bg-foreground/ transition-colors">
+                <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                   <td className="py-4 px-6">
-                    <p className="text-foreground font-medium">{item.text}</p>
+                    <p className="text-white font-medium">{item.text}</p>
                   </td>
                   <td className="py-4 px-6">
-                    <span className="text-foreground/ text-sm">{item.order_index}</span>
+                    <span className="text-white/70 text-sm">{item.order_index}</span>
                   </td>
                   <td className="py-4 px-6">
                     <button
                       onClick={() => toggleActive(item)}
                       className={cn(
                         'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors',
-                        item.is_active ? 'bg-green-500/20 text-green-400' : 'bg-foreground/ text-foreground/'
+                        item.is_active ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/50'
                       )}
                     >
                       {item.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -168,14 +168,14 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEdit(item)}
-                        className="p-2 rounded-lg bg-foreground/ text-foreground/ hover:text-foreground hover:bg-foreground/ transition-colors"
+                        className="p-2 rounded-lg bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(item.id)}
                         disabled={deletingId === item.id}
-                        className="p-2 rounded-lg bg-foreground/ text-red-400 hover:bg-red-400/20 transition-colors disabled:opacity-50"
+                        className="p-2 rounded-lg bg-white/5 text-red-400 hover:bg-red-400/20 transition-colors disabled:opacity-50"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -185,7 +185,7 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
               ))}
               {items.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-12 text-center text-foreground/">
+                  <td colSpan={4} className="py-12 text-center text-white/40">
                     No marquee labels found.
                   </td>
                 </tr>
@@ -211,17 +211,17 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
               className="glass-card w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-2">
-                  <h2 className="text-xl font-bold text-foreground">
+                  <h2 className="text-xl font-bold text-white">
                     {modal.data.id ? 'Edit Label' : 'Add Label'}
                   </h2>
-                  <button onClick={closeModal} className="p-2 rounded-full hover:bg-foreground/ transition-colors">
-                    <X className="w-5 h-5 text-foreground/" />
+                  <button onClick={closeModal} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+                    <X className="w-5 h-5 text-white/50" />
                   </button>
                 </div>
 
                 <div className="space-y-5">
                   <div>
-                    <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Text *</label>
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Text *</label>
                     <input
                       value={modal.data.text}
                       onChange={(e) => setModal((m) => ({ ...m, data: { ...m.data, text: e.target.value } }))}
@@ -230,7 +230,7 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
                     />
                   </div>
                   <div>
-                    <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Order Index</label>
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Order Index</label>
                     <input
                       type="number"
                       value={modal.data.order_index}
@@ -243,13 +243,13 @@ export function AdminMarqueeView({ labels: initial }: AdminMarqueeViewProps) {
                       type="checkbox"
                       checked={modal.data.is_active}
                       onChange={(e) => setModal((m) => ({ ...m, data: { ...m.data, is_active: e.target.checked } }))}
-                      className="w-4 h-4 rounded border-foreground/ bg-foreground/ text-luxe-accent focus:ring-luxe-accent focus:ring-offset-0"
+                      className="w-4 h-4 rounded border-white/20 bg-white/5 text-luxe-accent focus:ring-luxe-accent focus:ring-offset-0"
                     />
-                    <label className="text-foreground/ text-sm">Active (visible on landing page)</label>
+                    <label className="text-white/70 text-sm">Active (visible on landing page)</label>
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-foreground/">
+                <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-white/10">
                   <button onClick={closeModal} className="btn-luxe-outline">
                     Cancel
                   </button>

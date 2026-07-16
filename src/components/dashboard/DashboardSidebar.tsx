@@ -55,8 +55,8 @@ export function DashboardSidebar() {
               </div>
             )}
             <div className="min-w-0">
-              <p className="text-foreground font-semibold text-sm truncate">{profile.name}</p>
-              <p className="text-foreground/ text-xs truncate">{profile.email}</p>
+              <p className="text-white font-semibold text-sm truncate">{profile.name}</p>
+              <p className="text-white/40 text-xs truncate">{profile.email}</p>
             </div>
             <button
               onClick={handleSignOut}
@@ -69,7 +69,7 @@ export function DashboardSidebar() {
         )}
 
         {/* Scrollable tab strip (Glassmorphism) */}
-        <div className="flex gap-1 overflow-x-auto no-scrollbar p-1.5 mb-2 bg-[#0a0a0a]/80 backdrop-blur-xl border border-foreground/ rounded-2xl shadow-xl">
+        <div className="flex gap-1 overflow-x-auto no-scrollbar p-1.5 mb-2 bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl">
           {NAV_ITEMS.map((item) => {
             const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
@@ -80,8 +80,8 @@ export function DashboardSidebar() {
                 className={cn(
                   'flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-[11px] font-medium transition-all whitespace-nowrap flex-shrink-0 min-w-[64px]',
                   isActive
-                    ? 'bg-white/[0.08] text-foreground shadow-sm border border-foreground/'
-                    : 'text-foreground/ hover:text-foreground hover:bg-foreground/ border border-transparent'
+                    ? 'bg-white/[0.08] text-white shadow-sm border border-white/5'
+                    : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'
                 )}
               >
                 <div className="relative">
@@ -109,7 +109,7 @@ export function DashboardSidebar() {
         </div>
         <div className="glass-card p-5 sticky top-24">
           {/* Avatar & name */}
-          <div className="flex flex-col items-center text-center pb-5 border-b border-foreground/ mb-5">
+          <div className="flex flex-col items-center text-center pb-5 border-b border-white/10 mb-5">
             {profile?.profile_picture ? (
               <Image
                 src={profile.profile_picture}
@@ -125,8 +125,8 @@ export function DashboardSidebar() {
                 </span>
               </div>
             )}
-            <p className="text-foreground font-semibold text-sm truncate w-full">{profile?.name}</p>
-            <p className="text-foreground/ text-xs truncate w-full">{profile?.email}</p>
+            <p className="text-white font-semibold text-sm truncate w-full">{profile?.name}</p>
+            <p className="text-white/40 text-xs truncate w-full">{profile?.email}</p>
           </div>
 
           {/* Navigation */}
@@ -143,8 +143,8 @@ export function DashboardSidebar() {
                   className={cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
                     isActive
-                      ? 'bg-foreground/ text-foreground'
-                      : 'text-foreground/ hover:text-foreground hover:bg-foreground/'
+                      ? 'bg-white/10 text-white'
+                      : 'text-white/50 hover:text-white hover:bg-white/5'
                   )}
                 >
                   <item.icon className={cn("w-4 h-4 transition-colors", isActive ? "text-luxe-accent" : "")} />
@@ -157,7 +157,7 @@ export function DashboardSidebar() {
                 </Link>
               );
             })}
-            <div className="pt-2 mt-2 border-t border-foreground/">
+            <div className="pt-2 mt-2 border-t border-white/10">
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-all"

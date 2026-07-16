@@ -48,7 +48,7 @@ export function ReportsEngineView() {
 
   return (
     <div className="glass-card p-6 md:p-8 max-w-3xl">
-      <h2 className="text-foreground font-display text-xl font-bold mb-6 flex items-center gap-2">
+      <h2 className="text-white font-display text-xl font-bold mb-6 flex items-center gap-2">
         <FileText className="w-5 h-5 text-luxe-accent" />
         Advanced Export Engine
       </h2>
@@ -56,7 +56,7 @@ export function ReportsEngineView() {
       <div className="space-y-8">
         {/* Step 1: Data Type */}
         <div>
-          <label className="text-foreground/ text-sm font-semibold uppercase tracking-wider mb-3 block">1. Select Data Module</label>
+          <label className="text-white/60 text-sm font-semibold uppercase tracking-wider mb-3 block">1. Select Data Module</label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {types.map(t => (
               <button
@@ -66,12 +66,12 @@ export function ReportsEngineView() {
                   "p-4 rounded-xl border text-left transition-all",
                   reportType === t.id 
                     ? "border-luxe-accent bg-luxe-accent/10" 
-                    : "border-foreground/ bg-foreground/ hover:border-foreground/"
+                    : "border-white/10 bg-white/5 hover:border-white/30"
                 )}
               >
-                <t.icon className={cn("w-5 h-5 mb-2", reportType === t.id ? "text-luxe-accent" : "text-foreground/")} />
-                <p className="text-foreground font-medium text-sm">{t.label}</p>
-                <p className="text-foreground/ text-[10px] mt-1 line-clamp-2">{t.desc}</p>
+                <t.icon className={cn("w-5 h-5 mb-2", reportType === t.id ? "text-luxe-accent" : "text-white/50")} />
+                <p className="text-white font-medium text-sm">{t.label}</p>
+                <p className="text-white/40 text-[10px] mt-1 line-clamp-2">{t.desc}</p>
               </button>
             ))}
           </div>
@@ -79,7 +79,7 @@ export function ReportsEngineView() {
 
         {/* Step 2: Date Range */}
         <div>
-          <label className="text-foreground/ text-sm font-semibold uppercase tracking-wider mb-3 block">2. Select Date Range</label>
+          <label className="text-white/60 text-sm font-semibold uppercase tracking-wider mb-3 block">2. Select Date Range</label>
           <div className="flex flex-wrap gap-2">
             {periods.map(p => (
               <button
@@ -89,7 +89,7 @@ export function ReportsEngineView() {
                   "px-4 py-2 rounded-lg text-sm transition-all border",
                   period === p.id 
                     ? "border-luxe-accent text-luxe-accent bg-luxe-accent/5" 
-                    : "border-foreground/ text-foreground/ hover:text-foreground bg-foreground/"
+                    : "border-white/10 text-white/60 hover:text-white bg-white/5"
                 )}
               >
                 {p.label}
@@ -105,7 +105,7 @@ export function ReportsEngineView() {
         </div>
 
         {/* Step 3: Export */}
-        <div className="pt-6 border-t border-foreground/">
+        <div className="pt-6 border-t border-white/10">
           <button 
             onClick={handleExport}
             disabled={isExporting}

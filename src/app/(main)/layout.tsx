@@ -15,7 +15,7 @@ export default async function MainLayout({
     .order('display_order');
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-luxe-black flex flex-col overflow-x-hidden">
       <Navbar categories={categories || []} />
       {/* pt-14 = mobile navbar h-14; sm:pt-16 = sm navbar h-16; md:pt-20 = desktop h-20 */}
       <main className="flex-1 pt-14 sm:pt-16 md:pt-20">{children}</main>

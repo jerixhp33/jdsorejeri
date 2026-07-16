@@ -110,13 +110,13 @@ export function VariantSection({ formData, setFormData }: Props) {
       
       {/* Options Builder */}
       <div className="space-y-4">
-        <h4 className="text-foreground/ font-medium text-sm">Variant Options</h4>
+        <h4 className="text-white/80 font-medium text-sm">Variant Options</h4>
         
         {formData.variant_options.map(opt => (
-          <div key={opt.id} className="bg-foreground/ border border-foreground/ rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3 border-b border-foreground/ pb-3">
-              <span className="text-foreground font-medium">{opt.name}</span>
-              <button onClick={() => handleRemoveOption(opt.id)} className="text-foreground/ hover:text-red-400">
+          <div key={opt.id} className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-3">
+              <span className="text-white font-medium">{opt.name}</span>
+              <button onClick={() => handleRemoveOption(opt.id)} className="text-white/30 hover:text-red-400">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
@@ -164,9 +164,9 @@ export function VariantSection({ formData, setFormData }: Props) {
 
       {/* Combinations Table */}
       {formData.variant_options.some(o => o.values.length > 0) && (
-        <div className="space-y-4 pt-6 border-t border-foreground/">
+        <div className="space-y-4 pt-6 border-t border-white/10">
           <div className="flex items-center justify-between">
-            <h4 className="text-foreground/ font-medium text-sm">Combinations</h4>
+            <h4 className="text-white/80 font-medium text-sm">Combinations</h4>
             <button onClick={generateCombinations} className="btn-gold text-xs px-3 py-1.5">
               Generate / Update Combinations
             </button>
@@ -174,9 +174,9 @@ export function VariantSection({ formData, setFormData }: Props) {
           
           {formData.variant_combinations.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-foreground/">
+              <table className="w-full text-left text-sm text-white/70">
                 <thead>
-                  <tr className="border-b border-foreground/">
+                  <tr className="border-b border-white/10">
                     <th className="py-2 font-medium">Variant</th>
                     <th className="py-2 font-medium w-24">Price (₹)</th>
                     <th className="py-2 font-medium w-24">Stock</th>
@@ -186,7 +186,7 @@ export function VariantSection({ formData, setFormData }: Props) {
                 </thead>
                 <tbody>
                   {formData.variant_combinations.map((combo, idx) => (
-                    <tr key={combo.id} className="border-b border-foreground/">
+                    <tr key={combo.id} className="border-b border-white/5">
                       <td className="py-2">
                         {Object.entries(combo.options).map(([k, v]) => `${v}`).join(' / ')}
                       </td>
@@ -245,7 +245,7 @@ export function VariantSection({ formData, setFormData }: Props) {
               </table>
             </div>
           ) : (
-            <p className="text-foreground/ text-xs italic">Click 'Generate Combinations' to create editable variants.</p>
+            <p className="text-white/30 text-xs italic">Click 'Generate Combinations' to create editable variants.</p>
           )}
         </div>
       )}

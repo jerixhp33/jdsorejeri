@@ -36,11 +36,11 @@ export function FloatingActionBar({
   }, []);
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 glass-card px-2 py-2 rounded-full flex items-center gap-2 shadow-2xl border-foreground/">
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 glass-card px-2 py-2 rounded-full flex items-center gap-2 shadow-2xl border-white/20">
       <button 
         onClick={onCancel}
         disabled={saving}
-        className="text-foreground/ hover:text-foreground px-4 py-2 rounded-full hover:bg-foreground/ text-sm font-medium transition-colors"
+        className="text-white/60 hover:text-white px-4 py-2 rounded-full hover:bg-white/5 text-sm font-medium transition-colors"
       >
         Cancel
       </button>
@@ -49,17 +49,17 @@ export function FloatingActionBar({
         onClick={onDuplicate}
         disabled={saving}
         title="Duplicate Product"
-        className="text-foreground/ hover:text-foreground px-3 py-2 rounded-full hover:bg-foreground/ text-sm font-medium transition-colors flex items-center gap-2"
+        className="text-white/60 hover:text-white px-3 py-2 rounded-full hover:bg-white/5 text-sm font-medium transition-colors flex items-center gap-2"
       >
         <Copy className="w-4 h-4" />
       </button>
       
-      <div className="h-6 w-px bg-foreground/ mx-2" />
+      <div className="h-6 w-px bg-white/10 mx-2" />
       
       <button 
         onClick={onSaveDraft}
         disabled={saving}
-        className="bg-foreground/ hover:bg-foreground/ text-foreground px-6 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2"
+        className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2"
       >
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
         Save Draft
@@ -86,31 +86,31 @@ export function FloatingActionBar({
 
         {/* Dropdown Menu */}
         {showPublishMenu && (
-          <div className="absolute bottom-full right-0 mb-3 w-48 bg-[#1a1a1a] border border-foreground/ rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2">
+          <div className="absolute bottom-full right-0 mb-3 w-48 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2">
             <button 
               onClick={() => { onPublish(); setShowPublishMenu(false); }}
-              className="w-full text-left px-4 py-3 text-sm text-foreground hover:bg-foreground/ flex items-center gap-3 transition-colors"
+              className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 flex items-center gap-3 transition-colors"
             >
               <Send className="w-4 h-4 text-luxe-accent" />
               Publish Now
             </button>
             <button 
               onClick={() => { onSchedule(); setShowPublishMenu(false); }}
-              className="w-full text-left px-4 py-3 text-sm text-foreground hover:bg-foreground/ flex items-center gap-3 transition-colors border-t border-foreground/"
+              className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 flex items-center gap-3 transition-colors border-t border-white/5"
             >
               <Clock className="w-4 h-4 text-blue-400" />
               Schedule...
             </button>
             <button 
               onClick={() => { onSaveDraft(); setShowPublishMenu(false); }}
-              className="w-full text-left px-4 py-3 text-sm text-foreground hover:bg-foreground/ flex items-center gap-3 transition-colors border-t border-foreground/"
+              className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 flex items-center gap-3 transition-colors border-t border-white/5"
             >
               <FileText className="w-4 h-4 text-yellow-400" />
               Save as Draft
             </button>
             <button 
               onClick={() => { onArchive(); setShowPublishMenu(false); }}
-              className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors border-t border-foreground/"
+              className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors border-t border-white/5"
             >
               <Archive className="w-4 h-4" />
               Archive

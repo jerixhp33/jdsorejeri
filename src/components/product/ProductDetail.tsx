@@ -224,7 +224,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
         <div className="space-y-4">
           {/* Main image — aspect ratio adapts to the actual image (A4, A3, square, etc.) */}
           <div
-            className="relative rounded-2xl overflow-hidden bg-card md:cursor-zoom-in"
+            className="relative rounded-2xl overflow-hidden bg-luxe-dark md:cursor-zoom-in"
             style={{
               aspectRatio: imgAspect ? String(imgAspect) : '4/5',
               maxHeight: '85vh',
@@ -269,7 +269,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                   exit={{ opacity: 0 }}
                   className="absolute inset-0 flex items-center justify-center"
                 >
-                  <span className="text-foreground/ text-8xl">✦</span>
+                  <span className="text-white/10 text-8xl">✦</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -279,14 +279,14 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
               <>
                 <button
                   onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-foreground/ text-foreground hover:bg-black/70 transition-all"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-black/70 transition-all"
                   aria-label="Previous image"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-foreground/ text-foreground hover:bg-black/70 transition-all"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-black/70 transition-all"
                   aria-label="Next image"
                 >
                   <ChevronRight className="w-5 h-5" />
@@ -295,13 +295,13 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             )}
 
             {/* Zoom hint */}
-            <div className="absolute top-3 right-3 p-2 rounded-full bg-black/40 backdrop-blur-sm text-foreground/">
+            <div className="absolute top-3 right-3 p-2 rounded-full bg-black/40 backdrop-blur-sm text-white/60">
               <ZoomIn className="w-4 h-4" />
             </div>
 
               {/* Image counter */}
               {images.length > 1 && (
-                <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-foreground/ text-xs z-10">
+                <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white/60 text-xs z-10">
                   {selectedImage + 1} / {images.length}
                 </div>
               )}
@@ -313,7 +313,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                     e.stopPropagation();
                     setShowTryOn(true);
                   }}
-                  className="absolute bottom-3 left-3 px-5 py-2.5 rounded-full bg-foreground/ backdrop-blur-md border border-foreground/ text-foreground text-sm font-semibold shadow-lg hover:bg-foreground/ hover:scale-105 active:scale-95 transition-all flex items-center gap-2 z-10"
+                  className="absolute bottom-3 left-3 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold shadow-lg hover:bg-white/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 z-10"
                 >
                   <Package className="w-4 h-4" />
                   See it on your wall
@@ -332,7 +332,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                       'flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all',
                       selectedImage === i
                         ? 'border-luxe-accent'
-                        : 'border-foreground/ hover:border-foreground/'
+                        : 'border-white/10 hover:border-white/30'
                     )}
                     aria-label={`View image ${i + 1}`}
                   >
@@ -374,7 +374,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             </div>
 
             {/* Name */}
-            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3 leading-tight">
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">
               {product.name}
             </h1>
 
@@ -389,12 +389,12 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                         'w-4 h-4',
                         i < Math.floor(averageRating)
                           ? 'text-luxe-accent fill-current'
-                          : 'text-foreground/'
+                          : 'text-white/20'
                       )}
                     />
                   ))}
                 </div>
-                <span className="text-foreground/ text-sm">
+                <span className="text-white/60 text-sm">
                   {averageRating.toFixed(1)} ({reviews.length} review{reviews.length !== 1 ? 's' : ''})
                 </span>
               </div>
@@ -402,11 +402,11 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6">
-              <span className="font-display text-3xl font-bold text-foreground">
+              <span className="font-display text-3xl font-bold text-white">
                 {formatCurrency(unitPrice)}
               </span>
               {(product.sizes && product.sizes.length > 0 && selectedSize) && (
-                <span className="text-foreground/ text-sm">for {selectedSize.label}</span>
+                <span className="text-white/40 text-sm">for {selectedSize.label}</span>
               )}
             </div>
 
@@ -422,7 +422,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                       <div className="space-y-5">
                         {v2Variants.options.map((opt: any) => (
                           <div key={opt.id}>
-                            <p className="text-foreground/ text-sm font-medium mb-3">
+                            <p className="text-white/70 text-sm font-medium mb-3">
                               Select {opt.name}
                             </p>
                             <div className="flex flex-wrap gap-2">
@@ -452,10 +452,10 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                                     className={cn(
                                       'flex flex-col items-center px-4 py-2.5 rounded-xl border text-sm font-medium transition-all',
                                       !combo
-                                        ? 'border-foreground/ text-foreground/ cursor-not-allowed hidden' // combination doesn't exist
+                                        ? 'border-white/5 text-white/10 cursor-not-allowed hidden' // combination doesn't exist
                                         : isSelected
                                           ? 'border-luxe-accent bg-luxe-accent/10 text-luxe-accent'
-                                          : 'border-foreground/ text-foreground/ hover:border-foreground/'
+                                          : 'border-white/15 text-white/70 hover:border-white/40'
                                     )}
                                   >
                                     <span>{val}</span>
@@ -477,10 +477,10 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                   // Fallback for legacy poster sizes
                   return (
                     <div>
-                      <p className="text-foreground/ text-sm font-medium mb-3">
+                      <p className="text-white/70 text-sm font-medium mb-3">
                         Select Option
                         {selectedSize && product.product_type === 'poster' && (
-                          <span className="text-foreground/ ml-2">
+                          <span className="text-white/40 ml-2">
                             ({selectedSize.width_cm} × {selectedSize.height_cm} cm)
                           </span>
                         )}
@@ -494,10 +494,10 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                             className={cn(
                               'flex flex-col items-center px-4 py-2.5 rounded-xl border text-sm font-medium transition-all',
                               size.stock === 0
-                                ? 'border-foreground/ text-foreground/ cursor-not-allowed'
+                                ? 'border-white/10 text-white/20 cursor-not-allowed'
                                 : selectedSize?.id === size.id
                                   ? 'border-luxe-accent bg-luxe-accent/10 text-luxe-accent'
-                                  : 'border-foreground/ text-foreground/ hover:border-foreground/'
+                                  : 'border-white/15 text-white/70 hover:border-white/40'
                             )}
                           >
                             <span>{size.label}</span>
@@ -522,10 +522,10 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                   <button 
                     onClick={handleWaitlist}
                     disabled={joiningWaitlist || waitlistJoined}
-                    className="w-full h-full flex items-center justify-center gap-2 rounded-xl font-semibold text-sm bg-foreground/ text-foreground hover:bg-foreground/ transition-all border border-foreground/"
+                    className="w-full h-full flex items-center justify-center gap-2 rounded-xl font-semibold text-sm bg-white/10 text-white hover:bg-white/20 transition-all border border-white/20"
                   >
                     {joiningWaitlist ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-foreground/ border-t-white animate-spin" />
+                      <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
                     ) : waitlistJoined ? (
                       <Check className="w-4 h-4 text-green-400" />
                     ) : (
@@ -550,12 +550,12 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                   <div className="w-full h-full flex items-center justify-between glass-card rounded-xl overflow-hidden border border-luxe-accent/50 bg-luxe-accent/5 shadow-[0_0_15px_rgba(200,169,110,0.1)]">
                     <button
                       onClick={() => updateQuantity(cartItems.find(i => i.product_id === product.id && ((product.sizes && product.sizes.length > 0) ? i.poster_size_id === selectedSize?.id : true))!.id, cartQuantity - 1)}
-                      className="h-full px-6 text-foreground hover:text-luxe-accent hover:bg-foreground/ active:scale-95 transition-all text-xl"
+                      className="h-full px-6 text-white hover:text-luxe-accent hover:bg-white/5 active:scale-95 transition-all text-xl"
                     >
                       −
                     </button>
                     <div className="flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-foreground text-base font-bold">{cartQuantity}</span>
+                      <span className="text-white text-base font-bold">{cartQuantity}</span>
                       <span className="text-luxe-accent/80 text-[10px] uppercase tracking-wider font-semibold -mt-1">In Cart</span>
                     </div>
                     <button
@@ -567,7 +567,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                         }
                       }}
                       disabled={cartQuantity >= dbStock}
-                      className="h-full px-6 text-foreground hover:text-luxe-accent hover:bg-foreground/ active:scale-95 transition-all text-xl disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      className="h-full px-6 text-white hover:text-luxe-accent hover:bg-white/5 active:scale-95 transition-all text-xl disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >
                       +
                     </button>
@@ -591,7 +591,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                   'flex-1 flex items-center justify-center gap-2 py-3 rounded-full border text-sm font-medium transition-all backdrop-blur-md',
                   wishlisted
                     ? 'border-red-500/40 bg-red-500/10 text-red-400'
-                    : 'border-foreground/ bg-foreground/ text-foreground/ hover:border-foreground/ hover:bg-foreground/ hover:text-foreground'
+                    : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:bg-white/10 hover:text-white'
                 )}
               >
                 <Heart className={cn('w-4 h-4', wishlisted && 'fill-current')} />
@@ -599,7 +599,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
               </button>
               <button
                 onClick={handleShare}
-                className="p-3 rounded-full border border-foreground/ bg-foreground/ backdrop-blur-md text-foreground/ hover:border-foreground/ hover:bg-foreground/ hover:text-foreground transition-all"
+                className="p-3 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-white/60 hover:border-white/20 hover:bg-white/10 hover:text-white transition-all"
                 aria-label="Share"
               >
                 <Share2 className="w-4 h-4" />
@@ -614,13 +614,13 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                   onClick={() => setOpenAccordion(openAccordion === 'description' ? null : 'description')}
                   className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
                 >
-                  <span className="font-semibold text-foreground">Description</span>
-                  <ChevronRight className={cn('w-4 h-4 transition-transform text-foreground/', openAccordion === 'description' && 'rotate-90 text-luxe-accent')} />
+                  <span className="font-semibold text-white">Description</span>
+                  <ChevronRight className={cn('w-4 h-4 transition-transform text-white/50', openAccordion === 'description' && 'rotate-90 text-luxe-accent')} />
                 </button>
                 <AnimatePresence>
                   {openAccordion === 'description' && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <div className="p-4 pt-0 text-foreground/ text-sm leading-relaxed">
+                      <div className="p-4 pt-0 text-white/55 text-sm leading-relaxed">
                         {product.description}
                       </div>
                     </motion.div>
@@ -634,8 +634,8 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                   onClick={() => setOpenAccordion(openAccordion === 'details' ? null : 'details')}
                   className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
                 >
-                  <span className="font-semibold text-foreground">Specifications</span>
-                  <ChevronRight className={cn('w-4 h-4 transition-transform text-foreground/', openAccordion === 'details' && 'rotate-90 text-luxe-accent')} />
+                  <span className="font-semibold text-white">Specifications</span>
+                  <ChevronRight className={cn('w-4 h-4 transition-transform text-white/50', openAccordion === 'details' && 'rotate-90 text-luxe-accent')} />
                 </button>
                 <AnimatePresence>
                   {openAccordion === 'details' && (
@@ -643,40 +643,40 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                       <div className="p-4 pt-0 grid grid-cols-2 gap-3">
                         {product.material && (
                           <div className="glass-card-sm p-3">
-                            <p className="text-foreground/ text-[11px] uppercase tracking-wide mb-0.5">Material</p>
-                            <p className="text-foreground text-sm font-medium">{product.material}</p>
+                            <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Material</p>
+                            <p className="text-white text-sm font-medium">{product.material}</p>
                           </div>
                         )}
                         {product.product_type === 'poster' && product.finish && (
                           <div className="glass-card-sm p-3">
-                            <p className="text-foreground/ text-[11px] uppercase tracking-wide mb-0.5">Finish</p>
-                            <p className="text-foreground text-sm font-medium capitalize">{product.finish}</p>
+                            <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Finish</p>
+                            <p className="text-white text-sm font-medium capitalize">{product.finish}</p>
                           </div>
                         )}
                         {product.product_type === 'poster' && product.orientation && (
                           <div className="glass-card-sm p-3">
-                            <p className="text-foreground/ text-[11px] uppercase tracking-wide mb-0.5">Orientation</p>
-                            <p className="text-foreground text-sm font-medium capitalize">{product.orientation}</p>
+                            <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Orientation</p>
+                            <p className="text-white text-sm font-medium capitalize">{product.orientation}</p>
                           </div>
                         )}
                         {product.product_type === 'earring' && product.color && (
                           <div className="glass-card-sm p-3">
-                            <p className="text-foreground/ text-[11px] uppercase tracking-wide mb-0.5">Color</p>
-                            <p className="text-foreground text-sm font-medium">{product.color}</p>
+                            <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Color</p>
+                            <p className="text-white text-sm font-medium">{product.color}</p>
                           </div>
                         )}
                         {product.product_type === 'earring' && product.weight_grams && (
                           <div className="glass-card-sm p-3">
-                            <p className="text-foreground/ text-[11px] uppercase tracking-wide mb-0.5">Weight</p>
-                            <p className="text-foreground text-sm font-medium">{product.weight_grams}g</p>
+                            <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">Weight</p>
+                            <p className="text-white text-sm font-medium">{product.weight_grams}g</p>
                           </div>
                         )}
                         {product.attributes && Object.entries(product.attributes)
                           .filter(([key, value]) => !key.startsWith('_') && typeof value !== 'object')
                           .map(([key, value]) => (
                           <div key={key} className="glass-card-sm p-3">
-                            <p className="text-foreground/ text-[11px] uppercase tracking-wide mb-0.5">{key}</p>
-                            <p className="text-foreground text-sm font-medium">{value as React.ReactNode}</p>
+                            <p className="text-white/30 text-[11px] uppercase tracking-wide mb-0.5">{key}</p>
+                            <p className="text-white text-sm font-medium">{value as React.ReactNode}</p>
                           </div>
                         ))}
                       </div>
@@ -691,26 +691,26 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                   onClick={() => setOpenAccordion(openAccordion === 'shipping' ? null : 'shipping')}
                   className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
                 >
-                  <span className="font-semibold text-foreground">Shipping & Returns</span>
-                  <ChevronRight className={cn('w-4 h-4 transition-transform text-foreground/', openAccordion === 'shipping' && 'rotate-90 text-luxe-accent')} />
+                  <span className="font-semibold text-white">Shipping & Returns</span>
+                  <ChevronRight className={cn('w-4 h-4 transition-transform text-white/50', openAccordion === 'shipping' && 'rotate-90 text-luxe-accent')} />
                 </button>
                 <AnimatePresence>
                   {openAccordion === 'shipping' && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                       <div className="p-4 pt-0 space-y-3">
-                        <div className="flex items-center gap-3 text-sm text-foreground/">
+                        <div className="flex items-center gap-3 text-sm text-white/50">
                           <Truck className="w-4 h-4 text-luxe-accent flex-shrink-0" />
                           Delivered across Tamil Nadu in 3–5 business days
                         </div>
-                        <div className="flex items-center gap-3 text-sm text-foreground/">
+                        <div className="flex items-center gap-3 text-sm text-white/50">
                           <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
                           Free delivery on orders above {formatCurrency(deliverySettings.threshold)}
                         </div>
-                        <div className="flex items-center gap-3 text-sm text-foreground/">
+                        <div className="flex items-center gap-3 text-sm text-white/50">
                           <Shield className="w-4 h-4 text-luxe-accent flex-shrink-0" />
                           Easy 7-day returns
                         </div>
-                        <div className="flex items-center gap-3 text-sm text-foreground/">
+                        <div className="flex items-center gap-3 text-sm text-white/50">
                           <Package className="w-4 h-4 text-luxe-accent flex-shrink-0" />
                           Securely packaged with premium materials
                         </div>
@@ -723,7 +723,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
 
             {/* Tags */}
             {product.tags && product.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-4 border-t border-foreground/">
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-white/10">
                 {product.tags.map((tag) => (
                   <span key={tag} className="badge-luxe text-xs">
                     #{tag}
@@ -735,9 +735,9 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
         </div>
 
         {/* Reviews Section */}
-        <div className="mt-20 pt-12 border-t border-foreground/">
+        <div className="mt-20 pt-12 border-t border-white/10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <h2 className="font-display text-2xl font-bold text-foreground">
+            <h2 className="font-display text-2xl font-bold text-white">
               Customer Reviews ({reviews.length})
             </h2>
             <button
@@ -754,7 +754,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             {/* Rating summary */}
             <div className="flex items-center gap-6 mb-10 p-6 glass-card">
               <div className="text-center">
-                <p className="font-display text-5xl font-bold text-foreground">
+                <p className="font-display text-5xl font-bold text-white">
                   {averageRating.toFixed(1)}
                 </p>
                 <div className="flex items-center gap-1 justify-center my-2">
@@ -765,12 +765,12 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                         'w-4 h-4',
                         i < Math.floor(averageRating)
                           ? 'text-luxe-accent fill-current'
-                          : 'text-foreground/'
+                          : 'text-white/20'
                       )}
                     />
                   ))}
                 </div>
-                <p className="text-foreground/ text-xs">{reviews.length} reviews</p>
+                <p className="text-white/40 text-xs">{reviews.length} reviews</p>
               </div>
             </div>
 
@@ -792,7 +792,7 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                         </span>
                       </div>
                       <div>
-                        <p className="text-foreground text-sm font-medium">
+                        <p className="text-white text-sm font-medium">
                           {(review.user as any)?.name || 'Verified Customer'}
                         </p>
                         {review.is_verified && (
@@ -809,17 +809,17 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                           key={i}
                           className={cn(
                             'w-3.5 h-3.5',
-                            i < review.rating ? 'text-luxe-accent fill-current' : 'text-foreground/'
+                            i < review.rating ? 'text-luxe-accent fill-current' : 'text-white/20'
                           )}
                         />
                       ))}
                     </div>
                   </div>
                   {review.title && (
-                    <p className="text-foreground text-sm font-medium mb-1">{review.title}</p>
+                    <p className="text-white text-sm font-medium mb-1">{review.title}</p>
                   )}
                   {review.body && (
-                    <p className="text-foreground/ text-sm leading-relaxed">{review.body}</p>
+                    <p className="text-white/55 text-sm leading-relaxed">{review.body}</p>
                   )}
                 </motion.div>
               ))}
@@ -827,11 +827,11 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
             </>
           ) : (
             <div className="glass-card p-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-foreground/ flex items-center justify-center mx-auto mb-4">
-                <Star className="w-8 h-8 text-foreground/" />
+              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                <Star className="w-8 h-8 text-white/20" />
               </div>
-              <h3 className="text-xl font-display font-medium text-foreground mb-2">No Reviews Yet</h3>
-              <p className="text-foreground/ mb-6 max-w-md mx-auto">
+              <h3 className="text-xl font-display font-medium text-white mb-2">No Reviews Yet</h3>
+              <p className="text-white/50 mb-6 max-w-md mx-auto">
                 Be the first to share your thoughts on {product.name}. Your feedback helps other customers make better choices!
               </p>
               <button

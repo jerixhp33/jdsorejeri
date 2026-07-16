@@ -120,29 +120,29 @@ export function SettingsView() {
 
   return (
     <div className="space-y-6 relative">
-      <h1 className="font-display text-2xl font-bold text-foreground">Account Settings</h1>
+      <h1 className="font-display text-2xl font-bold text-white">Account Settings</h1>
 
       {/* Account Information */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Shield className="w-4 h-4 text-luxe-accent" />
-          <h2 className="text-foreground font-semibold">Account Information</h2>
+          <h2 className="text-white font-semibold">Account Information</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="text-foreground/ text-xs uppercase tracking-wide mb-1 block">Name</label>
-            <p className="text-foreground text-sm p-3 rounded-xl bg-foreground/" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+            <label className="text-white/40 text-xs uppercase tracking-wide mb-1 block">Name</label>
+            <p className="text-white text-sm p-3 rounded-xl bg-white/5" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
               {profile?.name || '—'}
             </p>
           </div>
           <div>
-            <label className="text-foreground/ text-xs uppercase tracking-wide mb-1 block">Email</label>
-            <p className="text-foreground text-sm p-3 rounded-xl bg-foreground/" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+            <label className="text-white/40 text-xs uppercase tracking-wide mb-1 block">Email</label>
+            <p className="text-white text-sm p-3 rounded-xl bg-white/5" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
               {profile?.email || '—'}
             </p>
           </div>
         </div>
-        <p className="text-foreground/ text-xs mt-3">
+        <p className="text-white/30 text-xs mt-3">
           Profile information is managed through your Google account.
         </p>
       </motion.div>
@@ -152,10 +152,10 @@ export function SettingsView() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <Bell className="w-4 h-4 text-luxe-accent" />
-            <h2 className="text-foreground font-semibold">Notifications</h2>
+            <h2 className="text-white font-semibold">Notifications</h2>
           </div>
           {savingNotifs && (
-            <span className="text-xs text-foreground/ flex items-center gap-1.5">
+            <span className="text-xs text-white/40 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-luxe-accent animate-pulse" />
               Saving...
             </span>
@@ -165,8 +165,8 @@ export function SettingsView() {
           {NOTIF_ITEMS.map((item) => (
             <div key={item.key} className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
               <div>
-                <p className="text-foreground text-sm">{item.label}</p>
-                <p className="text-foreground/ text-xs">{item.sub}</p>
+                <p className="text-white text-sm">{item.label}</p>
+                <p className="text-white/40 text-xs">{item.sub}</p>
               </div>
               <button
                 type="button"
@@ -193,11 +193,11 @@ export function SettingsView() {
           {isSupported && !isSubscribed && (
             <div className="flex items-center justify-between py-4 mt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <div>
-                <p className="text-foreground text-sm flex items-center gap-2">
+                <p className="text-white text-sm flex items-center gap-2">
                   <Smartphone className="w-4 h-4 text-luxe-accent" />
                   Push Notifications
                 </p>
-                <p className="text-foreground/ text-xs">Receive updates on your device even when closed</p>
+                <p className="text-white/40 text-xs">Receive updates on your device even when closed</p>
               </div>
               <button
                 onClick={() => subscribe()}
@@ -210,11 +210,11 @@ export function SettingsView() {
           {isSupported && isSubscribed && (
             <div className="flex items-center justify-between py-4 mt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <div>
-                <p className="text-foreground text-sm flex items-center gap-2">
+                <p className="text-white text-sm flex items-center gap-2">
                   <Smartphone className="w-4 h-4 text-green-400" />
                   Push Notifications
                 </p>
-                <p className="text-foreground/ text-xs">Enabled on this device</p>
+                <p className="text-white/40 text-xs">Enabled on this device</p>
               </div>
               <button
                 onClick={() => unsubscribe()}
@@ -231,32 +231,32 @@ export function SettingsView() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Shield className="w-4 h-4 text-luxe-accent" />
-          <h2 className="text-foreground font-semibold">Privacy & Security</h2>
+          <h2 className="text-white font-semibold">Privacy & Security</h2>
         </div>
         <div className="space-y-4">
           <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <div>
-              <p className="text-foreground text-sm flex items-center gap-2">
-                <Download className="w-4 h-4 text-foreground/" />
+              <p className="text-white text-sm flex items-center gap-2">
+                <Download className="w-4 h-4 text-white/50" />
                 Export My Data
               </p>
-              <p className="text-foreground/ text-xs mt-1">Download a copy of your personal data.</p>
+              <p className="text-white/40 text-xs mt-1">Download a copy of your personal data.</p>
             </div>
             <button
               onClick={handleExportData}
               disabled={exporting}
-              className="px-4 py-1.5 rounded-xl bg-foreground/ hover:bg-foreground/ text-foreground text-xs font-medium border border-foreground/ transition-all disabled:opacity-50"
+              className="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-medium border border-white/10 transition-all disabled:opacity-50"
             >
               {exporting ? 'Exporting...' : 'Export'}
             </button>
           </div>
           <div className="flex items-center justify-between py-3">
             <div>
-              <p className="text-foreground text-sm flex items-center gap-2">
-                <MonitorOff className="w-4 h-4 text-foreground/" />
+              <p className="text-white text-sm flex items-center gap-2">
+                <MonitorOff className="w-4 h-4 text-white/50" />
                 Sign Out of All Devices
               </p>
-              <p className="text-foreground/ text-xs mt-1">Log out of every device except this one.</p>
+              <p className="text-white/40 text-xs mt-1">Log out of every device except this one.</p>
             </div>
             <button
               onClick={() => setConfirmModal({
@@ -266,7 +266,7 @@ export function SettingsView() {
                 type: 'signout'
               })}
               disabled={loading}
-              className="px-4 py-1.5 rounded-xl bg-foreground/ hover:bg-foreground/ text-foreground text-xs font-medium border border-foreground/ transition-all disabled:opacity-50"
+              className="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-medium border border-white/10 transition-all disabled:opacity-50"
             >
               {loading ? 'Processing...' : 'Sign Out All'}
             </button>
@@ -281,7 +281,7 @@ export function SettingsView() {
           <Trash2 className="w-4 h-4 text-red-400" />
           <h2 className="text-red-400 font-semibold">Danger Zone</h2>
         </div>
-        <p className="text-foreground/ text-sm mb-4">
+        <p className="text-white/50 text-sm mb-4">
           Once you delete your account, all your data — orders, wishlist, addresses — will be permanently removed.
         </p>
         <button 
@@ -312,37 +312,37 @@ export function SettingsView() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-sm bg-[#111] border border-foreground/ rounded-2xl shadow-2xl p-6"
+              className="relative w-full max-w-sm bg-[#111] border border-white/10 rounded-2xl shadow-2xl p-6"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-xl ${confirmModal.type === 'delete' ? 'bg-red-500/10 text-red-400' : 'bg-luxe-accent/10 text-luxe-accent'}`}>
                     <AlertTriangle className="w-5 h-5" />
                   </div>
-                  <h3 className="text-foreground font-bold text-lg font-display">{confirmModal.title}</h3>
+                  <h3 className="text-white font-bold text-lg font-display">{confirmModal.title}</h3>
                 </div>
-                <button onClick={closeModal} className="text-foreground/ hover:text-foreground transition-colors">
+                <button onClick={closeModal} className="text-white/40 hover:text-white transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               
-              <p className="text-foreground/ text-sm mb-6">{confirmModal.message}</p>
+              <p className="text-white/60 text-sm mb-6">{confirmModal.message}</p>
               
               {confirmModal.type === 'delete' && (
                 <div className="mb-6">
-                  <label className="block text-xs uppercase tracking-wide text-foreground/ mb-2">Type DELETE to confirm</label>
+                  <label className="block text-xs uppercase tracking-wide text-white/50 mb-2">Type DELETE to confirm</label>
                   <input 
                     type="text" 
                     value={deleteInput}
                     onChange={(e) => setDeleteInput(e.target.value)}
                     placeholder="DELETE"
-                    className="w-full bg-foreground/ border border-foreground/ rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-red-400/50 transition-colors"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-400/50 transition-colors"
                   />
                 </div>
               )}
               
               <div className="flex gap-3 justify-end">
-                <button onClick={closeModal} className="px-5 py-2.5 rounded-xl text-sm font-medium text-foreground/ hover:text-foreground hover:bg-foreground/ transition-colors">
+                <button onClick={closeModal} className="px-5 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-colors">
                   Cancel
                 </button>
                 <button 

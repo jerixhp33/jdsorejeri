@@ -28,16 +28,16 @@ export function AttributesEditor({ attributes, onChange }: AttributesEditorProps
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">Custom Attributes (Optional)</p>
-        <p className="text-foreground/ text-xs mb-3">Add any additional details like Color, Fabric, Size, etc.</p>
+        <p className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Custom Attributes (Optional)</p>
+        <p className="text-white/30 text-xs mb-3">Add any additional details like Color, Fabric, Size, etc.</p>
       </div>
 
       {entries.length > 0 && (
         <div className="grid grid-cols-1 gap-2 mb-4">
           {entries.map(([key, val]) => (
-            <div key={key} className="flex items-center gap-2 bg-foreground/ rounded-lg p-2 border border-foreground/">
-              <div className="flex-1 text-sm text-foreground/">
-                <span className="font-semibold text-foreground/">{key}:</span> {val}
+            <div key={key} className="flex items-center gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
+              <div className="flex-1 text-sm text-white/70">
+                <span className="font-semibold text-white/90">{key}:</span> {val}
               </div>
               <button
                 type="button"
@@ -54,7 +54,7 @@ export function AttributesEditor({ attributes, onChange }: AttributesEditorProps
 
       <div className="flex items-end gap-2">
         <div className="flex-1">
-          <label className="text-foreground/ text-[10px] uppercase tracking-wide mb-1 block">Name (e.g. Color)</label>
+          <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Name (e.g. Color)</label>
           <input
             type="text"
             value={newKey}
@@ -65,7 +65,7 @@ export function AttributesEditor({ attributes, onChange }: AttributesEditorProps
           />
         </div>
         <div className="flex-1">
-          <label className="text-foreground/ text-[10px] uppercase tracking-wide mb-1 block">Value (e.g. Red)</label>
+          <label className="text-white/50 text-[10px] uppercase tracking-wide mb-1 block">Value (e.g. Red)</label>
           <input
             type="text"
             value={newValue}
@@ -79,7 +79,7 @@ export function AttributesEditor({ attributes, onChange }: AttributesEditorProps
           type="button"
           onClick={handleAdd}
           disabled={!newKey.trim() || !newValue.trim()}
-          className="bg-foreground/ hover:bg-foreground/ text-foreground rounded-lg p-2 h-[38px] transition-colors disabled:opacity-50"
+          className="bg-white/10 hover:bg-white/20 text-white rounded-lg p-2 h-[38px] transition-colors disabled:opacity-50"
         >
           <Plus className="w-4 h-4" />
         </button>

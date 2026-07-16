@@ -234,7 +234,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-foreground">Broadcast</h1>
+        <h1 className="font-display text-3xl font-bold text-white">Broadcast</h1>
         <button
           onClick={() => setShowCompose(true)}
           className="btn-gold flex items-center gap-2 text-sm"
@@ -248,8 +248,8 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
       <div className="space-y-4">
         {campaigns.length === 0 ? (
           <div className="glass-card p-16 text-center">
-            <Mail className="w-10 h-10 text-foreground/ mx-auto mb-4" />
-            <p className="text-foreground/">No campaigns sent yet</p>
+            <Mail className="w-10 h-10 text-white/20 mx-auto mb-4" />
+            <p className="text-white/30">No campaigns sent yet</p>
           </div>
         ) : (
           campaigns.map((c, i) => (
@@ -266,9 +266,9 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                     <Mail className="w-4 h-4 text-luxe-accent" />
                   </div>
                   <div>
-                    <p className="text-foreground font-medium">{c.title}</p>
-                    <p className="text-foreground/ text-sm">{c.subject}</p>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-foreground/">
+                    <p className="text-white font-medium">{c.title}</p>
+                    <p className="text-white/50 text-sm">{c.subject}</p>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-white/30">
                       <span className="flex items-center gap-1">
                         <Users className="w-3 h-3" />
                         {c.sent_count} sent
@@ -293,13 +293,13 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                     className={cn(
                       'badge-luxe text-xs',
                       c.status === 'sent' && '!bg-green-500/20 !text-green-400 !border-green-500/30',
-                      c.status === 'draft' && '!bg-foreground/ !text-foreground/',
+                      c.status === 'draft' && '!bg-white/5 !text-white/40',
                       c.status === 'scheduled' && '!bg-blue-500/20 !text-blue-400 !border-blue-500/30'
                     )}
                   >
                     {c.status}
                   </span>
-                  <p className="text-foreground/ text-xs mt-2">
+                  <p className="text-white/30 text-xs mt-2">
                     {c.sent_at ? formatDate(c.sent_at) : formatDate(c.created_at)}
                   </p>
                 </div>
@@ -317,12 +317,12 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
             onClick={() => setShowCompose(false)}
           />
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto glass-card">
-            <div className="sticky top-0 p-5 border-b border-foreground/ bg-card/90 backdrop-blur">
+            <div className="sticky top-0 p-5 border-b border-white/10 bg-luxe-dark/90 backdrop-blur">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-foreground font-semibold">Compose Message</h2>
+                <h2 className="text-white font-semibold">Compose Message</h2>
                 <button
                   onClick={() => setShowCompose(false)}
-                  className="text-foreground/ hover:text-foreground text-xl"
+                  className="text-white/50 hover:text-white text-xl"
                 >
                   ×
                 </button>
@@ -332,7 +332,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                   onClick={() => setComposeType('email')}
                   className={cn(
                     "px-4 py-2 text-sm rounded-lg transition-all",
-                    composeType === 'email' ? "bg-luxe-accent text-black font-semibold" : "text-foreground/ hover:bg-foreground/"
+                    composeType === 'email' ? "bg-luxe-accent text-black font-semibold" : "text-white/50 hover:bg-white/5"
                   )}
                 >
                   Email Campaign
@@ -341,7 +341,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                   onClick={() => setComposeType('push')}
                   className={cn(
                     "px-4 py-2 text-sm rounded-lg transition-all",
-                    composeType === 'push' ? "bg-luxe-accent text-black font-semibold" : "text-foreground/ hover:bg-foreground/"
+                    composeType === 'push' ? "bg-luxe-accent text-black font-semibold" : "text-white/50 hover:bg-white/5"
                   )}
                 >
                   Push Notification
@@ -354,13 +354,13 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                 <>
                   {/* Email Templates */}
                   <div>
-                    <p className="text-foreground/ text-xs uppercase tracking-wide mb-2">Quick Templates</p>
+                    <p className="text-white/50 text-xs uppercase tracking-wide mb-2">Quick Templates</p>
                 <div className="flex gap-2 flex-wrap">
                   {EMAIL_TEMPLATES.map((t) => (
                     <button
                       key={t.name}
                       onClick={() => applyTemplate(t)}
-                      className="badge-luxe hover:bg-foreground/ transition-all cursor-pointer"
+                      className="badge-luxe hover:bg-white/20 transition-all cursor-pointer"
                     >
                       {t.name}
                     </button>
@@ -369,7 +369,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
               </div>
 
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
                   Campaign Title *
                 </label>
                 <input
@@ -381,7 +381,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
               </div>
 
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
                   Email Subject *
                 </label>
                 <input
@@ -393,7 +393,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
               </div>
 
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
                   HTML Body *
                 </label>
                 <textarea
@@ -409,7 +409,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
               ) : (
                 <>
                   <div>
-                    <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
                       Notification Title *
                     </label>
                     <input
@@ -421,7 +421,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                   </div>
 
                   <div>
-                    <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
                       Message Body *
                     </label>
                     <textarea
@@ -434,7 +434,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                   </div>
                   
                   <div>
-                    <label className="text-foreground/ text-xs uppercase tracking-wide mb-1.5 block">
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">
                       Redirect URL (Optional)
                     </label>
                     <input
@@ -449,7 +449,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
 
               {/* Recipients */}
               <div>
-                <label className="text-foreground/ text-xs uppercase tracking-wide mb-2 block">
+                <label className="text-white/50 text-xs uppercase tracking-wide mb-2 block">
                   Recipients
                 </label>
                 <label className="flex items-center gap-2 mb-3 cursor-pointer">
@@ -462,17 +462,17 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                     }}
                     className="w-4 h-4 accent-luxe-accent"
                   />
-                  <span className="text-foreground/ text-sm">
+                  <span className="text-white/70 text-sm">
                     Send to all users ({users.length})
                   </span>
                 </label>
 
                 {!(composeType === 'email' ? form.target_all : pushForm.target_all) && (
-                  <div className="max-h-48 overflow-y-auto space-y-1 border border-foreground/ rounded-xl p-3">
+                  <div className="max-h-48 overflow-y-auto space-y-1 border border-white/10 rounded-xl p-3">
                     {users.map((user) => (
                       <label
                         key={user.id}
-                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-foreground/ cursor-pointer"
+                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer"
                       >
                         <input
                           type="checkbox"
@@ -483,8 +483,8 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
                           onChange={() => toggleUser(user.id)}
                           className="w-3.5 h-3.5 accent-luxe-accent"
                         />
-                        <span className="text-foreground/ text-sm">{user.name}</span>
-                        <span className="text-foreground/ text-xs">{user.email}</span>
+                        <span className="text-white/70 text-sm">{user.name}</span>
+                        <span className="text-white/30 text-xs">{user.email}</span>
                       </label>
                     ))}
                   </div>
@@ -494,15 +494,15 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
               {/* Preview */}
               {composeType === 'email' && form.html_body && (
                 <div>
-                  <p className="text-foreground/ text-xs uppercase tracking-wide mb-2">Preview</p>
+                  <p className="text-white/50 text-xs uppercase tracking-wide mb-2">Preview</p>
                   <div
-                    className="border border-foreground/ rounded-xl overflow-hidden"
+                    className="border border-white/10 rounded-xl overflow-hidden"
                     dangerouslySetInnerHTML={{ __html: form.html_body }}
                   />
                 </div>
               )}
 
-              <div className="flex gap-3 pt-3 border-t border-foreground/">
+              <div className="flex gap-3 pt-3 border-t border-white/10">
                 <button
                   onClick={() => setShowCompose(false)}
                   className="btn-luxe-outline flex-1 text-sm"
