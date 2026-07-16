@@ -64,7 +64,7 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
     : (subTotalValue + shippingAmount + taxAmount - discountAmount);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4 font-sans print:bg-white print:p-0">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center pt-10 pb-28 md:py-10 px-4 font-sans print:bg-white print:p-0">
       
       {/* Controls Container (Always OUTSIDE the PDF target) */}
       <div className="w-full max-w-3xl mb-6 print:hidden flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
