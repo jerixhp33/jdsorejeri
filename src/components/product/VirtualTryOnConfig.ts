@@ -24,6 +24,7 @@ export interface FrameStyle {
 }
 
 export const FRAME_STYLES: FrameStyle[] = [
+  { id: 'frameless', name: 'Frameless', css: 'border-none' },
   { id: 'minimal-black', name: 'Minimal Black', css: 'border-[4px] border-[#1a1a1a] bg-[#1a1a1a]' },
   { id: 'minimal-white', name: 'Minimal White', css: 'border-[4px] border-[#f5f5f5] bg-[#f5f5f5]' },
   { id: 'natural-oak', name: 'Natural Oak', css: 'border-[8px] border-[#c19a6b] bg-[#c19a6b] shadow-[inset_0_0_10px_rgba(0,0,0,0.2)]' },

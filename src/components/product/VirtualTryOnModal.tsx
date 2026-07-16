@@ -349,26 +349,26 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           centerY = (wallBounds.y + wallBounds.height / 2) * 100 - 50;
           // Scale posters down slightly if wall is small
           scaleMult = Math.min(1.2, Math.max(0.4, wallBounds.width * 1.5));
-          toast.success('Wall boundary detected via Edge ML!');
+          toast.success('Wall layout automatically generated.');
           
           // Reset perspective when ML bounds are found
           setIsPerspectiveMode(false);
           setWallCorners(null);
         } else {
-          toast.error('AI could not detect a wall perfectly, using full canvas.');
+          toast.error('Could not detect a wall perfectly, using full canvas.');
         }
       }
 
       // 4. Build Layout
       const newGallery: RenderedPoster[] = [];
-      const frameStyle = FRAME_STYLES[Math.floor(Math.random() * FRAME_STYLES.length)];
+      const frameStyle = FRAME_STYLES[0]; // Default to frameless
       
       // Base scaling variables
       const baseHeroScale = Math.random() * (0.40 - 0.34) + 0.34;
-      const baseSuppScale = Math.random() * (0.21 - 0.17) + 0.17;
+      const baseSuppScale = Math.random() * (0.45 - 0.35) + 0.35; // Doubled size for sub-images
       
       layout.posters.forEach((pos, idx) => {
-        const rotation = (Math.random() * 8) - 4;
+        const rotation = 0; // Perfectly straight
         if (pos.isHero) {
           newGallery.push({
             id: 'hero-' + Date.now(),
@@ -451,7 +451,9 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     setSaving(true);
     try {
       const handles = document.getElementById('perspective-handles');
+      const navbar = document.getElementById('bottom-navbar');
       if (handles) handles.style.display = 'none';
+      if (navbar) navbar.style.display = 'none';
 
       const dataUrl = await toJpeg(containerRef.current, {
         quality: 0.9,
@@ -460,6 +462,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       });
 
       if (handles) handles.style.display = 'block';
+      if (navbar) navbar.style.display = 'flex';
 
       const link = document.createElement('a');
       link.href = dataUrl;
@@ -511,6 +514,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          ref={containerRef}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -546,7 +550,6 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           {/* Main Viewport (Full Screen) */}
           <div 
             className="flex-1 relative z-10 flex items-center justify-center min-h-0" 
-            ref={containerRef}
             onPointerDown={() => setActivePosterId(null)}
           >
 
@@ -713,23 +716,28 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
             </div>
 
             {/* Elegant Floating Transparent Navbar */}
-            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-4 px-4 py-3 rounded-full backdrop-blur-xl bg-black/50 border border-white/20 shadow-2xl z-[110] w-[95%] max-w-[800px] justify-between overflow-x-auto">
+            <div id="bottom-navbar" className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-4 px-4 py-2 rounded-[2rem] backdrop-blur-2xl bg-black/60 border border-white/10 shadow-2xl z-[110] w-[95%] max-w-[800px] justify-between overflow-x-auto">
               
               {/* Close Button */}
               <button 
                 onClick={handleBack}
-                className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white/80 bg-white/5 hover:text-white hover:bg-white/20 active:scale-95 transition-all"
+                className="flex flex-col items-center justify-center gap-1 w-14 shrink-0 text-white/60 hover:text-white transition-colors"
                 title="Close"
               >
-                <X className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 active:scale-95 transition-transform">
+                  <X className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-medium tracking-wide">Close</span>
               </button>
 
-              <div className="w-px h-8 bg-white/20 shrink-0" />
+              <div className="w-px h-8 bg-white/10 shrink-0" />
 
               {/* Upload Wall */}
-              <label className="flex items-center gap-2 px-4 py-2 shrink-0 rounded-full bg-white/5 text-white/80 hover:text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer">
-                <Upload className="w-4 h-4" />
-                <span className="text-sm font-semibold hidden md:inline">Upload Wall</span>
+              <label className="flex flex-col items-center justify-center gap-1 w-14 shrink-0 text-white/60 hover:text-white transition-colors cursor-pointer">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 active:scale-95 transition-transform">
+                  <Upload className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-medium tracking-wide">Upload</span>
                 <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
               </label>
 
@@ -737,85 +745,99 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
               <button 
                 onClick={handleAutoDesign}
                 disabled={isAutoDesigning}
-                className="flex items-center gap-2 px-4 py-2 shrink-0 rounded-full bg-luxe-accent/10 border border-luxe-accent/30 text-luxe-accent font-bold hover:bg-luxe-accent/20 active:scale-95 transition-all disabled:opacity-50"
+                className="flex flex-col items-center justify-center gap-1 w-16 shrink-0 text-luxe-accent/80 hover:text-luxe-accent transition-colors disabled:opacity-50"
                 title="Auto Design"
               >
-                {isAutoDesigning ? (
-                  <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4" />
-                )}
-                <span className="text-sm hidden md:inline">Auto Design</span>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-luxe-accent/10 border border-luxe-accent/20 active:scale-95 transition-transform">
+                  {isAutoDesigning ? (
+                    <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4" />
+                  )}
+                </div>
+                <span className="text-[10px] font-bold tracking-wide">Design</span>
               </button>
               
-              <div className="w-px h-8 bg-white/20 shrink-0 hidden md:block" />
+              <div className="w-px h-8 bg-white/10 shrink-0 hidden md:block" />
 
               {/* Zoom & Warp */}
-              <div className="flex items-center gap-1 shrink-0 hidden md:flex">
+              <div className="items-center gap-2 shrink-0 hidden md:flex">
                 <button 
                   onClick={() => setGlobalScale(s => Math.max(0.4, s - 0.1))}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 active:scale-95 transition-all"
+                  className="flex flex-col items-center justify-center gap-1 w-14 text-white/60 hover:text-white transition-colors"
                 >
-                  <ZoomOut className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 active:scale-95 transition-transform">
+                    <ZoomOut className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-medium tracking-wide">Zoom Out</span>
                 </button>
                 <button 
                   onClick={() => setGlobalScale(s => Math.min(2.5, s + 0.1))}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 active:scale-95 transition-all"
+                  className="flex flex-col items-center justify-center gap-1 w-14 text-white/60 hover:text-white transition-colors"
                 >
-                  <ZoomIn className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 active:scale-95 transition-transform">
+                    <ZoomIn className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-medium tracking-wide">Zoom In</span>
                 </button>
                 <button 
                   onClick={togglePerspectiveMode}
-                  className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                    isPerspectiveMode ? "text-black bg-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" : "text-white/80 hover:text-white hover:bg-white/20 active:scale-95"
-                  )}
+                  className="flex flex-col items-center justify-center gap-1 w-14 text-white/60 hover:text-white transition-colors"
                   title="3D Perspective Warp"
                 >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 7l8-4 8 4-8 4-8-4z" />
-                    <path d="M3 17l8 4 8-4M3 12l8 4 8-4" />
-                  </svg>
+                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center active:scale-95 transition-transform", isPerspectiveMode ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]" : "bg-white/5")}>
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 7l8-4 8 4-8 4-8-4z" />
+                      <path d="M3 17l8 4 8-4M3 12l8 4 8-4" />
+                    </svg>
+                  </div>
+                  <span className="text-[10px] font-medium tracking-wide">3D Warp</span>
                 </button>
               </div>
               
-              <div className="w-px h-8 bg-white/20 shrink-0" />
+              <div className="w-px h-8 bg-white/10 shrink-0" />
               
-              {/* Save & Share */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button 
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="w-10 h-10 md:w-auto md:px-4 md:py-2 flex items-center justify-center gap-2 rounded-full bg-white/10 text-white font-semibold hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
-                  title="Save Photo"
-                >
+              {/* Save */}
+              <button 
+                onClick={handleSave}
+                disabled={saving}
+                className="flex flex-col items-center justify-center gap-1 w-14 shrink-0 text-white/60 hover:text-white transition-colors disabled:opacity-50"
+                title="Save Photo"
+              >
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 active:scale-95 transition-transform">
                   {saving ? <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" /> : <Download className="w-4 h-4" />}
-                  <span className="hidden md:inline text-sm">Save</span>
-                </button>
-                <button 
-                  onClick={handleShare}
-                  disabled={sharing}
-                  className="w-10 h-10 md:w-auto md:px-4 md:py-2 flex items-center justify-center gap-2 rounded-full bg-white/10 text-white font-semibold hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
-                  title="Share Gallery"
-                >
+                </div>
+                <span className="text-[10px] font-medium tracking-wide">Save</span>
+              </button>
+              
+              {/* Share */}
+              <button 
+                onClick={handleShare}
+                disabled={sharing}
+                className="flex flex-col items-center justify-center gap-1 w-14 shrink-0 text-white/60 hover:text-white transition-colors disabled:opacity-50"
+                title="Share Gallery"
+              >
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 active:scale-95 transition-transform">
                   {sharing ? <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" /> : <Share2 className="w-4 h-4" />}
-                  <span className="hidden md:inline text-sm">Share</span>
-                </button>
-              </div>
+                </div>
+                <span className="text-[10px] font-medium tracking-wide">Share</span>
+              </button>
 
               {/* Add to Cart */}
               <button 
                 onClick={handleAddToCart}
                 disabled={addingToCart}
-                className="w-10 h-10 md:w-auto md:px-4 md:py-2 shrink-0 flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-luxe-accent to-[#d4b982] text-black font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-70 shadow-[0_0_15px_rgba(200,169,110,0.3)]"
+                className="flex flex-col items-center justify-center gap-1 w-16 shrink-0 text-[#d4b982]/80 hover:text-[#d4b982] transition-colors disabled:opacity-50"
                 title="Add all to Cart"
               >
-                {addingToCart ? (
-                  <div className="w-4 h-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-                ) : (
-                  <ShoppingCart className="w-4 h-4" />
-                )}
-                <span className="hidden md:inline text-sm">Buy All</span>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-[#d4b982]/20 to-transparent border border-[#d4b982]/30 active:scale-95 transition-transform">
+                  {addingToCart ? (
+                    <div className="w-4 h-4 rounded-full border-2 border-[#d4b982]/30 border-t-[#d4b982] animate-spin" />
+                  ) : (
+                    <ShoppingCart className="w-4 h-4" />
+                  )}
+                </div>
+                <span className="text-[10px] font-bold tracking-wide">Buy All</span>
               </button>
             </div>
           </div>
