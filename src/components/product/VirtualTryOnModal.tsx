@@ -81,9 +81,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       const sizeId = currentProduct.sizes?.[0]?.id;
       const price = currentProduct.sizes?.[0]?.price || currentProduct.price || 0;
       await addItem(currentProduct.id, price, 1, sizeId);
-      toast.success(`Added ${currentProduct.name} to your cart!`);
+      // Removed toast to prevent duplicate notifications
     } catch (err) {
-      toast.error('Failed to add item to cart.');
+      console.error(err);
+      // Error toast is handled by addItem in CartContext
     } finally {
       setAddingToCart(false);
     }
@@ -221,19 +222,30 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
               {/* Room Actions */}
               <div className="space-y-4">
                 <h5 className="text-white/70 text-xs font-bold uppercase tracking-widest">Environment Canvas</h5>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   <button 
                     onClick={cycleCanvas}
-                    className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-luxe-accent/50 active:scale-95 transition-all group"
+                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-luxe-accent/50 active:scale-95 transition-all group"
                   >
                     <RefreshCw className="w-5 h-5 text-white/60 group-hover:text-luxe-accent transition-colors" />
-                    <span className="text-xs font-medium text-white/80">Change Room</span>
+                    <span className="text-[10px] font-medium text-white/80 text-center">Change Room</span>
                   </button>
-                  <label className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-luxe-accent/50 active:scale-95 transition-all group cursor-pointer">
+                  <label className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-luxe-accent/50 active:scale-95 transition-all group cursor-pointer">
                     <Upload className="w-5 h-5 text-white/60 group-hover:text-luxe-accent transition-colors" />
-                    <span className="text-xs font-medium text-white/80">Upload Wall</span>
+                    <span className="text-[10px] font-medium text-white/80 text-center">Upload Wall</span>
                     <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
                   </label>
+                  <button 
+                    onClick={() => {
+                      cycleCanvas();
+                      setGlobalScale(Math.random() * (1.5 - 0.7) + 0.7);
+                      toast.success('Auto Design applied!');
+                    }}
+                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-luxe-accent/10 border border-luxe-accent/30 hover:bg-luxe-accent/20 active:scale-95 transition-all group"
+                  >
+                    <Sparkles className="w-5 h-5 text-luxe-accent" />
+                    <span className="text-[10px] font-bold text-luxe-accent text-center">Auto Design</span>
+                  </button>
                 </div>
               </div>
 
