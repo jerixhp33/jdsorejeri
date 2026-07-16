@@ -161,7 +161,6 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
       hasVariants ? selectedSize?.id : undefined
     );
     setAddingToCart(false);
-    toast.success('Added to Cart');
   };
 
   const handleWaitlist = async () => {
