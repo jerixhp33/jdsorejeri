@@ -35,41 +35,9 @@ export function DashboardSidebar() {
 
   return (
     <>
-      {/* ── Mobile: horizontal tab bar ── */}
-      <div className="md:hidden print:hidden">
-        {/* Back button */}
-        <div className="flex items-center mb-4">
-          <Link prefetch={true} href="/" className="btn-glass !py-2 !px-4 text-xs group">
-            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Back to Home
-          </Link>
-        </div>
-        {/* Profile strip */}
-        {profile && (
-          <div className="flex items-center gap-3 px-1 py-2 mb-4">
-            {profile.profile_picture ? (
-              <Image src={profile.profile_picture} alt={profile.name} width={40} height={40} className="rounded-full flex-shrink-0 ring-2 ring-white/10" />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-luxe-accent/20 border border-luxe-accent/30 flex items-center justify-center flex-shrink-0 ring-2 ring-white/10">
-                <span className="text-luxe-accent text-sm font-bold">{getInitials(profile.name)}</span>
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="text-white font-semibold text-sm truncate">{profile.name}</p>
-              <p className="text-white/40 text-xs truncate">{profile.email}</p>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="ml-auto flex-shrink-0 p-2 rounded-xl text-red-400 bg-red-500/5 hover:bg-red-500/15 border border-red-500/10 transition-all"
-              aria-label="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {/* Scrollable tab strip (Glassmorphism) */}
-        <div className="flex gap-1 overflow-x-auto no-scrollbar p-1.5 mb-2 bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl">
+      {/* ── Mobile: Fixed Bottom Navigation ── */}
+      <div className="md:hidden print:hidden fixed bottom-6 left-0 right-0 z-[100] flex justify-center pointer-events-none">
+        <div className="flex gap-1 overflow-x-auto no-scrollbar p-1.5 bg-white/20 backdrop-blur-xl border border-white/30 rounded-[2rem] shadow-2xl pointer-events-auto max-w-[90vw]">
           {NAV_ITEMS.map((item) => {
             const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
@@ -78,21 +46,21 @@ export function DashboardSidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-[11px] font-medium transition-all whitespace-nowrap flex-shrink-0 min-w-[64px]',
+                  'relative flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-full transition-all duration-200 active:scale-95 flex-shrink-0',
                   isActive
-                    ? 'bg-white/[0.08] text-white shadow-sm border border-white/5'
-                    : 'text-white/40 hover:text-white hover:bg-white/5 border border-transparent'
+                    ? 'bg-white/20 text-white'
+                    : 'text-white/70 hover:text-white'
                 )}
               >
                 <div className="relative">
-                  <item.icon className={cn("w-4 h-4 mb-0.5 transition-colors", isActive ? "text-luxe-accent" : "")} />
+                  <item.icon className="w-5 h-5 mb-0.5" strokeWidth={isActive ? 2.5 : 2} />
                   {item.href === '/dashboard/notifications' && unreadCount > 0 && (
-                    <span className="absolute -top-1.5 -right-2 w-3.5 h-3.5 bg-luxe-accent rounded-full text-black text-[8px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(200,169,110,0.5)]">
+                    <span className="absolute -top-1.5 -right-2 w-3.5 h-3.5 bg-white text-black rounded-full text-[8px] font-bold flex items-center justify-center shadow-sm">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
                 </div>
-                {item.label}
+                <span className="text-[9px] font-medium tracking-wide">{item.label}</span>
               </Link>
             );
           })}

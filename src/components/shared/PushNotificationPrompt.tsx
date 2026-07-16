@@ -12,9 +12,6 @@ export function PushNotificationPrompt() {
   const [isSubscribing, setIsSubscribing] = useState(false);
 
   useEffect(() => {
-    // We only want to show this in standalone mode (after app install)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    if (!isStandalone) return;
 
     // Check if notifications are supported and we're not already subscribed
     if (!isSupported || isSubscribed) return;

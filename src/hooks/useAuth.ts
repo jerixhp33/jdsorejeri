@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 import type { User } from '@supabase/supabase-js';
 import type { UserProfile } from '@/types';
 
@@ -48,6 +49,11 @@ export function useAuth(): AuthState {
       async (_event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
+          if (_event === 'SIGNED_IN') {
+            const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'there';
+            // Only show if we haven't just refreshed the page. If it's a true login, it's SIGNED_IN.
+            toast.success(`Welcome ${name} 👋`, { duration: 4000 });
+          }
           await fetchProfile();
         } else {
           setProfile(null);

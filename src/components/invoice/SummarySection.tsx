@@ -10,7 +10,7 @@ export function SummarySection({ order }: SummarySectionProps) {
   const taxAmount = Number(order.tax || 0);
   const shippingAmount = Number(order.shipping_cost ?? order.delivery_charge ?? 0);
   
-  const subTotalValue = Number(order.total) > 0 ? Number(order.total) : itemsTotal;
+  const subTotalValue = itemsTotal;
   const grandTotalValue = Number(order.grand_total) > 0 
     ? Number(order.grand_total) 
     : (subTotalValue + shippingAmount + taxAmount - discountAmount);

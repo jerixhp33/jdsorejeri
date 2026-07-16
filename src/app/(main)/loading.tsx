@@ -1,30 +1,31 @@
+import { JDLogo } from '@/components/shared/JDLogo';
+
 export default function HomeLoading() {
   return (
-    <div className="">
-      {/* Hero banner skeleton */}
-      <div className="w-full h-[60vh] skeleton-shimmer bg-white/5 rounded-2xl mb-8" />
-      {/* Section title */}
-      <div className="h-8 skeleton-shimmer bg-white/5 rounded w-48 mx-auto mb-6" />
-      {/* Product grid - 4 cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 mb-12">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="space-y-3">
-            <div className="aspect-[3/4] skeleton-shimmer bg-white/5 rounded-xl" />
-            <div className="h-4 skeleton-shimmer bg-white/5 rounded w-3/4" />
-            <div className="h-4 skeleton-shimmer bg-white/5 rounded w-1/2" />
-          </div>
-        ))}
-      </div>
-      {/* Another section */}
-      <div className="h-8 skeleton-shimmer bg-white/5 rounded w-48 mx-auto mb-6" />
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="space-y-3">
-            <div className="aspect-[3/4] skeleton-shimmer bg-white/5 rounded-xl" />
-            <div className="h-4 skeleton-shimmer bg-white/5 rounded w-3/4" />
-            <div className="h-4 skeleton-shimmer bg-white/5 rounded w-1/2" />
-          </div>
-        ))}
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden">
+      {/* Soft ambient glow */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full pointer-events-none animate-pulse"
+        style={{ background: 'radial-gradient(circle, rgba(200,169,110,0.06) 0%, transparent 70%)' }}
+      />
+
+      {/* Center content */}
+      <div className="relative z-10 flex flex-col items-center gap-8">
+        {/* Logo with pulse ring */}
+        <div className="relative flex items-center justify-center">
+          <div className="absolute rounded-full border border-luxe-accent/20 animate-ping" style={{ width: 80, height: 80, animationDuration: '2s' }} />
+          <JDLogo size={56} />
+        </div>
+
+        {/* Brand name */}
+        <div className="text-center">
+          <p className="font-display text-2xl font-bold tracking-widest text-white">
+            JD Store
+          </p>
+          <p className="text-white/30 text-[11px] tracking-[0.3em] uppercase mt-2 animate-pulse">
+            Loading Experience...
+          </p>
+        </div>
       </div>
     </div>
   );

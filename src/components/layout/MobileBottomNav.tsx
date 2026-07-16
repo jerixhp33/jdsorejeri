@@ -43,8 +43,8 @@ export function MobileBottomNav() {
     };
   }, [scrollTimeout]);
 
-  // Don't show bottom nav on desktop, checkout, or admin routes
-  if (pathname.includes('/checkout') || pathname.includes('/admin')) {
+  // Don't show bottom nav on desktop, checkout, admin, or dashboard routes
+  if (pathname.includes('/checkout') || pathname.includes('/admin') || pathname.includes('/dashboard')) {
     return null;
   }
 
@@ -57,7 +57,7 @@ export function MobileBottomNav() {
   return (
     <div 
       className={cn(
-        "md:hidden fixed bottom-6 left-0 right-0 z-[100] flex justify-center transition-all duration-300 ease-in-out pointer-events-none",
+        "mobile-bottom-nav-container md:hidden fixed bottom-6 left-0 right-0 z-[100] flex justify-center transition-all duration-300 ease-in-out pointer-events-none",
         isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
       )}
     >

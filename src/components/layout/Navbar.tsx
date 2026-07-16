@@ -142,6 +142,8 @@ export function Navbar({ categories = [] }: NavbarProps) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [otherProductsOpen, setOtherProductsOpen] = useState(false);
+  const [mobileOtherProductsOpen, setMobileOtherProductsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
@@ -161,6 +163,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
     setNotifOpen(false);
     setMobileOpen(false);
     setSearchOpen(false);
+    setOtherProductsOpen(false);
   }, [pathname]);
 
   // Fast database search with debounce
@@ -220,14 +223,19 @@ export function Navbar({ categories = [] }: NavbarProps) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [searchOpen]);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll and add class when mobile menu is open
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.classList.add('sidebar-open');
     } else {
       document.body.style.overflow = '';
+      document.body.classList.remove('sidebar-open');
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => { 
+      document.body.style.overflow = '';
+      document.body.classList.remove('sidebar-open');
+    };
   }, [mobileOpen]);
 
   // Close notif dropdown on outside click
@@ -297,7 +305,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
         <div className="nav-edge-light" />
         
         <div className="px-4 sm:px-6 relative z-10">
-          <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
+          <div className="flex items-center justify-between h-12 sm:h-14 md:h-16">
             {/* Logo */}
             <Link prefetch={true} href="/" className="flex items-center gap-2 group" aria-label="JD Store home">
               <JDLogo size={32} />
@@ -308,21 +316,50 @@ export function Navbar({ categories = [] }: NavbarProps) {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  suppressHydrationWarning
-                  className={cn(
-                    'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
-                    pathname === link.href
-                      ? 'text-white bg-white/10'
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
-                  )}
-                >
-                  {link.label}
+                <Link prefetch={true} href="/" className={cn("nav-link", pathname === '/' && "active")}>
+                  Home
                 </Link>
-              ))}
+                {dynamicCategoryLinks.map((link) => {
+                  const isMain = link.href.includes('poster') || link.href.includes('earring');
+                  if (isMain) {
+                    return (
+                      <Link key={link.href} prefetch={true} href={link.href} className={cn("nav-link", pathname === link.href && "active")}>
+                        {link.label}
+                      </Link>
+                    );
+                  }
+                  return null;
+                })}
+                
+                {/* Other Products Dropdown */}
+                {dynamicCategoryLinks.some(l => !l.href.includes('poster') && !l.href.includes('earring')) && (
+                  <div className="relative group" onMouseEnter={() => setOtherProductsOpen(true)} onMouseLeave={() => setOtherProductsOpen(false)}>
+                    <button className={cn("nav-link flex items-center gap-1", otherProductsOpen && "text-white")}>
+                      Other Products <ChevronDown className="w-3 h-3" />
+                    </button>
+                    <AnimatePresence>
+                      {otherProductsOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute top-full left-0 mt-2 w-48 bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl"
+                        >
+                          {dynamicCategoryLinks.filter(l => !l.href.includes('poster') && !l.href.includes('earring')).map((link) => (
+                            <Link key={link.href} prefetch={true} href={link.href} className={cn("block px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors", pathname === link.href && "text-luxe-accent bg-white/5")}>
+                              {link.label}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+
+                <Link prefetch={true} href="/collections" className={cn("nav-link", pathname === '/collections' && "active")}>
+                  Collections
+                </Link>
             </nav>
 
             {/* Right Actions */}
@@ -620,23 +657,124 @@ export function Navbar({ categories = [] }: NavbarProps) {
 
               {/* Nav links */}
               <nav className="p-4 space-y-1.5">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    prefetch={true}
-                    suppressHydrationWarning
-                    className={cn(
-                      'flex items-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all',
-                      pathname === link.href
-                        ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
-                        : 'text-white/60 hover:text-white hover:bg-white/5'
-                    )}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                <Link
+                  href="/"
+                  prefetch={true}
+                  className={cn(
+                    'flex items-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all',
+                    pathname === '/'
+                      ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  )}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Home
+                </Link>
+                
+                {dynamicCategoryLinks.map((link) => {
+                  const isMain = link.href.includes('poster') || link.href.includes('earring');
+                  if (isMain) {
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        prefetch={true}
+                        className={cn(
+                          'flex items-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all',
+                          pathname === link.href
+                            ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
+                            : 'text-white/60 hover:text-white hover:bg-white/5'
+                        )}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {link.label}
+                      </Link>
+                    );
+                  }
+                  return null;
+                })}
+
+                {/* Other Products Accordion */}
+                {dynamicCategoryLinks.some(l => !l.href.includes('poster') && !l.href.includes('earring')) && (
+                  <div className="rounded-2xl border border-transparent overflow-hidden">
+                    <button
+                      onClick={() => setMobileOtherProductsOpen(!mobileOtherProductsOpen)}
+                      className="w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      Other Products
+                      <ChevronDown className={cn("w-4 h-4 transition-transform", mobileOtherProductsOpen && "rotate-180")} />
+                    </button>
+                    <AnimatePresence>
+                      {mobileOtherProductsOpen && (
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: 'auto' }}
+                          exit={{ height: 0 }}
+                          className="overflow-hidden bg-white/[0.02]"
+                        >
+                          <div className="p-2 space-y-1">
+                            {dynamicCategoryLinks.filter(l => !l.href.includes('poster') && !l.href.includes('earring')).map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                prefetch={true}
+                                className={cn(
+                                  'flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all',
+                                  pathname === link.href
+                                    ? 'text-luxe-accent bg-white/[0.05]'
+                                    : 'text-white/50 hover:text-white hover:bg-white/5'
+                                )}
+                                onClick={() => setMobileOpen(false)}
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+
+                <Link
+                  href="/collections"
+                  prefetch={true}
+                  className={cn(
+                    'flex items-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all',
+                    pathname === '/collections'
+                      ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  )}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Collections
+                </Link>
+                <Link
+                  href="/about"
+                  prefetch={true}
+                  className={cn(
+                    'flex items-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all',
+                    pathname === '/about'
+                      ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  )}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  About
+                </Link>
+                <Link
+                  href="/contact"
+                  prefetch={true}
+                  className={cn(
+                    'flex items-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all',
+                    pathname === '/contact'
+                      ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  )}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Contact
+                </Link>
               </nav>
 
               {/* User section */}
@@ -662,42 +800,9 @@ export function Navbar({ categories = [] }: NavbarProps) {
                   )}
 
                   <div className="space-y-1 mt-2">
-                    {[
-                      { href: '/dashboard/orders', label: 'My Orders', icon: Package },
-                      { href: '/dashboard/notifications', label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, icon: Bell },
-                      { href: '/wishlist', label: 'Wishlist', icon: Heart },
-                      { href: '/dashboard/settings', label: 'Settings', icon: Settings },
-                    ].map((item) => (
-                      <Link
-                        prefetch={true}
-                        key={item.href}
-                        href={item.href}
-                        className={cn(
-                          'flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all group',
-                          pathname === item.href
-                            ? 'text-luxe-accent bg-white/[0.08] backdrop-blur-md border border-white/10 shadow-lg'
-                            : 'text-white/60 hover:text-white hover:bg-white/5'
-                        )}
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        <item.icon className="w-4 h-4 flex-shrink-0 transition-colors group-hover:text-luxe-accent" />
-                        {item.label}
-                      </Link>
-                    ))}
-
-                    {(profile?.role === 'admin' || profile?.role === 'super_admin') && (
-                      <Link prefetch={true} href="/admin"
-                        className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-luxe-accent bg-luxe-accent/5 border border-luxe-accent/10 hover:bg-luxe-accent/10 transition-all group mt-2"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        <Settings className="w-4 h-4 flex-shrink-0 transition-transform group-hover:rotate-90" />
-                        Admin Panel
-                      </Link>
-                    )}
-
                     <button
                       onClick={() => { handleSignOut(); setMobileOpen(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 mt-4 rounded-2xl text-sm font-medium text-red-400 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 transition-all"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-red-400 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 transition-all"
                     >
                       <LogOut className="w-4 h-4 flex-shrink-0" />
                       Sign Out
