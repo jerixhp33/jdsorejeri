@@ -8,6 +8,8 @@ import { useCart } from '@/hooks/useCart';
 import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
+import Persp from 'perspective-transform';
+import { toJpeg } from 'html-to-image';
 import { ROOM_THEMES, FRAME_STYLES, GALLERY_PRESETS, RoomTheme, FrameStyle } from './VirtualTryOnConfig';
 
 interface VirtualTryOnModalProps {
@@ -31,7 +33,47 @@ interface RenderedPoster {
   rotation: number;
   frame: FrameStyle;
 }
+// ─── Wall Lighting Analyzer ───────────────────────────────────────────────────
+// Draws uploaded image to offscreen canvas and compares left vs right brightness
+async function detectWallLightingDirection(imgUrl: string): Promise<'left' | 'right' | 'center'> {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, 128, 64);
+        
+        // Left half
+        const leftData = ctx.getImageData(0, 0, 64, 64).data;
+        let leftB = 0;
+        for (let i = 0; i < leftData.length; i += 4) {
+          leftB += (leftData[i] * 299 + leftData[i + 1] * 587 + leftData[i + 2] * 114) / 1000;
+        }
+        leftB /= (64 * 64);
 
+        // Right half
+        const rightData = ctx.getImageData(64, 0, 64, 64).data;
+        let rightB = 0;
+        for (let i = 0; i < rightData.length; i += 4) {
+          rightB += (rightData[i] * 299 + rightData[i + 1] * 587 + rightData[i + 2] * 114) / 1000;
+        }
+        rightB /= (64 * 64);
+
+        if (leftB > rightB + 10) resolve('left');
+        else if (rightB > leftB + 10) resolve('right');
+        else resolve('center');
+      } catch {
+        resolve('center');
+      }
+    };
+    img.onerror = () => resolve('center');
+    img.src = imgUrl;
+  });
+}
 export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }: VirtualTryOnModalProps) {
   const [roomTheme, setRoomTheme] = useState<RoomTheme>(ROOM_THEMES[0]);
   const [customWallImage, setCustomWallImage] = useState<string | null>(null);
@@ -41,6 +83,12 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   const [saving, setSaving] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [isAutoDesigning, setIsAutoDesigning] = useState(false);
+  const [lightSource, setLightSource] = useState<'left' | 'right' | 'center'>('center');
+  
+  // Perspective Warp State
+  const [isPerspectiveMode, setIsPerspectiveMode] = useState(false);
+  const [wallCorners, setWallCorners] = useState<{x: number, y: number}[] | null>(null);
+  const [warpMatrix, setWarpMatrix] = useState<string>('none');
   
   const [galleryPosters, setGalleryPosters] = useState<RenderedPoster[]>([]);
   const [activePosterId, setActivePosterId] = useState<string | null>(null);
@@ -59,6 +107,49 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   
   const containerRef = useRef<HTMLDivElement>(null);
   const bgImageRef = useRef<HTMLImageElement>(null);
+
+  // Perspective Warp Calculation
+  useEffect(() => {
+    if (!wallCorners || !containerRef.current) {
+      setWarpMatrix('none');
+      return;
+    }
+    const { width, height } = containerRef.current.getBoundingClientRect();
+    const src = [0, 0, width, 0, width, height, 0, height];
+    const dst = wallCorners.flatMap(c => [c.x, c.y]);
+    try {
+      const transform = Persp(src, dst);
+      // transform.coeffs gives 3x3 homography [a,b,c, d,e,f, g,h,i]
+      const [a, b, c, d, e, f, g, h, i] = transform.coeffs;
+      
+      // We map this to 4x4 column-major CSS matrix3d
+      // m11=a, m12=d, m14=g
+      // m21=b, m22=e, m24=h
+      // m31=0, m32=0, m33=1, m34=0
+      // m41=c, m42=f, m43=0, m44=i
+      const matrix3d = `matrix3d(${a}, ${d}, 0, ${g}, ${b}, ${e}, 0, ${h}, 0, 0, 1, 0, ${c}, ${f}, 0, ${i})`;
+      setWarpMatrix(matrix3d);
+    } catch (e) {
+      // In case the polygon is invalid
+    }
+  }, [wallCorners]);
+
+  const togglePerspectiveMode = () => {
+    if (isPerspectiveMode) {
+      setIsPerspectiveMode(false);
+      setWallCorners(null);
+    } else {
+      if (!containerRef.current) return;
+      const { width, height } = containerRef.current.getBoundingClientRect();
+      setWallCorners([
+        { x: 0, y: 0 },
+        { x: width, y: 0 },
+        { x: width, y: height },
+        { x: 0, y: height }
+      ]);
+      setIsPerspectiveMode(true);
+    }
+  };
 
   // Initialize with single hero on open
   useEffect(() => {
@@ -108,19 +199,31 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     }
   }, [isOpen, customWallImage]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Custom Wall Upload
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
     }
+    
+    // Cleanup previous object url if exists
     if (customWallImage && customWallImage.startsWith('blob:')) {
       URL.revokeObjectURL(customWallImage);
     }
+    
     const url = URL.createObjectURL(file);
     setCustomWallImage(url);
-  };
+    setPrevRoomThemeUrl(roomTheme.url);
+    
+    // Smart Lighting Detection
+    const direction = await detectWallLightingDirection(url);
+    setLightSource(direction);
+    
+    // Reset input
+    e.target.value = '';
+  }, [customWallImage, roomTheme]);
 
   const handleAutoDesign = async () => {
     setIsAutoDesigning(true);
@@ -248,82 +351,17 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     if (!containerRef.current) return;
     setSaving(true);
     try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Could not create context');
-      
-      const rect = containerRef.current.getBoundingClientRect();
-      canvas.width = rect.width * 2;
-      canvas.height = rect.height * 2;
-      ctx.scale(2, 2);
+      const handles = document.getElementById('perspective-handles');
+      if (handles) handles.style.display = 'none';
 
-      const bgImg = new window.Image();
-      bgImg.crossOrigin = 'anonymous';
-      await new Promise((resolve, reject) => { 
-        bgImg.onload = resolve; 
-        bgImg.onerror = reject; 
-        bgImg.src = customWallImage || roomTheme.url; 
+      const dataUrl = await toJpeg(containerRef.current, {
+        quality: 0.9,
+        backgroundColor: '#000',
+        pixelRatio: 2 // for high-res saving
       });
-      
-      const bgAspect = bgImg.width / bgImg.height;
-      const cvAspect = rect.width / rect.height;
-      let drawW = rect.width;
-      let drawH = rect.height;
-      let drawX = 0;
-      let drawY = 0;
-      
-      if (bgAspect > cvAspect) {
-        drawW = rect.height * bgAspect;
-        drawX = (rect.width - drawW) / 2;
-      } else {
-        drawH = rect.width / bgAspect;
-        drawY = (rect.height - drawH) / 2;
-      }
-      
-      ctx.globalAlpha = 0.8;
-      ctx.drawImage(bgImg, drawX, drawY, drawW, drawH);
-      ctx.globalAlpha = 1.0;
-      
-      const posterElements = document.querySelectorAll('.gallery-poster-img');
-      for (const el of Array.from(posterElements)) {
-        const htmlEl = el as HTMLElement;
-        const pRect = htmlEl.getBoundingClientRect();
-        
-        const pImg = new window.Image();
-        pImg.crossOrigin = 'anonymous';
-        await new Promise((resolve, reject) => {
-          pImg.onload = resolve;
-          pImg.onerror = reject;
-          const innerImg = htmlEl.querySelector('img');
-          pImg.src = innerImg?.src || '';
-        });
 
-        const pX = pRect.left - rect.left;
-        const pY = pRect.top - rect.top;
-        const pW = pRect.width;
-        const pH = pRect.height;
-        
-        ctx.save();
-        const transform = window.getComputedStyle(htmlEl).transform;
-        if (transform && transform !== 'none') {
-          const values = transform.split('(')[1].split(')')[0].split(',');
-          const a = values[0];
-          const b = values[1];
-          const angle = Math.round(Math.atan2(parseFloat(b), parseFloat(a)) * (180/Math.PI));
-          ctx.translate(pX + pW/2, pY + pH/2);
-          ctx.rotate(angle * Math.PI / 180);
-          ctx.translate(-(pX + pW/2), -(pY + pH/2));
-        }
+      if (handles) handles.style.display = 'block';
 
-        ctx.fillStyle = htmlEl.style.backgroundColor || '#000';
-        ctx.fillRect(pX, pY, pW, pH);
-
-        const bw = parseInt(htmlEl.style.borderWidth) || 0;
-        ctx.drawImage(pImg, pX + bw, pY + bw, pW - bw*2, pH - bw*2);
-        ctx.restore();
-      }
-
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
       const link = document.createElement('a');
       link.href = dataUrl;
       link.download = 'jd-store-gallery-preview.jpg';
@@ -435,33 +473,43 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
             
             <AnimatePresence mode="popLayout">
               {prevRoomThemeUrl && (
-                <motion.img
-                  key="prev-bg"
-                  src={prevRoomThemeUrl}
-                  initial={{ opacity: 1 }}
+                <motion.img 
+                  key={prevRoomThemeUrl}
+                  src={prevRoomThemeUrl} 
+                  className="absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none"
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="absolute inset-0 w-full h-full object-cover opacity-80"
+                  transition={{ duration: 1.2, ease: "easeInOut" }}
                 />
               )}
+              
+              <motion.img 
+                key={customWallImage || roomTheme.url}
+                src={customWallImage || roomTheme.url} 
+                alt="Room" 
+                ref={bgImageRef}
+                className="absolute inset-0 w-full h-full object-cover z-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+                crossOrigin="anonymous"
+              />
             </AnimatePresence>
-            <motion.img 
-              key={customWallImage || roomTheme.url}
-              src={customWallImage || roomTheme.url} 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.8 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
-            />
 
-            <div className={cn("absolute inset-0 pointer-events-none bg-gradient-to-t", roomTheme.lighting)} />
-            <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-black/60 pointer-events-none" />
-
-            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none pb-20 md:pb-0">
-              <motion.div
+            {/* Render Perspective Wrappers & Handles */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none pb-20 md:pb-0" style={{ perspective: isPerspectiveMode ? undefined : '1000px' }}>
+              <motion.div 
                 animate={{ scale: globalScale }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className="relative w-full h-full flex items-center justify-center"
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="relative w-full h-full flex items-center justify-center pointer-events-none"
+                style={{
+                  transform: warpMatrix !== 'none' ? warpMatrix : undefined,
+                  transformOrigin: '0 0',
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0
+                }}
               >
                 <AnimatePresence>
                   {galleryPosters.map((poster, i) => (
@@ -491,8 +539,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                       }}
                       className={cn(
                         "gallery-poster-img absolute pointer-events-auto rounded-[2px]",
-                        poster.frame.css,
-                        poster.isHero ? 'shadow-[0_20px_45px_rgba(0,0,0,0.8)]' : 'shadow-[0_12px_30px_rgba(0,0,0,0.6)]'
+                        poster.frame.css
                       )}
                       style={{
                         width: `${poster.scaleFactor * 100}%`,
@@ -500,7 +547,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                         aspectRatio: '3/4',
                         backgroundColor: poster.frame.css.includes('bg-') ? undefined : '#1a1a1a', // fallback
                         zIndex: activePosterId === poster.id ? 50 : (poster.isHero ? 20 : 10),
-                        cursor: 'grab'
+                        cursor: 'grab',
+                        boxShadow: poster.isHero 
+                          ? (lightSource === 'left' ? '20px 20px 45px rgba(0,0,0,0.8)' : lightSource === 'right' ? '-20px 20px 45px rgba(0,0,0,0.8)' : '0 20px 45px rgba(0,0,0,0.8)') 
+                          : (lightSource === 'left' ? '12px 12px 30px rgba(0,0,0,0.6)' : lightSource === 'right' ? '-12px 12px 30px rgba(0,0,0,0.6)' : '0 12px 30px rgba(0,0,0,0.6)')
                       }}
                       whileDrag={{ cursor: 'grabbing', scale: 1.02, zIndex: 60 }}
                     >
@@ -574,10 +624,41 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                   ))}
                 </AnimatePresence>
               </motion.div>
+              
+              {/* Perspective Mode 4-Corner Handles */}
+              {isPerspectiveMode && wallCorners && (
+                <div id="perspective-handles" className="absolute inset-0 z-[100] pointer-events-none">
+                  {wallCorners.map((corner, idx) => (
+                    <motion.div
+                      key={idx}
+                      drag
+                      dragMomentum={false}
+                      dragElastic={0}
+                      onDrag={(e, info) => {
+                        setWallCorners(prev => {
+                          if (!prev) return prev;
+                          const next = [...prev];
+                          // Adjust coordinates based on pan offset
+                          next[idx] = { x: next[idx].x + info.delta.x, y: next[idx].y + info.delta.y };
+                          return next;
+                        });
+                      }}
+                      className="absolute w-8 h-8 -ml-4 -mt-4 bg-white/10 border-2 border-white rounded-full flex items-center justify-center cursor-crosshair pointer-events-auto backdrop-blur-md shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                      style={{ x: corner.x, y: corner.y }}
+                      whileDrag={{ scale: 1.5, backgroundColor: 'rgba(255,255,255,0.4)' }}
+                    >
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    </motion.div>
+                  ))}
+                  <div className="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-md text-white rounded-full text-sm border border-white/20 pointer-events-none">
+                    Drag the corners to match your wall's perspective
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Bottom Dock */}
-            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 px-6 py-3 rounded-full backdrop-blur-xl bg-black/50 border border-white/20 shadow-2xl z-30">
+            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 px-6 py-3 rounded-full backdrop-blur-xl bg-black/50 border border-white/20 shadow-2xl z-[110]">
               <div className="flex items-center gap-1">
                 <button 
                   onClick={() => setGlobalScale(s => Math.max(0.4, s - 0.1))}
@@ -591,6 +672,20 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                   className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 active:scale-95 transition-all"
                 >
                   <ZoomIn className="w-5 h-5" />
+                </button>
+                <div className="w-px h-6 bg-white/20 mx-1" />
+                <button 
+                  onClick={togglePerspectiveMode}
+                  className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                    isPerspectiveMode ? "text-black bg-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" : "text-white/80 hover:text-white hover:bg-white/20 active:scale-95"
+                  )}
+                  title="3D Perspective Warp"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 7l8-4 8 4-8 4-8-4z" />
+                    <path d="M3 17l8 4 8-4M3 12l8 4 8-4" />
+                  </svg>
                 </button>
               </div>
               
