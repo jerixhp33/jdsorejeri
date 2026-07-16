@@ -51,7 +51,7 @@ export function useAuth(): AuthState {
         if (session?.user) {
           if (_event === 'SIGNED_IN') {
             const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'there';
-            toast.success(`Welcome ${name} 👋`, { duration: 4000 });
+            toast.success(`Welcome ${name} 👋`, { duration: 4000, id: 'welcome-toast' });
           }
           await fetchProfile();
         } else {
