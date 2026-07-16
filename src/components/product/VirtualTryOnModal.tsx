@@ -126,13 +126,17 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       // 3. Fetch Posters
       let supportingProducts: any[] = [];
       if (numSupporting > 0) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('products')
-          .select('*, sizes:product_sizes(*), images:product_images(*)')
+          .select('*, sizes:poster_sizes(*), images:product_images(*)')
           .eq('product_type', 'poster')
           .eq('is_active', true)
           .neq('id', currentProduct.id)
           .limit(30);
+          
+        if (error) {
+          console.error('Supabase fetch error:', error);
+        }
           
         if (data && data.length > 0) {
           const shuffled = data.sort(() => 0.5 - Math.random());
@@ -471,7 +475,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                         poster.isHero ? 'shadow-[0_20px_45px_rgba(0,0,0,0.8)] z-20' : 'shadow-[0_12px_30px_rgba(0,0,0,0.6)] z-10'
                       )}
                       style={{
-                        width: `${poster.scaleFactor * 100}vw`,
+                        width: `${poster.scaleFactor * 100}%`,
                         maxWidth: poster.isHero ? '400px' : '300px',
                         aspectRatio: '3/4',
                         backgroundColor: poster.frame.css.includes('bg-') ? undefined : '#1a1a1a' // fallback
