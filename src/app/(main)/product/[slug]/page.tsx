@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -36,39 +36,30 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  const [product, reviews] = await Promise.all([
-    getProductBySlug(slug),
-    supabase
-      .from('reviews')
-      .select('*, user:user_profiles(name, profile_picture)')
-      .eq('product_id', slug) // will match by slug in query below
-      .eq('is_approved', true)
-      .order('created_at', { ascending: false })
-      .limit(20)
-      .then(({ data }) => data || []),
-  ]);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();
   }
 
-  // Track product view
-  await supabase.from('analytics_events').insert({
+  // Track product view — NON-BLOCKING (don't await, so page renders instantly)
+  void supabase.from('analytics_events').insert({
     event_type: 'product_view',
     event_data: { product_id: product.id, product_type: product.product_type },
     page: `/product/${slug}`,
   });
 
-  const relatedProducts = await getRelatedProducts(product.id, product.category_id, 4, product.product_type);
-
-  // Fetch reviews by product ID (not slug)
-  const { data: productReviews } = await supabase
-    .from('reviews')
-    .select('*, user:user_profiles(name, profile_picture)')
-    .eq('product_id', product.id)
-    .eq('is_approved', true)
-    .order('created_at', { ascending: false })
-    .limit(20);
+  // Fetch reviews and related products in parallel (single reviews fetch, not double)
+  const [{ data: productReviews }, relatedProducts] = await Promise.all([
+    supabase
+      .from('reviews')
+      .select('*, user:user_profiles(name, profile_picture)')
+      .eq('product_id', product.id)
+      .eq('is_approved', true)
+      .order('created_at', { ascending: false })
+      .limit(20),
+    getRelatedProducts(product.id, product.category_id, 4, product.product_type),
+  ]);
 
   return (
     <>

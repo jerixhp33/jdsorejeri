@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;

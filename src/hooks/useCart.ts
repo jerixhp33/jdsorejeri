@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
 import type { Cart, CartItem } from '@/types';
@@ -51,6 +52,7 @@ const useCartStore = create<GlobalCartState>((set) => ({
 
 export function useCart() {
   const { profile } = useAuth();
+  const queryClient = useQueryClient();
   const { 
     cart, 
     items, 
@@ -205,6 +207,7 @@ export function useCart() {
       
       // Re-sync background silently
       fetchCart();
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
       toast.success('Added to cart');
     } catch (err) {
       toast.error('Failed to add to cart');

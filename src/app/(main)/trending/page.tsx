@@ -5,7 +5,7 @@ import { ProductCard } from '@/components/product/ProductCard';
 import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
 import { createClient } from '@/lib/supabase/server';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 120;
 
 export default async function TrendingPage() {
   return (

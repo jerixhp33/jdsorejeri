@@ -1,13 +1,12 @@
-import { CollectionGridSkeleton } from '@/components/landing/CollectionGridSkeleton';
-
 export default function CollectionsLoading() {
   return (
-    <div className="page-container py-10 md:py-16">
-      <div className="flex flex-col items-center justify-center mb-10 md:mb-16 animate-pulse">
-        <div className="h-10 w-48 bg-white/5 rounded-lg mb-4"></div>
-        <div className="h-4 w-72 max-w-[80vw] bg-white/5 rounded"></div>
+    <div className="animate-pulse page-container pt-6">
+      <div className="h-10 bg-gray-200 rounded w-48 mb-8" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="aspect-[4/3] bg-gray-200 rounded-2xl" />
+        ))}
       </div>
-      <CollectionGridSkeleton count={8} />
     </div>
   );
 }
