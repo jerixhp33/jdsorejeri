@@ -23,6 +23,15 @@ export function CartView() {
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   
+  const [showSwipeTip, setShowSwipeTip] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSwipeTip(false);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const supabase = createClient();
   
   useEffect(() => {
@@ -146,7 +155,7 @@ export function CartView() {
           {/* ─── Cart Items ─── */}
           <div className="lg:col-span-2 space-y-4">
             <AnimatePresence>
-              {items.map((item) => {
+              {items.map((item, index) => {
                 const primaryImage =
                   (item.product?.images as { url: string; is_primary: boolean }[])?.find(
                     (img) => img.is_primary
@@ -163,6 +172,23 @@ export function CartView() {
                     transition={{ duration: 0.2 }}
                     className="relative overflow-hidden rounded-2xl"
                   >
+                    {/* Tooltip for the first item */}
+                    {index === 0 && (
+                      <AnimatePresence>
+                        {showSwipeTip && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            className="absolute right-4 top-2 z-20 pointer-events-none md:hidden flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10"
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5 text-luxe-accent animate-pulse" />
+                            <span className="text-white/80 text-[10px] font-medium tracking-wide">Swipe to delete</span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    )}
+
                     <div className="absolute inset-0 bg-red-500/20 flex items-center justify-end px-6 z-0">
                       <motion.div initial={{ scale: 0.5, rotate: -20 }} whileInView={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
                         <Trash2 className="w-6 h-6 text-red-500" />

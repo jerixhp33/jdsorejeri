@@ -76,7 +76,10 @@ export function AdminBannersView({ banners: initial, products = [], categories =
       setProductTypeFilter(p?.product_type || '');
     } else if (banner.cta_url?.startsWith('/category/')) {
       setLinkType('category');
-      const c = categories.find(c => `/category/${c.slug}` === banner.cta_url);
+      const categoryId = banner.cta_url.includes('?category=') 
+        ? new URLSearchParams(banner.cta_url.split('?')[1]).get('category') 
+        : null;
+      const c = categories.find(c => (categoryId ? c.id === categoryId : `/category/${c.slug}` === banner.cta_url));
       setProductTypeFilter(c?.product_type || '');
     } else {
       setLinkType('custom');
@@ -172,7 +175,13 @@ export function AdminBannersView({ banners: initial, products = [], categories =
           >
             <div className="relative aspect-video bg-luxe-dark">
               {banner.image_url ? (
-                <Image src={banner.image_url} alt={banner.title} fill className="object-cover" />
+                (() => {
+                  const isVideo = banner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
+                  if (isVideo) {
+                    return <video src={banner.image_url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />;
+                  }
+                  return <Image src={banner.image_url} alt={banner.title} fill className="object-cover" />;
+                })()
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-white/10 text-4xl">🖼</div>
               )}
@@ -344,7 +353,7 @@ export function AdminBannersView({ banners: initial, products = [], categories =
                       {categories
                         .filter(c => !productTypeFilter || c.product_type === productTypeFilter)
                         .map(c => (
-                          <option key={c.id} value={`/category/${c.slug}`}>{c.name}</option>
+                          <option key={c.id} value={`/category/${c.product_type}?category=${c.id}`}>{c.name}</option>
                         ))
                       }
                     </select>

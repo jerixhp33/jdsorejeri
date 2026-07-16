@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWishlist } from '@/hooks/useWishlist';
@@ -20,6 +20,15 @@ export function WishlistView() {
   const { addItem, items: cartItems } = useCart();
   const haptic = useHaptic();
   const [addingItem, setAddingItem] = useState<string | null>(null);
+  
+  const [showSwipeTip, setShowSwipeTip] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSwipeTip(false);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const router = useRouter();
 
@@ -99,6 +108,23 @@ export function WishlistView() {
                   transition={{ duration: 0.2 }}
                   className="relative overflow-hidden rounded-2xl h-[160px] sm:h-[220px]"
                 >
+                  {/* Tooltip for the first item */}
+                  {i === 0 && (
+                    <AnimatePresence>
+                      {showSwipeTip && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className="absolute right-4 top-2 z-20 pointer-events-none md:hidden flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5 text-luxe-accent animate-pulse" />
+                          <span className="text-white/80 text-[10px] font-medium tracking-wide">Swipe to delete</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  )}
+
                   {/* Background swipe-to-delete action layer */}
                   <div className="absolute inset-0 bg-red-500/20 flex items-center justify-end px-6 z-0">
                     <motion.div initial={{ scale: 0.5, rotate: -20 }} whileInView={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>

@@ -86,16 +86,33 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
 
       {/* Content wrapper */}
       <div className="absolute inset-0 overflow-hidden rounded-[inherit] z-10">
-        <Image
-          src={banner.image_url}
-          alt={banner.title || 'Banner'}
-          fill
-          crossOrigin="anonymous"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, 1400px"
-          priority={priority}
-          onLoad={handleImageLoad}
-        />
+        {(() => {
+          const isVideo = banner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
+          if (isVideo) {
+            return (
+              <video
+                src={banner.image_url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              />
+            );
+          }
+          return (
+            <Image
+              src={banner.image_url}
+              alt={banner.title || 'Banner'}
+              fill
+              crossOrigin="anonymous"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, 1400px"
+              priority={priority}
+              onLoad={handleImageLoad}
+            />
+          );
+        })()}
 
         {/* Clean, simple dark gradient just enough for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
@@ -219,16 +236,34 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="absolute inset-0"
           >
-            <Image
-              src={banners[current].image_url}
-              alt={banners[current].title || "Banner"}
-              fill
-              crossOrigin="anonymous"
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, 1400px"
-              priority={current === 0}
-              onLoad={(e) => handleImageLoad(e, current)}
-            />
+            {(() => {
+              const currentBanner = banners[current];
+              const isVideo = currentBanner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
+              if (isVideo) {
+                return (
+                  <video
+                    src={currentBanner.image_url}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
+                );
+              }
+              return (
+                <Image
+                  src={currentBanner.image_url}
+                  alt={currentBanner.title || "Banner"}
+                  fill
+                  crossOrigin="anonymous"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 1400px"
+                  priority={current === 0}
+                  onLoad={(e) => handleImageLoad(e, current)}
+                />
+              );
+            })()}
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
             
             <div className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20">
@@ -569,16 +604,33 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
                   : '0 10px 20px rgba(0,0,0,0.4)',
               }}
             >
-              <Image
-                src={banner.image_url}
-                alt={banner.title}
-                fill
-                crossOrigin="anonymous"
-                className="object-cover"
-                sizes="280px"
-                priority={isCenter}
-                onLoad={(e) => handleImageLoad(e, i)}
-              />
+              {(() => {
+                const isVideo = banner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
+                if (isVideo) {
+                  return (
+                    <video
+                      src={banner.image_url}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  );
+                }
+                return (
+                  <Image
+                    src={banner.image_url}
+                    alt={banner.title}
+                    fill
+                    crossOrigin="anonymous"
+                    className="object-cover"
+                    sizes="280px"
+                    priority={isCenter}
+                    onLoad={(e) => handleImageLoad(e, i)}
+                  />
+                );
+              })()}
               
               <motion.div 
                 className="absolute inset-0 bg-black"
@@ -653,16 +705,33 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
     >
       {/* Image */}
       <div className="relative w-full aspect-[3/4] overflow-hidden rounded-2xl">
-        <Image
-          src={banner.image_url}
-          alt={banner.title}
-          fill
-          crossOrigin="anonymous"
-          className="object-cover transition-transform duration-700 group-active:scale-105"
-          sizes="280px"
-          priority={priority}
-          onLoad={handleImageLoad}
-        />
+        {(() => {
+          const isVideo = banner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
+          if (isVideo) {
+            return (
+              <video
+                src={banner.image_url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            );
+          }
+          return (
+            <Image
+              src={banner.image_url}
+              alt={banner.title}
+              fill
+              crossOrigin="anonymous"
+              className="object-cover transition-transform duration-700 group-active:scale-105"
+              sizes="280px"
+              priority={priority}
+              onLoad={handleImageLoad}
+            />
+          );
+        })()}
 
         {/* Overlays */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/5" />

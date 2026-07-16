@@ -44,7 +44,7 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
 
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
-      const list = Array.from(files).filter((f) => f.type.startsWith('image/'));
+      const list = Array.from(files).filter((f) => f.type.startsWith('image/') || f.type.startsWith('video/'));
       if (!list.length) return;
 
       const remaining = maxImages - images.length;
@@ -150,7 +150,15 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
                 img.is_primary ? 'ring-2 ring-luxe-accent ring-offset-2 ring-offset-luxe-black sm:col-span-2 sm:row-span-2' : ''
               )}
             >
-              <img src={img.url} alt="Preview" className="w-full h-full object-cover" />
+              {(() => {
+                const isVideo = img.url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i) || img.url.startsWith('blob:') && img.url.includes('video'); // Very basic blob check might not work for type, but extensions will for uploaded
+                if (isVideo) {
+                  return (
+                    <video src={img.url} className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                  );
+                }
+                return <img src={img.url} alt="Preview" className="w-full h-full object-cover" />;
+              })()}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
                 <div className="flex justify-between items-start">
                   <button
@@ -210,17 +218,17 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
           </div>
           <div className="text-center">
             <p className="text-white/60 text-sm">
-              Drop images here or <span className="text-luxe-accent">browse</span>
+              Drop files here or <span className="text-luxe-accent">browse</span>
             </p>
             <p className="text-white/25 text-xs mt-0.5">
-              JPG, PNG, WebP · max 5 MB each · up to {maxImages} images
+              JPG, PNG, WebP, MP4, WebM · max 10 MB each · up to {maxImages} files
             </p>
           </div>
           <input
             ref={fileInputRef}
             type="file"
             multiple
-            accept="image/*"
+            accept="image/*,video/mp4,video/webm"
             className="hidden"
             onChange={(e) => e.target.files && handleFiles(e.target.files)}
           />

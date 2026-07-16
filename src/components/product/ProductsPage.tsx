@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
 import { ProductCard } from './ProductCard';
@@ -87,7 +88,10 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
   const [filtersOpen, setFiltersOpen]     = useState(false);
   const [search, setSearch]               = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  
+  const searchParams = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+  
   const [sort, setSort]                   = useState('newest');
   const [maxPrice, setMaxPrice]           = useState(productType === 'poster' ? 2000 : 10000);
   const [inStockOnly, setInStockOnly]     = useState(false);
