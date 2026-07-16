@@ -11,14 +11,15 @@ interface BestSellersProps {
   title?: string;
   subtitle?: string;
   viewAllLink?: string;
+  noContainer?: boolean;
 }
 
-export function BestSellers({ products, title = "Best Sellers", subtitle = "Trending Now", viewAllLink = "/best-sellers" }: BestSellersProps) {
+export function BestSellers({ products, title = "Best Sellers", subtitle = "Trending Now", viewAllLink = "/best-sellers", noContainer = false }: BestSellersProps) {
   if (!products.length) return null;
 
   return (
     <section className="py-2">
-      <div className="page-container">
+      <div className={noContainer ? "" : "page-container"}>
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
           <div>

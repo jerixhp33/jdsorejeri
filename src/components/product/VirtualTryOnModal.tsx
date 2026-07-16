@@ -498,8 +498,21 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       }
       
       const shareUrl = `${window.location.origin}/gallery/${slug}`;
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success('Gallery link copied to clipboard!');
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'My JD Store Gallery Design',
+            url: shareUrl
+          });
+        } catch (e) {
+          // Fallback if user cancels or share fails
+          await navigator.clipboard.writeText(shareUrl);
+          toast.success('Gallery link copied to clipboard!');
+        }
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Gallery link copied to clipboard!');
+      }
     } catch (e) {
       console.error(e);
       toast.error('Failed to generate link.');
@@ -745,17 +758,17 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
               <button 
                 onClick={handleAutoDesign}
                 disabled={isAutoDesigning}
-                className="flex flex-col items-center justify-center gap-1 w-16 shrink-0 text-luxe-accent/80 hover:text-luxe-accent transition-colors disabled:opacity-50"
+                className="flex flex-col items-center justify-center gap-1 w-16 shrink-0 text-white/60 hover:text-white transition-colors disabled:opacity-50"
                 title="Auto Design"
               >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-luxe-accent/10 border border-luxe-accent/20 active:scale-95 transition-transform">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 border border-white/20 active:scale-95 transition-transform">
                   {isAutoDesigning ? (
-                    <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin" />
+                    <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                   ) : (
                     <Sparkles className="w-4 h-4" />
                   )}
                 </div>
-                <span className="text-[10px] font-bold tracking-wide">Design</span>
+                <span className="text-[10px] font-medium tracking-wide">Design</span>
               </button>
               
               <div className="w-px h-8 bg-white/10 shrink-0 hidden md:block" />
@@ -827,17 +840,17 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
               <button 
                 onClick={handleAddToCart}
                 disabled={addingToCart}
-                className="flex flex-col items-center justify-center gap-1 w-16 shrink-0 text-[#d4b982]/80 hover:text-[#d4b982] transition-colors disabled:opacity-50"
+                className="flex flex-col items-center justify-center gap-1 w-16 shrink-0 text-white/60 hover:text-white transition-colors disabled:opacity-50"
                 title="Add all to Cart"
               >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-[#d4b982]/20 to-transparent border border-[#d4b982]/30 active:scale-95 transition-transform">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 border border-white/20 active:scale-95 transition-transform">
                   {addingToCart ? (
-                    <div className="w-4 h-4 rounded-full border-2 border-[#d4b982]/30 border-t-[#d4b982] animate-spin" />
+                    <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                   ) : (
                     <ShoppingCart className="w-4 h-4" />
                   )}
                 </div>
-                <span className="text-[10px] font-bold tracking-wide">Buy All</span>
+                <span className="text-[10px] font-medium tracking-wide">Buy All</span>
               </button>
             </div>
           </div>

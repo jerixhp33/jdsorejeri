@@ -68,7 +68,7 @@ export default function ReadOnlyGallery({ layout }: { layout: any }) {
           className="relative w-full h-full flex items-center justify-center pointer-events-none transition-transform duration-700 ease-out"
           style={{
             transform: warpMatrix !== 'none' ? warpMatrix : `scale(${scale})`,
-            transformOrigin: '0 0',
+            transformOrigin: warpMatrix !== 'none' ? '0 0' : 'center center',
             position: warpMatrix !== 'none' ? 'absolute' : 'relative',
             top: 0,
             left: 0
