@@ -188,7 +188,7 @@ export function useCart() {
       const newQty = currentCartQty + quantity;
 
       if (newQty > availableStock) {
-        toast.error(`Cannot add more. Max stock available: ${availableStock}`);
+        if (!silent) toast.error(`Cannot add more. Max stock available: ${availableStock}`);
         return;
       }
 
@@ -208,9 +208,9 @@ export function useCart() {
       // Re-sync background silently
       fetchCart();
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-      toast.success('Added to cart');
+      if (!silent) toast.success('Added to cart');
     } catch (err) {
-      toast.error('Failed to add to cart');
+      if (!silent) toast.error('Failed to add to cart');
       console.error(err);
       fetchCart(); // Revert optimistic changes on error
     }
