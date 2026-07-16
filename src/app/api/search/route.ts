@@ -52,10 +52,11 @@ export async function GET(request: NextRequest) {
     if (minPrice !== null) query = query.gte('price', minPrice);
 
     if (words.length > 0) {
+      const validTypes = ['poster', 'earring', 'hairband', 'bracelet', 'keychain', 'apparel', 'accessory'];
       const orConditions = words.map((w: string) => {
         let condition = `name.ilike.%${w}%,description.ilike.%${w}%,material.ilike.%${w}%,color.ilike.%${w}%,tags.cs.{${w}}`;
-        // Exact match for enums if the search word happens to be the enum value
-        if (w === 'poster' || w === 'earring') {
+        // Exact match for enums if the search word happens to be a valid enum value
+        if (validTypes.includes(w)) {
           condition += `,product_type.eq.${w}`;
         }
         return condition;

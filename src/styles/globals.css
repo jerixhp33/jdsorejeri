@@ -90,6 +90,12 @@
     touch-action: manipulation;
     -webkit-touch-callout: none;
   }
+  
+  body.sidebar-open .mobile-bottom-nav-container {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(2rem) !important;
+  }
 }
 
 @layer components {

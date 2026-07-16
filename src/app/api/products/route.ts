@@ -29,7 +29,14 @@ export async function GET(request: NextRequest) {
     if (search) {
       const words = search.trim().toLowerCase().split(/\s+/).filter(w => w.length >= 2);
       if (words.length > 0) {
-        const orConditions = words.map(w => `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`).join(',');
+        const validTypes = ['poster', 'earring', 'hairband', 'bracelet', 'keychain', 'apparel', 'accessory'];
+        const orConditions = words.map(w => {
+          let condition = `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`;
+          if (validTypes.includes(w)) {
+            condition += `,product_type.eq.${w}`;
+          }
+          return condition;
+        }).join(',');
         query = query.or(orConditions);
       }
     }

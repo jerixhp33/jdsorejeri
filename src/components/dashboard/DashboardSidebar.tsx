@@ -36,7 +36,7 @@ export function DashboardSidebar() {
   return (
     <>
       {/* ── Mobile: Fixed Bottom Navigation ── */}
-      <div className="md:hidden print:hidden fixed bottom-6 left-0 right-0 z-[100] flex justify-center pointer-events-none">
+      <div className="mobile-bottom-nav-container md:hidden print:hidden fixed bottom-6 left-0 right-0 z-[100] flex justify-center pointer-events-none transition-all duration-300">
         <div className="flex gap-1 overflow-x-auto no-scrollbar p-1.5 bg-white/20 backdrop-blur-xl border border-white/30 rounded-[2rem] shadow-2xl pointer-events-auto max-w-[90vw]">
           {NAV_ITEMS.map((item) => {
             const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
