@@ -43,6 +43,16 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   const [isAutoDesigning, setIsAutoDesigning] = useState(false);
   
   const [galleryPosters, setGalleryPosters] = useState<RenderedPoster[]>([]);
+  const [activePosterId, setActivePosterId] = useState<string | null>(null);
+
+  const updatePoster = (id: string, updates: Partial<RenderedPoster>) => {
+    setGalleryPosters(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const removePoster = (id: string) => {
+    setGalleryPosters(prev => prev.filter(p => p.id !== id));
+    if (activePosterId === id) setActivePosterId(null);
+  };
   
   const { addItem } = useCart();
   const supabase = createClient();
@@ -77,6 +87,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       window.dispatchEvent(new CustomEvent('pause-scroll'));
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
+      setActivePosterId(null);
     } else {
       window.dispatchEvent(new CustomEvent('resume-scroll'));
       document.body.style.overflow = '';
@@ -416,7 +427,11 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           </div>
 
           {/* Main Viewport */}
-          <div className="flex-1 relative overflow-hidden bg-black/90 flex items-center justify-center h-[55vh] md:h-auto" ref={containerRef}>
+          <div 
+            className="flex-1 relative overflow-hidden bg-black/90 flex items-center justify-center h-[55vh] md:h-auto" 
+            ref={containerRef}
+            onPointerDown={() => setActivePosterId(null)}
+          >
             
             <AnimatePresence mode="popLayout">
               {prevRoomThemeUrl && (
@@ -452,6 +467,11 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                   {galleryPosters.map((poster, i) => (
                     <motion.div
                       key={poster.id}
+                      drag
+                      dragConstraints={containerRef}
+                      dragMomentum={false}
+                      dragElastic={0.1}
+                      onPointerDown={() => setActivePosterId(poster.id)}
                       initial={{ opacity: 0, y: 50, scale: 0.9, x: '-50%', top: `calc(50% + ${poster.yPercent}%)`, left: `calc(50% + ${poster.xPercent}%)` }}
                       animate={{ 
                         opacity: 1, 
@@ -472,21 +492,84 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                       className={cn(
                         "gallery-poster-img absolute pointer-events-auto rounded-[2px]",
                         poster.frame.css,
-                        poster.isHero ? 'shadow-[0_20px_45px_rgba(0,0,0,0.8)] z-20' : 'shadow-[0_12px_30px_rgba(0,0,0,0.6)] z-10'
+                        poster.isHero ? 'shadow-[0_20px_45px_rgba(0,0,0,0.8)]' : 'shadow-[0_12px_30px_rgba(0,0,0,0.6)]'
                       )}
                       style={{
                         width: `${poster.scaleFactor * 100}%`,
                         maxWidth: poster.isHero ? '400px' : '300px',
                         aspectRatio: '3/4',
-                        backgroundColor: poster.frame.css.includes('bg-') ? undefined : '#1a1a1a' // fallback
+                        backgroundColor: poster.frame.css.includes('bg-') ? undefined : '#1a1a1a', // fallback
+                        zIndex: activePosterId === poster.id ? 50 : (poster.isHero ? 20 : 10),
+                        cursor: 'grab'
                       }}
+                      whileDrag={{ cursor: 'grabbing', scale: 1.02, zIndex: 60 }}
                     >
                       <img 
                         src={poster.url} 
                         alt={poster.productName} 
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover pointer-events-none"
                         crossOrigin="anonymous"
                       />
+                      
+                      {/* Active Toolbar Overlay */}
+                      <AnimatePresence>
+                        {activePosterId === poster.id && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-3 px-4 py-3 bg-black/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl z-50 pointer-events-auto"
+                            onPointerDown={(e) => e.stopPropagation()} // Prevent drag when using toolbar
+                          >
+                            <div className="flex items-center gap-1.5">
+                              {FRAME_STYLES.map(fs => (
+                                <button
+                                  key={fs.name}
+                                  title={fs.name}
+                                  onClick={() => updatePoster(poster.id, { frame: fs })}
+                                  className={cn(
+                                    "w-6 h-6 rounded-full border-2 transition-all",
+                                    poster.frame.name === fs.name ? "border-[#c8a96e] scale-110" : "border-white/20 hover:border-white/50"
+                                  )}
+                                  style={{ background: fs.css.includes('bg-white') ? '#fff' : (fs.css.includes('bg-zinc-800') ? '#27272a' : (fs.css.includes('bg-amber-900') ? '#78350f' : (fs.css.includes('bg-neutral-900') ? '#171717' : 'transparent'))) }}
+                                />
+                              ))}
+                            </div>
+                            
+                            <div className="w-px h-5 bg-white/20 mx-1" />
+                            
+                            {/* Scale Slider */}
+                            <input 
+                              type="range" 
+                              min="0.1" max="0.6" step="0.01" 
+                              value={poster.scaleFactor}
+                              onChange={(e) => updatePoster(poster.id, { scaleFactor: parseFloat(e.target.value) })}
+                              className="w-20 accent-[#c8a96e]"
+                              title="Resize"
+                            />
+                            
+                            {/* Rotate Slider */}
+                            <input 
+                              type="range" 
+                              min="-20" max="20" step="1" 
+                              value={poster.rotation}
+                              onChange={(e) => updatePoster(poster.id, { rotation: parseFloat(e.target.value) })}
+                              className="w-20 accent-[#c8a96e]"
+                              title="Rotate"
+                            />
+
+                            <div className="w-px h-5 bg-white/20 mx-1" />
+
+                            <button 
+                              onClick={() => removePoster(poster.id)}
+                              className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-full transition-all"
+                              title="Remove poster"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   ))}
                 </AnimatePresence>
