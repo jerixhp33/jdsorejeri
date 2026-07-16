@@ -503,10 +503,54 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[200] flex flex-col md:flex-row bg-black/95 backdrop-blur-3xl"
+          className="fixed inset-0 z-[200] flex flex-col md:flex-row bg-black"
         >
+          {/* Background Layer (Full Screen) */}
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <AnimatePresence mode="popLayout">
+              {isArMode && (
+                <motion.video
+                  key="ar-video"
+                  ref={el => {
+                    if (el && arStream && el.srcObject !== arStream) {
+                      el.srcObject = arStream;
+                      el.play().catch(console.error);
+                    }
+                  }}
+                  autoPlay
+                  playsInline
+                  muted
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
+              {!isArMode && prevRoomThemeUrl && (
+                <motion.img 
+                  key={prevRoomThemeUrl}
+                  src={prevRoomThemeUrl} 
+                  className="absolute inset-0 w-full h-full object-cover opacity-0"
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.2, ease: "easeInOut" }}
+                />
+              )}
+              {!isArMode && customWallImage && (
+                <motion.img 
+                  key={customWallImage}
+                  src={customWallImage} 
+                  alt="Room" 
+                  className="absolute inset-0 w-full h-full object-cover"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1.2, ease: "easeInOut" }}
+                  crossOrigin="anonymous"
+                />
+              )}
+            </AnimatePresence>
+          </div>
           {/* Mobile Header */}
-          <div className="md:hidden flex items-center justify-between p-4 bg-black/50 backdrop-blur-md border-b border-white/10 z-50 absolute top-0 w-full">
+          <div className="md:hidden flex items-center justify-between p-4 bg-gradient-to-b from-black/80 to-transparent z-50 absolute top-0 w-full">
             <h3 className="font-display text-lg font-bold text-white tracking-wide truncate pr-4">
               {currentProduct.name}
             </h3>
@@ -519,7 +563,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           </div>
 
           {/* Left Panel */}
-          <div className="w-full md:w-[360px] lg:w-[420px] bg-[#0c0c0c] border-r border-white/5 flex flex-col z-40 md:relative absolute bottom-0 max-h-[45vh] md:max-h-none rounded-t-3xl md:rounded-none overflow-y-auto shadow-[0_-20px_40px_rgba(0,0,0,0.5)] md:shadow-none">
+          <div className="w-full md:w-[360px] lg:w-[420px] bg-black/80 md:bg-[#0c0c0c] border-r border-white/5 flex flex-col z-40 order-2 md:order-1 backdrop-blur-2xl md:backdrop-blur-none max-h-[45vh] md:max-h-none rounded-t-3xl md:rounded-none overflow-y-auto shadow-[0_-20px_40px_rgba(0,0,0,0.5)] md:shadow-none">
             
             <div className="hidden md:flex items-center justify-between p-6 border-b border-white/5">
               <h3 className="font-display text-xl font-bold text-white tracking-wide truncate">
@@ -615,54 +659,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
 
           {/* Main Viewport */}
           <div 
-            className="flex-1 relative overflow-hidden bg-black flex items-center justify-center h-full min-h-[55vh]" 
+            className="flex-1 relative z-10 flex items-center justify-center order-1 md:order-2 min-h-0" 
             ref={containerRef}
             onPointerDown={() => setActivePosterId(null)}
           >
-            
-            <AnimatePresence mode="popLayout">
-              {isArMode && (
-                <motion.video
-                  key="ar-video"
-                  ref={el => {
-                    if (el && arStream && el.srcObject !== arStream) {
-                      el.srcObject = arStream;
-                      el.play().catch(console.error);
-                    }
-                  }}
-                  autoPlay
-                  playsInline
-                  muted
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 w-full h-full object-cover z-0"
-                />
-              )}
-              {!isArMode && prevRoomThemeUrl && (
-                <motion.img 
-                  key={prevRoomThemeUrl}
-                  src={prevRoomThemeUrl} 
-                  className="absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none"
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 1.2, ease: "easeInOut" }}
-                />
-              )}
-              
-              {!isArMode && customWallImage && (
-                <motion.img 
-                  key={customWallImage}
-                  src={customWallImage} 
-                  alt="Room" 
-                  ref={bgImageRef}
-                  className="absolute inset-0 w-full h-full object-cover z-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 1.2, ease: "easeInOut" }}
-                  crossOrigin="anonymous"
-                />
-              )}
-            </AnimatePresence>
 
             {/* Render Perspective Wrappers & Handles */}
             <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none pb-20 md:pb-0" style={{ perspective: isPerspectiveMode ? undefined : '1000px' }}>
