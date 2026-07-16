@@ -73,6 +73,14 @@ const nextConfig = {
       },
     ];
   },
+  
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "onnxruntime-node$": false,
+    };
+    return config;
+  },
 };
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({

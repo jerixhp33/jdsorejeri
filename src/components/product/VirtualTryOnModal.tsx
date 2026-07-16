@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 // @ts-ignore
 import Persp from 'perspective-transform';
 import { toJpeg } from 'html-to-image';
+import { detectWallBounds } from '@/lib/ml/wallDetector';
 import { ROOM_THEMES, FRAME_STYLES, GALLERY_PRESETS, RoomTheme, FrameStyle } from './VirtualTryOnConfig';
 
 interface VirtualTryOnModalProps {
@@ -91,6 +92,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   const [isPerspectiveMode, setIsPerspectiveMode] = useState(false);
   const [wallCorners, setWallCorners] = useState<{x: number, y: number}[] | null>(null);
   const [warpMatrix, setWarpMatrix] = useState<string>('none');
+  
+  // Live AR State
+  const [isArMode, setIsArMode] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   
   const [galleryPosters, setGalleryPosters] = useState<RenderedPoster[]>([]);
   const [activePosterId, setActivePosterId] = useState<string | null>(null);
@@ -260,6 +265,17 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
         }
       }
 
+      // Edge ML Wall Detection
+      let spreadX = 60, spreadY = 60, centerX = 0, centerY = 0;
+      const wallBounds = await detectWallBounds(customWallImage || roomTheme.url);
+      if (wallBounds) {
+        spreadX = wallBounds.width * 100 * 0.8;
+        spreadY = wallBounds.height * 100 * 0.8;
+        centerX = (wallBounds.x + wallBounds.width / 2) * 100 - 50;
+        centerY = (wallBounds.y + wallBounds.height / 2) * 100 - 50;
+        toast.success('Wall boundary detected via Edge ML!');
+      }
+
       // 4. Build Layout
       const newGallery: RenderedPoster[] = [];
       const frameStyle = FRAME_STYLES[Math.floor(Math.random() * FRAME_STYLES.length)];
@@ -279,8 +295,8 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
             price: currentProduct.sizes?.[0]?.price || currentProduct.price || 0,
             sizeId: currentProduct.sizes?.[0]?.id,
             isHero: true,
-            xPercent: pos.xPercent,
-            yPercent: pos.yPercent,
+            xPercent: centerX + (pos.xPercent * (spreadX / 60)),
+            yPercent: centerY + (pos.yPercent * (spreadY / 60)),
             scaleFactor: baseHeroScale * pos.scaleFactor,
             rotation: rotation,
             frame: frameStyle
@@ -298,8 +314,8 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                 price: supp.sizes?.[0]?.price || supp.price || 0,
                 sizeId: supp.sizes?.[0]?.id,
                 isHero: false,
-                xPercent: pos.xPercent,
-                yPercent: pos.yPercent,
+                xPercent: centerX + (pos.xPercent * (spreadX / 60)),
+                yPercent: centerY + (pos.yPercent * (spreadY / 60)),
                 scaleFactor: baseSuppScale * pos.scaleFactor,
                 rotation: rotation,
                 frame: frameStyle
@@ -316,10 +332,15 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       
       // Clear prev theme url after animation duration
       setTimeout(() => setPrevRoomThemeUrl(null), 300);
-      
+      setGalleryPosters(newGallery);
+      if (wallBounds) {
+        // Automatically disable perspective mode if auto design is used so boundaries make sense visually
+        setIsPerspectiveMode(false);
+        setWallCorners(null);
+      }
     } catch (err) {
       console.error(err);
-      toast.error('Failed to generate auto design');
+      toast.error('Failed to auto-design layout.');
     } finally {
       setIsAutoDesigning(false);
     }
@@ -410,6 +431,27 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
 
   const handleBack = () => onClose();
 
+  const toggleArMode = async () => {
+    if (isArMode) {
+      setIsArMode(false);
+      if (videoRef.current && videoRef.current.srcObject) {
+        (videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
+      }
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        setIsArMode(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        // Force light source to center for AR
+        setLightSource('center');
+      } catch (err) {
+        toast.error("Camera access denied or unavailable on this device.");
+      }
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -474,6 +516,19 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                     )}
                     <span className="text-xs font-bold text-luxe-accent">Auto Design</span>
                   </button>
+                  <button 
+                    onClick={toggleArMode}
+                    className={cn(
+                      "flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all group active:scale-95",
+                      isArMode ? "bg-white/20 border-white" : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30"
+                    )}
+                  >
+                    <svg className={cn("w-5 h-5 transition-colors", isArMode ? "text-white" : "text-white/60 group-hover:text-white")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                    <span className={cn("text-xs font-medium", isArMode ? "text-white font-bold" : "text-white/80")}>Live AR</span>
+                  </button>
                 </div>
               </div>
 
@@ -521,7 +576,20 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           >
             
             <AnimatePresence mode="popLayout">
-              {prevRoomThemeUrl && (
+              {isArMode && (
+                <motion.video
+                  key="ar-video"
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 w-full h-full object-cover z-0"
+                />
+              )}
+              {!isArMode && prevRoomThemeUrl && (
                 <motion.img 
                   key={prevRoomThemeUrl}
                   src={prevRoomThemeUrl} 
@@ -531,17 +599,19 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                 />
               )}
               
-              <motion.img 
-                key={customWallImage || roomTheme.url}
-                src={customWallImage || roomTheme.url} 
-                alt="Room" 
-                ref={bgImageRef}
-                className="absolute inset-0 w-full h-full object-cover z-0"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1.2, ease: "easeInOut" }}
-                crossOrigin="anonymous"
-              />
+              {!isArMode && (
+                <motion.img 
+                  key={customWallImage || roomTheme.url}
+                  src={customWallImage || roomTheme.url} 
+                  alt="Room" 
+                  ref={bgImageRef}
+                  className="absolute inset-0 w-full h-full object-cover z-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1.2, ease: "easeInOut" }}
+                  crossOrigin="anonymous"
+                />
+              )}
             </AnimatePresence>
 
             {/* Render Perspective Wrappers & Handles */}
