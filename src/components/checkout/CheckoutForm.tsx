@@ -429,9 +429,9 @@ export function CheckoutForm() {
       
       // Clear cart last to prevent race conditions with component unmounting
       await clearCart();
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Order error:', err);
-      toast.error('Something went wrong. Please try again.');
+      toast.error(`Checkout Failed: ${err?.message || err?.details || JSON.stringify(err)}`);
     } finally {
       setSubmitting(false);
     }
