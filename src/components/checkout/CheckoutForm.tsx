@@ -458,12 +458,14 @@ export function CheckoutForm() {
     }
     setUtrSubmitting(true);
     try {
-      const { error } = await supabase.from('orders').update({
-        admin_notes: `PAYMENT METHOD: UPI\nUTR: ${utrNumber}`,
-        payment_status: 'pending' // Admin will verify this
-      }).eq('id', createdOrderId);
+      const res = await fetch('/api/orders/utr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: createdOrderId, utrNumber }),
+      });
       
-      if (error) throw error;
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit UTR');
       
       toast.success('Payment verified successfully!');
       setUtrSubmitted(true);
