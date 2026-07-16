@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Download, ZoomIn, ZoomOut, Sparkles, ShoppingCart } from 'lucide-react';
+import { X, Upload, Download, ZoomIn, ZoomOut, Sparkles, ShoppingCart, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCart } from '@/hooks/useCart';
 import type { Product } from '@/types';
@@ -82,6 +82,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
   
   const [globalScale, setGlobalScale] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [isAutoDesigning, setIsAutoDesigning] = useState(false);
   const [lightSource, setLightSource] = useState<'left' | 'right' | 'center'>('center');
@@ -379,6 +380,34 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
     }
   };
 
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const slug = Math.random().toString(36).substring(2, 8);
+      const { error } = await supabase.from('saved_layouts').insert({
+        slug,
+        room_theme_url: customWallImage || roomTheme.url,
+        light_source: lightSource,
+        wall_corners: wallCorners ? JSON.parse(JSON.stringify(wallCorners)) : null,
+        posters: JSON.parse(JSON.stringify(galleryPosters))
+      });
+      if (error) {
+        console.error('Supabase error:', error);
+        toast.error('Could not save to database. Have you run the 016_gallery_layouts.sql migration?');
+        return;
+      }
+      
+      const shareUrl = `${window.location.origin}/gallery/${slug}`;
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Gallery link copied to clipboard!');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to generate link.');
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const handleBack = () => onClose();
 
   return (
@@ -448,7 +477,26 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
                 </div>
               </div>
 
-              <div className="mt-auto pt-6 border-t border-white/5 pb-6 md:pb-0">
+              <div className="mt-auto pt-6 border-t border-white/5 pb-6 md:pb-0 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 text-white font-medium hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    {saving ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <Download className="w-4 h-4" />}
+                    Save
+                  </button>
+                  <button 
+                    onClick={handleShare}
+                    disabled={sharing}
+                    className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 text-white font-medium hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    {sharing ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <Share2 className="w-4 h-4" />}
+                    Share
+                  </button>
+                </div>
+
                 <button 
                   onClick={handleAddToCart}
                   disabled={addingToCart}
