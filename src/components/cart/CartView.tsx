@@ -163,17 +163,19 @@ export function CartView() {
                     transition={{ duration: 0.2 }}
                     className="relative overflow-hidden rounded-2xl"
                   >
-                    {/* Background swipe-to-delete action layer */}
                     <div className="absolute inset-0 bg-red-500/20 flex items-center justify-end px-6 z-0">
-                      <Trash2 className="w-6 h-6 text-red-500" />
+                      <motion.div initial={{ scale: 0.8 }} whileInView={{ scale: 1 }} transition={{ type: "spring", stiffness: 300 }}>
+                        <Trash2 className="w-6 h-6 text-red-500" />
+                      </motion.div>
                     </div>
 
                     <motion.div
                       drag="x"
                       dragConstraints={{ left: -100, right: 0 }}
-                      dragElastic={0.2}
+                      dragElastic={0.1}
+                      dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
                       onDragEnd={(e, info) => {
-                        if (info.offset.x < -80) {
+                        if (info.offset.x < -60) {
                           haptic('heavy');
                           removeItem(item.id);
                         }

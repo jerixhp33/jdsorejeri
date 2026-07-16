@@ -17,41 +17,47 @@ export function MobileBottomNav() {
     return null;
   }
 
-  const navItems = [
-    { href: '/', icon: Home, label: 'Home' },
-    { href: '/wishlist', icon: Heart, label: 'Wishlist' },
-    { href: '/cart', icon: ShoppingCart, label: 'Cart', badge: itemCount },
-    { href: user ? '/dashboard' : '/login', icon: User, label: 'Profile' },
-  ];
+  const getProfileImage = () => {
+    return user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
+  };
+
+  const profileImg = getProfileImage();
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-t border-white/10 pb-safe">
-      <nav className="flex items-center justify-around px-2 h-16">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || (item.href === '/dashboard' && pathname.includes('/dashboard'));
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'relative flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors',
-                isActive ? 'text-luxe-accent' : 'text-white/50 hover:text-white/80'
-              )}
-            >
-              <div className="relative">
-                <Icon className={cn('w-6 h-6 transition-transform', isActive && 'scale-110')} strokeWidth={isActive ? 2.5 : 2} />
-                {item.badge !== undefined && item.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 w-4 h-4 bg-luxe-accent rounded-full text-black text-[10px] font-bold flex items-center justify-center">
-                    {item.badge > 9 ? '9+' : item.badge}
-                  </span>
-                )}
-              </div>
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
+    <div className="md:hidden fixed bottom-6 left-6 right-6 z-50">
+      <nav className="flex items-center justify-between px-6 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] shadow-2xl">
+        
+        {/* Home */}
+        <Link href="/" className={cn("transition-colors", pathname === '/' ? 'text-luxe-accent' : 'text-white/60 hover:text-white')}>
+          <Home className="w-6 h-6" strokeWidth={pathname === '/' ? 2.5 : 2} />
+        </Link>
+
+        {/* Wishlist */}
+        <Link href="/wishlist" className={cn("transition-colors", pathname === '/wishlist' ? 'text-red-500' : 'text-white/60 hover:text-red-400')}>
+          <Heart className={cn("w-6 h-6", pathname === '/wishlist' && "fill-current text-red-500")} strokeWidth={pathname === '/wishlist' ? 2.5 : 2} />
+        </Link>
+
+        {/* Center Prominent Cart */}
+        <Link href="/cart" className="relative -mt-6">
+          <div className="w-14 h-14 rounded-full bg-luxe-accent flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.4)] border-4 border-[#0a0a0a] transition-transform active:scale-95">
+            <ShoppingCart className="w-6 h-6 text-black" strokeWidth={2.5} />
+            {itemCount > 0 && (
+              <span className="absolute 0 right-0 top-0 w-5 h-5 bg-white rounded-full text-black text-[11px] font-bold flex items-center justify-center border-2 border-[#0a0a0a]">
+                {itemCount > 9 ? '9+' : itemCount}
+              </span>
+            )}
+          </div>
+        </Link>
+
+        {/* Profile */}
+        <Link href={user ? '/dashboard' : '/login'} className={cn("transition-colors rounded-full overflow-hidden border-2", pathname.includes('/dashboard') ? 'border-luxe-accent text-luxe-accent' : 'border-transparent text-white/60 hover:text-white')}>
+          {profileImg ? (
+            <img src={profileImg} alt="Profile" className="w-7 h-7 object-cover rounded-full" />
+          ) : (
+            <User className="w-6 h-6" strokeWidth={pathname.includes('/dashboard') ? 2.5 : 2} />
+          )}
+        </Link>
+
       </nav>
     </div>
   );

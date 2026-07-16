@@ -432,7 +432,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
                   {/* Cart */}
                   <Tooltip content="Cart">
                     <Link prefetch={true} href="/cart"
-                      className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+                      className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] hidden md:flex items-center justify-center"
                       aria-label="Cart"
                     >
                       <ShoppingCart className="w-5 h-5" />
