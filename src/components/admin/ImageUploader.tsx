@@ -5,6 +5,8 @@ import { Upload, X, ImageIcon, Loader2, GripVertical, Star } from 'lucide-react'
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+import { createClient } from '@/lib/supabase/client';
+
 export interface UploadedImage {
   id?: string;
   url: string;
@@ -17,29 +19,71 @@ interface ImageUploaderProps {
   onChange: (images: UploadedImage[]) => void;
   onDelete?: (image: UploadedImage) => void;
   maxImages?: number;
+  bucketName?: string;
 }
 
-export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: ImageUploaderProps) {
+export function ImageUploader({ images, onChange, onDelete, maxImages = 8, bucketName = 'product-images' }: ImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
-  const [uploading, setUploading] = useState<string[]>([]); // local object URLs being uploaded
+  
+    // Track local object URLs being uploaded along with their progress percentage
+  const [uploadingFiles, setUploadingFiles] = useState<{ url: string; progress: number, type: string }[]>([]); 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
 
   // ── Upload helpers ──────────────────────────────────────────────────────────
 
-  const uploadFile = async (file: File): Promise<UploadedImage | null> => {
-    const form = new FormData();
-    form.append('file', file);
+  const uploadFile = (file: File, localUrl: string): Promise<UploadedImage | null> => {
+    return new Promise(async (resolve) => {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          toast.error("Unauthorized");
+          return resolve(null);
+        }
 
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: form });
-    const json = await res.json();
+        const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-    if (!res.ok) {
-      toast.error(json.error || 'Upload failed');
-      return null;
-    }
-    return { url: json.url, storage_path: json.path, is_primary: false };
+        const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${bucketName}/${path}`;
+        
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
+        xhr.setRequestHeader('apikey', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+        xhr.setRequestHeader('Content-Type', file.type);
+        
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setUploadingFiles(prev => prev.map(f => f.url === localUrl ? { ...f, progress: pct } : f));
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const { data } = supabase.storage.from(bucketName).getPublicUrl(path);
+            resolve({ url: data.publicUrl, storage_path: path, is_primary: false });
+          } else {
+            console.error("Upload error:", xhr.responseText);
+            toast.error("Upload failed: " + xhr.responseText);
+            resolve(null);
+          }
+        };
+        
+        xhr.onerror = () => {
+          toast.error("Network error during upload");
+          resolve(null);
+        };
+
+        xhr.send(file);
+      } catch (err: any) {
+        toast.error(err.message || 'Upload failed');
+        resolve(null);
+      }
+    });
   };
 
   const handleFiles = useCallback(
@@ -54,26 +98,28 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
       }
       const toUpload = list.slice(0, remaining);
 
-      // Show local previews immediately while uploading
-      const localUrls = toUpload.map((f) => URL.createObjectURL(f));
-      setUploading((prev) => [...prev, ...localUrls]);
+      // Create tracking objects for UI
+      const tracking = toUpload.map(f => ({ url: URL.createObjectURL(f), progress: 0, type: f.type }));
+      setUploadingFiles((prev) => [...prev, ...tracking]);
 
-      const results = await Promise.all(toUpload.map((f) => uploadFile(f)));
+      const results = await Promise.all(
+        toUpload.map((f, index) => uploadFile(f, tracking[index].url))
+      );
 
-      // Revoke object URLs
-      localUrls.forEach((u) => URL.revokeObjectURL(u));
-      setUploading((prev) => prev.filter((u) => !localUrls.includes(u)));
+      // Clean up object URLs and UI state
+      tracking.forEach((t) => URL.revokeObjectURL(t.url));
+      setUploadingFiles((prev) => prev.filter((p) => !tracking.find(t => t.url === p.url)));
 
       const succeeded = results.filter(Boolean) as UploadedImage[];
       if (succeeded.length) {
-        // If it's the very first image uploaded, make it primary automatically
+        // Auto-primary logic
         if (images.length === 0 && succeeded.length > 0) {
           succeeded[0].is_primary = true;
         }
         onChange([...images, ...succeeded]);
       }
     },
-    [images, maxImages, onChange]
+    [images, maxImages, onChange, bucketName]
   );
 
   // ── Drag-and-drop into the zone ─────────────────────────────────────────────
@@ -114,7 +160,6 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
     if (onDelete) onDelete(img);
     
     const next = images.filter((_, j) => j !== i);
-    // Auto-assign primary if we deleted the primary
     if (img.is_primary && next.length > 0) {
       next[0].is_primary = true;
     }
@@ -129,12 +174,12 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
     onChange(next);
   };
 
-  const canAddMore = images.length + uploading.length < maxImages;
+  const canAddMore = images.length + uploadingFiles.length < maxImages;
 
   return (
     <div className="space-y-4">
       {/* Visual Grid */}
-      {images.length > 0 && (
+      {(images.length > 0 || uploadingFiles.length > 0) && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {images.map((img, i) => (
             <div
@@ -191,9 +236,25 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8 }: Ima
               )}
             </div>
           ))}
-          {uploading.map((url, i) => (
-            <div key={i} className="aspect-square rounded-xl bg-white/5 flex items-center justify-center animate-pulse">
-              <Loader2 className="w-6 h-6 text-luxe-accent animate-spin" />
+          {uploadingFiles.map((f, i) => (
+            <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-white/5 border border-white/10">
+              {(() => {
+                const isVideo = f.type.startsWith('video/');
+                if (isVideo) {
+                   return <video src={f.url} className="w-full h-full object-cover opacity-50 grayscale" autoPlay loop muted playsInline />
+                }
+                return <img src={f.url} alt="Uploading" className="w-full h-full object-cover opacity-50 grayscale" />
+              })()}
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
+                <Loader2 className="w-5 h-5 text-luxe-accent animate-spin mb-3 shadow-lg" />
+                <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-luxe-accent transition-all duration-300"
+                    style={{ width: `${f.progress}%` }}
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-white mt-1.5">{f.progress}%</span>
+              </div>
             </div>
           ))}
         </div>

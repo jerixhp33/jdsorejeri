@@ -17,17 +17,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate type
-    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'];
     if (!allowed.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Only JPG, PNG, WebP and GIF images are allowed' },
+        { error: 'Only JPG, PNG, WebP, GIF, MP4 and WebM are allowed' },
         { status: 400 }
       );
     }
 
-    // Validate size (5 MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File must be under 5 MB' }, { status: 400 });
+    // Validate size (50 MB max)
+    if (file.size > 50 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File must be under 50 MB' }, { status: 400 });
     }
 
     // Build a unique, clean filename
