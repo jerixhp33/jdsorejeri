@@ -205,13 +205,14 @@ function largestConnectedComponent(
   data: Uint8Array,
   width: number,
   height: number,
+  threshold: number = 128
 ): ComponentBounds | null {
   const visited = new Uint8Array(data.length);
   const queue = new Int32Array(data.length);
   let best: ComponentBounds | null = null;
 
   for (let startIdx = 0; startIdx < data.length; startIdx++) {
-    if (data[startIdx] === 0 || visited[startIdx]) continue;
+    if (data[startIdx] <= threshold || visited[startIdx]) continue;
 
     let head = 0;
     let tail = 0;
@@ -234,16 +235,16 @@ function largestConnectedComponent(
       let n: number;
 
       n = idx - 1;
-      if (x > 0 && data[n] > 0 && !visited[n]) { visited[n] = 1; queue[tail++] = n; }
+      if (x > 0 && data[n] > threshold && !visited[n]) { visited[n] = 1; queue[tail++] = n; }
 
       n = idx + 1;
-      if (x < width - 1 && data[n] > 0 && !visited[n]) { visited[n] = 1; queue[tail++] = n; }
+      if (x < width - 1 && data[n] > threshold && !visited[n]) { visited[n] = 1; queue[tail++] = n; }
 
       n = idx - width;
-      if (y > 0 && data[n] > 0 && !visited[n]) { visited[n] = 1; queue[tail++] = n; }
+      if (y > 0 && data[n] > threshold && !visited[n]) { visited[n] = 1; queue[tail++] = n; }
 
       n = idx + width;
-      if (y < height - 1 && data[n] > 0 && !visited[n]) { visited[n] = 1; queue[tail++] = n; }
+      if (y < height - 1 && data[n] > threshold && !visited[n]) { visited[n] = 1; queue[tail++] = n; }
     }
 
     if (!best || pixelCount > best.pixelCount) {
@@ -316,7 +317,7 @@ export async function detectWallBounds(
     insetFactor = 0.10,
     minCoverageRatio = 0.01,
     minBboxCoverage = 0.05,
-    minConfidence = 0.50,
+    minConfidence = 0.20,
     targetLabel = 'wall',
     timeoutMs = DEFAULT_TIMEOUT_MS,
     warmup = true,
