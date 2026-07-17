@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Barcode from 'react-barcode';
+import { QRCodeSVG } from 'qrcode.react';
 import { formatDate } from '@/lib/utils';
 import { JDLogo } from '@/components/shared/JDLogo';
 
@@ -59,17 +59,13 @@ export function InvoiceHeader({ order }: InvoiceHeaderProps) {
           </div>
         </div>
 
-        {/* Barcode (print optimized) */}
+        {/* QR Code (print optimized) */}
         <div className="bg-white p-2 rounded border border-gray-100 shadow-sm print:shadow-none print:border-none print:p-0 text-right">
-          <Barcode 
-            value={order.order_number} 
-            format="CODE128" 
-            width={1.2} 
-            height={40} 
-            displayValue={false} 
-            background="transparent" 
-            lineColor="#000"
-            margin={0}
+          <QRCodeSVG 
+            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/orders/${order.id}/invoice`} 
+            size={48} 
+            level="L"
+            className="ml-auto"
           />
           <p className="text-[9px] text-gray-400 font-mono mt-1 text-center tracking-widest">{order.order_number}</p>
         </div>
