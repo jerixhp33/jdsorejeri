@@ -623,6 +623,17 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
                 </h3>
                 
                 <div className="flex items-center gap-4 relative z-10">
+                  {bundleProduct.images?.[0]?.url && (
+                    <div className="shrink-0 w-16 h-16 rounded-xl overflow-hidden border border-white/10 bg-black/50">
+                      <Image
+                        src={bundleProduct.images[0].url}
+                        alt={bundleProduct.name}
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   <div className="flex-1">
                     <p className="text-white text-base font-medium leading-tight">{bundleProduct.name}</p>
                     <p className="text-white/60 text-sm mt-1">{formatCurrency(bundleProduct.sizes && bundleProduct.sizes.length > 0 ? bundleProduct.sizes[0].price : (bundleProduct.price || 0))}</p>
