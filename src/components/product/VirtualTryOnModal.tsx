@@ -363,7 +363,7 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
           setIsPerspectiveMode(false);
           setWallCorners(null);
         } else {
-          toast.error('Could not detect a wall perfectly, using full canvas.');
+          toast.success('Layout centered on canvas.');
         }
       }
 

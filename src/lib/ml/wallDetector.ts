@@ -291,10 +291,32 @@ function pickBestSegment(
     ? targetLabel.map(l => l.toLowerCase()) 
     : [targetLabel.toLowerCase()];
     
-  return segments.reduce<SegmentResult | null>((best, current) => {
+  const bestTarget = segments.reduce<SegmentResult | null>((best, current) => {
     if (!labels.includes(current.label.toLowerCase())) return best;
     return !best || current.score > best.score ? current : best;
   }, null);
+
+  if (bestTarget) return bestTarget;
+
+  // Fallback: pick the largest segment in the image by mask area (excluding floor/ceiling/person)
+  const badLabels = ['person', 'floor', 'ceiling', 'sky'];
+  let largest: SegmentResult | null = null;
+  let maxArea = 0;
+  
+  for (const seg of segments) {
+    if (badLabels.includes(seg.label.toLowerCase())) continue;
+    let area = 0;
+    const data = seg.mask.data;
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] > 128) area++;
+    }
+    if (area > maxArea) {
+      maxArea = area;
+      largest = seg;
+    }
+  }
+  
+  return largest;
 }
 
 // ── Cache key ────────────────────────────────────────────────────────────────
