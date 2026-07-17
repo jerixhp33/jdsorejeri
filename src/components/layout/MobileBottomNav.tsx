@@ -43,8 +43,13 @@ export function MobileBottomNav() {
     };
   }, [scrollTimeout]);
 
-  // Don't show bottom nav on desktop, checkout, admin, or dashboard routes
-  if (pathname === '/cart' || pathname.includes('/checkout') || pathname.includes('/admin') || pathname.includes('/dashboard')) {
+  // Don't show bottom nav on checkout, admin, or dashboard routes
+  if (pathname.includes('/checkout') || pathname.includes('/admin') || pathname.includes('/dashboard')) {
+    return null;
+  }
+
+  // Hide on cart page ONLY if there are items in the cart
+  if (pathname === '/cart' && itemCount > 0) {
     return null;
   }
 
