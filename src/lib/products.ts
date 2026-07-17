@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/server';
 import type { Product, ProductFilters, PaginatedResponse } from '@/types';
 
 /**
@@ -9,7 +9,7 @@ export async function getProducts(
   page = 1,
   limit = 12
 ): Promise<PaginatedResponse<Product>> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const offset = (page - 1) * limit;
 
   let query = supabase
@@ -110,7 +110,7 @@ export async function getProducts(
  * Fetch a single product by slug.
  */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from('products')
@@ -138,7 +138,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
  * Fetch featured products.
  */
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from('products')
@@ -163,7 +163,7 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
  * Fetch trending products.
  */
 export async function getTrendingProducts(limit = 8): Promise<Product[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from('products')
@@ -188,7 +188,7 @@ export async function getTrendingProducts(limit = 8): Promise<Product[]> {
  * Fetch best seller products.
  */
 export async function getBestSellers(limit = 8): Promise<Product[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from('products')
@@ -223,7 +223,7 @@ export async function getRelatedProducts(
   limit = 4,
   productType?: string
 ): Promise<Product[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const FIELDS = `
     *,
@@ -273,7 +273,7 @@ export async function getRelatedProducts(
  * Search products by query.
  */
 export async function searchProducts(query: string, limit = 10): Promise<Product[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from('products')

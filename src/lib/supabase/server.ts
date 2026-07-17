@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 export async function createClient() {
@@ -36,6 +37,19 @@ export async function createAdminClient() {
         autoRefreshToken: false,
         persistSession: false,
       },
+    }
+  );
+}
+
+// Public client — NO cookies, allows Next.js static generation (SSG) without dynamic bailout
+export function createPublicClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: false,
+      }
     }
   );
 }

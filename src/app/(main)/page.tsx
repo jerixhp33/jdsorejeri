@@ -9,12 +9,12 @@ import { FAQSection } from '@/components/landing/FAQSection';
 import { ContactSection } from '@/components/landing/ContactSection';
 import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
 import { getFeaturedProducts } from '@/lib/products';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/server';
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   
   // Fetch ONLY fast, layout-blocking data here to ensure rapid First Contentful Paint
   const [banners, collections, marqueeLabels] = await Promise.all([
@@ -122,7 +122,7 @@ export default async function HomePage() {
 // ─── Data Fetcher Server Components ──────────────────────────────────────────
 
 async function BestSellersData() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_best_seller', true).order('created_at', { ascending: false }).limit(4);
   return <BestSellers products={data || []} />;
 }
@@ -133,19 +133,19 @@ async function DynamicShowcaseData() {
 }
 
 async function TestimonialsData() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase.from('testimonials').select('*').eq('is_active', true).order('display_order').limit(8);
   return <TestimonialsSection testimonials={data || []} />;
 }
 
 async function FAQData() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase.from('faqs').select('*').eq('is_active', true).order('display_order').limit(10);
   return <FAQSection faqs={data || []} />;
 }
 
 async function TrendingData() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_trending', true).order('created_at', { ascending: false }).limit(4);
   return <BestSellers products={data || []} title="Trending Products" subtitle="Hot Right Now" viewAllLink="/trending" noContainer />;
 }
