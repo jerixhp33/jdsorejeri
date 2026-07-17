@@ -325,6 +325,7 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
               is_featured: editProduct.is_featured || false,
               is_trending: editProduct.is_trending || false,
               is_best_seller: editProduct.is_best_seller || false,
+              bundle_product_id: editProduct.bundle_product_id || null,
               weight_grams: editProduct.weight_grams || 0,
               length_cm: editProduct.length_cm || 0,
               width_cm: editProduct.width_cm || 0,
