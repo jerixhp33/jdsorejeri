@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useHaptic } from '@/hooks/useHaptic';
@@ -71,6 +72,35 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const haptic = useHaptic();
 
+  // 3D Parallax Tilt Effect setup
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+  const mouseXSpring = useSpring(mouseX, { stiffness: 300, damping: 40 });
+  const mouseYSpring = useSpring(mouseY, { stiffness: 300, damping: 40 });
+  
+  // Maps 0-1 percentage to degrees (e.g. 10 deg tilt)
+  const rotateX = useTransform(mouseYSpring, [0, 1], [8, -8]);
+  const rotateY = useTransform(mouseXSpring, [0, 1], [-8, 8]);
+  
+  const glareBackground = useTransform(
+    [mouseXSpring, mouseYSpring],
+    ([x, y]) => `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.15) 0%, transparent 60%)`
+  );
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeaveWrapper = () => {
+    setIsHovered(false);
+    mouseX.set(0.5);
+    mouseY.set(0.5);
+  };
+
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -86,16 +116,25 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   };
 
   return (
-    <div
+    <motion.div
       ref={inViewRef}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative rounded-[1rem] animate-card-fade transition-all duration-300 hover:-translate-y-1"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeaveWrapper}
+      className="relative rounded-[1rem] animate-card-fade"
       style={{
         animationDelay: `${index * 40}ms`,
         opacity: 0,
         animationFillMode: 'forwards',
-        boxShadow: `0 0 0 1px rgba(200,169,110,0.12), 0 3px 12px rgba(200,169,110,0.04)`,
+        rotateX,
+        rotateY,
+        transformPerspective: 1000,
+        scale: isHovered ? 1.02 : 1,
+        boxShadow: isHovered 
+          ? `0 30px 60px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(200,169,110,0.3)` 
+          : `0 0 0 1px rgba(200,169,110,0.12), 0 3px 12px rgba(200,169,110,0.04)`,
+        transition: 'box-shadow 0.3s ease-out, scale 0.3s ease-out',
+        zIndex: isHovered ? 50 : 1,
       }}
     >
       <Link prefetch={true} href={`/product/${product.slug}`}
@@ -167,11 +206,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           {/* Overlay */}
           <div className="image-overlay" />
 
-          {/* Static subtle inner bloom for luxury feel without heavy calculation */}
-          <div
-            className="absolute inset-0 pointer-events-none z-[1]"
+          {/* Dynamic Glare Effect */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-30 transition-opacity duration-300"
             style={{
-              background: `radial-gradient(ellipse at 50% 100%, rgba(200,169,110,0.06) 0%, transparent 60%)`,
+              background: glareBackground,
+              opacity: isHovered ? 1 : 0
             }}
           />
 
