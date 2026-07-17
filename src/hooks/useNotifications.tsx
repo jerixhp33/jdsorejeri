@@ -16,10 +16,11 @@ interface NotificationsState {
   refresh: () => Promise<void>;
 }
 
-// Single shared client — never recreated on re-render
-const supabase = createClient();
+// Single shared client — initialized lazily to avoid build errors
+let supabase: ReturnType<typeof createClient>;
 
 export function useNotifications(): NotificationsState {
+  if (!supabase) supabase = createClient();
   const { profile } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
