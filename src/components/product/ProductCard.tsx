@@ -339,6 +339,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         </div>
       </Link>
-    </div>
+    </motion.div>
   );
 }
