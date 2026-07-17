@@ -56,10 +56,10 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
 
   const [allProducts, setAllProducts] = useState<{id: string, name: string}[]>([]);
   useEffect(() => {
-    fetch('/api/products')
+    fetch('/api/products?limit=100') // fetch more products to ensure we can select from a larger pool
       .then(res => res.json())
       .then(data => {
-        if (data.products) setAllProducts(data.products.filter((p: any) => p.id !== initialData?.id));
+        if (data.data) setAllProducts(data.data.filter((p: any) => p.id !== initialData?.id));
       })
       .catch(console.error);
   }, [initialData?.id]);

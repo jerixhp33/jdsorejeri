@@ -110,10 +110,10 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
   // Bundle selection
   const [allProducts, setAllProducts] = useState<{id: string, name: string}[]>([]);
   useEffect(() => {
-    fetch('/api/products')
+    fetch('/api/products?limit=100')
       .then(res => res.json())
       .then(data => {
-        if (data.products) setAllProducts(data.products.filter((p: any) => p.id !== product?.id));
+        if (data.data) setAllProducts(data.data.filter((p: any) => p.id !== product?.id));
       })
       .catch(console.error);
   }, [product?.id]);
