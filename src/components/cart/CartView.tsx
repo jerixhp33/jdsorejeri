@@ -297,7 +297,7 @@ export function CartView() {
             </AnimatePresence>
 
             {/* Continue shopping */}
-            <div className="flex gap-3 pt-2 pb-32 lg:pb-0">
+            <div className="flex gap-3 pt-2 pb-6 lg:pb-0">
               <Link prefetch={true} href="/category/poster"
                 className="btn-glass !py-2 !px-4 text-sm group w-fit"
               >
@@ -307,12 +307,12 @@ export function CartView() {
             </div>
           </div>
 
-          {/* ─── Order Summary ─── */}
-          <div className="lg:col-span-1 fixed bottom-0 left-0 right-0 z-50 lg:relative lg:z-auto bg-black/80 backdrop-blur-xl lg:bg-transparent p-4 lg:p-0 border-t border-white/10 lg:border-none shadow-[0_-10px_40px_rgba(0,0,0,0.5)] lg:shadow-none">
-            <div className="glass-card p-4 lg:p-6 lg:sticky lg:top-24 max-w-lg mx-auto lg:max-w-none">
-              <h2 className="hidden lg:block text-white font-semibold text-base mb-5">Order Summary</h2>
+          {/* ─── Order Summary (Scrolls normally on mobile now) ─── */}
+          <div className="lg:col-span-1 mb-24 lg:mb-0">
+            <div className="glass-card p-5 lg:p-6 lg:sticky lg:top-24 max-w-lg mx-auto lg:max-w-none">
+              <h2 className="text-white font-semibold text-base mb-5">Order Summary</h2>
 
-              <div className="hidden lg:block space-y-3 mb-5">
+              <div className="space-y-3 mb-5">
                 <div className="flex justify-between text-sm">
                   <span className="text-white/50">
                     Subtotal ({itemCount} item{itemCount !== 1 ? 's' : ''})
@@ -337,7 +337,7 @@ export function CartView() {
               </div>
               
               {appliedCoupon && (
-                <div className="hidden lg:flex justify-between text-sm mb-5">
+                <div className="flex justify-between text-sm mb-5">
                   <span className="text-green-400 flex items-center gap-1.5">
                     <Tag className="w-3.5 h-3.5" />
                     Discount ({appliedCoupon.code})
@@ -346,25 +346,23 @@ export function CartView() {
                 </div>
               )}
 
-              <div className="lg:border-t lg:border-white/10 lg:pt-4 mb-3 lg:mb-6">
+              <div className="border-t border-white/10 pt-4 mb-6">
                 <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-white/70 text-sm lg:hidden block mb-1">Total ({itemCount} items)</span>
-                    <span className="hidden lg:inline text-white font-semibold">Total</span>
-                    <span className="text-white font-bold text-xl lg:text-lg block lg:inline">{formatCurrency(finalTotal)}</span>
-                  </div>
-                  
-                  <Link prefetch={true} href="/checkout"
-                    className="w-1/2 lg:w-full btn-gold flex items-center justify-center gap-2 text-sm py-3"
-                  >
-                    Checkout
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  <span className="text-white font-semibold">Total</span>
+                  <span className="text-white font-bold text-lg">{formatCurrency(finalTotal)}</span>
                 </div>
               </div>
               
+              {/* Checkout Button for Desktop */}
+              <Link prefetch={true} href="/checkout"
+                className="hidden lg:flex w-full btn-gold items-center justify-center gap-2 text-sm py-3 mb-6"
+              >
+                Checkout
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              
               {/* Coupon Input */}
-              <div className="hidden lg:block mb-6 pt-5 border-t border-white/10">
+              <div className="pt-2">
                 {!appliedCoupon ? (
                   <div>
                     <div className="flex gap-2 mb-3">
@@ -425,12 +423,27 @@ export function CartView() {
                 )}
               </div>
 
-              {/* Delivery info */}
-              <p className="hidden lg:block text-white/30 text-xs text-center mt-4">
+              <p className="text-white/30 text-xs text-center mt-6">
                 Secure checkout and fast delivery
               </p>
             </div>
           </div>
+          
+          {/* Floating Checkout Card for Mobile */}
+          <div className="lg:hidden fixed bottom-6 left-4 right-4 z-50 pointer-events-none">
+            <div className="bg-white/10 backdrop-blur-2xl border border-white/20 p-3 rounded-2xl flex justify-between items-center shadow-[0_20px_40px_rgba(0,0,0,0.4)] pointer-events-auto">
+              <div className="pl-2">
+                <span className="text-white/60 text-[10px] uppercase tracking-wider block mb-0.5">Total</span>
+                <span className="text-white font-bold text-base">{formatCurrency(finalTotal)}</span>
+              </div>
+              <Link prefetch={true} href="/checkout"
+                className="btn-gold !py-2.5 !px-6 text-sm flex gap-2 items-center rounded-xl font-medium"
+              >
+                Checkout <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+
         </div>
       </motion.div>
     </div>
