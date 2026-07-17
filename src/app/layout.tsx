@@ -40,6 +40,11 @@ const getBaseUrl = () => {
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseUrl()),
   manifest: '/manifest.json',
+  applicationName: 'JD Store',
+  appleWebApp: {
+    title: 'JD Store',
+    statusBarStyle: 'default',
+  },
   title: {
     default: 'JD Store — Premium Wall Posters & Earrings',
     template: '%s | JD Store',
@@ -98,6 +103,20 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${playfair.variable}`}
     >
+      <head>
+        {/* JSON-LD for Site Name */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "JD Store",
+              "url": getBaseUrl(),
+            })
+          }}
+        />
+      </head>
       <body className="font-sans antialiased overflow-x-hidden" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
