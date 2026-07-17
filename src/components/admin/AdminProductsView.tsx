@@ -10,6 +10,7 @@ import type { Product, Category, ProductType } from '@/types';
 import { ProductFormModal } from './ProductFormModal';
 import { ProductWorkspace } from './ProductWorkspaceV2/ProductWorkspace';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import { Portal } from '@/components/ui/Portal';
 
 interface AdminProductsViewProps {
   initialProducts: Product[];
@@ -139,7 +140,7 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-white">Products</h1>
         <div className="flex gap-3">
@@ -292,66 +293,70 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
       </div>
 
       {showModal && (
-        <ProductFormModal
-          product={editProduct}
-          categories={categories}
-          onClose={() => { setShowModal(false); setEditProduct(null); }}
-          onSaved={handleSaved}
-        />
+        <Portal>
+          <ProductFormModal
+            product={editProduct}
+            categories={categories}
+            onClose={() => { setShowModal(false); setEditProduct(null); }}
+            onSaved={handleSaved}
+          />
+        </Portal>
       )}
 
       {showV2 && (
-        <ProductWorkspace
-          categories={categories}
-          initialData={editProduct ? {
-            id: editProduct.id,
-            name: editProduct.name,
-            slug: editProduct.slug,
-            description: editProduct.description || '',
-            short_description: editProduct.short_description || '',
-            product_type: editProduct.product_type || '',
-            category_id: editProduct.category_id || '',
-            tags: editProduct.tags || [],
-            price: editProduct.price || 0,
-            original_price: editProduct.original_price || 0,
-            cost_price: editProduct.cost_price || 0,
-            stock: editProduct.stock || 0,
-            sku: editProduct.sku || '',
-            status: (editProduct.status as any) || (editProduct.is_active ? 'active' : 'draft'),
-            is_featured: editProduct.is_featured || false,
-            is_trending: editProduct.is_trending || false,
-            is_best_seller: editProduct.is_best_seller || false,
-            weight_grams: editProduct.weight_grams || 0,
-            length_cm: editProduct.length_cm || 0,
-            width_cm: editProduct.width_cm || 0,
-            height_cm: editProduct.height_cm || 0,
-            seo_title: editProduct.seo_title || '',
-            seo_description: editProduct.seo_description || '',
-            seo_keywords: editProduct.seo_keywords || '',
-            variant_combinations: (editProduct.attributes as any)?._v2_variants?.combinations || (editProduct.sizes || []).map(s => ({
-              id: s.id,
-              options: { Size: s.label },
-              price: s.price,
-              stock: s.stock,
-              sku: s.sku,
-              is_active: s.is_active
-            })),
-            variant_options: (editProduct.attributes as any)?._v2_variants?.options || ((editProduct.sizes && editProduct.sizes.length > 0) ? [{
-              id: '1',
-              name: 'Size',
-              values: editProduct.sizes.map(s => s.label)
-            }] : []),
-            attributes: (() => {
-              // Strip out internal v2 variants from attributes shown to user
-              if (!editProduct.attributes) return {};
-              const { _v2_variants, ...rest } = editProduct.attributes as any;
-              return rest;
-            })(),
-            images: editProduct.images || []
-          } : null}
-          onClose={() => { setShowV2(false); setEditProduct(null); }}
-          onSaved={handleSaved}
-        />
+        <Portal>
+          <ProductWorkspace
+            categories={categories}
+            initialData={editProduct ? {
+              id: editProduct.id,
+              name: editProduct.name,
+              slug: editProduct.slug,
+              description: editProduct.description || '',
+              short_description: editProduct.short_description || '',
+              product_type: editProduct.product_type || '',
+              category_id: editProduct.category_id || '',
+              tags: editProduct.tags || [],
+              price: editProduct.price || 0,
+              original_price: editProduct.original_price || 0,
+              cost_price: editProduct.cost_price || 0,
+              stock: editProduct.stock || 0,
+              sku: editProduct.sku || '',
+              status: (editProduct.status as any) || (editProduct.is_active ? 'active' : 'draft'),
+              is_featured: editProduct.is_featured || false,
+              is_trending: editProduct.is_trending || false,
+              is_best_seller: editProduct.is_best_seller || false,
+              weight_grams: editProduct.weight_grams || 0,
+              length_cm: editProduct.length_cm || 0,
+              width_cm: editProduct.width_cm || 0,
+              height_cm: editProduct.height_cm || 0,
+              seo_title: editProduct.seo_title || '',
+              seo_description: editProduct.seo_description || '',
+              seo_keywords: editProduct.seo_keywords || '',
+              variant_combinations: (editProduct.attributes as any)?._v2_variants?.combinations || (editProduct.sizes || []).map(s => ({
+                id: s.id,
+                options: { Size: s.label },
+                price: s.price,
+                stock: s.stock,
+                sku: s.sku,
+                is_active: s.is_active
+              })),
+              variant_options: (editProduct.attributes as any)?._v2_variants?.options || ((editProduct.sizes && editProduct.sizes.length > 0) ? [{
+                id: '1',
+                name: 'Size',
+                values: editProduct.sizes.map(s => s.label)
+              }] : []),
+              attributes: (() => {
+                // Strip out internal v2 variants from attributes shown to user
+                if (!editProduct.attributes) return {};
+                const { _v2_variants, ...rest } = editProduct.attributes as any;
+                return rest;
+              })(),
+              images: editProduct.images || []
+            } : null}
+            onClose={() => { setShowV2(false); setEditProduct(null); }}
+            onSaved={handleSaved}
+          />
+        </Portal>
       )}
 
       {selectedIds.length > 0 && (

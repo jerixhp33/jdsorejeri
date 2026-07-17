@@ -148,7 +148,7 @@ export function AdminTestimonialsView({ testimonials: initial }: AdminTestimonia
     setModal((prev) => ({ ...prev, data: { ...prev.data, [key]: val } }));
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

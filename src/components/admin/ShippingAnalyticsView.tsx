@@ -18,7 +18,7 @@ export function ShippingAnalyticsView({ data }: { data: any }) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {kpis.map((k) => (

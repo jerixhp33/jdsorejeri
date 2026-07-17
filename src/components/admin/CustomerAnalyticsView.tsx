@@ -17,7 +17,7 @@ export function CustomerAnalyticsView({ analytics, totalCustomers }: { analytics
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {kpis.map((k) => (

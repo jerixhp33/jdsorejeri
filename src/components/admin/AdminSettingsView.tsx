@@ -57,7 +57,7 @@ export function AdminSettingsView({ settings: initial }: AdminSettingsViewProps)
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <h1 className="font-display text-3xl font-bold text-white">Settings</h1>
 
       <div className="glass-card p-6">

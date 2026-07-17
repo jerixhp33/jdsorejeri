@@ -232,7 +232,7 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-white">Broadcast</h1>
         <button

@@ -100,7 +100,7 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-white">Coupons</h1>
         <button onClick={openCreate} className="btn-gold flex items-center gap-2 text-sm">

@@ -72,7 +72,7 @@ export function CustomerProfileView({ customer }: { customer: any }) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Header Profile Card */}
       <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border-l-4 border-l-luxe-accent">
         <div className="flex items-center gap-6">
@@ -147,7 +147,7 @@ export function CustomerProfileView({ customer }: { customer: any }) {
           
           {/* OVERVIEW TAB */}
           {activeTab === 'overview' && (
-            <div className="space-y-6">
+            <div className="flex flex-col gap-6">
               <h2 className="text-lg font-bold text-white">Analytics Overview</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="glass-card p-5 rounded-xl">

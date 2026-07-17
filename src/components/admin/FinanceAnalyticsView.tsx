@@ -15,7 +15,7 @@ export function FinanceAnalyticsView({ data }: { data: any }) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Waterfall / Bar Chart */}
