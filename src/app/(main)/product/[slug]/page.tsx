@@ -61,8 +61,27 @@ export default async function ProductPage({ params }: ProductPageProps) {
     getRelatedProducts(product.id, product.category_id, 4, product.product_type),
   ]);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images?.map((img: any) => img.url) || [],
+    description: product.description,
+    offers: {
+      '@type': 'Offer',
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}/product/${product.slug}`,
+      priceCurrency: 'INR',
+      price: product.price,
+      availability: product.stock_quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    }
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <ProductDetail product={product} reviews={productReviews || []} />
       <RelatedProducts products={relatedProducts} />
     </>
