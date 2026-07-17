@@ -153,12 +153,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
                 transition={{ duration: 0.5, delay: 0.45 }}
               >
                 <Link prefetch={true} href={banner.cta_url}
-                  className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300"
-                  style={{
-                    background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
-                    color: '#0a0a0a',
-                    boxShadow: '0 0 24px rgba(200,169,110,0.25)',
-                  }}
+                  className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300 bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 hover:scale-105"
                 >
                   {banner.cta_text}
                   <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
@@ -296,12 +291,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
                     transition={{ duration: 0.5, delay: 0.45 }}
                   >
                     <Link prefetch={true} href={banners[current].cta_url}
-                      className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300"
-                      style={{
-                        background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
-                        color: '#0a0a0a',
-                        boxShadow: '0 0 24px rgba(200,169,110,0.25)',
-                      }}
+                      className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300 bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 hover:scale-105"
                     >
                       {banners[current].cta_text}
                       <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
