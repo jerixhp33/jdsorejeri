@@ -495,15 +495,10 @@ function SidebarBannerCard({ banner, priority }: { banner: Banner; priority: boo
 
         {banner.cta_text && banner.cta_url && (
           <Link prefetch={true} href={banner.cta_url}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium text-xs transition-all duration-300 self-start"
-            style={{
-              background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
-              color: '#0a0a0a',
-              boxShadow: '0 0 16px rgba(200,169,110,0.30)',
-            }}
+            className="group/btn inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium text-xs transition-all duration-300 self-start bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 hover:scale-105 shadow-xl"
           >
             {banner.cta_text}
-            <ArrowRight className="w-3 h-3 transition-transform duration-300 group-hover:translate-x-0.5" />
+            <ArrowRight className="w-3 h-3 transition-transform duration-300 group-hover/btn:translate-x-1" />
           </Link>
         )}
       </div>
@@ -703,15 +698,13 @@ export function MobileSidebarBanners({ banners }: BannersSectionProps) {
                        if (!isCenter) e.preventDefault();
                        else e.stopPropagation();
                      }}
-                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs self-start"
+                     className="group/btn inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs self-start bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 hover:scale-105 shadow-xl"
                      style={{
-                       background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
-                       color: '#0a0a0a',
                        pointerEvents: isCenter ? 'auto' : 'none',
                      }}
                    >
                      {banner.cta_text}
-                     <ArrowRight className="w-3 h-3" />
+                     <ArrowRight className="w-3 h-3 transition-transform duration-300 group-hover/btn:translate-x-1" />
                    </Link>
                  )}
               </motion.div>
@@ -813,14 +806,10 @@ function MobileSidebarCard({ banner, priority }: { banner: Banner; priority: boo
 
         {banner.cta_text && banner.cta_url && (
           <Link prefetch={true} href={banner.cta_url}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-[11px] self-start"
-            style={{
-              background: 'linear-gradient(135deg, #c8a96e, #e8d5a3)',
-              color: '#0a0a0a',
-            }}
+            className="group/btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-[11px] self-start bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 hover:scale-105 shadow-xl"
           >
             {banner.cta_text}
-            <ArrowRight className="w-3 h-3" />
+            <ArrowRight className="w-3 h-3 transition-transform duration-300 group-hover/btn:translate-x-1" />
           </Link>
         )}
       </div>
