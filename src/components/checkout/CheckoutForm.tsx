@@ -716,27 +716,7 @@ export function CheckoutForm() {
       )}
 
       <div className="mb-8">
-        {/* Progress Indicator (Moved to top) */}
-        <div className="flex items-center justify-between relative max-w-sm mx-auto mb-8 mt-2">
-          <div className="absolute left-0 top-3 -translate-y-1/2 w-full h-[2px] bg-white/10 -z-10 rounded-full"></div>
-          <div className="absolute left-0 top-3 -translate-y-1/2 w-[35%] h-[2px] bg-luxe-accent -z-10 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(200,169,110,0.5)]"></div>
-          
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-luxe-accent text-black flex items-center justify-center text-[10px] font-bold shadow-[0_0_15px_rgba(200,169,110,0.4)] relative">
-              1
-              <div className="absolute inset-0 rounded-full border border-luxe-accent animate-ping opacity-20"></div>
-            </div>
-            <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-luxe-accent font-semibold text-center w-16">Delivery</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-black border border-luxe-accent text-luxe-accent flex items-center justify-center text-[10px] font-bold">2</div>
-            <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-white/70 font-medium text-center w-16">Review</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-black border border-white/20 text-white/30 flex items-center justify-center text-[10px] font-bold">3</div>
-            <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-white/30 text-center w-16">Payment</span>
-          </div>
-        </div>
+
 
         <div className="flex items-center gap-3 mb-6">
           <Link prefetch={true} href="/cart" className="text-white/50 hover:text-white transition-colors">
