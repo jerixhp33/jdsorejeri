@@ -4,8 +4,8 @@ import { Instagram, Twitter, Mail, Phone, MapPin, ExternalLink } from 'lucide-re
 
 const FOOTER_LINKS = {
   Shop: [
-    { label: 'Wall Posters', href: '/posters' },
-    { label: 'Earrings', href: '/earrings' },
+    { label: 'Wall Posters', href: '/category/poster' },
+    { label: 'Earrings', href: '/category/earring' },
     { label: 'Collections', href: '/collections' },
   ],
   Help: [
