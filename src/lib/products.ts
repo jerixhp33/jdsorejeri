@@ -135,6 +135,34 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 }
 
 /**
+ * Fetch a single product by ID.
+ */
+export async function getProductById(id: string): Promise<Product | null> {
+  const supabase = createPublicClient();
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(
+      `
+      *,
+      category:product_categories(*),
+      images:product_images(*),
+      sizes:poster_sizes(*)
+    `
+    )
+    .eq('id', id)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching product by ID:', error);
+    return null;
+  }
+
+  return data as Product;
+}
+
+/**
  * Fetch featured products.
  */
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {

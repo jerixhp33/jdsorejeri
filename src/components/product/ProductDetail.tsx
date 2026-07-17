@@ -30,9 +30,10 @@ import { ReviewFormModal } from './ReviewFormModal';
 interface ProductDetailProps {
   product: Product;
   reviews: Review[];
+  initialBundleProduct?: Product | null;
 }
 
-export function ProductDetail({ product, reviews }: ProductDetailProps) {
+export function ProductDetail({ product, reviews, initialBundleProduct }: ProductDetailProps) {
   const router = useRouter();
   const { addItem, updateQuantity, items: cartItems, deliverySettings } = useCart();
   const { isWishlisted, toggle } = useWishlist();
@@ -59,19 +60,8 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     return product.sizes?.[0] || null;
   });
 
-  const [bundleProduct, setBundleProduct] = useState<Product | null>(null);
+  const [bundleProduct, setBundleProduct] = useState<Product | null>(initialBundleProduct || null);
   const [addingBundle, setAddingBundle] = useState(false);
-
-  useEffect(() => {
-    if (product.bundle_product_id) {
-      fetch(`/api/products/${product.bundle_product_id}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.product) setBundleProduct(data.product);
-        })
-        .catch(console.error);
-    }
-  }, [product.bundle_product_id]);
 
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);

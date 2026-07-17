@@ -2,7 +2,7 @@ export const revalidate = 60;
 
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getProductBySlug, getRelatedProducts } from '@/lib/products';
+import { getProductBySlug, getRelatedProducts, getProductById } from '@/lib/products';
 import { ProductDetail } from '@/components/product/ProductDetail';
 import { RelatedProducts } from '@/components/product/RelatedProducts';
 import { createClient } from '@/lib/supabase/server';
@@ -54,8 +54,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
     page: `/product/${slug}`,
   });
 
-  // Fetch reviews and related products in parallel (single reviews fetch, not double)
-  const [{ data: productReviews }, relatedProducts] = await Promise.all([
+  // Fetch reviews, related products, and bundle product in parallel
+  const [{ data: productReviews }, relatedProducts, bundleProduct] = await Promise.all([
     supabase
       .from('reviews')
       .select('*, user:user_profiles(name, profile_picture)')
@@ -64,6 +64,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       .order('created_at', { ascending: false })
       .limit(20),
     getRelatedProducts(product.id, product.category_id, 4, product.product_type),
+    product.bundle_product_id ? getProductById(product.bundle_product_id) : Promise.resolve(null),
   ]);
 
   const displayPrice = product.product_type !== 'poster' 
@@ -95,7 +96,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ProductDetail product={product} reviews={productReviews || []} />
+      <ProductDetail product={product} reviews={productReviews || []} initialBundleProduct={bundleProduct} />
       <RelatedProducts products={relatedProducts} />
     </>
   );
