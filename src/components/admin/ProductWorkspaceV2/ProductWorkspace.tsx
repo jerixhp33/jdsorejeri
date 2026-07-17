@@ -97,7 +97,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         is_featured: data.is_featured,
         is_trending: data.is_trending,
         is_best_seller: data.is_best_seller,
-        bundle_product_id: data.bundle_product_id,
+        bundle_product_id: data.bundle_product_id || null,
         weight_grams: data.weight_grams,
         length_cm: data.length_cm,
         width_cm: data.width_cm,

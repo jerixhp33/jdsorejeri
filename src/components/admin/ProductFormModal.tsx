@@ -245,6 +245,7 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
 
       const payload = {
         ...data,
+        bundle_product_id: data.bundle_product_id || null,
         slug,
         tags,
         attributes,
