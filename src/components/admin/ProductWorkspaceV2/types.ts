@@ -38,6 +38,7 @@ export interface ProductFormData {
   is_featured: boolean;
   is_trending: boolean;
   is_best_seller: boolean;
+  bundle_product_id?: string | null;
   
   // Shipping
   weight_grams: number;

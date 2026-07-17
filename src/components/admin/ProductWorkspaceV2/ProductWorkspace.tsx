@@ -54,6 +54,16 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
   const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const [allProducts, setAllProducts] = useState<{id: string, name: string}[]>([]);
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (data.products) setAllProducts(data.products.filter((p: any) => p.id !== initialData?.id));
+      })
+      .catch(console.error);
+  }, [initialData?.id]);
+
   const isSavingRef = useRef(false);
 
   // Auto-Save Hook (15s debounce)
@@ -87,6 +97,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         is_featured: data.is_featured,
         is_trending: data.is_trending,
         is_best_seller: data.is_best_seller,
+        bundle_product_id: data.bundle_product_id,
         weight_grams: data.weight_grams,
         length_cm: data.length_cm,
         width_cm: data.width_cm,
@@ -347,7 +358,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       case 'seo': return (
         <div className="space-y-12">
           <MarketingSection formData={formData} updateField={updateField} />
-          <SEOSection formData={formData} updateField={updateField} onGenerateSEO={generateSEO} isGeneratingSEO={isGenerating.seo} />
+          <SEOSection formData={formData} updateField={updateField} onGenerateSEO={generateSEO} isGeneratingSEO={isGenerating.seo} allProducts={allProducts} />
         </div>
       );
       default: return null;
