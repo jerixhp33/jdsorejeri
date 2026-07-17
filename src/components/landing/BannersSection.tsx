@@ -336,7 +336,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
                   </motion.div>
                 )}
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </AnimatePresence>
 
