@@ -12,7 +12,7 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
       *,
       orders!orders_user_id_fkey(
         *,
-        order_items(*, product:products(name, category_id, images)),
+        order_items(*, product:products(name, category_id, images:product_images(url, is_primary))),
         shipments(*),
         order_events(*)
       )
