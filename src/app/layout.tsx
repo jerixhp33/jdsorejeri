@@ -71,11 +71,20 @@ export const metadata: Metadata = {
     title: 'JD Store — Premium Wall Posters & Earrings',
     description: 'Museum-quality prints and artisan jewelry for the discerning collector.',
     siteName: 'JD Store',
+    images: [
+      {
+        url: '/icon-512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'JD Store Logo',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'JD Store — Premium Wall Posters & Earrings',
     description: 'Museum-quality prints and artisan jewelry for the discerning collector.',
+    images: ['/icon-512x512.png'],
   },
   robots: {
     index: true,
@@ -122,6 +131,7 @@ export default function RootLayout({
               "@type": "WebSite",
               "name": "JD Store",
               "url": getBaseUrl(),
+              "image": `${getBaseUrl()}/icon-512x512.png`,
             })
           }}
         />
