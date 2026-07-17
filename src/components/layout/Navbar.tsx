@@ -588,15 +588,15 @@ export function Navbar({ categories = [] }: NavbarProps) {
           scrolled ? "opacity-0 -translate-y-8 pointer-events-none" : "opacity-100 translate-y-0"
         )}
       >
-        <div className="w-[90%] bg-luxe-accent text-black rounded-b-2xl sm:rounded-b-3xl overflow-hidden py-1.5 sm:py-2 shadow-[0_10px_30px_rgba(200,169,110,0.2)] relative -mt-3 pt-4 -z-10">
+        <div className="w-[90%] bg-white/30 backdrop-blur-xl border border-white/40 text-black rounded-b-2xl sm:rounded-b-3xl overflow-hidden py-1.5 sm:py-2 shadow-[0_10px_30px_rgba(0,0,0,0.1)] relative -mt-3 pt-4 -z-10">
           <div className="flex whitespace-nowrap animate-marquee w-max" style={{ animationDuration: '40s' }}>
             <div className="flex shrink-0">
               {itemsToRender.map((item, i) => (
                 <span
                   key={`h1-${i}`}
-                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/80 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase font-bold"
+                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/90 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase font-bold"
                 >
-                  <Sparkles className="w-2.5 h-2.5 text-black/40" />
+                  <Sparkles className="w-2.5 h-2.5 text-black/60" />
                   {item}
                 </span>
               ))}
@@ -605,9 +605,9 @@ export function Navbar({ categories = [] }: NavbarProps) {
               {itemsToRender.map((item, i) => (
                 <span
                   key={`h2-${i}`}
-                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/80 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase font-bold"
+                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/90 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase font-bold"
                 >
-                  <Sparkles className="w-2.5 h-2.5 text-black/40" />
+                  <Sparkles className="w-2.5 h-2.5 text-black/60" />
                   {item}
                 </span>
               ))}
