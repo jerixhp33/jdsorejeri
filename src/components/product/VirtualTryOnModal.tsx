@@ -263,11 +263,12 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       const direction = await detectWallLightingDirection(url);
       setLightSource(direction);
       
-      const wallBounds = await detectWallBounds(url);
+      const wallResult = await detectWallBounds(url);
       let centerX = 0, centerY = 0;
       let scaleMult = 1;
 
-      if (wallBounds) {
+      if (wallResult) {
+        const wallBounds = wallResult.bounds;
         centerX = (wallBounds.x + wallBounds.width / 2) * 100 - 50;
         centerY = (wallBounds.y + wallBounds.height / 2) * 100 - 50;
         scaleMult = Math.min(1.5, Math.max(0.5, wallBounds.width * 2));
@@ -341,8 +342,9 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       }
       
       if (activeBg) {
-        const wallBounds = await detectWallBounds(activeBg);
-        if (wallBounds) {
+        const wallResult = await detectWallBounds(activeBg);
+        if (wallResult) {
+          const wallBounds = wallResult.bounds;
           spreadX = wallBounds.width * 100 * 0.8;
           spreadY = wallBounds.height * 100 * 0.8;
           centerX = (wallBounds.x + wallBounds.width / 2) * 100 - 50;
