@@ -116,7 +116,7 @@ export function AdminCategoriesView({ initialCategories }: AdminCategoriesViewPr
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
         {filtered.map((cat) => (
           <div key={cat.id} className={cn("glass-card p-5 relative overflow-hidden", !cat.is_active && 'opacity-50')}>
             <div className="flex justify-between items-start mb-4">

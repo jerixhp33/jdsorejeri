@@ -54,7 +54,7 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
       </div>
 
       {/* Stat cards — 2 cols on mobile, 4 on lg */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-5">
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label}

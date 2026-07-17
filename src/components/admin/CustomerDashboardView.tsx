@@ -113,7 +113,7 @@ export function CustomerDashboardView({ initialCustomers }: { initialCustomers: 
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8 gap-4">
         <div className="glass-card p-3 rounded-xl border border-white/5">
           <p className="text-white/50 text-[10px] uppercase tracking-wider mb-1">Total</p>
           <p className="text-xl font-bold text-white">{kpis.total}</p>

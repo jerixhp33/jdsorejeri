@@ -190,7 +190,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <div className="glass-card p-4 rounded-xl border border-white/5 bg-white/[0.02]">
           <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Today's Revenue</p>
           <p className="text-2xl font-bold text-emerald-400">{formatCurrency(kpis.todayRevenue)}</p>
