@@ -88,6 +88,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   );
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Disable heavy physics on touch devices (phones/tablets)
+    if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return;
+    
     const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
@@ -97,6 +100,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const handleMouseLeaveWrapper = () => {
     setIsHovered(false);
+    if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return;
     mouseX.set(0.5);
     mouseY.set(0.5);
   };

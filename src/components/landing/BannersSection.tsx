@@ -65,10 +65,17 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const imgEl = e.currentTarget as unknown as HTMLImageElement;
-    setTimeout(() => {
-      const color = sampleColor(imgEl);
-      if (color) setGlowColor(color);
-    }, 100);
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        const color = sampleColor(imgEl);
+        if (color) setGlowColor(color);
+      });
+    } else {
+      setTimeout(() => {
+        const color = sampleColor(imgEl);
+        if (color) setGlowColor(color);
+      }, 100);
+    }
   }, []);
 
   return (
@@ -99,7 +106,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
       {/* Content wrapper */}
       <div className="absolute inset-0 overflow-hidden rounded-[inherit] z-10 bg-[#0a0a0a]">
         <motion.div 
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 w-full h-full will-change-transform"
           style={{ y: bgY, scale: 1.15 }}
         >
           {(() => {
@@ -136,7 +143,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
 
         {/* Content overlay */}
         <motion.div 
-          className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20"
+          className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20 will-change-transform"
           style={{ y: textY }}
         >
           <div className="max-w-xl">
@@ -219,10 +226,17 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>, idx: number) => {
     const imgEl = e.currentTarget as unknown as HTMLImageElement;
-    setTimeout(() => {
-      const color = sampleColor(imgEl);
-      if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
-    }, 100);
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        const color = sampleColor(imgEl);
+        if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
+      });
+    } else {
+      setTimeout(() => {
+        const color = sampleColor(imgEl);
+        if (color) setGlowColors((prev) => ({ ...prev, [idx]: color }));
+      }, 100);
+    }
   }, []);
 
   const activeGlow = glowColors[current];
@@ -263,7 +277,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="absolute inset-0"
           >
-            <motion.div className="absolute inset-0 w-full h-full" style={{ y: bgY, scale: 1.15 }}>
+            <motion.div className="absolute inset-0 w-full h-full will-change-transform" style={{ y: bgY, scale: 1.15 }}>
               {(() => {
                 const currentBanner = banners[current];
                 const isVideo = currentBanner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
@@ -296,7 +310,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
             
             <motion.div 
-              className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20"
+              className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20 will-change-transform"
               style={{ y: textY }}
             >
               <div className="max-w-xl">

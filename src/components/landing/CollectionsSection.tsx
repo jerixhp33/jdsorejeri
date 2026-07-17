@@ -48,8 +48,18 @@ export function CollectionCard({ collection, index }: { collection: Collection; 
   const [glowColor, setGlowColor] = useState<string | null>(null);
 
   const onImgLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const color = sampleColor(e.currentTarget as unknown as HTMLImageElement);
-    if (color) setGlowColor(color);
+    const imgEl = e.currentTarget as unknown as HTMLImageElement;
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        const color = sampleColor(imgEl);
+        if (color) setGlowColor(color);
+      });
+    } else {
+      setTimeout(() => {
+        const color = sampleColor(imgEl);
+        if (color) setGlowColor(color);
+      }, 0);
+    }
   }, []);
 
   return (
@@ -188,9 +198,9 @@ export function CollectionsSection({ collections }: CollectionsSectionProps) {
             coverflowEffect={{
               rotate: 30,
               stretch: 0,
-              depth: 200,
+              depth: 150, // Reduced depth for performance
               modifier: 1,
-              slideShadows: true,
+              slideShadows: false, // Disabled for huge performance gain on mobile
             }}
             pagination={{ clickable: true, dynamicBullets: true }}
             modules={[EffectCoverflow, Pagination, Autoplay]}
