@@ -115,17 +115,40 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     await toggle(product.id);
   };
 
+  // Paper Unroll Scroll Reveal
+  const unrollVariants = {
+    hidden: { 
+      opacity: 0, 
+      rotateX: -45, // Roll from the top
+      y: 40,
+      scale: 0.95,
+      transformPerspective: 1200,
+      transformOrigin: "top center"
+    },
+    visible: { 
+      opacity: 1, 
+      rotateX: 0, 
+      y: 0, 
+      scale: 1,
+      transition: { 
+        duration: 0.85, 
+        ease: [0.16, 1, 0.3, 1], // Custom spring-like ease
+        delay: index * 0.1 
+      } 
+    }
+  };
+
   return (
     <motion.div
       ref={inViewRef}
+      variants={unrollVariants}
+      initial="hidden"
+      animate={inView ? "visible" : "hidden"}
       onMouseEnter={() => setIsHovered(true)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeaveWrapper}
-      className="relative rounded-[1rem] animate-card-fade"
+      className="relative rounded-[1rem] will-change-transform"
       style={{
-        animationDelay: `${index * 40}ms`,
-        opacity: 0,
-        animationFillMode: 'forwards',
         rotateX,
         rotateY,
         transformPerspective: 1000,

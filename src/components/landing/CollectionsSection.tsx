@@ -143,13 +143,19 @@ export function CollectionCard({ collection, index }: { collection: Collection; 
   );
 }
 
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { EffectCoverflow, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-coverflow';
+import 'swiper/css/pagination';
+
 export function CollectionsSection({ collections }: CollectionsSectionProps) {
   if (!collections.length) return null;
 
   return (
-    <section className="py-2">
-      <div className="page-container">
-        <div className="text-center mb-16">
+    <section className="py-8 overflow-hidden">
+      <div className="page-container relative z-10">
+        <div className="text-center mb-10 md:mb-16">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -169,13 +175,33 @@ export function CollectionsSection({ collections }: CollectionsSectionProps) {
           </motion.h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-          {collections.map((collection, i) => (
-            <CollectionCard key={collection.id} collection={collection} index={i} />
-          ))}
+        <div className="w-full max-w-6xl mx-auto -mx-4 sm:mx-auto">
+          <Swiper
+            effect={'coverflow'}
+            grabCursor={true}
+            centeredSlides={true}
+            slidesPerView={'auto'}
+            initialSlide={Math.floor(collections.length / 2)}
+            coverflowEffect={{
+              rotate: 30,
+              stretch: 0,
+              depth: 200,
+              modifier: 1,
+              slideShadows: true,
+            }}
+            pagination={{ clickable: true, dynamicBullets: true }}
+            modules={[EffectCoverflow, Pagination]}
+            className="w-full pb-14 pt-4"
+          >
+            {collections.map((collection, i) => (
+              <SwiperSlide key={collection.id} className="w-[280px] sm:w-[320px] md:w-[380px] transition-transform duration-500">
+                <CollectionCard collection={collection} index={i} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
-        <div className="text-center mt-10">
+        <div className="text-center mt-6 md:mt-10">
           <Link prefetch={true} href="/collections" className="btn-luxe-outline text-sm">
             View All Collections
           </Link>

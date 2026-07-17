@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Banner } from '@/types';
@@ -51,6 +51,17 @@ function sampleColor(imgEl: HTMLImageElement): string | null {
 
 function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean }) {
   const [glowColor, setGlowColor] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
+
+  // Background parallax: moves slower than scroll
+  const bgY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+  // Text parallax: moves faster than scroll
+  const textY = useTransform(scrollYProgress, [0, 1], ["10%", "-10%"]);
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const imgEl = e.currentTarget as unknown as HTMLImageElement;
@@ -62,6 +73,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
 
   return (
     <motion.div
+      ref={containerRef}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
@@ -85,40 +97,48 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
       )}
 
       {/* Content wrapper */}
-      <div className="absolute inset-0 overflow-hidden rounded-[inherit] z-10">
-        {(() => {
-          const isVideo = banner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
-          if (isVideo) {
+      <div className="absolute inset-0 overflow-hidden rounded-[inherit] z-10 bg-[#0a0a0a]">
+        <motion.div 
+          className="absolute inset-0 w-full h-full"
+          style={{ y: bgY, scale: 1.15 }}
+        >
+          {(() => {
+            const isVideo = banner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
+            if (isVideo) {
+              return (
+                <video
+                  src={banner.image_url}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                />
+              );
+            }
             return (
-              <video
+              <Image
                 src={banner.image_url}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                alt={banner.title || 'Banner'}
+                fill
+                crossOrigin="anonymous"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, 1400px"
+                priority={priority}
+                onLoad={handleImageLoad}
               />
             );
-          }
-          return (
-            <Image
-              src={banner.image_url}
-              alt={banner.title || 'Banner'}
-              fill
-              crossOrigin="anonymous"
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, 1400px"
-              priority={priority}
-              onLoad={handleImageLoad}
-            />
-          );
-        })()}
+          })()}
+        </motion.div>
 
         {/* Clean, simple dark gradient just enough for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
 
         {/* Content overlay */}
-        <div className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20">
+        <motion.div 
+          className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20"
+          style={{ y: textY }}
+        >
           <div className="max-w-xl">
             {banner.title && (
               <motion.h3
@@ -161,7 +181,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
               </motion.div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );
@@ -171,6 +191,17 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
   const [current, setCurrent] = useState(0);
   const [glowColors, setGlowColors] = useState<Record<number, string>>({});
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
+
+  // Background parallax: moves slower than scroll
+  const bgY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+  // Text parallax: moves faster than scroll
+  const textY = useTransform(scrollYProgress, [0, 1], ["10%", "-10%"]);
 
   const next = useCallback(() => {
     setCurrent((c) => (c + 1) % banners.length);
@@ -198,6 +229,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
 
   return (
     <motion.div
+      ref={containerRef}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
@@ -221,7 +253,7 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
       )}
 
       {/* Content wrapper */}
-      <div className="absolute inset-0 overflow-hidden rounded-[inherit] z-10">
+      <div className="absolute inset-0 overflow-hidden rounded-[inherit] z-10 bg-[#0a0a0a]">
         <AnimatePresence initial={false}>
           <motion.div
             key={current}
@@ -231,37 +263,42 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="absolute inset-0"
           >
-            {(() => {
-              const currentBanner = banners[current];
-              const isVideo = currentBanner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
-              if (isVideo) {
+            <motion.div className="absolute inset-0 w-full h-full" style={{ y: bgY, scale: 1.15 }}>
+              {(() => {
+                const currentBanner = banners[current];
+                const isVideo = currentBanner.image_url?.split('?')[0].match(/\.(mp4|webm|ogg)$/i);
+                if (isVideo) {
+                  return (
+                    <video
+                      src={currentBanner.image_url}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    />
+                  );
+                }
                 return (
-                  <video
+                  <Image
                     src={currentBanner.image_url}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    alt={currentBanner.title || "Banner"}
+                    fill
+                    crossOrigin="anonymous"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 1400px"
+                    priority={current === 0}
+                    onLoad={(e) => handleImageLoad(e, current)}
                   />
                 );
-              }
-              return (
-                <Image
-                  src={currentBanner.image_url}
-                  alt={currentBanner.title || "Banner"}
-                  fill
-                  crossOrigin="anonymous"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 1400px"
-                  priority={current === 0}
-                  onLoad={(e) => handleImageLoad(e, current)}
-                />
-              );
-            })()}
+              })()}
+            </motion.div>
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
             
-            <div className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20">
+            <motion.div 
+              className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20"
+              style={{ y: textY }}
+            >
               <div className="max-w-xl">
                 {banners[current].title && (
                   <motion.h3
