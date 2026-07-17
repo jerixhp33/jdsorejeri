@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 // @ts-ignore
 import Persp from 'perspective-transform';
@@ -49,10 +50,12 @@ export default function ReadOnlyGallery({ layout }: { layout: any }) {
     <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-black/90 pt-16">
       
       {/* Background Room Image */}
-      <img 
+      <Image 
         src={layout.room_theme_url} 
         alt="Room" 
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        fill
+        className="object-cover z-0"
+        priority
       />
       
       {/* Lighting Gradient */}
@@ -95,11 +98,13 @@ export default function ReadOnlyGallery({ layout }: { layout: any }) {
                   : (layout.light_source === 'left' ? '12px 12px 30px rgba(0,0,0,0.6)' : layout.light_source === 'right' ? '-12px 12px 30px rgba(0,0,0,0.6)' : '0 12px 30px rgba(0,0,0,0.6)')
               }}
             >
-              <img 
+              <Image 
                 src={poster.url} 
                 alt={poster.productName} 
-                className="w-full h-full object-cover shadow-inner pointer-events-none"
+                fill
+                className="object-cover shadow-inner pointer-events-none"
                 crossOrigin="anonymous"
+                loading="lazy"
               />
             </div>
           ))}

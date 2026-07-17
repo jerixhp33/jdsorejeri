@@ -67,7 +67,7 @@ export function Footer() {
                 <Instagram className="w-4 h-4" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://x.com/jdstorejeri"
                 rel="noopener noreferrer"
                 className="p-2.5 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
                 aria-label="Twitter"

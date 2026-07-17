@@ -2,20 +2,39 @@ import { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const getBaseUrl = () => {
+    if (process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')) {
+      return process.env.NEXT_PUBLIC_SITE_URL;
+    }
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+      return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+    }
+    if (process.env.VERCEL_URL) {
+      return `https://${process.env.VERCEL_URL}`;
+    }
+    return 'https://jdstorejeri.vercel.app';
+  };
   const supabase = await createClient();
-  let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
-  if (baseUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
-    baseUrl = 'https://jdstorejeri.vercel.app';
-  }
+
+  const baseUrl = getBaseUrl();
+
+  // Known product types for category pages
+  const categoryTypes = ['poster', 'earring', 'hairband', 'bracelet', 'keychain'];
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: `${baseUrl}/posters`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/earrings`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    ...categoryTypes.map((type) => ({
+      url: `${baseUrl}/category/${type}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    })),
     { url: `${baseUrl}/collections`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
   ];
 
   // Dynamic product pages

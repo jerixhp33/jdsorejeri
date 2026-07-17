@@ -21,9 +21,14 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   const primaryImage = product.images?.find((img) => img.is_primary)?.url || product.images?.[0]?.url;
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
+
   return {
     title: product.name,
     description: product.description.slice(0, 160),
+    alternates: {
+      canonical: `${baseUrl}/product/${slug}`,
+    },
     openGraph: {
       title: product.name,
       description: product.description.slice(0, 160),

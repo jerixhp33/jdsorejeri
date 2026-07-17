@@ -19,10 +19,14 @@ function formatTitle(type: string): string {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { type } = await params;
   const title = formatTitle(type);
-  
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
+
   return {
     title,
     description: `Browse our collection of premium ${title.toLowerCase()}.`,
+    alternates: {
+      canonical: `${baseUrl}/category/${type}`,
+    },
   };
 }
 
