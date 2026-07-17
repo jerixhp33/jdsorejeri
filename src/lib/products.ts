@@ -122,7 +122,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
       sizes:poster_sizes(*)
     `
     )
-    .eq('slug', slug)
+    .eq('slug', decodeURIComponent(slug))
     .eq('is_active', true)
     .maybeSingle();
 

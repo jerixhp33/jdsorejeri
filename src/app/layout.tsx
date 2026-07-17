@@ -20,6 +20,7 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+  adjustFontFallback: false,
 });
 
 const playfair = Playfair_Display({
@@ -27,14 +28,27 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
   display: 'swap',
   weight: ['400', '500', '600', '700', '800', '900'],
+  adjustFontFallback: false,
 });
 
 const getBaseUrl = () => {
-  const url = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
-  if (url.includes('localhost') && process.env.NODE_ENV === 'production') {
-    return 'https://jdstorejeri.vercel.app';
+  if (process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
   }
-  return url;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return 'https://jdstorejeri.vercel.app';
+};
+
+export const viewport: Viewport = {
+  themeColor: '#000000',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export const metadata: Metadata = {
@@ -67,16 +81,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: process.env.NEXT_PUBLIC_SITE_URL,
+    url: getBaseUrl(),
     title: 'JD Store — Premium Wall Posters & Earrings',
     description: 'Museum-quality prints and artisan jewelry for the discerning collector.',
     siteName: 'JD Store',
     images: [
       {
-        url: '/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'JD Store Logo',
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'JD Store',
       },
     ],
   },
@@ -84,7 +98,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'JD Store — Premium Wall Posters & Earrings',
     description: 'Museum-quality prints and artisan jewelry for the discerning collector.',
-    images: ['/icon-512x512.png'],
+    images: ['/og-image.jpg'],
   },
   robots: {
     index: true,
@@ -99,16 +113,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-  ],
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-};
+
 
 export default function RootLayout({
   children,
