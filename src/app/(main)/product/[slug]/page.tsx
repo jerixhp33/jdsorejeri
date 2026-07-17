@@ -61,6 +61,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
     getRelatedProducts(product.id, product.category_id, 4, product.product_type),
   ]);
 
+  const displayPrice = product.product_type !== 'poster' 
+    ? (product.price || 0) 
+    : (product.sizes?.[0]?.price || 0);
+
+  const isAvailable = product.product_type !== 'poster'
+    ? (product.stock || 0) > 0
+    : (product.sizes?.some(s => s.stock > 0));
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -71,8 +79,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       '@type': 'Offer',
       url: `${process.env.NEXT_PUBLIC_SITE_URL}/product/${product.slug}`,
       priceCurrency: 'INR',
-      price: product.price,
-      availability: product.stock_quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      price: displayPrice,
+      availability: isAvailable ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
     }
   };
 
