@@ -4,8 +4,8 @@ import { cookies } from 'next/headers';
 import ReadOnlyGallery from './ReadOnlyGallery';
 
 export const metadata = {
-  title: 'Gallery Design | Luxe Store',
-  description: 'A beautiful gallery wall layout created by a Luxe Store user.',
+  title: 'Gallery Design | JD Store',
+  description: 'A beautiful gallery wall layout created by a JD Store user.',
 };
 
 export default async function GalleryPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -35,11 +35,8 @@ export default async function GalleryPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="min-h-screen bg-black overflow-hidden flex flex-col">
-      <header className="absolute top-0 inset-x-0 z-50 p-6 flex justify-between items-center pointer-events-none">
-        <h1 className="font-display text-2xl font-bold text-white uppercase tracking-widest pointer-events-auto">
-          Luxe <span className="text-[#c8a96e]">Store</span>
-        </h1>
-        <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-auto">
+      <header className="absolute top-0 inset-x-0 z-50 p-4 sm:p-6 flex justify-end items-center pointer-events-none">
+        <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-auto mt-2 sm:mt-0">
           <span className="text-white/80 text-sm font-medium">Shared Gallery Design</span>
         </div>
       </header>
