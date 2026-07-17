@@ -1,14 +1,22 @@
 import webpush from './web-push';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize a server-side Supabase client for admin operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let supabaseInstance: any = null;
+function getSupabase() {
+  if (!supabaseInstance) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
+    supabaseInstance = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    );
+  }
+  return supabaseInstance;
+}
 
 export async function sendWebPushToUser(userId: string, payload: { title: string; body: string; url?: string; image?: string; icon?: string }) {
   try {
+    const supabase = getSupabase();
+    if (!supabase) return;
     // The userId passed from orders is usually the profile.id, but push_subscriptions uses profile.uid
     const { data: profile } = await supabase
       .from('user_profiles')
@@ -31,7 +39,7 @@ export async function sendWebPushToUser(userId: string, payload: { title: string
 
     if (!subscriptions || subscriptions.length === 0) return;
 
-    const pushPromises = subscriptions.map(async (sub) => {
+    const pushPromises = subscriptions.map(async (sub: any) => {
       try {
         await webpush.sendNotification(
           {
@@ -67,6 +75,8 @@ export async function sendWebPushToUser(userId: string, payload: { title: string
 
 export async function broadcastWebPush(payload: { title: string; body: string; url?: string; image?: string; icon?: string }) {
   try {
+    const supabase = getSupabase();
+    if (!supabase) return;
     // Note: for very large user bases, this should be paginated or sent to a queue
     const { data: subscriptions } = await supabase
       .from('push_subscriptions')
@@ -74,7 +84,7 @@ export async function broadcastWebPush(payload: { title: string; body: string; u
 
     if (!subscriptions || subscriptions.length === 0) return;
 
-    const pushPromises = subscriptions.map(async (sub) => {
+    const pushPromises = subscriptions.map(async (sub: any) => {
       try {
         await webpush.sendNotification(
           {
@@ -107,6 +117,8 @@ export async function broadcastWebPush(payload: { title: string; body: string; u
 
 export async function notifyAdmins(payload: { title: string; body: string; url?: string; image?: string; icon?: string }) {
   try {
+    const supabase = getSupabase();
+    if (!supabase) return;
     // Get all admin users
     const { data: admins } = await supabase
       .from('user_profiles')
@@ -115,7 +127,7 @@ export async function notifyAdmins(payload: { title: string; body: string; url?:
 
     if (!admins || admins.length === 0) return;
 
-    const adminUids = admins.map(a => a.uid);
+    const adminUids = admins.map((a: any) => a.uid);
 
     // Get all subscriptions for admins
     const { data: subscriptions } = await supabase
@@ -125,7 +137,7 @@ export async function notifyAdmins(payload: { title: string; body: string; url?:
 
     if (!subscriptions || subscriptions.length === 0) return;
 
-    const pushPromises = subscriptions.map(async (sub) => {
+    const pushPromises = subscriptions.map(async (sub: any) => {
       try {
         await webpush.sendNotification(
           {
