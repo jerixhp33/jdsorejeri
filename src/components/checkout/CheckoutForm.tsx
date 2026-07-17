@@ -244,7 +244,9 @@ export function CheckoutForm() {
     : 0;
   
   const isGift = watch('is_gift');
-  const giftWrapFee = (isGift && storeSettings?.is_gift_wrapping_enabled) ? (storeSettings.gift_wrapping_price || 0) : 0;
+  const giftWrapFee = (isGift && storeSettings?.gift_wrapping_enabled === 'true') 
+    ? Number(storeSettings.gift_wrapping_fee || 0) 
+    : 0;
 
   const finalTotal = Math.max(0, total - discountAmount) + giftWrapFee;
   
@@ -881,7 +883,7 @@ export function CheckoutForm() {
           <div className="glass-card p-6">
             <h2 className="text-white font-semibold text-sm mb-5">Additional Services & Notes</h2>
             
-            {storeSettings?.is_gift_wrapping_enabled && (
+            {storeSettings?.gift_wrapping_enabled === 'true' && (
               <div className="mb-6 p-4 rounded-xl border border-luxe-accent/20 bg-luxe-accent/5">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <div className="relative flex items-center justify-center mt-1">
@@ -892,7 +894,7 @@ export function CheckoutForm() {
                   </div>
                   <div className="flex-1">
                     <p className="text-white text-sm font-medium">Add Gift Wrapping</p>
-                    <p className="text-white/60 text-xs mt-1">Make it special with our premium packaging (+{formatCurrency(storeSettings.gift_wrapping_price || 0)})</p>
+                    <p className="text-white/60 text-xs mt-1">Make it special with our premium packaging (+{formatCurrency(Number(storeSettings.gift_wrapping_fee || 0))})</p>
                   </div>
                 </label>
 
