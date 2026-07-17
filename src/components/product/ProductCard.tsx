@@ -84,7 +84,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   
   const glareBackground = useTransform(
     [mouseXSpring, mouseYSpring],
-    ([x, y]) => `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.15) 0%, transparent 60%)`
+    ([x, y]: number[]) => `radial-gradient(circle at ${(x || 0.5) * 100}% ${(y || 0.5) * 100}%, rgba(255,255,255,0.15) 0%, transparent 60%)`
   );
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
