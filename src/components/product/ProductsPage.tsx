@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
+import { SlidersHorizontal, X, ChevronDown, Search, ArrowLeft } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { ProductGridSkeleton } from './ProductGridSkeleton';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -84,6 +84,7 @@ function CustomSelect({ value, onChange, options, minWidth = 150 }: {
 }
 
 export function ProductsPage({ productType, title, subtitle }: ProductsPageProps) {
+  const router = useRouter();
   const [categories, setCategories]       = useState<Category[]>([]);
   const [filtersOpen, setFiltersOpen]     = useState(false);
   const [search, setSearch]               = useState('');
@@ -98,16 +99,8 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
   
   const sliderMax = productType === 'poster' ? 2000 : 10000;
   const sliderStep = productType === 'poster' ? 50 : 100;
-
-  // Fetch categories via API route (server-side, bypasses anon RLS issue)
-  useEffect(() => {
-    fetch(`/api/products/categories?type=${productType}`)
-      .then(r => r.json())
-      .then(data => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => setCategories([]));
-  }, [productType]);
-
-  // Debounce search input
+  
+  // Debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
@@ -115,19 +108,36 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
     return () => clearTimeout(handler);
   }, [search]);
 
-  const fetchProductsPage = async ({ pageParam = 1 }) => {
+  // Fetch categories for filter
+  useEffect(() => {
+    async function fetchCats() {
+      try {
+        const res = await fetch(`/api/products/categories?type=${productType}`);
+        const data = await res.json();
+        setCategories(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch categories', err);
+        setCategories([]);
+      }
+    }
+    fetchCats();
+  }, [productType]);
+
+  const fetchProducts = async ({ pageParam = 1 }) => {
     const params = new URLSearchParams({
+      page: pageParam.toString(),
+      limit: LIMIT.toString(),
       type: productType,
-      page: String(pageParam),
-      limit: String(LIMIT),
-      sort,
+      sort
     });
-    if (selectedCategory) params.set('category', selectedCategory);
-    if (debouncedSearch)  params.set('search', debouncedSearch);
-    if (inStockOnly)      params.set('inStock', '1');
-    if (maxPrice < sliderMax) params.set('maxPrice', String(maxPrice));
+
+    if (selectedCategory) params.append('category', selectedCategory);
+    if (debouncedSearch) params.append('search', debouncedSearch);
+    if (inStockOnly) params.append('inStock', '1');
+    params.append('maxPrice', maxPrice.toString());
 
     const res = await fetch(`/api/products?${params.toString()}`);
+    if (!res.ok) throw new Error('Network response was not ok');
     return res.json();
   };
 
@@ -139,7 +149,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
     isLoading,
   } = useInfiniteQuery({
     queryKey: ['products', productType, selectedCategory, debouncedSearch, sort, maxPrice, inStockOnly],
-    queryFn: fetchProductsPage,
+    queryFn: fetchProducts,
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
       const fetchedCount = allPages.reduce((acc, page) => acc + (page.data?.length || 0), 0);
@@ -170,15 +180,25 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
   const hasActiveFilters = !!(selectedCategory || debouncedSearch || inStockOnly);
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="page-container pt-16 sm:pt-20 md:pt-24 pb-8" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+    <div className="page-container py-16 sm:py-20 md:py-24 max-w-7xl relative">
+      {/* Background ambient glow */}
+      <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-luxe-accent/5 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Header & Controls */}
+      <div className="mb-12 md:mb-16">
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10"
         >
           <div>
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 mb-6 px-4 py-2 rounded-[1rem] bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm hover:bg-white/20 transition-all w-fit group shadow-xl"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              Back
+            </button>
             <p className="text-luxe-accent text-sm tracking-widest uppercase mb-2">
               {productType === 'poster' ? 'Wall Art' : productType === 'other' ? 'Accessories' : productType.replace('_', ' ')}
             </p>
