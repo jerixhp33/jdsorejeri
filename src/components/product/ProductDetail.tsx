@@ -176,7 +176,6 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     try {
       await new Promise(r => setTimeout(r, 400));
       await addItem(product.id, unitPrice, quantity, hasVariants ? selectedSize?.id : undefined);
-      toast.success('Added to cart');
     } finally {
       setAddingToCart(false);
     }
