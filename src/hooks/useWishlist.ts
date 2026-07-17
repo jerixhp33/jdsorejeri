@@ -16,10 +16,8 @@ interface WishlistState {
   refresh: () => Promise<void>;
 }
 
-// Single shared client — stable across re-renders
-const supabase = createClient();
-
 export function useWishlist(): WishlistState {
+  const supabase = createClient();
   const { profile } = useAuth();
   const queryClient = useQueryClient();
 

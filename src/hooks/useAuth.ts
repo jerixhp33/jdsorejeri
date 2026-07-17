@@ -13,13 +13,13 @@ interface AuthState {
   isAdmin: boolean;
 }
 
-// Single shared client — stable across re-renders
-const supabase = createClient();
-
 export function useAuth(): AuthState {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Safe to call inside component, createBrowserClient caches it
+  const supabase = createClient();
 
   const fetchProfile = async () => {
     try {
