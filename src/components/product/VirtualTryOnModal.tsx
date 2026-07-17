@@ -263,7 +263,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       const direction = await detectWallLightingDirection(url);
       setLightSource(direction);
       
-      const wallResult = await detectWallBounds(url);
+      const wallResult = await detectWallBounds(url, {
+        targetLabel: ['wall', 'door', 'cabinet', 'wardrobe', 'board', 'screen', 'blind', 'fence', 'bulletin board', 'poster'],
+        minConfidence: 0.10 // Extremely lenient for user uploads
+      });
       let centerX = 0, centerY = 0;
       let scaleMult = 1;
 
@@ -342,7 +345,10 @@ export function VirtualTryOnModal({ isOpen, onClose, posterUrl, currentProduct }
       }
       
       if (activeBg) {
-        const wallResult = await detectWallBounds(activeBg);
+        const wallResult = await detectWallBounds(activeBg, {
+          targetLabel: ['wall', 'door', 'cabinet', 'wardrobe', 'board', 'screen', 'blind', 'fence', 'bulletin board', 'poster'],
+          minConfidence: 0.10
+        });
         if (wallResult) {
           const wallBounds = wallResult.bounds;
           spreadX = wallBounds.width * 100 * 0.8;

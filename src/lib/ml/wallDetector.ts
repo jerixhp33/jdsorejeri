@@ -39,7 +39,7 @@ export interface WallDetectionOptions {
   minCoverageRatio?: number;
   minBboxCoverage?: number;
   minConfidence?: number;
-  targetLabel?: string;
+  targetLabel?: string | string[];
   timeoutMs?: number;
   warmup?: boolean;
   debug?: boolean;
@@ -285,11 +285,14 @@ function applyInset(
 
 function pickBestSegment(
   segments: SegmentResult[],
-  targetLabel: string,
+  targetLabel: string | string[],
 ): SegmentResult | null {
-  const label = targetLabel.toLowerCase();
+  const labels = Array.isArray(targetLabel) 
+    ? targetLabel.map(l => l.toLowerCase()) 
+    : [targetLabel.toLowerCase()];
+    
   return segments.reduce<SegmentResult | null>((best, current) => {
-    if (current.label.toLowerCase() !== label) return best;
+    if (!labels.includes(current.label.toLowerCase())) return best;
     return !best || current.score > best.score ? current : best;
   }, null);
 }
@@ -297,9 +300,10 @@ function pickBestSegment(
 // ── Cache key ────────────────────────────────────────────────────────────────
 
 function buildCacheKey(url: string, opts: Required<Omit<WallDetectionOptions, 'signal' | 'onProgress' | 'debug'>>): string {
+  const labelKey = Array.isArray(opts.targetLabel) ? opts.targetLabel.join(',') : opts.targetLabel;
   return [
     url,
-    opts.targetLabel,
+    labelKey,
     opts.insetFactor,
     opts.minCoverageRatio,
     opts.minBboxCoverage,
