@@ -144,7 +144,7 @@ export function CollectionCard({ collection, index }: { collection: Collection; 
 }
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { EffectCoverflow, Pagination } from 'swiper/modules';
+import { EffectCoverflow, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';
@@ -182,6 +182,9 @@ export function CollectionsSection({ collections }: CollectionsSectionProps) {
             centeredSlides={true}
             slidesPerView={'auto'}
             initialSlide={Math.floor(collections.length / 2)}
+            autoplay={{ delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true }}
+            speed={900}
+            loop={true}
             coverflowEffect={{
               rotate: 30,
               stretch: 0,
@@ -190,7 +193,7 @@ export function CollectionsSection({ collections }: CollectionsSectionProps) {
               slideShadows: true,
             }}
             pagination={{ clickable: true, dynamicBullets: true }}
-            modules={[EffectCoverflow, Pagination]}
+            modules={[EffectCoverflow, Pagination, Autoplay]}
             className="w-full pb-14 pt-4"
           >
             {collections.map((collection, i) => (
