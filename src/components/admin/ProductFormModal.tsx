@@ -57,6 +57,7 @@ const productSchema = z.object({
   is_best_seller: z.boolean().default(false),
   is_new_arrival: z.boolean().default(false),
   is_limited_edition: z.boolean().default(false),
+  bundle_product_id: z.string().optional().nullable(),
   slug: z.string().optional(),
 });
 
@@ -105,6 +106,17 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
   
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
   const [deletedStoragePaths, setDeletedStoragePaths] = useState<string[]>([]);
+
+  // Bundle selection
+  const [allProducts, setAllProducts] = useState<{id: string, name: string}[]>([]);
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (data.products) setAllProducts(data.products.filter((p: any) => p.id !== product?.id));
+      })
+      .catch(console.error);
+  }, [product?.id]);
 
   const [sizes, setSizes] = useState<SizeRow[]>(
     product?.sizes && product.sizes.length > 0
@@ -667,6 +679,17 @@ export function ProductFormModal({ product, categories, onClose, onSaved, onSucc
                   </div>
                 </label>
               ))}
+            </div>
+
+            <div className="pt-4 border-t border-white/10 mt-6">
+              <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Bundle Partner Product</label>
+              <p className="text-white/40 text-[10px] mb-2">Select a complementary product to create a "Frequently Bought Together" bundle.</p>
+              <select {...register('bundle_product_id')} className="input-luxe py-3">
+                <option value="">No Bundle</option>
+                {allProducts.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
             </div>
           </div>
 

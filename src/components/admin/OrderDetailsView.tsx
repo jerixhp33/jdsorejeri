@@ -316,9 +316,20 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
                 )}
               </div>
               {order.delivery_instructions && (
-                <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 mt-4">
                   <p className="text-amber-400 text-xs font-semibold uppercase mb-1">Delivery Notes</p>
                   <p className="text-white/80 text-sm">{order.delivery_instructions}</p>
+                </div>
+              )}
+              {order.is_gift && (
+                <div className="p-3 bg-pink-500/10 rounded-lg border border-pink-500/20 mt-4">
+                  <p className="text-pink-400 text-xs font-semibold uppercase mb-1">🎁 Gift Wrapping Requested</p>
+                  {order.gift_message && (
+                    <div className="mt-2 text-white/80 text-sm">
+                      <span className="text-white/40 text-xs uppercase block mb-1">Gift Message:</span>
+                      <p className="italic bg-white/5 p-2 rounded border border-white/10">"{order.gift_message}"</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

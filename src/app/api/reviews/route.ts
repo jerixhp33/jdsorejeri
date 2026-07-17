@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     if (!profile) return NextResponse.json({ error: 'User profile not found.' }, { status: 404 });
 
     const body = await request.json();
-    const { productId, rating, title, reviewBody } = body;
+    const { productId, rating, title, reviewBody, image_url } = body;
 
     if (!productId || !rating || rating < 1 || rating > 5) {
       return NextResponse.json({ error: 'Invalid product or rating.' }, { status: 400 });
@@ -39,8 +39,9 @@ export async function POST(request: NextRequest) {
       rating,
       title,
       body: reviewBody,
+      image_url: image_url || null,
       is_verified: true,
-      is_approved: true, // Auto-approve so it shows immediately
+      is_approved: false, // Wait for admin approval
     }).select().single();
 
     if (error) throw error;

@@ -59,6 +59,20 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     return product.sizes?.[0] || null;
   });
 
+  const [bundleProduct, setBundleProduct] = useState<Product | null>(null);
+  const [addingBundle, setAddingBundle] = useState(false);
+
+  useEffect(() => {
+    if (product.bundle_product_id) {
+      fetch(`/api/products/${product.bundle_product_id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.product) setBundleProduct(data.product);
+        })
+        .catch(console.error);
+    }
+  }, [product.bundle_product_id]);
+
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [zoomed, setZoomed] = useState(false);
@@ -157,15 +171,35 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     }
     if (!inStock || cartQuantity >= dbStock) return;
     
-    haptic('heavy');
+    haptic('medium');
     setAddingToCart(true);
-    await addItem(
-      product.id,
-      unitPrice,
-      quantity,
-      hasVariants ? selectedSize?.id : undefined
-    );
-    setAddingToCart(false);
+    try {
+      await new Promise(r => setTimeout(r, 400));
+      await addItem(product.id, unitPrice, quantity, hasVariants ? selectedSize?.id : undefined);
+      toast.success('Added to cart');
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
+  const handleAddBundle = async () => {
+    if (!bundleProduct) return;
+    haptic('medium');
+    setAddingBundle(true);
+    try {
+      await new Promise(r => setTimeout(r, 400));
+      
+      const hasVariants = product.sizes && product.sizes.length > 0;
+      await addItem(product.id, unitPrice, quantity, hasVariants ? selectedSize?.id : undefined, true);
+      
+      const bundleHasVariants = bundleProduct.sizes && bundleProduct.sizes.length > 0;
+      const bundlePrice = bundleHasVariants && bundleProduct.sizes?.[0] ? bundleProduct.sizes[0].price : (bundleProduct.price || 0);
+      await addItem(bundleProduct.id, bundlePrice, 1, bundleHasVariants ? bundleProduct.sizes?.[0]?.id : undefined, true);
+      
+      toast.success('Bundle added to cart!');
+    } finally {
+      setAddingBundle(false);
+    }
   };
 
   const handleWaitlist = async () => {
@@ -588,6 +622,39 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
               )}
             </div>
 
+            {/* Bundle UI */}
+            {bundleProduct && (
+              <div className="mb-8 p-5 rounded-2xl border border-luxe-accent/20 bg-white/5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-3 opacity-10">
+                  <Package className="w-24 h-24 text-luxe-accent" />
+                </div>
+                
+                <h3 className="text-sm font-semibold text-luxe-accent uppercase tracking-wider mb-4 relative z-10">
+                  Frequently Bought Together
+                </h3>
+                
+                <div className="flex items-center gap-4 relative z-10">
+                  <div className="flex-1">
+                    <p className="text-white text-base font-medium leading-tight">{bundleProduct.name}</p>
+                    <p className="text-white/60 text-sm mt-1">{formatCurrency(bundleProduct.sizes && bundleProduct.sizes.length > 0 ? bundleProduct.sizes[0].price : (bundleProduct.price || 0))}</p>
+                  </div>
+                  
+                  <button
+                    onClick={handleAddBundle}
+                    disabled={addingBundle}
+                    className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-luxe-accent text-black hover:bg-white hover:text-black transition-all"
+                  >
+                    {addingBundle ? (
+                      <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+                    ) : (
+                      <Package className="w-4 h-4" />
+                    )}
+                    {addingBundle ? 'Adding...' : 'Add Bundle'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Wishlist + Share */}
             <div className="flex items-center gap-3 mb-8">
               <button
@@ -824,7 +891,17 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
                     <p className="text-white text-sm font-medium mb-1">{review.title}</p>
                   )}
                   {review.body && (
-                    <p className="text-white/55 text-sm leading-relaxed">{review.body}</p>
+                    <p className="text-white/55 text-sm leading-relaxed mb-3">{review.body}</p>
+                  )}
+                  {review.image_url && (
+                    <div className="mt-3 relative w-24 h-24 rounded-lg overflow-hidden border border-white/10 group cursor-pointer">
+                      <Image src={review.image_url} alt="Review Image" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <ZoomIn className="w-4 h-4 text-white" />
+                      </div>
+                      {/* For a real app, clicking this would open a lightbox. We'll use a simple anchor for now. */}
+                      <a href={review.image_url} target="_blank" rel="noreferrer" className="absolute inset-0 z-10" />
+                    </div>
                   )}
                 </motion.div>
               ))}

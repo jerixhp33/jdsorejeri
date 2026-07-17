@@ -40,6 +40,8 @@ const checkoutSchema = z.object({
   landmark: z.string().optional(),
   delivery_notes: z.string().optional(),
   delivery_instructions: z.string().optional(),
+  is_gift: z.boolean().optional(),
+  gift_message: z.string().optional(),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -85,6 +87,17 @@ export function CheckoutForm() {
   useEffect(() => {
     supabase.from('coupons').select('*').eq('is_active', true).then(({ data }) => {
       if (data) setAvailableCoupons(data);
+    });
+  }, [supabase]);
+
+  // Store Settings (for Gift Wrapping)
+  const [storeSettings, setStoreSettings] = useState<any>(null);
+  useEffect(() => {
+    supabase.from('settings').select('key, value').then(({ data }) => {
+      if (data) {
+        const config = data.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
+        setStoreSettings(config);
+      }
     });
   }, [supabase]);
 
@@ -230,7 +243,10 @@ export function CheckoutForm() {
         : appliedCoupon.discount_value)
     : 0;
   
-  const finalTotal = Math.max(0, total - discountAmount);
+  const isGift = watch('is_gift');
+  const giftWrapFee = (isGift && storeSettings?.is_gift_wrapping_enabled) ? (storeSettings.gift_wrapping_price || 0) : 0;
+
+  const finalTotal = Math.max(0, total - discountAmount) + giftWrapFee;
   
   // Auto-remove coupon if subtotal drops below minimum order amount
   useEffect(() => {
@@ -294,6 +310,8 @@ export function CheckoutForm() {
           delivery_notes: data.delivery_notes || null,
           delivery_instructions: data.delivery_instructions || null,
           whatsapp_sent: false,
+          is_gift: data.is_gift || false,
+          gift_message: data.gift_message || null,
         })
         .select().single();
       if (orderErr) throw orderErr;
@@ -857,11 +875,36 @@ export function CheckoutForm() {
               </div>
             </div>
           </div>
-          </div>
+        </div>
 
-          {/* Notes */}
+          {/* Gift Wrapping & Notes */}
           <div className="glass-card p-6">
-            <h2 className="text-white font-semibold text-sm mb-5">Additional Notes</h2>
+            <h2 className="text-white font-semibold text-sm mb-5">Additional Services & Notes</h2>
+            
+            {storeSettings?.is_gift_wrapping_enabled && (
+              <div className="mb-6 p-4 rounded-xl border border-luxe-accent/20 bg-luxe-accent/5">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <div className="relative flex items-center justify-center mt-1">
+                    <input type="checkbox" {...register('is_gift')} className="peer sr-only" />
+                    <div className="w-5 h-5 rounded border-2 border-white/30 peer-checked:bg-luxe-accent peer-checked:border-luxe-accent transition-all flex items-center justify-center">
+                      <Check className="w-3.5 h-3.5 text-black opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white text-sm font-medium">Add Gift Wrapping</p>
+                    <p className="text-white/60 text-xs mt-1">Make it special with our premium packaging (+{formatCurrency(storeSettings.gift_wrapping_price || 0)})</p>
+                  </div>
+                </label>
+
+                {watch('is_gift') && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4 pt-4 border-t border-white/10">
+                    <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Gift Message (Optional)</label>
+                    <textarea {...register('gift_message')} className="input-luxe resize-none" rows={2} placeholder="Write a sweet message for the recipient..." />
+                  </motion.div>
+                )}
+              </div>
+            )}
+
             <div className="space-y-4">
               <div>
                 <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Delivery Notes</label>
@@ -869,7 +912,7 @@ export function CheckoutForm() {
               </div>
               <div>
                 <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Order Notes</label>
-                <textarea {...register('delivery_instructions')} className="input-luxe resize-none" rows={2} placeholder="Gift wrapping, custom framing requests, etc." />
+                <textarea {...register('delivery_instructions')} className="input-luxe resize-none" rows={2} placeholder="Custom framing requests, etc." />
               </div>
             </div>
           </div>

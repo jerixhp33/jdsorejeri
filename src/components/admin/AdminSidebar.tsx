@@ -24,6 +24,7 @@ const NAV = [
   { href: '/admin/banners', label: 'Banners', icon: ImageIcon },
   { href: '/admin/collections', label: 'Collections', icon: Layers },
   { href: '/admin/broadcast', label: 'Broadcast', icon: Mail },
+  { href: '/admin/reviews', label: 'Reviews', icon: Star },
   { href: '/admin/testimonials', label: 'Testimonials', icon: Star },
   { href: '/admin/faqs', label: 'FAQs', icon: HelpCircle },
   { href: '/admin/marquee', label: 'Marquee Text', icon: Type },

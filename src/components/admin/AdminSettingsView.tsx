@@ -110,6 +110,44 @@ export function AdminSettingsView({ settings: initial }: AdminSettingsViewProps)
             </motion.div>
           ))}
         </div>
+
+        <div className="mt-8 pt-6 border-t border-white/10">
+          <h3 className="text-white text-sm font-semibold mb-4">Add New Setting</h3>
+          <div className="flex flex-col sm:flex-row gap-3 items-start">
+            <input id="new-setting-key" placeholder="Setting Key (e.g. is_gift_wrapping_enabled)" className="input-luxe flex-1 text-sm font-mono" />
+            <input id="new-setting-val" placeholder="Value (e.g. true or 50)" className="input-luxe flex-1 text-sm font-mono" />
+            <input id="new-setting-desc" placeholder="Description (Optional)" className="input-luxe flex-1 text-sm" />
+            <button
+              onClick={async () => {
+                const keyInput = document.getElementById('new-setting-key') as HTMLInputElement;
+                const valInput = document.getElementById('new-setting-val') as HTMLInputElement;
+                const descInput = document.getElementById('new-setting-desc') as HTMLInputElement;
+                if (!keyInput.value || !valInput.value) return toast.error('Key and value required');
+                
+                let value: unknown = valInput.value;
+                try { value = JSON.parse(valInput.value); } catch {}
+                
+                const res = await fetch('/api/admin/settings', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ key: keyInput.value, value, description: descInput.value, updated_at: new Date().toISOString() })
+                });
+                
+                if (res.ok) {
+                  const data = await res.json();
+                  setSettings(prev => [data, ...prev]);
+                  toast.success('Setting added');
+                  keyInput.value = ''; valInput.value = ''; descInput.value = '';
+                } else {
+                  toast.error('Failed to add setting');
+                }
+              }}
+              className="p-2.5 rounded-xl bg-luxe-accent text-black font-semibold hover:bg-white transition-all whitespace-nowrap"
+            >
+              Add Setting
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Danger zone */}

@@ -155,9 +155,11 @@ export interface Product {
   short_description?: string;
   is_new_arrival?: boolean;
   is_limited_edition?: boolean;
+  bundle_product_id?: string;
 
   // Relations
   sizes?: PosterSize[];
+  bundle_product?: Product;
 
   created_at: string;
   updated_at: string;
@@ -258,6 +260,8 @@ export interface Order {
   delivery_instructions?: string;
   whatsapp_sent: boolean;
   whatsapp_message?: string;
+  is_gift?: boolean;
+  gift_message?: string;
   admin_notes?: string;
   admin_internal_notes?: string;
   internal_tags?: string[];
@@ -372,6 +376,7 @@ export interface Review {
   rating: number; // 1-5
   title?: string;
   body?: string;
+  image_url?: string;
   is_verified: boolean;
   is_approved: boolean;
   created_at: string;
