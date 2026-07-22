@@ -19,5 +19,10 @@ export default async function AdminProductsPage() {
     console.error("Categories fetch error:", categoriesResponse.error);
   }
 
-  return <AdminProductsView initialProducts={productsResponse.data || []} categories={categoriesResponse.data || []} />;
+  const formattedProducts = productsResponse.data?.map(p => ({
+    ...p,
+    cross_sells: p.cross_sells?.map((cs: any) => cs.cross_sell_product_id) || []
+  })) || [];
+
+  return <AdminProductsView initialProducts={formattedProducts} categories={categoriesResponse.data || []} />;
 }

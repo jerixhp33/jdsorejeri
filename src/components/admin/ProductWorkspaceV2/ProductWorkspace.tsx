@@ -230,6 +230,8 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
           is_active: c.is_active
         }));
       }
+      
+      savedProduct.cross_sells = data.cross_sells || [];
 
       return savedProduct;
 
