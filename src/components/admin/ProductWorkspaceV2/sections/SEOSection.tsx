@@ -78,21 +78,7 @@ export function SEOSection({ formData, updateField, onGenerateSEO, isGeneratingS
         </div>
       )}
 
-      {/* Bundle Partner */}
-      <div className="pt-6 border-t border-white/10 mt-6">
-        <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Bundle Partner Product</label>
-        <p className="text-white/40 text-[10px] mb-2">Select a complementary product to create a "Frequently Bought Together" bundle.</p>
-        <select 
-          value={formData.bundle_product_id || ''}
-          onChange={(e) => updateField('bundle_product_id', e.target.value)}
-          className="input-luxe w-full py-3"
-        >
-          <option value="">No Bundle</option>
-          {allProducts?.map(p => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
-      </div>
+
     </div>
   );
 }
