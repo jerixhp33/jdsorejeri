@@ -117,7 +117,7 @@ export async function getInventoryAnalytics(): Promise<InventoryAnalytics> {
 
   const { data: products } = await supabase
     .from('products')
-    .select('id, name, stock, price, cost_price, category_id, is_active, category:categories(name), poster_sizes(stock, price, cost_price)')
+    .select('id, name, stock, price, cost_price, category_id, is_active, category:product_categories(name), poster_sizes(stock, price, cost_price)')
     .eq('is_active', true);
 
   if (!products) {

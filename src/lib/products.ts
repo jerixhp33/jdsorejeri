@@ -319,3 +319,29 @@ export async function searchProducts(query: string, limit = 10): Promise<Product
   if (error) return [];
   return (data as Product[]) || [];
 }
+
+/**
+ * Fetch cross-sell products for a given product.
+ */
+export async function getCrossSells(productId: string): Promise<Product[]> {
+  const supabase = createPublicClient();
+
+  const { data, error } = await supabase
+    .from('product_cross_sells')
+    .select(`
+      cross_sell_product:products!product_cross_sells_cross_sell_product_id_fkey(
+        *,
+        category:product_categories(*),
+        images:product_images(*),
+        sizes:poster_sizes(*)
+      )
+    `)
+    .eq('product_id', productId)
+    .order('created_at', { ascending: true });
+
+  if (error || !data) return [];
+  
+  return data
+    .map((item: any) => item.cross_sell_product)
+    .filter((p: any) => p && p.is_active);
+}

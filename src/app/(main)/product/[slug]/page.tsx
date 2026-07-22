@@ -2,9 +2,10 @@ export const revalidate = 60;
 
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getProductBySlug, getRelatedProducts, getProductById } from '@/lib/products';
+import { getProductBySlug, getRelatedProducts, getProductById, getCrossSells } from '@/lib/products';
 import { ProductDetail } from '@/components/product/ProductDetail';
 import { RelatedProducts } from '@/components/product/RelatedProducts';
+import { FrequentlyBoughtTogether } from '@/components/product/FrequentlyBoughtTogether';
 import { createClient } from '@/lib/supabase/server';
 
 interface ProductPageProps {
@@ -55,7 +56,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   });
 
   // Fetch reviews, related products, and bundle product in parallel
-  const [{ data: productReviews }, relatedProducts, bundleProduct] = await Promise.all([
+  const [{ data: productReviews }, relatedProducts, bundleProduct, crossSells] = await Promise.all([
     supabase
       .from('reviews')
       .select('*, user:user_profiles(name, profile_picture)')
@@ -65,6 +66,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       .limit(20),
     getRelatedProducts(product.id, product.category_id, 4, product.product_type),
     product.bundle_product_id ? getProductById(product.bundle_product_id) : Promise.resolve(null),
+    getCrossSells(product.id),
   ]);
 
   const displayPrice = product.product_type !== 'poster' 
@@ -97,6 +99,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <ProductDetail product={product} reviews={productReviews || []} initialBundleProduct={bundleProduct} />
+      <FrequentlyBoughtTogether baseProduct={product} crossSells={crossSells} />
       <RelatedProducts products={relatedProducts} />
     </>
   );
