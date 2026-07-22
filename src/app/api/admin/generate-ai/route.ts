@@ -72,6 +72,7 @@ export async function POST(req: Request) {
       model: model,
       temperature: 0.7,
       max_tokens: 1024,
+      ...( (type === 'bulk' || type === 'seo') ? { response_format: { type: 'json_object' } } : {} )
     });
 
     const result = completion.choices[0]?.message?.content || '';

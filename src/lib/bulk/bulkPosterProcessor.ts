@@ -118,7 +118,7 @@ export async function processBulkItems(
       let description = item.short_description || '';
       let tags = item.tags || [];
       
-      if (!description && !item.isGeneric) {
+      if (!description) {
         onUpdate(item.id, { status: 'generating_ai' });
         
         const prompt = generateBulkProductDataPrompt(item.title, item.productType, "Poster");
@@ -135,7 +135,19 @@ export async function processBulkItems(
              // AI might return markdown block ```json ... ```, strip it
              const aiText = aiData.result || aiData.text || '';
              let raw = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
-             parsed = JSON.parse(raw);
+             
+             try {
+               parsed = JSON.parse(raw);
+             } catch (parseErr) {
+               // Fallback: try to extract json block using regex
+               const match = raw.match(/\{[\s\S]*\}/);
+               if (match) {
+                 parsed = JSON.parse(match[0]);
+               } else {
+                 throw parseErr;
+               }
+             }
+
              description = parsed.short_description || description;
              tags = parsed.tags || tags;
              
@@ -144,7 +156,7 @@ export async function processBulkItems(
              item.seo_title = parsed.seo_title;
              item.seo_description = parsed.seo_description;
           } catch(e) {
-             console.warn('Failed to parse AI JSON', aiData.result);
+             console.warn('Failed to parse AI JSON', aiData.result || aiData.text);
           }
         }
       }
