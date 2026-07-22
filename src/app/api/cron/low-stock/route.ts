@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email';
-import { getInventoryMetrics } from '@/lib/inventory-analytics';
+import { getInventoryAnalytics } from '@/lib/inventory-analytics';
 
 export async function GET(request: Request) {
   try {
@@ -12,9 +12,9 @@ export async function GET(request: Request) {
     }
 
     const supabase = await createAdminClient();
-    const metrics = await getInventoryMetrics(supabase);
+    const metrics = await getInventoryAnalytics();
 
-    if (metrics.lowStockItems.length === 0) {
+    if (metrics.restockRecommendations.length === 0) {
       return NextResponse.json({ success: true, message: 'No low stock items found' });
     }
 
@@ -26,18 +26,18 @@ export async function GET(request: Request) {
         <thead>
           <tr style="background-color: #f3f4f6;">
             <th align="left">Product Name</th>
-            <th align="left">Variant/Size</th>
             <th align="right">Current Stock</th>
-            <th align="right">Threshold</th>
+            <th align="right">30d Velocity</th>
+            <th align="right">Suggested Restock</th>
           </tr>
         </thead>
         <tbody>
-          ${metrics.lowStockItems.map(item => `
+          ${metrics.restockRecommendations.map(item => `
             <tr>
-              <td>${item.productName}</td>
-              <td>${item.variantName || 'N/A'}</td>
+              <td>${item.name}</td>
               <td align="right" style="color: red; font-weight: bold;">${item.stock}</td>
-              <td align="right">${item.threshold}</td>
+              <td align="right">${item.velocity30d}</td>
+              <td align="right">+${item.suggestedRestock}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -57,14 +57,14 @@ export async function GET(request: Request) {
       
       await sendEmail({
         to: adminEmails.join(','),
-        subject: `⚠️ Low Stock Alert: ${metrics.lowStockItems.length} items need attention`,
+        subject: `⚠️ Low Stock Alert: ${metrics.restockRecommendations.length} items need attention`,
         html,
       });
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: `Sent low stock alert for ${metrics.lowStockItems.length} items` 
+      message: `Sent low stock alert for ${metrics.restockRecommendations.length} items` 
     });
 
   } catch (error: any) {
