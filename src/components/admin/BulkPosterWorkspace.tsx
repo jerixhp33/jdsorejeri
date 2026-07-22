@@ -138,8 +138,7 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
   const remainingCount = items.filter(i => !['completed', 'error'].includes(i.status)).length;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-luxe-black/90 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-luxe-black border border-white/10 rounded-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 z-[100] bg-luxe-black flex flex-col overflow-hidden">
         
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/10 bg-black/40">
@@ -405,6 +404,5 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
         </div>
 
       </div>
-    </div>
   );
 }
