@@ -22,7 +22,14 @@ export async function POST(req: NextRequest) {
 
     // 2. Insert new cross_sells
     if (cross_sells.length > 0) {
-      const inserts = cross_sells.map((csId, index) => ({
+      // Safely extract string IDs and deduplicate to avoid unique constraint violations
+      const validIds = cross_sells
+        .map(csId => typeof csId === 'string' ? csId : (csId?.cross_sell_product_id || csId?.id))
+        .filter(Boolean);
+      
+      const uniqueIds = Array.from(new Set(validIds));
+
+      const inserts = uniqueIds.map((csId, index) => ({
         product_id,
         cross_sell_product_id: csId,
         display_order: index,
