@@ -36,7 +36,7 @@ ${getProductContext(product)}
 export const generateSEOPrompt = (product: ProductFormData) => {
   return `
 You are an SEO expert. Generate an optimized SEO Title (max 60 characters) and SEO Meta Description (max 160 characters) for this product.
-Return ONLY a JSON object with two keys: "title" and "description". Do not include markdown formatting or backticks, just the raw JSON.
+Return ONLY a JSON object (in valid json format) with two keys: "title" and "description". Do not include markdown formatting or backticks, just the raw JSON.
 
 Context:
 ${getProductContext(product)}
@@ -64,7 +64,7 @@ You are an e-commerce AI assistant for JD Store. Based on the product title, pro
 - seo_title: optimized SEO title (max 60 characters).
 - seo_description: optimized SEO description (max 160 characters).
 
-Return ONLY a JSON object with exactly these five keys: "short_description", "description", "tags", "seo_title", and "seo_description". Do NOT include markdown formatting or backticks.
+Return ONLY a JSON object (in valid json format) with exactly these five keys: "short_description", "description", "tags", "seo_title", and "seo_description". Do NOT include markdown formatting or backticks.
 
 Title: ${title}
 Product Type: ${productType}
