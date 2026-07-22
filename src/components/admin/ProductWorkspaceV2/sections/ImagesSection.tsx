@@ -9,10 +9,10 @@ interface Props {
 
 export function ImagesSection({ formData, setFormData }: Props) {
   
-  const handleImagesChange = (newImages: UploadedImage[]) => {
+  const handleImagesChange = (updater: UploadedImage[] | ((prev: UploadedImage[]) => UploadedImage[])) => {
     setFormData(prev => ({
       ...prev,
-      images: newImages as any // Map UploadedImage to ProductImage
+      images: typeof updater === 'function' ? updater(prev.images as any) as any : updater as any
     }));
   };
 

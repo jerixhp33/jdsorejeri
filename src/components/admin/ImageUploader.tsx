@@ -16,7 +16,7 @@ export interface UploadedImage {
 
 interface ImageUploaderProps {
   images: UploadedImage[];
-  onChange: (images: UploadedImage[]) => void;
+  onChange: (images: UploadedImage[] | ((prev: UploadedImage[]) => UploadedImage[])) => void;
   onDelete?: (image: UploadedImage) => void;
   maxImages?: number;
   bucketName?: string;
@@ -112,11 +112,14 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8, bucke
 
       const succeeded = results.filter(Boolean) as UploadedImage[];
       if (succeeded.length) {
-        // Auto-primary logic
-        if (images.length === 0 && succeeded.length > 0) {
-          succeeded[0].is_primary = true;
-        }
-        onChange([...images, ...succeeded]);
+        onChange(prev => {
+          // Auto-primary logic for new arrays
+          const next = [...prev, ...succeeded];
+          if (prev.length === 0 && next.length > 0) {
+            next[0].is_primary = true;
+          }
+          return next;
+        });
       }
     },
     [images, maxImages, onChange, bucketName]
@@ -291,7 +294,10 @@ export function ImageUploader({ images, onChange, onDelete, maxImages = 8, bucke
             multiple
             accept="image/*,video/mp4,video/webm"
             className="hidden"
-            onChange={(e) => e.target.files && handleFiles(e.target.files)}
+            onChange={(e) => {
+              if (e.target.files) handleFiles(e.target.files);
+              e.target.value = ''; // Reset so the same file can be selected again
+            }}
           />
         </div>
       )}
