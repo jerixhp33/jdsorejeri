@@ -21,7 +21,10 @@ export function ImagesSection({ formData, setFormData }: Props) {
       const deletedIds = prev.deletedImageIds || [];
       const deletedPaths = prev.deletedStoragePaths || [];
       
-      if (img.id) deletedIds.push(img.id);
+      // Only add to deletedIds if it's a real database UUID (not a temp ID)
+      if (img.id && !img.id.startsWith('temp-')) {
+        deletedIds.push(img.id);
+      }
       if (img.storage_path) deletedPaths.push(img.storage_path);
       
       return {
