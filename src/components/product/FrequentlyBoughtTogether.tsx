@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Plus, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+
 import { useCart } from '@/hooks/useCart';
 import { formatCurrency } from '@/lib/utils';
 import type { Product } from '@/types';
@@ -58,7 +58,7 @@ export function FrequentlyBoughtTogether({ baseProduct, crossSells }: Frequently
       if (p.product_type === 'poster' && p.sizes?.[0]) {
         sizeId = p.sizes[0].id;
       }
-      addItem(p, 1, sizeId, {});
+      addItem(p.id, getPrice(p), 1, sizeId, true);
       addedCount++;
     });
 
@@ -132,14 +132,14 @@ export function FrequentlyBoughtTogether({ baseProduct, crossSells }: Frequently
               Total price: <span className="text-primary text-2xl ml-1">{formatCurrency(selectedTotal)}</span>
             </h3>
             
-            <Button 
-              className="w-full rounded-full h-12 text-base font-semibold mb-4 gap-2"
+            <button 
+              className="w-full bg-foreground text-background hover:bg-foreground/90 transition-colors rounded-full h-12 text-base font-semibold mb-4 gap-2 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleAddAllToCart}
               disabled={selectedItems.size === 0}
             >
               <ShoppingCart className="w-5 h-5" />
               Add Selected to Cart
-            </Button>
+            </button>
             
             <div className="space-y-3 mt-4">
               {allItems.map((product) => {
