@@ -292,7 +292,13 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         ...c,
         id: crypto.randomUUID(), // new UUIDs for duplicated variants
         sku: '' // clear sku
-      }))
+      })),
+      images: prev.images ? prev.images.map(img => ({
+        ...img,
+        id: undefined, // ensure new image records are created instead of stealing from original
+      })) : [],
+      deletedImageIds: [], // prevent accidentally deleting original images
+      deletedStoragePaths: [],
     }));
     toast.success('Product duplicated as Draft. Don\'t forget to save!');
   };
