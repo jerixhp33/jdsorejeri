@@ -5,6 +5,9 @@ export interface BulkProductPayload {
   name: string;
   slug: string;
   short_description: string;
+  description?: string;
+  seo_title?: string;
+  seo_description?: string;
   product_type: ProductType | '';
   category_id: string;
   tags: string[];
@@ -29,7 +32,7 @@ export async function createBulkProduct(data: BulkProductPayload) {
       name: data.name,
       slug: data.slug,
       short_description: data.short_description,
-      description: data.short_description, // Default description to short_description initially
+      description: data.description || data.short_description, // Default to short_description if not provided
       product_type: data.product_type,
       category_id: data.category_id,
       tags: data.tags,
@@ -47,8 +50,8 @@ export async function createBulkProduct(data: BulkProductPayload) {
       length_cm: 0,
       width_cm: 0,
       height_cm: 0,
-      seo_title: data.name,
-      seo_description: data.short_description,
+      seo_title: data.seo_title || data.name,
+      seo_description: data.seo_description || data.short_description,
       seo_keywords: data.tags.join(', '),
       created_at: new Date().toISOString()
     })

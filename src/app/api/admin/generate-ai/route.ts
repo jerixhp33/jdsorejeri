@@ -46,7 +46,10 @@ export async function POST(req: Request) {
         return NextResponse.json({
           result: JSON.stringify({
             short_description: "A stunning and aesthetic poster to elevate any room's decor.",
-            tags: ["Poster", "Wall Art", "Decor", "Aesthetic", "Premium"]
+            description: "Enhance your living space with this beautiful, premium poster. Carefully crafted with top-tier materials, its rich colors and elegant aesthetic will instantly draw the eye and breathe life into any room. Perfect for modern, contemporary, or minimalist decor.",
+            tags: ["Poster", "Wall Art", "Decor", "Aesthetic", "Premium"],
+            seo_title: "Premium Aesthetic Poster | JD Store",
+            seo_description: "Shop our stunning premium posters to elevate your home decor. Discover high-quality wall art and aesthetic designs at JD Store."
           }),
           isMock: true
         });

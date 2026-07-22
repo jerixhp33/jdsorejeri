@@ -18,6 +18,9 @@ export interface BulkPosterItem {
   
   // Edited/Generated data
   short_description?: string;
+  description?: string;
+  seo_title?: string;
+  seo_description?: string;
   tags?: string[];
   
   // Global settings assigned
@@ -135,6 +138,11 @@ export async function processBulkItems(
              parsed = JSON.parse(raw);
              description = parsed.short_description || description;
              tags = parsed.tags || tags;
+             
+             // Update item with the rest of the parsed data
+             item.description = parsed.description;
+             item.seo_title = parsed.seo_title;
+             item.seo_description = parsed.seo_description;
           } catch(e) {
              console.warn('Failed to parse AI JSON', aiData.result);
           }
@@ -144,6 +152,9 @@ export async function processBulkItems(
       onUpdate(item.id, { 
         status: 'saving', 
         short_description: description, 
+        description: item.description,
+        seo_title: item.seo_title,
+        seo_description: item.seo_description,
         tags 
       });
 
