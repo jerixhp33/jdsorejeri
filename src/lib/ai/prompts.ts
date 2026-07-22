@@ -26,7 +26,7 @@ ${getProductContext(product)}
 export const generateShortDescriptionPrompt = (product: ProductFormData) => {
   return `
 You are a world-class e-commerce copywriter. Write a punchy, 1-2 sentence short description (max 150 characters) for a product card.
-It must be concise and engaging.
+Focus on the aesthetic and emotional appeal of the product. Do NOT include the price in the description. Do NOT use quotation marks.
 
 Context:
 ${getProductContext(product)}
@@ -45,8 +45,10 @@ ${getProductContext(product)}
 
 export const generateTagsPrompt = (product: ProductFormData) => {
   return `
-You are an SEO expert. Generate 5-8 highly relevant, comma-separated tags for this product to improve searchability.
-Return ONLY the comma-separated string.
+You are an SEO expert. Generate 5-8 highly relevant tags for this product to improve searchability.
+Tags should be short, punchy keywords (1-2 words max, e.g., "Bollywood", "Vintage", "A5 Poster").
+Do NOT generate long descriptive phrases.
+Return ONLY the comma-separated string of tags. Do NOT use quotation marks or bullet points.
 
 Context:
 ${getProductContext(product)}
