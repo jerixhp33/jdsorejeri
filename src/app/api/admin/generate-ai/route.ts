@@ -10,13 +10,15 @@ export async function POST(req: Request) {
   let requestType = '';
   try {
     // 1. Verify Admin Authentication
-    const admin = await requireAdmin();
+    const authHeader = req.headers.get('Authorization');
+    const token = authHeader?.replace('Bearer ', '');
+    const admin = await requireAdmin(token);
     if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 2. Parse Request
-    const { prompt, type, model = 'llama3-70b-8192' } = await req.json();
+    const { prompt, type, model = 'llama-3.3-70b-versatile' } = await req.json();
     requestType = type;
 
     if (!prompt) {
@@ -48,7 +50,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ result });
     
   } catch (error: any) {
-    console.error('AI Generation Error:', error.message || error);
-    return NextResponse.json({ error: error.message || 'Failed to generate content' }, { status: 500 });
+    console.error('Full error:', JSON.stringify(error, null, 2));
+    return NextResponse.json({ 
+      error: error.message || 'Failed to generate content',
+      status: error.status,
+      code: error.code
+    }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import { generateBulkProductDataPrompt } from '../ai/prompts';
 import { createBulkProduct, BulkProductPayload } from '../products/productCreator';
 import { generateSlug } from '../utils';
 
+import { uploadProductImage } from '../storage';
 import { createClient } from '@/lib/supabase/client';
 
 export interface BulkPosterItem {
@@ -121,10 +122,16 @@ export async function processBulkItems(
       if (!description) {
         onUpdate(item.id, { status: 'generating_ai' });
         
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
         const prompt = generateBulkProductDataPrompt(item.title, item.productType, "Poster");
         const res = await fetch('/api/admin/generate-ai', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token || ''}`
+          },
           body: JSON.stringify({ prompt, type: 'bulk' })
         });
         

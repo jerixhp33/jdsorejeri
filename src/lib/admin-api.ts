@@ -1,8 +1,11 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 
-export async function requireAdmin() {
+export async function requireAdmin(token?: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = token 
+    ? await supabase.auth.getUser(token)
+    : await supabase.auth.getUser();
+    
   if (!user) return null;
   const admin = await createAdminClient();
   const { data: profile } = await admin
