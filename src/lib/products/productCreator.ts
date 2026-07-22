@@ -17,6 +17,7 @@ export interface BulkProductPayload {
   isFeatured?: boolean;
   isTrending?: boolean;
   isBestSeller?: boolean;
+  attributes?: Record<string, string>;
 }
 
 export async function createBulkProduct(data: BulkProductPayload) {
@@ -41,7 +42,7 @@ export async function createBulkProduct(data: BulkProductPayload) {
       is_featured: !!data.isFeatured,
       is_trending: !!data.isTrending,
       is_best_seller: !!data.isBestSeller,
-      attributes: {},
+      attributes: data.attributes || {},
       weight_grams: 0,
       length_cm: 0,
       width_cm: 0,

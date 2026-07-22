@@ -26,7 +26,8 @@ export interface BulkPosterItem {
   basePrice: number;
   costPrice: number;
   stock: number;
-  sizes: { label: string; price: number; stock: number }[];
+  sizes: { label: string; price: number; stock: number; sku?: string }[];
+  attributes: Record<string, string>;
   isFeatured: boolean;
   isTrending: boolean;
   isBestSeller: boolean;
@@ -161,7 +162,8 @@ export async function processBulkItems(
         sizes: item.sizes,
         isFeatured: item.isFeatured,
         isTrending: item.isTrending,
-        isBestSeller: item.isBestSeller
+        isBestSeller: item.isBestSeller,
+        attributes: item.attributes
       };
 
       await createBulkProduct(payload);

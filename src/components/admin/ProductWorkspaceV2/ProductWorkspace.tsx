@@ -24,11 +24,12 @@ import { DescriptionSection } from './sections/DescriptionSection';
 import { PricingSection } from './sections/PricingSection';
 import { InventorySection } from './sections/InventorySection';
 import { ShippingSection } from './sections/ShippingSection';
-import { VariantSection } from './sections/VariantSection';
 import { ImagesSection } from './sections/ImagesSection';
-import { AttributesSection } from './sections/AttributesSection';
 import { MarketingSection } from './sections/MarketingSection';
 import { SEOSection } from './sections/SEOSection';
+
+import { VariantSection } from '../product/VariantSection';
+import { AttributesSection } from '../product/AttributesSection';
 
 import { Product, Category } from '@/types';
 
@@ -358,9 +359,21 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       case 'pricing': return <PricingSection formData={formData} updateField={updateField} />;
       case 'inventory': return <InventorySection formData={formData} updateField={updateField} />;
       case 'shipping': return <ShippingSection formData={formData} updateField={updateField} />;
-      case 'variants': return <VariantSection formData={formData} setFormData={setFormData} />;
+      case 'variants': return (
+        <VariantSection 
+          options={formData.variant_options} 
+          combinations={formData.variant_combinations} 
+          basePrice={formData.price}
+          onChange={(options, combinations) => setFormData(prev => ({ ...prev, variant_options: options, variant_combinations: combinations }))} 
+        />
+      );
       case 'images': return <ImagesSection formData={formData} setFormData={setFormData} />;
-      case 'attributes': return <AttributesSection formData={formData} updateAttribute={updateAttribute} removeAttribute={removeAttribute} />;
+      case 'attributes': return (
+        <AttributesSection 
+          attributes={formData.attributes} 
+          onChange={(attrs) => updateField('attributes', attrs)} 
+        />
+      );
       case 'seo': return (
         <div className="space-y-12">
           <MarketingSection formData={formData} updateField={updateField} />
