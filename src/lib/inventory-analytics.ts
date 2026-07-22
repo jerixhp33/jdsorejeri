@@ -124,9 +124,11 @@ export async function getInventoryAnalytics(): Promise<InventoryAnalytics> {
     return {
       totalProducts: 0,
       totalValue: 0,
+      totalCapital: 0,
       lowStockCount: 0,
       outOfStockCount: 0,
       deadStockCount: 0,
+      deadCapital: 0,
       fastMovingCount: 0,
       restockRecommendations: [],
       categoryDistribution: []
