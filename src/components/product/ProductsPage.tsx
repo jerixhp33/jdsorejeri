@@ -185,7 +185,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
       <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-luxe-accent/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Header & Controls */}
-      <div className="mb-12 md:mb-16">
+      <div className="mb-6 md:mb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -304,7 +304,7 @@ export function ProductsPage({ productType, title, subtitle }: ProductsPageProps
       </div>
 
       {/* Grid */}
-      <div className="page-container py-10">
+      <div className="pt-2 pb-10">
         {!isLoading && (
           <p className="text-white/30 text-sm mb-6">
             {total} product{total !== 1 ? 's' : ''} found
