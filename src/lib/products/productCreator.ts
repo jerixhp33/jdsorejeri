@@ -14,6 +14,9 @@ export interface BulkProductPayload {
   status: 'active' | 'draft';
   images: UploadedImage[];
   sizes: { label: string; price: number; stock: number; sku?: string }[];
+  isFeatured?: boolean;
+  isTrending?: boolean;
+  isBestSeller?: boolean;
 }
 
 export async function createBulkProduct(data: BulkProductPayload) {
@@ -35,9 +38,9 @@ export async function createBulkProduct(data: BulkProductPayload) {
       stock: data.stock,
       sku: '',
       status: data.status,
-      is_featured: false,
-      is_trending: false,
-      is_best_seller: false,
+      is_featured: !!data.isFeatured,
+      is_trending: !!data.isTrending,
+      is_best_seller: !!data.isBestSeller,
       attributes: {},
       weight_grams: 0,
       length_cm: 0,

@@ -25,6 +25,17 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
   const [costPrice, setCostPrice] = useState(10);
   const [stock, setStock] = useState(100);
   
+  // Marketing Flags
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [isTrending, setIsTrending] = useState(false);
+  const [isBestSeller, setIsBestSeller] = useState(false);
+
+  // Size Variants
+  const [sizesConfig, setSizesConfig] = useState([
+    { label: 'A4', priceDelta: 0 },
+    { label: 'A3', priceDelta: 10 }
+  ]);
+  
   const handleFiles = (files: FileList | File[]) => {
     const list = Array.from(files).filter(f => f.type.startsWith('image/'));
     if (items.length + list.length > 50) {
@@ -46,10 +57,14 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
         basePrice,
         costPrice,
         stock,
-        sizes: [
-          { label: 'A4', price: basePrice, stock },
-          { label: 'A3', price: basePrice + 10, stock }
-        ]
+        sizes: sizesConfig.map(s => ({ 
+          label: s.label, 
+          price: basePrice + s.priceDelta, 
+          stock 
+        })),
+        isFeatured,
+        isTrending,
+        isBestSeller
       };
     });
 
@@ -148,6 +163,72 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
                   />
                 </div>
               </div>
+              
+              {/* Marketing Flags */}
+              <div className="pt-4 border-t border-white/10">
+                <label className="block text-sm font-medium text-white/70 mb-3">Features</label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm text-white cursor-pointer">
+                    <input type="checkbox" checked={isFeatured} onChange={e => setIsFeatured(e.target.checked)} disabled={isProcessing || items.length > 0} className="rounded border-white/20 bg-black/20 text-luxe-accent focus:ring-luxe-accent disabled:opacity-50" />
+                    Featured
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-white cursor-pointer">
+                    <input type="checkbox" checked={isTrending} onChange={e => setIsTrending(e.target.checked)} disabled={isProcessing || items.length > 0} className="rounded border-white/20 bg-black/20 text-luxe-accent focus:ring-luxe-accent disabled:opacity-50" />
+                    Trending
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-white cursor-pointer">
+                    <input type="checkbox" checked={isBestSeller} onChange={e => setIsBestSeller(e.target.checked)} disabled={isProcessing || items.length > 0} className="rounded border-white/20 bg-black/20 text-luxe-accent focus:ring-luxe-accent disabled:opacity-50" />
+                    Best Seller
+                  </label>
+                </div>
+              </div>
+
+              {/* Sizes Config */}
+              <div className="pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-medium text-white/70">Poster Sizes</label>
+                  <button 
+                    disabled={isProcessing || items.length > 0}
+                    onClick={() => setSizesConfig(prev => [...prev, { label: '', priceDelta: 0 }])}
+                    className="text-xs text-luxe-accent hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    + Add Size
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  {sizesConfig.map((size, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input 
+                        type="text" 
+                        value={size.label}
+                        onChange={e => setSizesConfig(prev => prev.map((s, i) => i === idx ? { ...s, label: e.target.value } : s))}
+                        placeholder="Size (e.g. A4)"
+                        disabled={isProcessing || items.length > 0}
+                        className="w-1/2 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-luxe-accent focus:outline-none disabled:opacity-50"
+                      />
+                      <div className="relative w-1/2">
+                        <span className="absolute left-3 top-2 text-white/50 text-sm">+₹</span>
+                        <input 
+                          type="number" 
+                          value={size.priceDelta}
+                          onChange={e => setSizesConfig(prev => prev.map((s, i) => i === idx ? { ...s, priceDelta: Number(e.target.value) } : s))}
+                          disabled={isProcessing || items.length > 0}
+                          className="w-full bg-black/20 border border-white/10 rounded-lg pl-8 pr-3 py-2 text-sm text-white focus:border-luxe-accent focus:outline-none disabled:opacity-50"
+                        />
+                      </div>
+                      <button 
+                        disabled={isProcessing || items.length > 0 || sizesConfig.length === 1}
+                        onClick={() => setSizesConfig(prev => prev.filter((_, i) => i !== idx))}
+                        className="p-2 text-white/30 hover:text-red-400 disabled:opacity-50"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
 
