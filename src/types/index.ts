@@ -160,6 +160,7 @@ export interface Product {
   // Relations
   sizes?: PosterSize[];
   bundle_product?: Product;
+  cross_sells?: string[];
 
   created_at: string;
   updated_at: string;

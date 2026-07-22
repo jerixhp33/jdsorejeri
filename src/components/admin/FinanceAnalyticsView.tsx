@@ -3,15 +3,16 @@
 import { DollarSign, TrendingUp, TrendingDown, Receipt, Truck, CreditCard } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ProductPerformanceMatrix, type ProductPerformance } from './ProductPerformanceMatrix';
 
-export function FinanceAnalyticsView({ data }: { data: any }) {
+export function FinanceAnalyticsView({ data, matrix }: { data: any, matrix?: ProductPerformance[] }) {
   const chartData = [
     { name: 'Gross Revenue', value: data.grossRevenue, fill: '#4ade80' },
     { name: 'Discounts', value: -data.discounts, fill: '#fb923c' },
     { name: 'Shipping (Net)', value: data.shippingIncome - data.shippingExpense, fill: '#60a5fa' },
     { name: 'Refunds', value: -data.refunds, fill: '#f87171' },
     { name: 'Net Revenue', value: data.netRevenue, fill: '#c8a96e' },
-    { name: 'Est. Profit', value: data.estimatedProfit, fill: '#a78bfa' }
+    { name: 'Net Profit', value: data.netProfit, fill: '#a78bfa' }
   ];
 
   return (
@@ -71,12 +72,16 @@ export function FinanceAnalyticsView({ data }: { data: any }) {
             </div>
 
             <div className="flex justify-between items-center text-sm pt-4">
-              <span className="text-white/60">Estimated COGS</span>
-              <span className="text-white/60">-{formatCurrency(data.grossRevenue * 0.6)}</span>
+              <span className="text-white/60">Cost of Goods (COGS)</span>
+              <span className="text-white/60">-{formatCurrency(data.totalCogs)}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-white/60">Shipping Expense</span>
               <span className="text-white/60">-{formatCurrency(data.shippingExpense)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-white/60">Payment Gateway Fees</span>
+              <span className="text-white/60">-{formatCurrency(data.paymentGatewayFees)}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-white/60">Taxes (GST)</span>
@@ -84,14 +89,24 @@ export function FinanceAnalyticsView({ data }: { data: any }) {
             </div>
 
             <div className="pt-4 border-t border-white/10 flex justify-between items-center">
-              <span className="text-white font-semibold">Estimated Profit</span>
-              <span className={cn("font-bold text-lg", data.estimatedProfit >= 0 ? "text-emerald-400" : "text-red-400")}>
-                {formatCurrency(data.estimatedProfit)}
+              <span className="text-white font-semibold">Net Profit</span>
+              <span className={cn("font-bold text-lg", data.netProfit >= 0 ? "text-emerald-400" : "text-red-400")}>
+                {formatCurrency(data.netProfit)}
               </span>
+            </div>
+            <div className="flex justify-between items-center text-xs mt-1">
+              <span className="text-white/40">Gross Margin: {data.grossMarginPct.toFixed(1)}%</span>
+              <span className="text-white/40">Net Margin: {data.netMarginPct.toFixed(1)}%</span>
             </div>
           </div>
         </div>
       </div>
+
+      {matrix && matrix.length > 0 && (
+        <div className="mt-4">
+          <ProductPerformanceMatrix data={matrix} />
+        </div>
+      )}
     </div>
   );
 }

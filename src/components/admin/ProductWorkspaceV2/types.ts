@@ -10,6 +10,7 @@ export interface VariantCombination {
   id: string; // unique ID for this combination
   options: Record<string, string>; // e.g. { "Color": "Red", "Size": "A4" }
   price: number;
+  cost_price?: number;
   stock: number;
   sku: string;
   image_id?: string;
@@ -62,4 +63,7 @@ export interface ProductFormData {
   images: ProductImage[];
   deletedImageIds?: string[];
   deletedStoragePaths?: string[];
+  
+  // Marketing & Bundling
+  cross_sells?: string[];
 }

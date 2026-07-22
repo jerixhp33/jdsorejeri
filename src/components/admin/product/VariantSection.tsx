@@ -159,6 +159,7 @@ export function VariantSection({ options, combinations, basePrice, onChange }: P
                   <tr className="border-b border-white/10">
                     <th className="py-2 font-medium">Variant</th>
                     <th className="py-2 font-medium w-24">Price (₹)</th>
+                    <th className="py-2 font-medium w-24">Cost (₹)</th>
                     <th className="py-2 font-medium w-24">Stock</th>
                     <th className="py-2 font-medium w-32">SKU</th>
                     <th className="py-2 font-medium w-16 text-center">Status</th>
@@ -179,7 +180,19 @@ export function VariantSection({ options, combinations, basePrice, onChange }: P
                             newCombos[idx].price = Number(e.target.value);
                             onChange(options, newCombos);
                           }}
-                          className="input-luxe w-full px-2 py-1 text-xs bg-black/20"
+                          className="w-full bg-black/20 border border-white/10 rounded px-2 py-1 text-white focus:border-luxe-accent focus:outline-none"
+                        />
+                      </td>
+                      <td className="py-2 pr-2">
+                        <input 
+                          type="number" 
+                          value={combo.cost_price ?? 0} 
+                          onChange={(e) => {
+                            const newCombos = [...combinations];
+                            newCombos[idx].cost_price = Number(e.target.value);
+                            onChange(options, newCombos);
+                          }}
+                          className="w-full bg-black/20 border border-white/10 rounded px-2 py-1 text-white focus:border-luxe-accent focus:outline-none"
                         />
                       </td>
                       <td className="py-2 pr-2">

@@ -236,6 +236,42 @@ export async function getTopProducts(limit = 10): Promise<
 }
 
 /**
+ * Get low stock items for dashboard widget.
+ */
+export async function getLowStockItems(limit = 6): Promise<Array<{ id: string; name: string; stock: number; is_variant: boolean }>> {
+  const supabase = await createAdminClient();
+  
+  // Base products low stock
+  const { data: baseProducts } = await supabase
+    .from('products')
+    .select('id, name, stock')
+    .eq('is_active', true)
+    .lte('stock', 5)
+    .order('stock', { ascending: true })
+    .limit(limit);
+
+  // Poster sizes (variants) low stock
+  const { data: variants } = await supabase
+    .from('poster_sizes')
+    .select('id, size_name, stock, product_id, product:products(name)')
+    .lte('stock', 5)
+    .order('stock', { ascending: true })
+    .limit(limit);
+
+  const combined = [
+    ...(baseProducts || []).map(p => ({ id: p.id, name: p.name, stock: p.stock, is_variant: false })),
+    ...(variants || []).filter(v => v.product).map(v => ({ 
+      id: v.id, 
+      name: `${(v.product as any)?.name} - ${v.size_name}`, 
+      stock: v.stock, 
+      is_variant: true 
+    }))
+  ];
+
+  return combined.sort((a, b) => a.stock - b.stock).slice(0, limit);
+}
+
+/**
  * Get device analytics.
  */
 export async function getDeviceAnalytics(): Promise<

@@ -27,6 +27,7 @@ import { ShippingSection } from './sections/ShippingSection';
 import { ImagesSection } from './sections/ImagesSection';
 import { MarketingSection } from './sections/MarketingSection';
 import { SEOSection } from './sections/SEOSection';
+import { CrossSellsSection } from './sections/CrossSellsSection';
 
 import { VariantSection } from '../product/VariantSection';
 import { AttributesSection } from '../product/AttributesSection';
@@ -157,6 +158,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
                 width_cm: null, 
                 height_cm: null, 
                 price: s.price || 0, 
+                cost_price: s.cost_price || 0,
                 stock: s.stock || 0, 
                 sku: s.sku || null, 
                 is_active: true 
@@ -201,6 +203,18 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         // Clear deleted tracking after successful save
         updateField('deletedImageIds', []);
         updateField('deletedStoragePaths', []);
+      }
+
+      // Sync Cross-Sells
+      if (data.cross_sells !== undefined) {
+        await fetch('/api/admin/products/cross-sells', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product_id: savedProduct.id,
+            cross_sells: data.cross_sells
+          })
+        });
       }
       
       // Inject relations so the UI can render correctly without a page refresh
@@ -372,6 +386,13 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         <AttributesSection 
           attributes={formData.attributes} 
           onChange={(attrs) => updateField('attributes', attrs)} 
+        />
+      );
+      case 'cross_sells': return (
+        <CrossSellsSection 
+          crossSells={formData.cross_sells || []} 
+          onChange={(val) => updateField('cross_sells', val)} 
+          allProducts={allProducts} 
         />
       );
       case 'seo': return (

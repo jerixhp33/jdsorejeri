@@ -1,14 +1,15 @@
 export const dynamic = 'force-dynamic';
 
 import { createAdminClient } from '@/lib/supabase/server';
-import { getAnalyticsSummary, getDailySales, getTopProducts } from '@/lib/analytics';
+import { getAnalyticsSummary, getDailySales, getTopProducts, getLowStockItems } from '@/lib/analytics';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
 export default async function AdminPage() {
-  const [summary, dailySales, topProducts] = await Promise.all([
+  const [summary, dailySales, topProducts, lowStockItems] = await Promise.all([
     getAnalyticsSummary(),
     getDailySales(30),
     getTopProducts(5),
+    getLowStockItems(6),
   ]);
 
   const supabase = await createAdminClient();
@@ -24,6 +25,7 @@ export default async function AdminPage() {
       dailySales={dailySales}
       topProducts={topProducts}
       recentOrders={recentOrders || []}
+      lowStockItems={lowStockItems}
     />
   );
 }

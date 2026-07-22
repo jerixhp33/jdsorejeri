@@ -8,6 +8,7 @@ export interface VariantCombination {
   id: string;
   options: Record<string, string>;
   price: number;
+  cost_price?: number;
   stock: number;
   sku: string;
   image_id?: string;

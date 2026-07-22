@@ -13,10 +13,10 @@ const COLORS = ['#c8a96e', '#4ade80', '#60a5fa', '#f472b6', '#fb923c', '#94a3b8'
 
 export function InventoryAnalyticsView({ data }: { data: InventoryAnalytics }) {
   const kpis = [
-    { label: 'Total Value', value: formatCurrency(data.totalValue), icon: TrendingUp, color: 'text-luxe-accent' },
+    { label: 'Potential Revenue', value: formatCurrency(data.totalValue), icon: TrendingUp, color: 'text-luxe-accent' },
+    { label: 'Capital Locked', value: formatCurrency(data.totalCapital), icon: Package, color: 'text-emerald-400' },
+    { label: 'Dead Capital (90d)', value: formatCurrency(data.deadCapital), icon: AlertTriangle, color: 'text-red-400' },
     { label: 'Low Stock', value: data.lowStockCount, icon: AlertTriangle, color: 'text-amber-400' },
-    { label: 'Out of Stock', value: data.outOfStockCount, icon: SearchX, color: 'text-red-400' },
-    { label: 'Dead Stock (90d)', value: data.deadStockCount, icon: Package, color: 'text-white/40' },
     { label: 'Fast Moving (30d)', value: data.fastMovingCount, icon: Zap, color: 'text-blue-400' },
   ];
 

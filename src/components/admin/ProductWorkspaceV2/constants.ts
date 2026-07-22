@@ -28,6 +28,7 @@ export const DEFAULT_FORM_DATA: ProductFormData = {
   variant_options: [],
   variant_combinations: [],
   images: [],
+  cross_sells: [],
 };
 
 export const SECTIONS = [
@@ -39,5 +40,6 @@ export const SECTIONS = [
   { id: 'variants', label: 'Variants' },
   { id: 'images', label: 'Images' },
   { id: 'attributes', label: 'Attributes' },
+  { id: 'cross_sells', label: 'Cross-Sells' },
   { id: 'seo', label: 'SEO & Marketing' },
 ];

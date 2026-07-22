@@ -2,10 +2,12 @@ import { createAdminClient } from '@/lib/supabase/server';
 
 export interface InventoryAnalytics {
   totalProducts: number;
-  totalValue: number;
+  totalValue: number; // Potential Revenue
+  totalCapital: number; // Capital Locked
   lowStockCount: number;
   outOfStockCount: number;
   deadStockCount: number;
+  deadCapital: number;
   fastMovingCount: number;
   restockRecommendations: any[];
   categoryDistribution: any[];
@@ -18,7 +20,6 @@ export class InventoryAnalyticsService {
     
     if (recentSales) {
       recentSales.forEach(item => {
-        // Filter cancelled
         if (item.order && (item.order as any).status === 'cancelled') return;
         
         productSales90d[item.product_id] = (productSales90d[item.product_id] || 0) + item.quantity;
@@ -28,7 +29,9 @@ export class InventoryAnalyticsService {
       });
     }
 
-    let totalValue = 0;
+    let totalValue = 0; // Potential Revenue
+    let totalCapital = 0; // Capital Locked
+    let deadCapital = 0;
     let lowStockCount = 0;
     let outOfStockCount = 0;
     let deadStockCount = 0;
@@ -38,40 +41,57 @@ export class InventoryAnalyticsService {
     const categoryMap: Record<string, { name: string; value: number; count: number }> = {};
 
     products.forEach(p => {
-      const stock = p.stock || 0;
-      const val = stock * (p.price || 0);
-      totalValue += val;
+      let productStock = 0;
+      let productValue = 0;
+      let productCapital = 0;
+
+      // Handle variants vs base product
+      if (p.poster_sizes && p.poster_sizes.length > 0) {
+        p.poster_sizes.forEach((s: any) => {
+          const sStock = s.stock || 0;
+          productStock += sStock;
+          productValue += sStock * (s.price || 0);
+          productCapital += sStock * (s.cost_price || p.cost_price || 0);
+        });
+      } else {
+        productStock = p.stock || 0;
+        productValue = productStock * (p.price || 0);
+        productCapital = productStock * (p.cost_price || 0);
+      }
+
+      totalValue += productValue;
+      totalCapital += productCapital;
 
       const catName = (p.category as any)?.name || 'Uncategorized';
       if (!categoryMap[catName]) categoryMap[catName] = { name: catName, value: 0, count: 0 };
-      categoryMap[catName].value += val;
+      categoryMap[catName].value += productCapital; // Category distribution by capital locked
       categoryMap[catName].count += 1;
 
-      if (stock === 0) outOfStockCount++;
-      else if (stock <= 5) lowStockCount++;
+      if (productStock === 0) outOfStockCount++;
+      else if (productStock <= 5) lowStockCount++;
 
       const sold90d = productSales90d[p.id] || 0;
       const sold30d = productSales30d[p.id] || 0;
 
-      if (sold90d === 0 && stock > 0) {
+      if (sold90d === 0 && productStock > 0) {
         deadStockCount++;
+        deadCapital += productCapital;
       }
 
       if (sold30d > 10) {
         fastMovingCount++;
       }
 
-      // Recommendation logic: If selling fast and stock is low, restock!
       if (sold30d > 0) {
-        const daysOfInventory = (stock / sold30d) * 30; // velocity
+        const daysOfInventory = (productStock / sold30d) * 30;
         if (daysOfInventory < 14) {
           restockRecommendations.push({
             id: p.id,
             name: p.name,
-            stock,
+            stock: productStock,
             velocity30d: sold30d,
             daysRemaining: daysOfInventory,
-            suggestedRestock: Math.ceil(sold30d * 1.5) // Suggest 45 days worth
+            suggestedRestock: Math.ceil(sold30d * 1.5)
           });
         }
       }
@@ -80,9 +100,11 @@ export class InventoryAnalyticsService {
     return {
       totalProducts: products.length,
       totalValue,
+      totalCapital,
       lowStockCount,
       outOfStockCount,
       deadStockCount,
+      deadCapital,
       fastMovingCount,
       restockRecommendations: restockRecommendations.sort((a, b) => a.daysRemaining - b.daysRemaining).slice(0, 10),
       categoryDistribution: Object.values(categoryMap).sort((a, b) => b.value - a.value)
@@ -95,7 +117,7 @@ export async function getInventoryAnalytics(): Promise<InventoryAnalytics> {
 
   const { data: products } = await supabase
     .from('products')
-    .select('id, name, stock, price, category_id, is_active, category:categories(name)')
+    .select('id, name, stock, price, cost_price, category_id, is_active, category:categories(name), poster_sizes(stock, price, cost_price)')
     .eq('is_active', true);
 
   if (!products) {

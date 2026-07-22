@@ -17,6 +17,7 @@ interface AdminDashboardProps {
   dailySales: DailySales[];
   topProducts: Array<{ product_id: string; name: string; total_sold: number; revenue: number }>;
   recentOrders: Order[];
+  lowStockItems?: Array<{ id: string; name: string; stock: number; is_variant: boolean }>;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -28,7 +29,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: 'status-cancelled',
 };
 
-export function AdminDashboard({ summary, dailySales, topProducts, recentOrders }: AdminDashboardProps) {
+export function AdminDashboard({ summary, dailySales, topProducts, recentOrders, lowStockItems = [] }: AdminDashboardProps) {
   const stats = [
     { label: 'Revenue Today',     value: formatCurrency(summary.today_revenue),     sub: 'Gross sales',                          icon: DollarSign,  color: 'text-luxe-accent' },
     { label: 'Orders Today',      value: summary.today_orders.toLocaleString(),     sub: 'Total orders placed',                  icon: ShoppingBag, color: 'text-green-400' },
@@ -116,7 +117,7 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Top Products */}
         <div className="glass-card p-4 md:p-6">
           <h2 className="text-white font-semibold text-sm md:text-base mb-4 md:mb-5">Top Products by Revenue</h2>
@@ -137,6 +138,41 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
           </div>
         </div>
 
+        {/* Low Stock Alerts */}
+        <div className="glass-card p-4 md:p-6 border border-red-500/10 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+            <AlertTriangle className="w-24 h-24 text-red-500" />
+          </div>
+          <div className="flex items-center justify-between mb-4 relative z-10">
+            <h3 className="text-red-400 text-sm font-semibold flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Low Stock Alerts
+            </h3>
+            <Link prefetch={true} href="/admin/analytics/inventory" className="text-white/50 text-xs hover:underline">View all →</Link>
+          </div>
+          <div className="space-y-2.5 md:space-y-3 relative z-10">
+            {lowStockItems.map((item) => (
+              <div key={`${item.id}-${item.is_variant ? 'v' : 'p'}`} className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-white text-xs md:text-sm font-medium truncate">{item.name}</p>
+                  <p className="text-white/40 text-[11px] truncate">{item.is_variant ? 'Variant' : 'Product'}</p>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <span className={cn(
+                    "px-2 py-0.5 rounded text-xs font-semibold", 
+                    item.stock === 0 ? "bg-red-500/20 text-red-400" : "bg-amber-500/20 text-amber-400"
+                  )}>
+                    {item.stock} left
+                  </span>
+                </div>
+              </div>
+            ))}
+            {lowStockItems.length === 0 && (
+              <p className="text-white/40 text-sm text-center py-6">All stock levels healthy</p>
+            )}
+          </div>
+        </div>
+
         {/* Recent Orders */}
         <div className="glass-card p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
@@ -144,7 +180,7 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
             <Link prefetch={true} href="/admin/orders" className="text-luxe-accent text-xs hover:underline">View all →</Link>
           </div>
           <div className="space-y-2.5 md:space-y-3">
-            {recentOrders.slice(0, 6).map((order) => (
+            {recentOrders.slice(0, 5).map((order) => (
               <div key={order.id} className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-white text-xs md:text-sm font-medium truncate">#{order.order_number}</p>
@@ -152,7 +188,7 @@ export function AdminDashboard({ summary, dailySales, topProducts, recentOrders 
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <span className={STATUS_COLORS[order.status]}>{order.status}</span>
-                  <p className="text-white text-xs md:text-sm">{formatCurrency(order.total)}</p>
+                  <p className="text-white text-xs md:text-sm font-semibold">{formatCurrency(order.total)}</p>
                 </div>
               </div>
             ))}

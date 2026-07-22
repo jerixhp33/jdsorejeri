@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     width_cm: s.width_cm || null,
     height_cm: s.height_cm || null,
     price: Number(s.price) || 0,
+    cost_price: Number(s.cost_price) || 0,
     stock: Number(s.stock) || 0,
     sku: s.sku || `${product_id.slice(0, 8)}-${s.label}`.toUpperCase(),
     is_active: s.is_active ?? true,
