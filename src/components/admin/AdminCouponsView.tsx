@@ -92,7 +92,11 @@ export function AdminCouponsView({ coupons: initial }: AdminCouponsViewProps) {
     if (!confirm('Are you sure you want to delete this coupon?')) return;
     const { error } = await supabase.from('coupons').delete().eq('id', id);
     if (error) {
-      toast.error('Failed to delete coupon');
+      if (error.code === '23503') {
+        toast.error('Cannot delete a coupon that has been used in orders. Please deactivate it instead.');
+      } else {
+        toast.error(`Failed to delete coupon: ${error.message}`);
+      }
     } else {
       setCoupons(prev => prev.filter(c => c.id !== id));
       toast.success('Coupon deleted');
