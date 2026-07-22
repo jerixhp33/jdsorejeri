@@ -54,3 +54,17 @@ Context:
 ${getProductContext(product)}
 `;
 };
+
+export const generateBulkProductDataPrompt = (title: string, productType: string, category: string) => {
+  return `
+You are an e-commerce AI assistant for JD Store. Based on the product title, product type, and category below, generate a short description and tags.
+The short description should be punchy, 1-2 sentences (max 150 characters), focusing on aesthetic appeal without mentioning prices or quotes.
+The tags should be an array of 5-8 short, relevant keywords.
+
+Return ONLY a JSON object with exactly two keys: "short_description" (string) and "tags" (array of strings). Do NOT include markdown formatting or backticks.
+
+Title: ${title}
+Product Type: ${productType}
+Category: ${category}
+`;
+};

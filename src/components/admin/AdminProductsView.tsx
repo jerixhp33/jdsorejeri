@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import type { Product, Category, ProductType } from '@/types';
 import { ProductFormModal } from './ProductFormModal';
 import { ProductWorkspace } from './ProductWorkspaceV2/ProductWorkspace';
+import { BulkPosterWorkspace } from './BulkPosterWorkspace';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { Portal } from '@/components/ui/Portal';
 
@@ -31,8 +32,9 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
   };
   const [showModal, setShowModal] = useState(false);
   const [showV2, setShowV2] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
   
-  useScrollLock(showModal || showV2);
+  useScrollLock(showModal || showV2 || showBulk);
 
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -144,6 +146,13 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-white">Products</h1>
         <div className="flex gap-3">
+          <button
+            onClick={() => setShowBulk(true)}
+            className="flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl transition-colors font-medium border border-white/10"
+          >
+            <Copy className="w-4 h-4" />
+            Bulk Add Posters
+          </button>
           <button
             onClick={() => { setEditProduct(null); setShowV2(true); }}
             className="btn-gold flex items-center gap-2 text-sm"
@@ -370,6 +379,19 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
             </button>
           </div>
         </motion.div>
+      )}
+
+      {showBulk && (
+        <Portal>
+          <BulkPosterWorkspace
+            categories={categories}
+            onClose={() => setShowBulk(false)}
+            onComplete={() => {
+              setShowBulk(false);
+              window.location.reload(); // Quick refresh to show new items
+            }}
+          />
+        </Portal>
       )}
     </div>
   );
