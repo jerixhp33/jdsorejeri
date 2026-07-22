@@ -98,8 +98,8 @@ export async function processBulkItems(
   items: BulkPosterItem[],
   onUpdate: (id: string, updates: Partial<BulkPosterItem>) => void
 ) {
-  // Process up to 3 at a time to avoid rate limits
-  return asyncPool(3, items, async (item) => {
+  // Process up to 1 at a time to avoid rate limits
+  return asyncPool(1, items, async (item) => {
     if (item.status === 'completed') return item;
     
     try {
@@ -157,7 +157,14 @@ export async function processBulkItems(
              item.seo_description = parsed.seo_description;
           } catch(e) {
              console.warn('Failed to parse AI JSON', aiData.result || aiData.text);
+             throw new Error('AI returned invalid JSON format');
           }
+          
+          // Delay to help prevent rate limiting on Groq free tier
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `AI generation failed with status ${res.status}`);
         }
       }
 
