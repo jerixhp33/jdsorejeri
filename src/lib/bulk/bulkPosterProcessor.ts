@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 export interface BulkPosterItem {
   id: string; // unique internal ID for the UI
   file?: File;
+  previewUrl?: string;
   image?: UploadedImage;
   originalFilename: string;
   title: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { X, Upload, CheckCircle2, AlertCircle, Loader2, Play, Settings, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Category } from '@/types';
@@ -48,6 +48,7 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
       return {
         id: crypto.randomUUID(),
         file: f,
+        previewUrl: URL.createObjectURL(f),
         originalFilename: f.name,
         title: isGeneric ? '' : title,
         isGeneric,
@@ -76,18 +77,34 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
   };
 
   const removeImage = (id: string) => {
-    setItems(prev => prev.filter(item => item.id !== id));
+    setItems(prev => {
+      const item = prev.find(i => i.id === id);
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter(i => i.id !== id);
+    });
   };
 
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      items.forEach(item => {
+        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      });
+    };
+  }, []);
+
   const startProcessing = async () => {
-    if (items.some(i => !i.title.trim())) {
-      toast.error('Please enter a title for all posters before processing.');
+    const toProcess = items.filter(i => i.status === 'pending' || i.status === 'error');
+    if (toProcess.length === 0) return;
+
+    if (toProcess.some(i => !i.title.trim())) {
+      toast.error('Please enter a title for all pending posters before processing.');
       return;
     }
     
     setIsProcessing(true);
     try {
-      await processBulkItems(items, updateItem);
+      await processBulkItems(toProcess, updateItem);
       toast.success('Bulk processing complete!');
     } catch (e: any) {
       toast.error('Processing interrupted: ' + e.message);
@@ -98,7 +115,7 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
 
   const completedCount = items.filter(i => i.status === 'completed').length;
   const errorCount = items.filter(i => i.status === 'error').length;
-  const pendingCount = items.length - completedCount - errorCount;
+  const remainingCount = items.filter(i => !['completed', 'error'].includes(i.status)).length;
 
   return (
     <div className="fixed inset-0 z-[100] bg-luxe-black/90 backdrop-blur-sm flex items-center justify-center p-4">
@@ -158,6 +175,16 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
                     type="number" 
                     value={costPrice}
                     onChange={e => setCostPrice(Number(e.target.value))}
+                    disabled={isProcessing || items.length > 0}
+                    className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-luxe-accent focus:outline-none disabled:opacity-50"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-white/70 mb-2">Default Stock</label>
+                  <input 
+                    type="number" 
+                    value={stock}
+                    onChange={e => setStock(Number(e.target.value))}
                     disabled={isProcessing || items.length > 0}
                     className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-luxe-accent focus:outline-none disabled:opacity-50"
                   />
@@ -268,8 +295,8 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
                     <span className="text-white/30 text-sm font-medium w-6">{index + 1}</span>
                     
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/50 shrink-0 border border-white/10">
-                      {item.file ? (
-                        <img src={URL.createObjectURL(item.file)} alt="preview" className="w-full h-full object-cover" />
+                      {item.previewUrl ? (
+                        <img src={item.previewUrl} alt="preview" className="w-full h-full object-cover" />
                       ) : (
                         <ImageIcon className="w-6 h-6 text-white/20 m-auto mt-5" />
                       )}
@@ -313,6 +340,18 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
                     )}
                   </div>
                 ))}
+
+                {items.length < 50 && !isProcessing && (
+                  <div className="flex justify-center mt-6">
+                    <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-dashed border-white/20 text-white/70 hover:border-luxe-accent hover:text-luxe-accent hover:bg-luxe-accent/5 transition-colors text-sm font-medium"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Add More Posters ({50 - items.length} remaining)
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -338,7 +377,7 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
                   </div>
                 )}
                 <div className="text-sm text-white/50">
-                  {pendingCount} Remaining
+                  {remainingCount} Remaining
                 </div>
               </>
             )}
