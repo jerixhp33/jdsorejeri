@@ -119,10 +119,10 @@ export async function processBulkItems(
         onUpdate(item.id, { status: 'generating_ai' });
         
         const prompt = generateBulkProductDataPrompt(item.title, item.productType, "Poster");
-        const res = await fetch('/api/ai/generate', {
+        const res = await fetch('/api/admin/generate-ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, systemPrompt: 'You are an e-commerce assistant. Return strictly valid JSON with no markdown block formatting.' })
+          body: JSON.stringify({ prompt, type: 'bulk' })
         });
         
         if (res.ok) {
@@ -130,12 +130,13 @@ export async function processBulkItems(
           let parsed;
           try {
              // AI might return markdown block ```json ... ```, strip it
-             let raw = aiData.text.replace(/```json/g, '').replace(/```/g, '').trim();
+             const aiText = aiData.result || aiData.text || '';
+             let raw = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
              parsed = JSON.parse(raw);
              description = parsed.short_description || description;
              tags = parsed.tags || tags;
           } catch(e) {
-             console.warn('Failed to parse AI JSON', aiData.text);
+             console.warn('Failed to parse AI JSON', aiData.result);
           }
         }
       }

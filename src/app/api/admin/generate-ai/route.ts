@@ -41,6 +41,16 @@ export async function POST(req: Request) {
       if (type === 'tags') {
         return NextResponse.json({ result: "luxury, premium, trending, aesthetic, gift", isMock: true });
       }
+      
+      if (type === 'bulk') {
+        return NextResponse.json({
+          result: JSON.stringify({
+            short_description: "A stunning and aesthetic poster to elevate any room's decor.",
+            tags: ["Poster", "Wall Art", "Decor", "Aesthetic", "Premium"]
+          }),
+          isMock: true
+        });
+      }
 
       return NextResponse.json({ 
         result: "This is a brilliantly crafted product designed with premium materials. Its aesthetic design makes it a perfect addition to any collection. Designed for longevity and elegance, it stands out effortlessly.",
