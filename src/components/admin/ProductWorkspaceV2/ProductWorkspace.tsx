@@ -295,7 +295,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       })),
       images: prev.images ? prev.images.map(img => ({
         ...img,
-        id: '', // ensure new image records are created instead of stealing from original
+        id: `temp-${crypto.randomUUID()}`, // Use a temp ID so TS is happy and API ignores it to create a new record
       })) : [],
       deletedImageIds: [], // prevent accidentally deleting original images
       deletedStoragePaths: [],
