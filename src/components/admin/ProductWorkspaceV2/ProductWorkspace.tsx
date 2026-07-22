@@ -295,7 +295,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       })),
       images: prev.images ? prev.images.map(img => ({
         ...img,
-        id: undefined, // ensure new image records are created instead of stealing from original
+        id: '', // ensure new image records are created instead of stealing from original
       })) : [],
       deletedImageIds: [], // prevent accidentally deleting original images
       deletedStoragePaths: [],
