@@ -33,16 +33,18 @@ export async function POST(req: Request) {
           result: JSON.stringify({ 
             title: "Premium Handcrafted Product - JD Store", 
             description: "Shop the finest quality materials and designs. Enjoy free shipping on all orders over ₹999." 
-          }) 
+          }),
+          isMock: true
         });
       }
       
       if (type === 'tags') {
-        return NextResponse.json({ result: "luxury, premium, trending, aesthetic, gift" });
+        return NextResponse.json({ result: "luxury, premium, trending, aesthetic, gift", isMock: true });
       }
 
       return NextResponse.json({ 
-        result: "This is a brilliantly crafted product designed with premium materials. Its aesthetic design makes it a perfect addition to any collection. Designed for longevity and elegance, it stands out effortlessly." 
+        result: "This is a brilliantly crafted product designed with premium materials. Its aesthetic design makes it a perfect addition to any collection. Designed for longevity and elegance, it stands out effortlessly.",
+        isMock: true
       });
     }
 

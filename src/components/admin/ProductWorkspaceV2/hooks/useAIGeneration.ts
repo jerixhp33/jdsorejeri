@@ -45,7 +45,11 @@ export function useAIGeneration(
         updateField(field as any, data.result);
       }
       
-      toast.success(`${field.replace('_', ' ')} generated successfully!`);
+      if (data.isMock) {
+        toast.warning('Using mock AI data. Please set GROQ_API_KEY in .env to enable real AI generation.');
+      } else {
+        toast.success(`${field.replace('_', ' ')} generated successfully!`);
+      }
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'AI generation failed.');
