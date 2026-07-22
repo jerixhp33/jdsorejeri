@@ -104,9 +104,15 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
     });
   };
 
-  // Cleanup object URLs on unmount
+  // Cleanup object URLs on unmount and lock body scroll
   useEffect(() => {
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
+
     return () => {
+      // Restore body scroll
+      document.body.style.overflow = '';
+      
       items.forEach(item => {
         if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
       });
