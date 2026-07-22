@@ -42,6 +42,14 @@ export async function POST(req: NextRequest) {
       if (insertError) throw insertError;
     }
 
+    // 3. Revalidate the product page cache so the storefront updates immediately
+    const { data: productData } = await admin.from('products').select('slug').eq('id', product_id).single();
+    if (productData?.slug) {
+      const { revalidatePath } = require('next/cache');
+      revalidatePath(`/product/${productData.slug}`);
+      revalidatePath('/admin/products');
+    }
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error syncing cross sells:', error);
