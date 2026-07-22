@@ -2,8 +2,6 @@ import { UploadedImage } from '@/components/admin/ImageUploader';
 import { generateBulkProductDataPrompt } from '../ai/prompts';
 import { createBulkProduct, BulkProductPayload } from '../products/productCreator';
 import { generateSlug } from '../utils';
-
-import { uploadProductImage } from '../storage';
 import { createClient } from '@/lib/supabase/client';
 
 export interface BulkPosterItem {
