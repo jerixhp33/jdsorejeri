@@ -23,9 +23,16 @@ export function useAIGeneration(
     setIsGenerating(prev => ({ ...prev, [field]: true }));
     
     try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
       const response = await fetch('/api/admin/generate-ai', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
         body: JSON.stringify({
           prompt: promptFn(formData),
           type,
