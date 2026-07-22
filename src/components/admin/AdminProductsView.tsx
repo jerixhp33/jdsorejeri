@@ -342,7 +342,7 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
               seo_title: editProduct.seo_title || '',
               seo_description: editProduct.seo_description || '',
               seo_keywords: editProduct.seo_keywords || '',
-              cross_sells: (editProduct.cross_sells as any[])?.map(c => c.cross_sell_product_id) || [],
+              cross_sells: editProduct.cross_sells || [],
               variant_combinations: (editProduct.attributes as any)?._v2_variants?.combinations || (editProduct.sizes || []).map(s => ({
                 id: s.id,
                 options: { Size: s.label },
