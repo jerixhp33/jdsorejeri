@@ -812,12 +812,14 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
             <h2 className="font-display text-2xl font-bold text-white">
               Customer Reviews ({reviews.length})
             </h2>
-            <button
-              onClick={() => setIsReviewModalOpen(true)}
-              className="btn-luxe px-6 py-2.5 text-sm w-full sm:w-auto"
-            >
-              Write a Review
-            </button>
+            {reviews.length > 0 && (
+              <button
+                onClick={() => setIsReviewModalOpen(true)}
+                className="btn-luxe px-6 py-2.5 text-sm w-full sm:w-auto"
+              >
+                Write a Review
+              </button>
+            )}
           </div>
 
           {reviews.length > 0 ? (

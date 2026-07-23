@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { ShoppingCart, Plus, Check } from 'lucide-react';
+import { ShoppingCart, Check, Plus } from 'lucide-react';
 
 import { useCart } from '@/hooks/useCart';
 import { formatCurrency } from '@/lib/utils';
@@ -66,109 +65,95 @@ export function FrequentlyBoughtTogether({ baseProduct, crossSells }: Frequently
   };
 
   return (
-    <section className="py-12 border-t border-border">
+    <section className="py-16 mt-8 border-t border-white/10">
       <div className="container mx-auto px-4 md:px-6">
-        <h2 className="text-2xl font-bold font-heading mb-8">Frequently Bought Together</h2>
+        <h2 className="font-display text-2xl font-bold text-white mb-8">
+          Frequently Bought Together
+        </h2>
         
-        <div className="flex flex-col lg:flex-row gap-12 items-start">
-          {/* Items Row */}
-          <div className="flex-1 overflow-x-auto pb-4">
-            <div className="flex items-center gap-4 min-w-max">
-              {allItems.map((product, index) => {
-                const isSelected = selectedItems.has(product.id);
-                const image = getPrimaryImage(product);
-                
-                return (
-                  <div key={product.id} className="flex items-center gap-4">
-                    {index > 0 && <Plus className="w-6 h-6 text-muted-foreground" />}
+        <div className="glass-card p-6 sm:p-8 border border-white/10 max-w-4xl">
+          <div className="space-y-6">
+            {allItems.map((product, index) => {
+              const isSelected = selectedItems.has(product.id);
+              const image = getPrimaryImage(product);
+              
+              return (
+                <div key={product.id} className="relative">
+                  {index > 0 && (
+                    <div className="absolute -top-4 left-6 z-10 hidden sm:flex items-center justify-center w-6 h-6 rounded-full bg-[#0a0a0a] border border-white/10">
+                      <Plus className="w-3.5 h-3.5 text-white/50" />
+                    </div>
+                  )}
+                  
+                  <div 
+                    className={`
+                      flex items-center gap-4 sm:gap-6 p-4 rounded-xl transition-all cursor-pointer border
+                      ${isSelected ? 'bg-white/[0.03] border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.05)]' : 'bg-transparent border-transparent hover:bg-white/[0.02] hover:border-white/10'}
+                    `}
+                    onClick={() => toggleItem(product.id)}
+                  >
+                    {/* Custom Checkbox */}
+                    <div className={`
+                      w-6 h-6 rounded border flex-shrink-0 flex items-center justify-center transition-colors
+                      ${isSelected ? 'bg-white border-white text-black' : 'border-white/30 text-transparent hover:border-white/50'}
+                    `}>
+                      <Check className={`w-4 h-4 ${isSelected ? 'opacity-100' : 'opacity-0'}`} strokeWidth={3} />
+                    </div>
                     
-                    <div className="w-40 relative group">
-                      <div 
-                        className={`
-                          relative aspect-[4/5] rounded-xl overflow-hidden mb-3 border-2 transition-all cursor-pointer
-                          ${isSelected ? 'border-primary shadow-md' : 'border-transparent hover:border-border'}
-                        `}
-                        onClick={() => toggleItem(product.id)}
-                      >
-                        {image ? (
-                          <Image
-                            src={image}
-                            alt={product.name}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-muted flex items-center justify-center">
-                            <span className="text-muted-foreground text-xs">No image</span>
-                          </div>
-                        )}
-                        
-                        <div className="absolute top-2 left-2 z-10">
-                          <div className={`
-                            w-6 h-6 rounded-full flex items-center justify-center border-2
-                            ${isSelected ? 'bg-primary border-primary text-primary-foreground' : 'bg-background/80 border-muted-foreground/30 backdrop-blur-sm'}
-                          `}>
-                            {isSelected && <Check className="w-3.5 h-3.5" />}
-                          </div>
+                    {/* Thumbnail */}
+                    <div className="w-16 h-20 sm:w-20 sm:h-24 relative rounded-md overflow-hidden flex-shrink-0 border border-white/10 bg-white/5">
+                      {image ? (
+                        <Image
+                          src={image}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-white/30 text-[10px]">No img</span>
                         </div>
-                      </div>
-                      
-                      <Link href={`/product/${product.slug}`} className="hover:underline">
-                        <h3 className="text-sm font-medium line-clamp-2 mb-1">{product.name}</h3>
+                      )}
+                    </div>
+                    
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+                      <Link 
+                        href={`/product/${product.slug}`} 
+                        className="hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <h3 className={`text-sm sm:text-base line-clamp-2 mb-1 ${isSelected ? 'text-white font-medium' : 'text-white/70'}`}>
+                          {product.id === baseProduct.id && <span className="text-luxe-accent mr-2 text-xs uppercase tracking-wider font-bold">This item</span>}
+                          {product.name}
+                        </h3>
                       </Link>
-                      <div className="text-sm font-bold text-primary">
+                      <div className="text-sm sm:text-base font-bold text-white">
                         {formatCurrency(getPrice(product))}
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
-          
-          {/* Summary Box */}
-          <div className="w-full lg:w-80 bg-card rounded-2xl p-6 border border-border shadow-sm flex-shrink-0">
-            <h3 className="text-lg font-semibold mb-4">
-              Total price: <span className="text-primary text-2xl ml-1">{formatCurrency(selectedTotal)}</span>
-            </h3>
+
+          <div className="mt-8 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+              <p className="text-white/60 text-sm mb-1">{selectedItems.size} items selected</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-white">
+                Total price: <span className="text-luxe-accent ml-2">{formatCurrency(selectedTotal)}</span>
+              </h3>
+            </div>
             
             <button 
-              className="w-full bg-foreground text-background hover:bg-foreground/90 transition-colors rounded-full h-12 text-base font-semibold mb-4 gap-2 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-luxe px-8 py-3.5 flex items-center justify-center gap-3 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleAddAllToCart}
               disabled={selectedItems.size === 0}
             >
               <ShoppingCart className="w-5 h-5" />
-              Add Selected to Cart
+              <span className="font-semibold text-sm tracking-wide uppercase">Add Selected to Cart</span>
             </button>
-            
-            <div className="space-y-3 mt-4">
-              {allItems.map((product) => {
-                const isSelected = selectedItems.has(product.id);
-                return (
-                  <div 
-                    key={`list-${product.id}`}
-                    className="flex items-start gap-3 cursor-pointer"
-                    onClick={() => toggleItem(product.id)}
-                  >
-                    <div className={`
-                      w-5 h-5 mt-0.5 rounded border flex-shrink-0 flex items-center justify-center
-                      ${isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-input hover:border-primary/50'}
-                    `}>
-                      {isSelected && <Check className="w-3.5 h-3.5" />}
-                    </div>
-                    <div className="flex-1">
-                      <span className={`text-sm ${isSelected ? 'font-medium' : 'text-muted-foreground'}`}>
-                        {product.id === baseProduct.id && <strong className="mr-1 text-foreground">This item:</strong>}
-                        {product.name}
-                      </span>
-                    </div>
-                    <div className={`text-sm font-semibold flex-shrink-0 ${!isSelected && 'text-muted-foreground'}`}>
-                      {formatCurrency(getPrice(product))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </div>
       </div>
