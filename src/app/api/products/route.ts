@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('products')
-      .select(selectStr, { count: 'planned' })
+      .select(selectStr, { count: 'exact' })
       .eq('is_active', true);
 
     // Text search — split into words, match against name/description/tags
