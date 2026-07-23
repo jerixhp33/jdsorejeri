@@ -144,8 +144,7 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
   const remainingCount = items.filter(i => !['completed', 'error'].includes(i.status)).length;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-luxe-black flex flex-col overflow-hidden">
-        
+    <div className="fixed inset-0 z-[100] bg-luxe-black flex flex-col overflow-hidden" data-lenis-prevent="true">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/10 bg-black/40">
           <div>
@@ -172,7 +171,7 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
         <div className="flex flex-1 overflow-hidden">
           
           {step === 1 ? (
-            <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-12">
+            <div className="flex-1 overflow-y-auto overscroll-contain p-6 md:p-10 space-y-12">
               <div className="max-w-4xl mx-auto space-y-12">
                 
                 {/* Category & Features */}
@@ -266,7 +265,7 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 overflow-y-auto p-6 space-y-3">
+                <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-3">
                   {items.map((item, index) => (
                     <div key={item.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
                       <span className="text-white/30 text-sm font-medium w-6">{index + 1}</span>
