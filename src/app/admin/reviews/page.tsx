@@ -10,7 +10,7 @@ export default async function AdminReviewsPage() {
     .select(`
       *,
       user_profiles ( name, email, avatar_url ),
-      products ( name, image_paths )
+      products ( name )
     `)
     .order('created_at', { ascending: false });
     

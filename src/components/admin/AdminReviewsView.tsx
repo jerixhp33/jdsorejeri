@@ -19,7 +19,7 @@ interface Review {
   is_approved: boolean;
   created_at: string;
   user_profiles: { name: string; email: string; avatar_url: string | null };
-  products: { name: string; image_paths: string[] };
+  products: { name: string; };
 }
 
 export function AdminReviewsView({ initialReviews }: { initialReviews: Review[] }) {
