@@ -37,81 +37,30 @@ export async function POST(req: NextRequest) {
         .contains('notification_preferences', { new_arrivals: true });
 
       if (users && users.length > 0) {
-        const { sendEmail } = await import('@/lib/email');
-        // Force the live site URL for emails so it never links to localhost, even when testing locally
-        const siteUrl = 'https://jdstorejeri.vercel.app';
-        
-        await Promise.all(users.map(async (u) => {
-          const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="margin: 0; padding: 0; background-color: #000000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #000000; padding: 40px 20px;">
-                <tr>
-                  <td align="center">
-                    <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #111111; border-radius: 12px; overflow: hidden; border: 1px solid #333333;">
-                      
-                      <!-- Header -->
-                      <tr>
-                        <td align="center" style="padding: 40px 20px; border-bottom: 1px solid #222222;">
-                          <h1 style="color: #FFFFFF; font-size: 28px; margin: 0; letter-spacing: 2px;">NEW ARRIVAL</h1>
-                          <p style="color: #FFFFFF; font-size: 16px; margin: 10px 0 0 0; opacity: 0.8;">JD Store Exclusive</p>
-                        </td>
-                      </tr>
-
-                      <!-- Content -->
-                      <tr>
-                        <td align="center" style="padding: 40px 30px;">
-                          <p style="color: #FFFFFF; font-size: 18px; margin: 0 0 20px 0; line-height: 1.6;">
-                            Hi ${u.name || 'there'},<br>
-                            We just added a stunning new piece to our collection:
-                          </p>
-                          <h2 style="color: #FFFFFF; font-size: 24px; margin: 0 0 30px 0;">${data.name}</h2>
-                          
-                          <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                            <tr>
-                              <td align="center">
-                                <a href="${siteUrl}/product/${data.slug}" style="display: inline-block; background-color: #FFFFFF; color: #000000; font-size: 14px; font-weight: 700; text-decoration: none; padding: 16px 36px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase;">
-                                  Shop Now
-                                </a>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                      
-                      <!-- Footer -->
-                      <tr>
-                        <td align="center" style="padding: 40px; background-color: #0A0A0A; border-top: 1px solid #222222;">
-                          <p style="margin: 0 0 15px 0; font-size: 11px; color: #666666; line-height: 1.5;">
-                            You are receiving this email because you opted into New Arrivals notifications at JD Store.<br/>
-                            We promise to only send you the good stuff.
-                          </p>
-                          <p style="margin: 0; font-size: 11px; color: #444444;">
-                            &copy; ${new Date().getFullYear()} JD Store. All rights reserved.<br/>
-                            Tamil Nadu, India
-                          </p>
-                        </td>
-                      </tr>
-                      
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </body>
-            </html>
-          `;
+        if (body.notify_users) {
+          const { sendReactEmail } = await import('@/lib/email');
+          const NewArrivalEmail = (await import('@/emails/NewArrivalEmail')).default;
+          const React = await import('react');
           
-          await sendEmail({
-            to: u.email,
-            subject: `✨ Just In: ${data.name} is now available!`,
-            html,
-          });
-        }));
+          // Force the live site URL for emails so it never links to localhost, even when testing locally
+          const siteUrl = 'https://jdstorejeri.vercel.app';
+          
+          await Promise.all(users.map(async (u) => {
+            const emailComponent = React.createElement(NewArrivalEmail, {
+              customerName: u.name || 'there',
+              productName: data.name,
+              productUrl: `${siteUrl}/product/${data.slug}`
+            });
+
+            await sendReactEmail({
+              to: u.email,
+              subject: `New Arrival: ${data.name}`,
+              react: emailComponent
+            }).catch(err => {
+              console.error(`Failed to send new arrival email to ${u.email}:`, err);
+            });
+          }));
+        }
       }
     } catch (err) {
       console.error('Failed to send new arrivals broadcast:', err);
