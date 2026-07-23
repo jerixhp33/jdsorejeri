@@ -805,7 +805,7 @@ function GameScreen({ levelNum, save, onSave, onBack }: {
       const positions = Array.from(fullRemove).map(s => { const [r, cc] = s.split(',').map(Number); return { r, c: cc }; });
       const cr = positions.reduce((a, p) => a + p.r, 0) / positions.length;
       const cc2 = positions.reduce((a, p) => a + p.c, 0) / positions.length;
-      const mainColor = GEM_STYLES[cur[positions[0].r][positions[0].c].color]?.color || '#fff';
+      const mainColor = GEM_STYLES[cur[positions[0].r][positions[0].c].color]?.border || '#fff';
       setFloats(prev => [...prev, {
         id: uid++, x: cc2 * cp + cp / 2, y: cr * cp + cp / 2,
         text: c > 1 ? `🔥${c}x +${pts}` : `+${pts}`, color: mainColor,
