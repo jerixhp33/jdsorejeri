@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { formatCurrency, formatDistanceToNow, generateWhatsAppMessage } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import { Phone, MessageCircle, Clock, ShoppingBag, Check } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
