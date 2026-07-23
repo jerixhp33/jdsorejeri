@@ -9,7 +9,7 @@ export default async function AdminReviewsPage() {
     .from('reviews')
     .select(`
       *,
-      user_profiles ( name, email, avatar_url ),
+      user_profiles ( name, email, profile_picture ),
       products ( name )
     `)
     .order('created_at', { ascending: false });

@@ -18,7 +18,7 @@ interface Review {
   is_verified: boolean;
   is_approved: boolean;
   created_at: string;
-  user_profiles: { name: string; email: string; avatar_url: string | null };
+  user_profiles: { name: string; email: string; profile_picture: string | null };
   products: { name: string; };
 }
 
@@ -106,8 +106,8 @@ export function AdminReviewsView({ initialReviews }: { initialReviews: Review[] 
                 <div className="flex flex-col md:flex-row gap-5">
                   <div className="flex-1 flex gap-4">
                     <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden flex-shrink-0">
-                      {review.user_profiles?.avatar_url ? (
-                        <img src={review.user_profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                      {review.user_profiles?.profile_picture ? (
+                        <img src={review.user_profiles.profile_picture} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-white/50">{review.user_profiles?.name?.[0] || '?'}</div>
                       )}
