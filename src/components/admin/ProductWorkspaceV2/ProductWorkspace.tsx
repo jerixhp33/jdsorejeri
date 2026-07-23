@@ -116,6 +116,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
         },
         is_active: data.status === 'active',
         updated_at: new Date().toISOString(),
+        notify_users: (data as any).notify_users,
       };
 
       let savedProduct;
