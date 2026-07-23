@@ -114,14 +114,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
   const { data, error } = await supabase
     .from('products')
-    .select(
-      `
-      id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
-      category:product_categories(id, name, slug),
-      images:product_images(id, url, alt_text, is_primary, display_order),
-      sizes:poster_sizes(id, label, price, stock, is_active, sku)
-    `
-    )
+    .select('*, category:product_categories(*), images:product_images(*), sizes:poster_sizes(*)')
     .eq('slug', decodeURIComponent(slug))
     .eq('is_active', true)
     .maybeSingle();
@@ -142,14 +135,7 @@ export async function getProductById(id: string): Promise<Product | null> {
 
   const { data, error } = await supabase
     .from('products')
-    .select(
-      `
-      id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
-      category:product_categories(id, name, slug),
-      images:product_images(id, url, alt_text, is_primary, display_order),
-      sizes:poster_sizes(id, label, price, stock, is_active, sku)
-    `
-    )
+    .select('*, category:product_categories(*), images:product_images(*), sizes:poster_sizes(*)')
     .eq('id', id)
     .eq('is_active', true)
     .maybeSingle();

@@ -110,10 +110,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       >
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden rounded-t-[1rem] bg-luxe-gray">
-          {images.length > 0 ? (
+          {images.length > 0 && images[imageIndex] ? (
             <div className="absolute inset-0">
               <Image
-                key={images[imageIndex]?.url || imageIndex}
+                key={images[imageIndex].url || imageIndex}
                 src={images[imageIndex].url}
                 alt={images[imageIndex].alt_text || product.name}
                 fill
@@ -219,9 +219,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 <ShoppingCart className="w-3.5 h-3.5" />
                 {!isInStock
                   ? 'Out of Stock'
-                  : product.product_type === 'poster'
+                  : (product.product_type || 'other') === 'poster'
                     ? 'Select Poster'
-                    : `Select ${product.product_type === 'other' ? 'Option' : product.product_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}`}
+                    : `Select ${(product.product_type || 'other') === 'other' ? 'Option' : (product.product_type || 'other').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}`}
               </button>
             </Tooltip>
           </div>

@@ -83,7 +83,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && isAuthPath) {
-    return NextResponse.redirect(new URL('/'));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return supabaseResponse;
