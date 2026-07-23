@@ -17,6 +17,7 @@ import {
   ChevronRight,
   ZoomIn,
   Check,
+  X,
 } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
@@ -72,6 +73,7 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [waitlistJoined, setWaitlistJoined] = useState(false);
   const [joiningWaitlist, setJoiningWaitlist] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   
   // Adaptive aspect ratio: tracks the natural width/height of the loaded image
   const [imgAspect, setImgAspect] = useState<number | null>(null);
@@ -901,8 +903,12 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                         <ZoomIn className="w-4 h-4 text-white" />
                       </div>
-                      {/* For a real app, clicking this would open a lightbox. We'll use a simple anchor for now. */}
-                      <a href={review.image_url} target="_blank" rel="noreferrer" className="absolute inset-0 z-10" />
+                      <button 
+                        type="button"
+                        onClick={() => setLightboxImage(review.image_url)}
+                        className="absolute inset-0 z-10 focus:outline-none" 
+                        aria-label="View full image"
+                      />
                     </div>
                   )}
                 </motion.div>
@@ -946,6 +952,41 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
           productName={product.name}
           onSuccess={() => router.refresh()}
         />
+
+        {/* Image Lightbox */}
+        <AnimatePresence>
+          {lightboxImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 sm:p-8"
+              onClick={() => setLightboxImage(null)}
+            >
+              <button
+                onClick={() => setLightboxImage(null)}
+                className="absolute top-4 left-4 sm:top-8 sm:left-8 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus:outline-none"
+                aria-label="Close lightbox"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              
+              <div 
+                className="relative w-full max-w-5xl h-full sm:h-[90vh] flex items-center justify-center"
+                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image wrapper
+              >
+                <Image
+                  src={lightboxImage}
+                  alt="Full review image"
+                  fill
+                  className="object-contain"
+                  sizes="100vw"
+                  quality={100}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
