@@ -123,7 +123,7 @@ export default async function HomePage() {
 
 async function BestSellersData() {
   const supabase = createPublicClient();
-  const { data } = await supabase.from('products').select('id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating, images:product_images(id, url, alt_text, is_primary, display_order), category:product_categories(id, name, slug), sizes:poster_sizes(id, label, price, stock, is_active, sku)').eq('is_active', true).eq('is_best_seller', true).order('created_at', { ascending: false }).limit(4);
+  const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_best_seller', true).order('created_at', { ascending: false }).limit(4);
   return <BestSellers products={data || []} />;
 }
 
@@ -146,6 +146,6 @@ async function FAQData() {
 
 async function TrendingData() {
   const supabase = createPublicClient();
-  const { data } = await supabase.from('products').select('id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating, images:product_images(id, url, alt_text, is_primary, display_order), category:product_categories(id, name, slug), sizes:poster_sizes(id, label, price, stock, is_active, sku)').eq('is_active', true).eq('is_trending', true).order('created_at', { ascending: false }).limit(4);
+  const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_trending', true).order('created_at', { ascending: false }).limit(4);
   return <BestSellers products={data || []} title="Trending Products" subtitle="Hot Right Now" viewAllLink="/trending" noContainer />;
 }
