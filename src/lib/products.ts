@@ -339,7 +339,11 @@ export async function getCrossSells(productId: string): Promise<Product[]> {
     .eq('product_id', productId)
     .order('created_at', { ascending: true });
 
-  if (error || !data) return [];
+  if (error) {
+    console.error('[getCrossSells] Supabase error:', error.message, error.code);
+    return [];
+  }
+  if (!data) return [];
   
   return data
     .map((item: any) => item.cross_sell_product)
