@@ -18,9 +18,9 @@ export default async function HomePage() {
   
   // Fetch ONLY fast, layout-blocking data here to ensure rapid First Contentful Paint
   const [banners, collections, marqueeLabels] = await Promise.all([
-    supabase.from('banners').select('id, title, subtitle, image_url, mobile_image_url, link, position, text_color, button_text, display_order').eq('is_active', true).order('display_order').then(({ data }) => data || []),
-    supabase.from('collections').select('id, name, slug, image_url, description').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
-    supabase.from('marquee_labels').select('id, text, is_active, order_index').eq('is_active', true).order('order_index').then(({ data }) => data || []),
+    supabase.from('banners').select('*').eq('is_active', true).order('display_order').then(({ data }) => data || []),
+    supabase.from('collections').select('*').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
+    supabase.from('marquee_labels').select('*').eq('is_active', true).order('order_index').then(({ data }) => data || []),
   ]);
 
   const heroBanners    = banners.filter((b: any) => b.position === 'hero');
@@ -134,13 +134,13 @@ async function DynamicShowcaseData() {
 
 async function TestimonialsData() {
   const supabase = createPublicClient();
-  const { data } = await supabase.from('testimonials').select('id, name, role, content, rating, avatar_url').eq('is_active', true).order('display_order').limit(8);
+  const { data } = await supabase.from('testimonials').select('*').eq('is_active', true).order('display_order').limit(8);
   return <TestimonialsSection testimonials={data || []} />;
 }
 
 async function FAQData() {
   const supabase = createPublicClient();
-  const { data } = await supabase.from('faqs').select('id, question, answer').eq('is_active', true).order('display_order').limit(10);
+  const { data } = await supabase.from('faqs').select('*').eq('is_active', true).order('display_order').limit(10);
   return <FAQSection faqs={data || []} />;
 }
 
