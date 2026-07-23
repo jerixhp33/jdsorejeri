@@ -98,7 +98,7 @@ export async function getProducts(
   const total = count ?? 0;
 
   return {
-    data: (data as Product[]) || [],
+    data: (data as unknown as Product[]) || [],
     total,
     page,
     limit,
@@ -131,7 +131,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return null;
   }
 
-  return data as Product;
+  return data as unknown as Product;
 }
 
 /**
@@ -159,7 +159,7 @@ export async function getProductById(id: string): Promise<Product | null> {
     return null;
   }
 
-  return data as Product;
+  return data as unknown as Product;
 }
 
 /**
@@ -184,7 +184,7 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
     .limit(limit);
 
   if (error) return [];
-  return (data as Product[]) || [];
+  return (data as unknown as Product[]) || [];
 }
 
 /**
@@ -209,7 +209,7 @@ export async function getTrendingProducts(limit = 8): Promise<Product[]> {
     .limit(limit);
 
   if (error) return [];
-  return (data as Product[]) || [];
+  return (data as unknown as Product[]) || [];
 }
 
 /**
@@ -234,7 +234,7 @@ export async function getBestSellers(limit = 8): Promise<Product[]> {
     .limit(limit);
 
   if (error) return [];
-  return (data as Product[]) || [];
+  return (data as unknown as Product[]) || [];
 }
 
 /**
@@ -271,7 +271,7 @@ export async function getRelatedProducts(
   if (productType) stage1 = stage1.eq('product_type', productType);
 
   const { data: sameCat } = await stage1.limit(limit);
-  const results: Product[] = (sameCat as Product[]) || [];
+  const results: Product[] = (sameCat as unknown as Product[]) || [];
 
   // ── Stage 2: fill remaining with same type, any category ─────────
   if (results.length < limit) {
@@ -291,7 +291,7 @@ export async function getRelatedProducts(
     stage2 = stage2.order('is_trending', { ascending: false });
 
     const { data: otherCat } = await stage2.limit(needed);
-    results.push(...((otherCat as Product[]) || []));
+    results.push(...((otherCat as unknown as Product[]) || []));
   }
 
   return results;
@@ -317,7 +317,7 @@ export async function searchProducts(query: string, limit = 10): Promise<Product
     .limit(limit);
 
   if (error) return [];
-  return (data as Product[]) || [];
+  return (data as unknown as Product[]) || [];
 }
 
 /**
