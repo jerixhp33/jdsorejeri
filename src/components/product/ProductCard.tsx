@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useHaptic } from '@/hooks/useHaptic';
@@ -49,12 +48,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   };
 
   useEffect(() => {
-    if (images.length <= 1 || !inView) return;
+    if (images.length <= 1 || !isHovered) return;
     const timer = setInterval(() => {
       setImageIndex((prev) => (prev + 1) % images.length);
     }, 2500);
     return () => clearInterval(timer);
-  }, [images.length, inView]);
+  }, [images.length, isHovered]);
 
   const wishlisted = isWishlisted(product.id);
 
@@ -72,39 +71,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const haptic = useHaptic();
 
-  // 3D Parallax Tilt Effect setup
-  const mouseX = useMotionValue(0.5);
-  const mouseY = useMotionValue(0.5);
-  const mouseXSpring = useSpring(mouseX, { stiffness: 300, damping: 40 });
-  const mouseYSpring = useSpring(mouseY, { stiffness: 300, damping: 40 });
-  
-  // Maps 0-1 percentage to degrees (e.g. 10 deg tilt)
-  const rotateX = useTransform(mouseYSpring, [0, 1], [8, -8]);
-  const rotateY = useTransform(mouseXSpring, [0, 1], [-8, 8]);
-  
-  const glareBackground = useTransform(
-    [mouseXSpring, mouseYSpring],
-    ([x, y]: number[]) => `radial-gradient(circle at ${(x || 0.5) * 100}% ${(y || 0.5) * 100}%, rgba(255,255,255,0.15) 0%, transparent 60%)`
-  );
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Disable heavy physics on touch devices (phones/tablets)
-    if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return;
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-    mouseX.set(x);
-    mouseY.set(y);
-  };
-
-  const handleMouseLeaveWrapper = () => {
-    setIsHovered(false);
-    if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return;
-    mouseX.set(0.5);
-    mouseY.set(0.5);
-  };
-
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -119,48 +85,20 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     await toggle(product.id);
   };
 
-  // Paper Unroll Scroll Reveal
-  const unrollVariants = {
-    hidden: { 
-      opacity: 0, 
-      rotateX: -45, // Roll from the top
-      y: 40,
-      scale: 0.95,
-      transformPerspective: 1200,
-      transformOrigin: "top center"
-    },
-    visible: { 
-      opacity: 1, 
-      rotateX: 0, 
-      y: 0, 
-      scale: 1,
-      transition: { 
-        duration: 0.85, 
-        ease: [0.16, 1, 0.3, 1], // Custom spring-like ease
-        delay: index * 0.1 
-      } 
-    }
-  };
-
   return (
-    <motion.div
+    <div
       ref={inViewRef}
-      variants={unrollVariants}
-      initial="hidden"
-      animate={inView ? "visible" : "hidden"}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeaveWrapper}
-      className="relative rounded-[1rem] will-change-transform"
+      onMouseLeave={() => setIsHovered(false)}
+      className="relative rounded-[1rem] will-change-transform product-card-reveal"
       style={{
-        rotateX,
-        rotateY,
-        transformPerspective: 1000,
-        scale: isHovered ? 1.02 : 1,
+        opacity: inView ? 1 : 0,
+        transform: inView ? (isHovered ? 'translateY(0) scale(1.02)' : 'translateY(0) scale(1)') : 'translateY(30px)',
+        transition: 'opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease-out',
+        transitionDelay: inView && !isHovered ? `${index * 0.08}s` : '0s',
         boxShadow: isHovered 
           ? `0 30px 60px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(200,169,110,0.3)` 
           : `0 0 0 1px rgba(200,169,110,0.12), 0 3px 12px rgba(200,169,110,0.04)`,
-        transition: 'box-shadow 0.3s ease-out, scale 0.3s ease-out',
         zIndex: isHovered ? 50 : 1,
       }}
     >
@@ -173,30 +111,21 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden rounded-t-[1rem] bg-luxe-gray">
           {images.length > 0 ? (
-            <div 
-              className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
-              style={{
-                transform: `translateX(-${imageIndex * 100}%)`,
-              }}
-            >
-              {images.map((img, idx) => (
-                <div key={idx} className="relative w-full h-full flex-shrink-0">
-                  <Image
-                    src={img.url}
-                    alt={img.alt_text || product.name}
-                    fill
-                    crossOrigin="anonymous"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className={cn(
-                      'object-cover transition-all duration-700 protect-image pointer-events-none',
-                      imageLoaded ? 'opacity-100' : 'opacity-0'
-                    )}
-                    onLoad={() => {
-                      if (idx === 0) setImageLoaded(true);
-                    }}
-                  />
-                </div>
-              ))}
+            <div className="absolute inset-0">
+              <Image
+                key={images[imageIndex]?.url || imageIndex}
+                src={images[imageIndex].url}
+                alt={images[imageIndex].alt_text || product.name}
+                fill
+                crossOrigin="anonymous"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className={cn(
+                  'object-cover transition-opacity duration-700 protect-image pointer-events-none',
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                )}
+                style={{ animation: 'fadeIn 0.5s ease-in-out' }}
+                onLoad={() => setImageLoaded(true)}
+              />
             </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-luxe-gray">
@@ -233,14 +162,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           {/* Overlay */}
           <div className="image-overlay" />
 
-          {/* Dynamic Glare Effect */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none z-30 transition-opacity duration-300"
-            style={{
-              background: glareBackground,
-              opacity: isHovered ? 1 : 0
-            }}
-          />
 
           {/* Badges - optimized to remove backdrop blur for mobile performance */}
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10 max-w-[75%]">
@@ -343,6 +264,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

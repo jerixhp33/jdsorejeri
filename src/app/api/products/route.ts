@@ -18,11 +18,11 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createAdminClient();
 
-    const selectStr = `*, category:product_categories(id, name, slug), images:product_images(url, is_primary, display_order), sizes:poster_sizes(id, label, price, stock, width_cm, height_cm)`;
+    const selectStr = `id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, average_rating, category:product_categories(id, name), images:product_images(id, url, alt_text, is_primary, display_order), sizes:poster_sizes(id, label, price, stock, is_active)`;
 
     let query = supabase
       .from('products')
-      .select(selectStr, { count: 'exact' })
+      .select(selectStr, { count: 'planned' })
       .eq('is_active', true);
 
     // Text search — split into words, match against name/description/tags
@@ -63,13 +63,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       data: data || [],
       total: count || 0,
       page,
       limit,
       has_more: offset + limit < (count || 0),
     });
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    return response;
   } catch (error) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

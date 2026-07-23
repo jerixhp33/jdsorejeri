@@ -18,9 +18,9 @@ export default async function HomePage() {
   
   // Fetch ONLY fast, layout-blocking data here to ensure rapid First Contentful Paint
   const [banners, collections, marqueeLabels] = await Promise.all([
-    supabase.from('banners').select('*').eq('is_active', true).order('display_order').then(({ data }) => data || []),
-    supabase.from('collections').select('*').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
-    supabase.from('marquee_labels').select('*').eq('is_active', true).order('order_index').then(({ data }) => data || []),
+    supabase.from('banners').select('id, title, subtitle, image_url, mobile_image_url, link, position, text_color, button_text, display_order').eq('is_active', true).order('display_order').then(({ data }) => data || []),
+    supabase.from('collections').select('id, name, slug, image_url, description').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
+    supabase.from('marquee_labels').select('id, text, is_active, order_index').eq('is_active', true).order('order_index').then(({ data }) => data || []),
   ]);
 
   const heroBanners    = banners.filter((b: any) => b.position === 'hero');
@@ -123,29 +123,29 @@ export default async function HomePage() {
 
 async function BestSellersData() {
   const supabase = createPublicClient();
-  const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_best_seller', true).order('created_at', { ascending: false }).limit(4);
+  const { data } = await supabase.from('products').select('id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating, images:product_images(id, url, alt_text, is_primary, display_order), category:product_categories(id, name, slug), sizes:poster_sizes(id, label, price, stock, is_active, sku)').eq('is_active', true).eq('is_best_seller', true).order('created_at', { ascending: false }).limit(4);
   return <BestSellers products={data || []} />;
 }
 
 async function DynamicShowcaseData() {
-  const products = await getFeaturedProducts(40);
+  const products = await getFeaturedProducts(16);
   return <DynamicShowcase products={products} />;
 }
 
 async function TestimonialsData() {
   const supabase = createPublicClient();
-  const { data } = await supabase.from('testimonials').select('*').eq('is_active', true).order('display_order').limit(8);
+  const { data } = await supabase.from('testimonials').select('id, name, role, content, rating, avatar_url').eq('is_active', true).order('display_order').limit(8);
   return <TestimonialsSection testimonials={data || []} />;
 }
 
 async function FAQData() {
   const supabase = createPublicClient();
-  const { data } = await supabase.from('faqs').select('*').eq('is_active', true).order('display_order').limit(10);
+  const { data } = await supabase.from('faqs').select('id, question, answer').eq('is_active', true).order('display_order').limit(10);
   return <FAQSection faqs={data || []} />;
 }
 
 async function TrendingData() {
   const supabase = createPublicClient();
-  const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_trending', true).order('created_at', { ascending: false }).limit(4);
+  const { data } = await supabase.from('products').select('id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating, images:product_images(id, url, alt_text, is_primary, display_order), category:product_categories(id, name, slug), sizes:poster_sizes(id, label, price, stock, is_active, sku)').eq('is_active', true).eq('is_trending', true).order('created_at', { ascending: false }).limit(4);
   return <BestSellers products={data || []} title="Trending Products" subtitle="Hot Right Now" viewAllLink="/trending" noContainer />;
 }

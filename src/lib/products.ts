@@ -16,10 +16,10 @@ export async function getProducts(
     .from('products')
     .select(
       `
-      *,
-      category:product_categories(*),
-      images:product_images(*),
-      sizes:poster_sizes(*)
+      id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
+      category:product_categories(id, name, slug),
+      images:product_images(id, url, alt_text, is_primary, display_order),
+      sizes:poster_sizes(id, label, price, stock, is_active, sku)
     `,
       { count: 'exact' }
     )
@@ -116,10 +116,10 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     .from('products')
     .select(
       `
-      *,
-      category:product_categories(*),
-      images:product_images(*),
-      sizes:poster_sizes(*)
+      id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
+      category:product_categories(id, name, slug),
+      images:product_images(id, url, alt_text, is_primary, display_order),
+      sizes:poster_sizes(id, label, price, stock, is_active, sku)
     `
     )
     .eq('slug', decodeURIComponent(slug))
@@ -144,10 +144,10 @@ export async function getProductById(id: string): Promise<Product | null> {
     .from('products')
     .select(
       `
-      *,
-      category:product_categories(*),
-      images:product_images(*),
-      sizes:poster_sizes(*)
+      id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
+      category:product_categories(id, name, slug),
+      images:product_images(id, url, alt_text, is_primary, display_order),
+      sizes:poster_sizes(id, label, price, stock, is_active, sku)
     `
     )
     .eq('id', id)
@@ -172,10 +172,10 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
     .from('products')
     .select(
       `
-      *,
-      category:product_categories(*),
-      images:product_images(*),
-      sizes:poster_sizes(*)
+      id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
+      category:product_categories(id, name, slug),
+      images:product_images(id, url, alt_text, is_primary, display_order),
+      sizes:poster_sizes(id, label, price, stock, is_active, sku)
     `
     )
     .eq('is_active', true)
@@ -197,10 +197,10 @@ export async function getTrendingProducts(limit = 8): Promise<Product[]> {
     .from('products')
     .select(
       `
-      *,
-      category:product_categories(*),
-      images:product_images(*),
-      sizes:poster_sizes(*)
+      id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
+      category:product_categories(id, name, slug),
+      images:product_images(id, url, alt_text, is_primary, display_order),
+      sizes:poster_sizes(id, label, price, stock, is_active, sku)
     `
     )
     .eq('is_active', true)
@@ -222,10 +222,10 @@ export async function getBestSellers(limit = 8): Promise<Product[]> {
     .from('products')
     .select(
       `
-      *,
-      category:product_categories(*),
-      images:product_images(*),
-      sizes:poster_sizes(*)
+      id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
+      category:product_categories(id, name, slug),
+      images:product_images(id, url, alt_text, is_primary, display_order),
+      sizes:poster_sizes(id, label, price, stock, is_active, sku)
     `
     )
     .eq('is_active', true)
@@ -254,10 +254,10 @@ export async function getRelatedProducts(
   const supabase = createPublicClient();
 
   const FIELDS = `
-    *,
-    category:product_categories(*),
-    images:product_images(*),
-    sizes:poster_sizes(*)
+    id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
+    category:product_categories(id, name, slug),
+    images:product_images(id, url, alt_text, is_primary, display_order),
+    sizes:poster_sizes(id, label, price, stock, is_active, sku)
   `;
 
   // ── Stage 1: same category ──────────────────────────────────────
@@ -330,10 +330,10 @@ export async function getCrossSells(productId: string): Promise<Product[]> {
     .from('product_cross_sells')
     .select(`
       cross_sell_product:products!product_cross_sells_cross_sell_product_id_fkey(
-        *,
-        category:product_categories(*),
-        images:product_images(*),
-        sizes:poster_sizes(*)
+        id, name, slug, price, original_price, product_type, is_active, is_featured, is_trending, is_best_seller, stock, status, short_description, average_rating,
+        category:product_categories(id, name, slug),
+        images:product_images(id, url, alt_text, is_primary, display_order),
+        sizes:poster_sizes(id, label, price, stock, is_active, sku)
       )
     `)
     .eq('product_id', productId)

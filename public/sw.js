@@ -13,11 +13,12 @@ self.addEventListener('install', function (event) {
 
 // Activate event - Clean up old caches
 self.addEventListener('activate', function (event) {
+  const validCaches = [CACHE_NAME, 'jd-store-assets-v1', 'jd-store-images-v1'];
   event.waitUntil(
     caches.keys().then(function (cacheNames) {
       return Promise.all(
         cacheNames.map(function (cacheName) {
-          if (cacheName !== CACHE_NAME) {
+          if (!validCaches.includes(cacheName)) {
             return caches.delete(cacheName);
           }
         })
@@ -29,6 +30,56 @@ self.addEventListener('activate', function (event) {
 
 // Fetch event - Serve offline fallback page on connection failure
 self.addEventListener('fetch', function (event) {
+  const url = new URL(event.request.url);
+
+  // 1. Cache-First for _next/static/
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
+        return fetch(event.request).then((networkResponse) => {
+          return caches.open('jd-store-assets-v1').then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        });
+      })
+    );
+    return;
+  }
+
+  // 2. Cache-First for Google Fonts
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
+        return fetch(event.request).then((networkResponse) => {
+          return caches.open('jd-store-assets-v1').then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        });
+      })
+    );
+    return;
+  }
+
+  // 3. Stale-While-Revalidate for images
+  if (event.request.destination === 'image') {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          return caches.open('jd-store-images-v1').then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        });
+        return cachedResponse || fetchPromise;
+      })
+    );
+    return;
+  }
+
   // Only intercept document/navigation page requests
   if (event.request.mode === 'navigate') {
     event.respondWith(
