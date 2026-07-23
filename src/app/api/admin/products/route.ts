@@ -72,11 +72,48 @@ export async function PATCH(req: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
-  const { id, key, ...updates } = body;
+  const { id, key, notify_users, ...updates } = body;
   const col = id ? 'id' : 'key';
   const val = id ?? key;
   const { data, error } = await admin.from('products').update(updates).eq(col, val).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Send New Arrivals emails if published
+  if (notify_users) {
+    try {
+      const { data: users } = await admin
+        .from('user_profiles')
+        .select('email, name')
+        .contains('notification_preferences', { new_arrivals: true });
+
+      if (users && users.length > 0) {
+        const { sendReactEmail } = await import('@/lib/email');
+        const NewArrivalEmail = (await import('@/emails/NewArrivalEmail')).default;
+        const React = await import('react');
+        
+        const siteUrl = 'https://jdstorejeri.vercel.app';
+        
+        await Promise.all(users.map(async (u) => {
+          const emailComponent = React.createElement(NewArrivalEmail, {
+            customerName: u.name || 'there',
+            productName: data.name,
+            productUrl: `${siteUrl}/product/${data.slug}`
+          });
+
+          await sendReactEmail({
+            to: u.email,
+            subject: `New Arrival: ${data.name}`,
+            react: emailComponent
+          }).catch(err => {
+            console.error(`Failed to send new arrival email to ${u.email}:`, err);
+          });
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to send new arrivals broadcast:', err);
+    }
+  }
+
   return NextResponse.json(data);
 }
 

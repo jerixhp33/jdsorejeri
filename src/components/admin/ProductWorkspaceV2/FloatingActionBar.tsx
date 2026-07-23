@@ -7,7 +7,7 @@ interface FloatingActionBarProps {
   onCancel: () => void;
   onDuplicate: () => void;
   onSaveDraft: () => void;
-  onPublish: () => void;
+  onPublish: (notify?: boolean) => void;
   onSchedule: () => void;
   onArchive: () => void;
 }
@@ -93,6 +93,13 @@ export function FloatingActionBar({
             >
               <Send className="w-4 h-4 text-luxe-accent" />
               Publish Now
+            </button>
+            <button 
+              onClick={() => { onPublish(true); setShowPublishMenu(false); }}
+              className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 flex items-center gap-3 transition-colors border-t border-white/5"
+            >
+              <Send className="w-4 h-4 text-purple-400" />
+              Publish & Notify Users
             </button>
             <button 
               onClick={() => { onSchedule(); setShowPublishMenu(false); }}
