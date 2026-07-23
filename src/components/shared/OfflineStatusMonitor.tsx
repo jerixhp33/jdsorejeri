@@ -3,833 +3,714 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type GemType = 'ruby' | 'sapphire' | 'emerald' | 'topaz' | 'amethyst' | 'diamond';
-type CellState = { type: GemType; id: number; matched: boolean; falling: boolean; isNew: boolean };
-type Position = { row: number; col: number };
+type GemType = 0 | 1 | 2 | 3 | 4 | 5;
+type Cell = { type: GemType; id: number; matched: boolean };
+type Pos = { r: number; c: number };
 
-const GEM_TYPES: GemType[] = ['ruby', 'sapphire', 'emerald', 'topaz', 'amethyst', 'diamond'];
-const GRID_SIZE = 8;
-const BASE_POINTS = 50;
+const COLS = 8;
+const ROWS = 9;
+const GEM_COUNT = 6;
 
-const GEM_COLORS: Record<GemType, { bg: string; glow: string; emoji: string }> = {
-  ruby:     { bg: 'linear-gradient(135deg, #ff1744, #d50000)', glow: 'rgba(255,23,68,0.6)',   emoji: '💎' },
-  sapphire: { bg: 'linear-gradient(135deg, #448aff, #2962ff)', glow: 'rgba(68,138,255,0.6)',  emoji: '🔷' },
-  emerald:  { bg: 'linear-gradient(135deg, #00e676, #00c853)', glow: 'rgba(0,230,118,0.6)',   emoji: '💚' },
-  topaz:    { bg: 'linear-gradient(135deg, #ffd740, #ffab00)', glow: 'rgba(255,215,64,0.6)',   emoji: '⭐' },
-  amethyst: { bg: 'linear-gradient(135deg, #e040fb, #aa00ff)', glow: 'rgba(224,64,251,0.6)',  emoji: '🔮' },
-  diamond:  { bg: 'linear-gradient(135deg, #e0e0e0, #ffffff)', glow: 'rgba(255,255,255,0.7)', emoji: '✨' },
-};
+// Big colorful emoji gems — instantly recognizable on every device
+const GEMS: { emoji: string; color: string; glow: string; name: string }[] = [
+  { emoji: '🔴', color: '#ff1744', glow: '#ff174480', name: 'Red' },
+  { emoji: '🟡', color: '#ffd600', glow: '#ffd60080', name: 'Yellow' },
+  { emoji: '🟢', color: '#00e676', glow: '#00e67680', name: 'Green' },
+  { emoji: '🔵', color: '#2979ff', glow: '#2979ff80', name: 'Blue' },
+  { emoji: '🟣', color: '#d500f9', glow: '#d500f980', name: 'Purple' },
+  { emoji: '🟠', color: '#ff9100', glow: '#ff910080', name: 'Orange' },
+];
 
-// ─── Sound Engine (Web Audio API) ────────────────────────────────────────────
-class SoundEngine {
+// ─── Sound Engine ────────────────────────────────────────────────────────────
+class SFX {
   private ctx: AudioContext | null = null;
+  enabled = true;
 
-  private getCtx(): AudioContext {
+  private ac(): AudioContext {
     if (!this.ctx) this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
     if (this.ctx.state === 'suspended') this.ctx.resume();
     return this.ctx;
   }
 
-  playTone(freq: number, duration: number, type: OscillatorType = 'sine', volume = 0.15) {
+  private tone(freq: number, dur: number, type: OscillatorType = 'sine', vol = 0.12) {
+    if (!this.enabled) return;
     try {
-      const ctx = this.getCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      gain.gain.setValueAtTime(volume, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + duration);
-    } catch { /* ignore audio errors */ }
+      const c = this.ac();
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, c.currentTime);
+      g.gain.setValueAtTime(vol, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+      o.connect(g).connect(c.destination);
+      o.start();
+      o.stop(c.currentTime + dur);
+    } catch {}
   }
 
-  swap() {
-    this.playTone(600, 0.08, 'sine', 0.1);
-    setTimeout(() => this.playTone(800, 0.08, 'sine', 0.1), 40);
-  }
-
+  swap() { this.tone(523, 0.06); setTimeout(() => this.tone(659, 0.06), 40); }
+  
   match(combo: number) {
-    const baseFreq = 523 + combo * 80; // C5 going up
-    this.playTone(baseFreq, 0.15, 'sine', 0.12);
-    setTimeout(() => this.playTone(baseFreq * 1.25, 0.15, 'sine', 0.12), 60);
-    setTimeout(() => this.playTone(baseFreq * 1.5, 0.2, 'triangle', 0.1), 120);
+    const base = 523 + combo * 100;
+    this.tone(base, 0.12, 'sine', 0.14);
+    setTimeout(() => this.tone(base * 1.25, 0.12, 'sine', 0.14), 50);
+    setTimeout(() => this.tone(base * 1.5, 0.18, 'triangle', 0.1), 100);
   }
 
   cascade() {
-    this.playTone(880, 0.1, 'triangle', 0.08);
-    setTimeout(() => this.playTone(1100, 0.1, 'triangle', 0.08), 50);
-    setTimeout(() => this.playTone(1320, 0.15, 'triangle', 0.08), 100);
+    [880, 1100, 1320].forEach((f, i) => setTimeout(() => this.tone(f, 0.1, 'triangle', 0.08), i * 50));
   }
 
-  levelUp() {
-    const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
-    notes.forEach((f, i) => {
-      setTimeout(() => this.playTone(f, 0.3, 'sine', 0.12), i * 100);
-    });
-  }
+  fail() { this.tone(200, 0.12, 'square', 0.04); setTimeout(() => this.tone(160, 0.15, 'square', 0.04), 60); }
 
-  noMatch() {
-    this.playTone(200, 0.15, 'square', 0.05);
-    setTimeout(() => this.playTone(150, 0.2, 'square', 0.05), 80);
-  }
+  win() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => this.tone(f, 0.25, 'sine', 0.1), i * 90)); }
 
-  gameOver() {
-    const notes = [392, 349, 330, 262]; // G4, F4, E4, C4
-    notes.forEach((f, i) => {
-      setTimeout(() => this.playTone(f, 0.4, 'sine', 0.1), i * 150);
-    });
-  }
+  lose() { [392, 349, 330, 262].forEach((f, i) => setTimeout(() => this.tone(f, 0.3, 'sine', 0.08), i * 120)); }
 }
 
-const sound = new SoundEngine();
+const sfx = new SFX();
 
-// ─── Grid Helpers ────────────────────────────────────────────────────────────
-let nextId = 1;
-function randomGem(): GemType {
-  return GEM_TYPES[Math.floor(Math.random() * GEM_TYPES.length)];
-}
+// ─── Grid Logic ──────────────────────────────────────────────────────────────
+let uid = 1;
+const rng = (): GemType => Math.floor(Math.random() * GEM_COUNT) as GemType;
+const mk = (t?: GemType): Cell => ({ type: t ?? rng(), id: uid++, matched: false });
 
-function createCell(type?: GemType, isNew = false): CellState {
-  return { type: type || randomGem(), id: nextId++, matched: false, falling: false, isNew };
-}
-
-function initGrid(): CellState[][] {
-  const grid: CellState[][] = [];
-  for (let r = 0; r < GRID_SIZE; r++) {
-    grid[r] = [];
-    for (let c = 0; c < GRID_SIZE; c++) {
-      let cell = createCell();
-      // Ensure no initial matches
+function buildGrid(): Cell[][] {
+  const g: Cell[][] = [];
+  for (let r = 0; r < ROWS; r++) {
+    g[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      let cell = mk();
       while (
-        (c >= 2 && grid[r][c - 1].type === cell.type && grid[r][c - 2].type === cell.type) ||
-        (r >= 2 && grid[r - 1][c].type === cell.type && grid[r - 2][c].type === cell.type)
-      ) {
-        cell = createCell();
-      }
-      grid[r][c] = cell;
+        (c >= 2 && g[r][c-1].type === cell.type && g[r][c-2].type === cell.type) ||
+        (r >= 2 && g[r-1][c].type === cell.type && g[r-2][c].type === cell.type)
+      ) cell = mk();
+      g[r][c] = cell;
     }
   }
-  return grid;
-}
-
-function copyGrid(g: CellState[][]): CellState[][] {
-  return g.map(row => row.map(cell => ({ ...cell })));
-}
-
-function findMatches(grid: CellState[][]): Position[] {
-  const matched = new Set<string>();
-
-  // Horizontal
-  for (let r = 0; r < GRID_SIZE; r++) {
-    for (let c = 0; c <= GRID_SIZE - 3; c++) {
-      const t = grid[r][c].type;
-      if (t === grid[r][c + 1].type && t === grid[r][c + 2].type) {
-        let end = c + 2;
-        while (end + 1 < GRID_SIZE && grid[r][end + 1].type === t) end++;
-        for (let i = c; i <= end; i++) matched.add(`${r},${i}`);
-      }
-    }
-  }
-
-  // Vertical
-  for (let c = 0; c < GRID_SIZE; c++) {
-    for (let r = 0; r <= GRID_SIZE - 3; r++) {
-      const t = grid[r][c].type;
-      if (t === grid[r + 1][c].type && t === grid[r + 2][c].type) {
-        let end = r + 2;
-        while (end + 1 < GRID_SIZE && grid[end + 1][c].type === t) end++;
-        for (let i = r; i <= end; i++) matched.add(`${i},${c}`);
-      }
-    }
-  }
-
-  return Array.from(matched).map(s => {
-    const [row, col] = s.split(',').map(Number);
-    return { row, col };
-  });
-}
-
-function isAdjacent(a: Position, b: Position): boolean {
-  return (Math.abs(a.row - b.row) + Math.abs(a.col - b.col)) === 1;
-}
-
-function swapCells(grid: CellState[][], a: Position, b: Position): CellState[][] {
-  const g = copyGrid(grid);
-  const temp = g[a.row][a.col];
-  g[a.row][a.col] = g[b.row][b.col];
-  g[b.row][b.col] = temp;
   return g;
 }
 
-function hasAnyValidMove(grid: CellState[][]): boolean {
-  for (let r = 0; r < GRID_SIZE; r++) {
-    for (let c = 0; c < GRID_SIZE; c++) {
-      // Try swapping right
-      if (c + 1 < GRID_SIZE) {
-        const g = swapCells(grid, { row: r, col: c }, { row: r, col: c + 1 });
-        if (findMatches(g).length > 0) return true;
+function clone(g: Cell[][]): Cell[][] {
+  return g.map(row => row.map(c => ({ ...c })));
+}
+
+function getMatches(g: Cell[][]): Set<string> {
+  const m = new Set<string>();
+  // Horizontal
+  for (let r = 0; r < ROWS; r++) {
+    let run = 1;
+    for (let c = 1; c < COLS; c++) {
+      if (g[r][c].type === g[r][c-1].type) { run++; }
+      else {
+        if (run >= 3) for (let i = c - run; i < c; i++) m.add(`${r},${i}`);
+        run = 1;
       }
-      // Try swapping down
-      if (r + 1 < GRID_SIZE) {
-        const g = swapCells(grid, { row: r, col: c }, { row: r + 1, col: c });
-        if (findMatches(g).length > 0) return true;
+    }
+    if (run >= 3) for (let i = COLS - run; i < COLS; i++) m.add(`${r},${i}`);
+  }
+  // Vertical
+  for (let c = 0; c < COLS; c++) {
+    let run = 1;
+    for (let r = 1; r < ROWS; r++) {
+      if (g[r][c].type === g[r-1][c].type) { run++; }
+      else {
+        if (run >= 3) for (let i = r - run; i < r; i++) m.add(`${i},${c}`);
+        run = 1;
       }
+    }
+    if (run >= 3) for (let i = ROWS - run; i < ROWS; i++) m.add(`${i},${c}`);
+  }
+  return m;
+}
+
+function swapInGrid(g: Cell[][], a: Pos, b: Pos): Cell[][] {
+  const ng = clone(g);
+  [ng[a.r][a.c], ng[b.r][b.c]] = [ng[b.r][b.c], ng[a.r][a.c]];
+  return ng;
+}
+
+function anyValidMove(g: Cell[][]): boolean {
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (c + 1 < COLS && getMatches(swapInGrid(g, {r,c}, {r,c:c+1})).size > 0) return true;
+      if (r + 1 < ROWS && getMatches(swapInGrid(g, {r,c}, {r:r+1,c})).size > 0) return true;
     }
   }
   return false;
 }
 
-// ─── Particle Effect Component ───────────────────────────────────────────────
-function ParticleExplosion({ x, y, color }: { x: number; y: number; color: string }) {
+const adj = (a: Pos, b: Pos) => Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1;
+
+// ─── Floating Score Component ────────────────────────────────────────────────
+function FloatingScore({ x, y, text, color }: { x: number; y: number; text: string; color: string }) {
   return (
-    <div className="pointer-events-none absolute" style={{ left: x, top: y, zIndex: 100 }}>
-      {Array.from({ length: 8 }).map((_, i) => {
-        const angle = (i / 8) * 360;
-        const dist = 20 + Math.random() * 15;
-        return (
-          <div
-            key={i}
-            className="absolute w-2 h-2 rounded-full"
-            style={{
-              background: color,
-              boxShadow: `0 0 6px ${color}`,
-              animation: `particle-fly 0.5s ease-out forwards`,
-              '--tx': `${Math.cos(angle * Math.PI / 180) * dist}px`,
-              '--ty': `${Math.sin(angle * Math.PI / 180) * dist}px`,
-            } as React.CSSProperties}
-          />
-        );
-      })}
+    <div
+      className="pointer-events-none absolute font-black text-sm whitespace-nowrap"
+      style={{
+        left: x, top: y,
+        color,
+        textShadow: `0 0 8px ${color}`,
+        animation: 'floatUp 0.8s ease-out forwards',
+        zIndex: 200,
+      }}
+    >
+      {text}
     </div>
   );
 }
 
-// ─── Main Game Component ─────────────────────────────────────────────────────
+// ─── Gem Crush Game ──────────────────────────────────────────────────────────
 function JDGemCrush() {
-  const [grid, setGrid] = useState<CellState[][]>(() => initGrid());
-  const [selected, setSelected] = useState<Position | null>(null);
+  const [grid, setGrid] = useState<Cell[][]>(() => buildGrid());
+  const [sel, setSel] = useState<Pos | null>(null);
   const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
-  const [moves, setMoves] = useState(30);
+  const [best, setBest] = useState(0);
+  const [moves, setMoves] = useState(35);
   const [level, setLevel] = useState(1);
-  const [targetScore, setTargetScore] = useState(1000);
+  const [target, setTarget] = useState(800);
   const [combo, setCombo] = useState(0);
-  const [animating, setAnimating] = useState(false);
-  const [particles, setParticles] = useState<{ id: number; x: number; y: number; color: string }[]>([]);
-  const [showComboText, setShowComboText] = useState<{ text: string; id: number } | null>(null);
-  const [gameOver, setGameOver] = useState(false);
-  const [levelComplete, setLevelComplete] = useState(false);
-  const [soundOn, setSoundOn] = useState(true);
-  const [shakeCells, setShakeCells] = useState<Set<string>>(new Set());
+  const [busy, setBusy] = useState(false);
+  const [over, setOver] = useState(false);
+  const [won, setWon] = useState(false);
+  const [shaking, setShaking] = useState<string | null>(null);
+  const [floats, setFloats] = useState<{ id: number; x: number; y: number; text: string; color: string }[]>([]);
+  const [matchedCells, setMatchedCells] = useState<Set<string>>(new Set());
   const boardRef = useRef<HTMLDivElement>(null);
-  const touchStartRef = useRef<Position | null>(null);
+  const swipeStart = useRef<{ r: number; c: number; x: number; y: number } | null>(null);
 
-  // Load high score
   useEffect(() => {
-    const saved = localStorage.getItem('jd_gemcrush_highscore');
-    if (saved) setHighScore(parseInt(saved, 10));
+    const s = localStorage.getItem('jd_gc_best');
+    if (s) setBest(parseInt(s, 10));
   }, []);
 
-  // Cell size depends on the board width
-  const getCellSize = useCallback(() => {
-    if (boardRef.current) {
-      return boardRef.current.offsetWidth / GRID_SIZE;
-    }
-    return 40;
+  const cellPx = useCallback(() => {
+    if (!boardRef.current) return 42;
+    return boardRef.current.offsetWidth / COLS;
   }, []);
 
-  // Process matches and cascades
-  const processMatches = useCallback(async (currentGrid: CellState[][], currentCombo: number) => {
-    let g = copyGrid(currentGrid);
-    let matches = findMatches(g);
-    let totalCombo = currentCombo;
+  // ── Match-cascade loop ──
+  const cascade = useCallback(async (g: Cell[][], startCombo: number) => {
+    let cur = clone(g);
+    let c = startCombo;
 
-    while (matches.length > 0) {
-      totalCombo++;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const matches = getMatches(cur);
+      if (matches.size === 0) break;
 
-      // Mark matched
-      for (const pos of matches) {
-        g[pos.row][pos.col].matched = true;
-      }
-      setGrid(copyGrid(g));
+      c++;
+      // Highlight matched
+      setMatchedCells(new Set(matches));
+      setGrid(clone(cur));
 
-      // Particles
-      const cellSize = getCellSize();
-      const newParticles = matches.map(pos => ({
-        id: nextId++,
-        x: pos.col * cellSize + cellSize / 2,
-        y: pos.row * cellSize + cellSize / 2,
-        color: GEM_COLORS[g[pos.row][pos.col].type].glow,
-      }));
-      setParticles(prev => [...prev, ...newParticles]);
-      setTimeout(() => {
-        setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
-      }, 500);
-
-      // Sound
-      if (soundOn) {
-        if (totalCombo > 1) sound.cascade();
-        else sound.match(totalCombo);
-      }
+      if (c > 1) sfx.cascade(); else sfx.match(c);
 
       // Score
-      const matchPoints = matches.length * BASE_POINTS * totalCombo;
-      setScore(s => {
-        const ns = s + matchPoints;
-        return ns;
-      });
-      setCombo(totalCombo);
+      const pts = matches.size * 50 * c;
+      setScore(s => s + pts);
+      setCombo(c);
 
-      if (totalCombo > 1) {
-        setShowComboText({ text: `${totalCombo}x COMBO! +${matchPoints}`, id: nextId++ });
-        setTimeout(() => setShowComboText(null), 1200);
-      }
+      // Float scores at match positions
+      const cp = cellPx();
+      const positions = Array.from(matches).map(s => { const [r, cc] = s.split(',').map(Number); return { r, c: cc }; });
+      const centerR = positions.reduce((a, p) => a + p.r, 0) / positions.length;
+      const centerC = positions.reduce((a, p) => a + p.c, 0) / positions.length;
+      const gemType = cur[positions[0].r][positions[0].c].type;
+      setFloats(prev => [...prev, {
+        id: uid++,
+        x: centerC * cp + cp / 2,
+        y: centerR * cp + cp / 2,
+        text: c > 1 ? `${c}x +${pts}` : `+${pts}`,
+        color: GEMS[gemType].color,
+      }]);
+      setTimeout(() => setFloats(prev => prev.slice(1)), 900);
 
-      await new Promise(r => setTimeout(r, 300));
-
-      // Remove matched cells and collapse
-      for (let c = 0; c < GRID_SIZE; c++) {
-        let writeRow = GRID_SIZE - 1;
-        for (let r = GRID_SIZE - 1; r >= 0; r--) {
-          if (!g[r][c].matched) {
-            if (writeRow !== r) {
-              g[writeRow][c] = { ...g[r][c], falling: true };
-              g[r][c] = createCell(undefined, true);
-            }
-            writeRow--;
-          }
-        }
-        // Fill empty top
-        for (let r = writeRow; r >= 0; r--) {
-          g[r][c] = createCell(undefined, true);
-        }
-      }
-
-      setGrid(copyGrid(g));
       await new Promise(r => setTimeout(r, 350));
 
-      // Reset animations
-      for (let r = 0; r < GRID_SIZE; r++) {
-        for (let c = 0; c < GRID_SIZE; c++) {
-          g[r][c].falling = false;
-          g[r][c].isNew = false;
-          g[r][c].matched = false;
+      // Remove matched
+      for (const key of matches) {
+        const [r, cc] = key.split(',').map(Number);
+        cur[r][cc] = { ...cur[r][cc], matched: true };
+      }
+
+      // Gravity: collapse columns
+      for (let col = 0; col < COLS; col++) {
+        let write = ROWS - 1;
+        for (let row = ROWS - 1; row >= 0; row--) {
+          if (!cur[row][col].matched) {
+            if (write !== row) cur[write][col] = { ...cur[row][col] };
+            write--;
+          }
+        }
+        for (let row = write; row >= 0; row--) {
+          cur[row][col] = mk();
         }
       }
-      setGrid(copyGrid(g));
 
-      matches = findMatches(g);
+      setMatchedCells(new Set());
+      setGrid(clone(cur));
+      await new Promise(r => setTimeout(r, 300));
     }
 
     setCombo(0);
-    return g;
-  }, [getCellSize, soundOn]);
+    return cur;
+  }, [cellPx]);
 
-  // Handle gem click/tap
-  const handleCellClick = useCallback(async (row: number, col: number) => {
-    if (animating || gameOver || levelComplete) return;
+  // ── Handle cell interaction ──
+  const doSwap = useCallback(async (a: Pos, b: Pos) => {
+    if (busy || over || won) return;
+    if (!adj(a, b)) return;
 
-    const pos: Position = { row, col };
+    setBusy(true);
+    sfx.swap();
 
-    if (!selected) {
-      setSelected(pos);
-      return;
-    }
-
-    if (selected.row === row && selected.col === col) {
-      setSelected(null);
-      return;
-    }
-
-    if (!isAdjacent(selected, pos)) {
-      setSelected(pos);
-      return;
-    }
-
-    // Attempt swap
-    setAnimating(true);
-    if (soundOn) sound.swap();
-
-    const swapped = swapCells(grid, selected, pos);
+    // Swap
+    const swapped = swapInGrid(grid, a, b);
     setGrid(swapped);
-
     await new Promise(r => setTimeout(r, 200));
 
-    const matches = findMatches(swapped);
-    if (matches.length === 0) {
-      // No match — shake and swap back
-      if (soundOn) sound.noMatch();
-      setShakeCells(new Set([`${selected.row},${selected.col}`, `${row},${col}`]));
-      await new Promise(r => setTimeout(r, 300));
-      setShakeCells(new Set());
-      setGrid(copyGrid(grid));
-      setSelected(null);
-      setAnimating(false);
+    const matches = getMatches(swapped);
+    if (matches.size === 0) {
+      sfx.fail();
+      setShaking(`${a.r},${a.c}|${b.r},${b.c}`);
+      await new Promise(r => setTimeout(r, 350));
+      setShaking(null);
+      setGrid(clone(grid)); // swap back
+      setBusy(false);
       return;
     }
 
-    setSelected(null);
     setMoves(m => m - 1);
+    setSel(null);
+    const final = await cascade(swapped, 0);
+    setGrid(final);
+    setBusy(false);
+  }, [grid, busy, over, won, cascade]);
 
-    const finalGrid = await processMatches(swapped, 0);
-    setGrid(finalGrid);
-    setAnimating(false);
-  }, [selected, grid, animating, gameOver, levelComplete, soundOn, processMatches]);
-
-  // Touch handling for swipe gestures
-  const handleTouchStart = useCallback((row: number, col: number) => {
-    touchStartRef.current = { row, col };
-  }, []);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent, row: number, col: number) => {
-    if (!touchStartRef.current || animating || gameOver || levelComplete) return;
-    
-    const start = touchStartRef.current;
-    touchStartRef.current = null;
-
-    // If same cell, treat as click
-    if (start.row === row && start.col === col) {
-      handleCellClick(row, col);
-      return;
-    }
-
-    // Determine swipe direction
-    const dRow = row - start.row;
-    const dCol = col - start.col;
-    
-    let target: Position;
-    if (Math.abs(dRow) > Math.abs(dCol)) {
-      target = { row: start.row + (dRow > 0 ? 1 : -1), col: start.col };
+  const tapCell = useCallback((r: number, c: number) => {
+    if (busy || over || won) return;
+    const pos: Pos = { r, c };
+    if (!sel) { setSel(pos); return; }
+    if (sel.r === r && sel.c === c) { setSel(null); return; }
+    if (adj(sel, pos)) {
+      doSwap(sel, pos);
+      setSel(null);
     } else {
-      target = { row: start.row, col: start.col + (dCol > 0 ? 1 : -1) };
+      setSel(pos);
     }
+  }, [sel, busy, over, won, doSwap]);
 
-    if (target.row >= 0 && target.row < GRID_SIZE && target.col >= 0 && target.col < GRID_SIZE) {
-      setSelected(start);
-      setTimeout(() => handleCellClick(target.row, target.col), 10);
-    }
-  }, [animating, gameOver, levelComplete, handleCellClick]);
-
-  // Check level complete or game over
-  useEffect(() => {
-    if (animating) return;
-
-    if (score >= targetScore && !levelComplete) {
-      setLevelComplete(true);
-      if (soundOn) sound.levelUp();
-      const newHS = Math.max(score, highScore);
-      setHighScore(newHS);
-      localStorage.setItem('jd_gemcrush_highscore', String(newHS));
-      return;
-    }
-
-    if (moves <= 0 && score < targetScore && !gameOver) {
-      setGameOver(true);
-      if (soundOn) sound.gameOver();
-      const newHS = Math.max(score, highScore);
-      setHighScore(newHS);
-      localStorage.setItem('jd_gemcrush_highscore', String(newHS));
-      return;
-    }
-
-    // No valid moves — reshuffle
-    if (!gameOver && !levelComplete && moves > 0 && !hasAnyValidMove(grid)) {
-      setGrid(initGrid());
-    }
-  }, [score, targetScore, moves, grid, animating, gameOver, levelComplete, highScore, soundOn]);
-
-  // Next level
-  const nextLevel = useCallback(() => {
-    const newLevel = level + 1;
-    setLevel(newLevel);
-    setTargetScore(1000 + (newLevel - 1) * 500);
-    setMoves(30);
-    setScore(0);
-    setGrid(initGrid());
-    setLevelComplete(false);
-    setGameOver(false);
-  }, [level]);
-
-  // Restart
-  const restart = useCallback(() => {
-    setLevel(1);
-    setTargetScore(1000);
-    setMoves(30);
-    setScore(0);
-    setGrid(initGrid());
-    setLevelComplete(false);
-    setGameOver(false);
-    setCombo(0);
-    setSelected(null);
+  // ── Touch swipe ──
+  const onTouchStart = useCallback((r: number, c: number, e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    swipeStart.current = { r, c, x: touch.clientX, y: touch.clientY };
+    setSel({ r, c });
   }, []);
 
-  const progressPercent = Math.min(100, (score / targetScore) * 100);
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!swipeStart.current || busy || over || won) { swipeStart.current = null; return; }
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - swipeStart.current.x;
+    const dy = touch.clientY - swipeStart.current.y;
+    const { r, c } = swipeStart.current;
+    swipeStart.current = null;
+
+    const threshold = 15;
+    if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) {
+      // It's a tap, handled by tapCell
+      return;
+    }
+
+    let tr: number, tc: number;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      tr = r; tc = c + (dx > 0 ? 1 : -1);
+    } else {
+      tr = r + (dy > 0 ? 1 : -1); tc = c;
+    }
+
+    if (tr >= 0 && tr < ROWS && tc >= 0 && tc < COLS) {
+      setSel(null);
+      doSwap({ r, c }, { r: tr, c: tc });
+    }
+  }, [busy, over, won, doSwap]);
+
+  // ── Win / Lose ──
+  useEffect(() => {
+    if (busy) return;
+    if (score >= target && !won) {
+      setWon(true);
+      sfx.win();
+      const nb = Math.max(score, best);
+      setBest(nb);
+      localStorage.setItem('jd_gc_best', String(nb));
+    } else if (moves <= 0 && score < target && !over) {
+      setOver(true);
+      sfx.lose();
+      const nb = Math.max(score, best);
+      setBest(nb);
+      localStorage.setItem('jd_gc_best', String(nb));
+    } else if (!over && !won && moves > 0 && !anyValidMove(grid)) {
+      // Reshuffle
+      setGrid(buildGrid());
+    }
+  }, [score, target, moves, grid, busy, over, won, best]);
+
+  const nextLvl = () => {
+    const nl = level + 1;
+    setLevel(nl);
+    setTarget(800 + (nl - 1) * 400);
+    setMoves(35);
+    setScore(0);
+    setGrid(buildGrid());
+    setWon(false);
+    setOver(false);
+    setSel(null);
+  };
+
+  const restart = () => {
+    setLevel(1);
+    setTarget(800);
+    setMoves(35);
+    setScore(0);
+    setGrid(buildGrid());
+    setWon(false);
+    setOver(false);
+    setCombo(0);
+    setSel(null);
+  };
+
+  const pct = Math.min(100, (score / target) * 100);
 
   return (
-    <div className="w-full max-w-[400px] mx-auto select-none" style={{ touchAction: 'none' }}>
-      {/* Inline CSS for animations */}
+    <div className="w-full max-w-[420px] mx-auto select-none" style={{ touchAction: 'none' }}>
       <style>{`
-        @keyframes particle-fly {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        @keyframes floatUp {
+          0% { transform: translateY(0) scale(1); opacity: 1; }
+          100% { transform: translateY(-40px) scale(1.3); opacity: 0; }
         }
-        @keyframes gem-pop {
-          0% { transform: scale(1); }
-          50% { transform: scale(0); }
+        @keyframes gemPop {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.4); opacity: 0.5; }
           100% { transform: scale(0); opacity: 0; }
         }
-        @keyframes gem-fall {
-          0% { transform: translateY(-100%); opacity: 0; }
-          60% { opacity: 1; }
+        @keyframes gemDrop {
+          0% { transform: translateY(-120%); }
+          60% { transform: translateY(5%); }
+          80% { transform: translateY(-3%); }
           100% { transform: translateY(0); }
         }
-        @keyframes gem-new {
-          0% { transform: scale(0) rotate(-20deg); opacity: 0; }
-          70% { transform: scale(1.15) rotate(5deg); opacity: 1; }
-          100% { transform: scale(1) rotate(0deg); }
+        @keyframes cellShake {
+          0%,100% { transform: translateX(0); }
+          20% { transform: translateX(-4px); }
+          40% { transform: translateX(4px); }
+          60% { transform: translateX(-3px); }
+          80% { transform: translateX(3px); }
         }
-        @keyframes cell-shake {
-          0%, 100% { transform: translateX(0); }
-          20% { transform: translateX(-3px); }
-          40% { transform: translateX(3px); }
-          60% { transform: translateX(-2px); }
-          80% { transform: translateX(2px); }
+        @keyframes selectedPulse {
+          0%,100% { transform: scale(1); }
+          50% { transform: scale(1.15); }
         }
-        @keyframes combo-pop {
-          0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-          40% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
-          100% { transform: translate(-50%, -80%) scale(1); opacity: 0; }
+        @keyframes starBurst {
+          0% { transform: scale(0) rotate(0deg); opacity: 1; }
+          100% { transform: scale(2) rotate(180deg); opacity: 0; }
         }
-        @keyframes pulse-ring {
-          0% { box-shadow: 0 0 0 0 rgba(200,169,110,0.6); }
-          100% { box-shadow: 0 0 0 6px rgba(200,169,110,0); }
-        }
-        @keyframes level-celebration {
-          0% { transform: scale(0.8); opacity: 0; }
-          50% { transform: scale(1.05); }
+        @keyframes overlayIn {
+          0% { transform: scale(0.7); opacity: 0; }
+          60% { transform: scale(1.05); }
           100% { transform: scale(1); opacity: 1; }
         }
-        .gem-cell { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .gem-matched { animation: gem-pop 0.3s ease-in forwards; }
-        .gem-falling { animation: gem-fall 0.35s ease-out forwards; }
-        .gem-new { animation: gem-new 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        .cell-shaking { animation: cell-shake 0.3s ease-in-out; }
+        @keyframes comboShake {
+          0%,100% { transform: translateX(-50%) rotate(0deg); }
+          25% { transform: translateX(-50%) rotate(-3deg); }
+          75% { transform: translateX(-50%) rotate(3deg); }
+        }
       `}</style>
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2.5">
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#c8a96e]">✦ JD Gem Crush ✦</span>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-white/40 text-[10px]">Level {level}</span>
-            <span className="text-white/20">·</span>
-            <span className="text-white/40 text-[10px]">Best: {highScore.toLocaleString()}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-base">💎</span>
+            <span className="text-[13px] font-extrabold tracking-wide text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(90deg, #c8a96e, #f0d78c, #c8a96e)' }}>
+              JD GEM CRUSH
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-white/30 text-[10px] font-medium">Level {level}</span>
+            <span className="text-white/15">·</span>
+            <span className="text-white/30 text-[10px]">🏆 {best.toLocaleString()}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
-            onClick={() => setSoundOn(s => !s)}
-            className="text-[10px] px-2 py-1 rounded-lg border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition-colors"
+            onClick={() => { sfx.enabled = !sfx.enabled; /* force re-render */ setCombo(c => c); }}
+            className="w-8 h-8 rounded-xl flex items-center justify-center border border-white/10 bg-white/[0.03] text-sm hover:bg-white/[0.08] active:scale-95 transition-all"
           >
-            {soundOn ? '🔊' : '🔇'}
+            {sfx.enabled ? '🔊' : '🔇'}
           </button>
           <button
             onClick={restart}
-            className="text-[10px] px-2 py-1 rounded-lg border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition-colors"
+            className="w-8 h-8 rounded-xl flex items-center justify-center border border-white/10 bg-white/[0.03] text-sm hover:bg-white/[0.08] active:scale-95 transition-all"
           >
-            ↺
+            🔄
           </button>
         </div>
       </div>
 
-      {/* Score Bar */}
-      <div className="mb-3 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-3">
-            <div className="text-center">
-              <p className="text-[10px] text-white/40 uppercase tracking-wider">Score</p>
-              <p className="text-white font-bold text-lg leading-tight">{score.toLocaleString()}</p>
+      {/* Score HUD */}
+      <div className="mb-3 p-3 rounded-2xl border border-white/[0.06] relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(200,169,110,0.06) 0%, rgba(10,10,10,0.8) 100%)' }}>
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-4">
+            <div>
+              <p className="text-[9px] text-white/35 uppercase tracking-widest font-bold">Score</p>
+              <p className="text-white font-extrabold text-xl leading-none mt-0.5">{score.toLocaleString()}</p>
             </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="text-center">
-              <p className="text-[10px] text-white/40 uppercase tracking-wider">Target</p>
-              <p className="text-[#c8a96e] font-bold text-lg leading-tight">{targetScore.toLocaleString()}</p>
+            <div className="w-px h-9 bg-white/10" />
+            <div>
+              <p className="text-[9px] text-white/35 uppercase tracking-widest font-bold">Target</p>
+              <p className="text-xl font-extrabold leading-none mt-0.5" style={{ color: '#c8a96e' }}>{target.toLocaleString()}</p>
             </div>
           </div>
-          <div className="text-center px-3 py-1 rounded-xl bg-white/[0.04] border border-white/[0.08]">
-            <p className="text-[10px] text-white/40 uppercase tracking-wider">Moves</p>
-            <p className={`font-bold text-lg leading-tight ${moves <= 5 ? 'text-red-400' : 'text-white'}`}>{moves}</p>
+          <div className="text-center px-3.5 py-1.5 rounded-2xl border border-white/[0.08]" style={{ background: moves <= 5 ? 'rgba(255,23,68,0.1)' : 'rgba(255,255,255,0.02)' }}>
+            <p className="text-[9px] text-white/35 uppercase tracking-widest font-bold">Moves</p>
+            <p className={`font-extrabold text-xl leading-none mt-0.5 ${moves <= 5 ? 'text-red-400' : 'text-white'}`}>{moves}</p>
           </div>
         </div>
-        {/* Progress bar */}
-        <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-500 ease-out"
-            style={{
-              width: `${progressPercent}%`,
-              background: progressPercent >= 100
-                ? 'linear-gradient(90deg, #00e676, #69f0ae)'
-                : 'linear-gradient(90deg, #c8a96e, #e9c86e)',
-            }}
-          />
+        {/* Progress */}
+        <div className="w-full h-2.5 rounded-full bg-white/[0.04] overflow-hidden border border-white/[0.05]">
+          <div className="h-full rounded-full transition-all duration-700 ease-out relative" style={{
+            width: `${pct}%`,
+            background: pct >= 100 ? 'linear-gradient(90deg, #00e676, #69f0ae)' : 'linear-gradient(90deg, #b8860b, #c8a96e, #e9c86e)',
+          }}>
+            {pct > 8 && <div className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 60%)' }} />}
+          </div>
+        </div>
+        {/* Star markers */}
+        <div className="relative w-full h-0 mt-1">
+          {[33, 66, 100].map((p, i) => (
+            <div key={i} className="absolute -top-1 -translate-x-1/2 text-[10px] transition-all duration-500" style={{ left: `${p}%`, opacity: pct >= p ? 1 : 0.2, transform: `translateX(-50%) scale(${pct >= p ? 1.2 : 0.8})` }}>
+              ⭐
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Combo indicator */}
+      {/* Combo banner */}
       {combo > 1 && (
         <div className="text-center mb-2">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-[#c8a96e] to-[#e9c86e] text-black animate-bounce">
-            {combo}x COMBO!
+          <span
+            className="inline-block px-4 py-1 rounded-full text-xs font-black text-black"
+            style={{
+              background: 'linear-gradient(90deg, #c8a96e, #f0d78c, #c8a96e)',
+              animation: 'comboShake 0.3s ease-in-out infinite',
+              boxShadow: '0 0 20px rgba(200,169,110,0.4)',
+            }}
+          >
+            🔥 {combo}x COMBO! 🔥
           </span>
         </div>
       )}
 
-      {/* Game Board */}
+      {/* ═══ GAME BOARD ═══ */}
       <div
         ref={boardRef}
-        className="relative aspect-square w-full rounded-2xl overflow-hidden border border-white/[0.08]"
+        className="relative w-full rounded-2xl overflow-hidden border-2 border-[#c8a96e]/20"
         style={{
-          background: 'linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(20,15,8,0.95) 100%)',
-          boxShadow: '0 0 40px rgba(200,169,110,0.08), inset 0 0 30px rgba(0,0,0,0.5)',
+          aspectRatio: `${COLS}/${ROWS}`,
+          background: 'linear-gradient(180deg, #1a1510 0%, #0d0b08 100%)',
+          boxShadow: '0 0 60px rgba(200,169,110,0.08), inset 0 0 40px rgba(0,0,0,0.6), 0 4px 30px rgba(0,0,0,0.5)',
         }}
       >
-        {/* Grid lines */}
-        <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.04 }}>
-          {Array.from({ length: GRID_SIZE - 1 }).map((_, i) => (
-            <div key={`h-${i}`}>
-              <div className="absolute w-full h-px bg-white" style={{ top: `${((i + 1) / GRID_SIZE) * 100}%` }} />
-              <div className="absolute h-full w-px bg-white" style={{ left: `${((i + 1) / GRID_SIZE) * 100}%` }} />
-            </div>
-          ))}
+        {/* Background grid pattern */}
+        <div className="absolute inset-0 pointer-events-none">
+          {Array.from({ length: ROWS }).map((_, r) =>
+            Array.from({ length: COLS }).map((_, c) => (
+              <div
+                key={`bg-${r}-${c}`}
+                className="absolute"
+                style={{
+                  left: `${(c / COLS) * 100}%`,
+                  top: `${(r / ROWS) * 100}%`,
+                  width: `${100 / COLS}%`,
+                  height: `${100 / ROWS}%`,
+                  background: (r + c) % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'transparent',
+                  borderRight: c < COLS - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none',
+                  borderBottom: r < ROWS - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none',
+                }}
+              />
+            ))
+          )}
         </div>
 
         {/* Gems */}
         {grid.map((row, r) =>
           row.map((cell, c) => {
-            const gem = GEM_COLORS[cell.type];
-            const isSelected = selected?.row === r && selected?.col === c;
-            const isShaking = shakeCells.has(`${r},${c}`);
-            const cellPct = 100 / GRID_SIZE;
+            const gem = GEMS[cell.type];
+            const isSel = sel?.r === r && sel?.c === c;
+            const isMatched = matchedCells.has(`${r},${c}`);
+            const isShake = shaking?.includes(`${r},${c}`);
 
-            let animClass = 'gem-cell';
-            if (cell.matched) animClass += ' gem-matched';
-            else if (cell.falling) animClass += ' gem-falling';
-            else if (cell.isNew) animClass += ' gem-new';
-            if (isShaking) animClass += ' cell-shaking';
+            const wp = 100 / COLS;
+            const hp = 100 / ROWS;
 
             return (
               <div
                 key={cell.id}
-                className={`absolute flex items-center justify-center cursor-pointer ${animClass}`}
+                className="absolute flex items-center justify-center"
                 style={{
-                  left: `${c * cellPct}%`,
-                  top: `${r * cellPct}%`,
-                  width: `${cellPct}%`,
-                  height: `${cellPct}%`,
-                  padding: '8%',
+                  left: `${c * wp}%`,
+                  top: `${r * hp}%`,
+                  width: `${wp}%`,
+                  height: `${hp}%`,
+                  transition: 'left 0.2s ease, top 0.2s ease',
+                  animation: isMatched ? 'gemPop 0.35s ease-in forwards'
+                    : isShake ? 'cellShake 0.35s ease-in-out'
+                    : undefined,
+                  zIndex: isSel ? 10 : 1,
                 }}
-                onClick={() => handleCellClick(r, c)}
-                onTouchStart={(e) => {
-                  e.preventDefault();
-                  handleTouchStart(r, c);
-                }}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  handleTouchEnd(e, r, c);
-                }}
+                onClick={() => tapCell(r, c)}
+                onTouchStart={(e) => { e.preventDefault(); onTouchStart(r, c, e); }}
+                onTouchEnd={(e) => { e.preventDefault(); onTouchEnd(e); }}
               >
                 <div
-                  className="w-full h-full rounded-[25%] flex items-center justify-center transition-shadow duration-200"
+                  className="relative flex items-center justify-center"
                   style={{
-                    background: gem.bg,
-                    boxShadow: isSelected
-                      ? `0 0 0 2px #c8a96e, 0 0 12px ${gem.glow}, 0 0 24px ${gem.glow}`
-                      : `0 2px 8px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.25)`,
-                    animation: isSelected ? 'pulse-ring 1s infinite' : undefined,
-                    transform: isSelected ? 'scale(1.1)' : undefined,
+                    width: '78%',
+                    height: '78%',
+                    fontSize: `min(calc(${wp}vw * 0.55), 32px)`,
+                    borderRadius: '22%',
+                    background: isSel
+                      ? `radial-gradient(circle, ${gem.glow} 0%, transparent 70%)`
+                      : 'transparent',
+                    animation: isSel ? 'selectedPulse 0.8s ease-in-out infinite' : undefined,
+                    boxShadow: isSel ? `0 0 0 2px ${gem.color}, 0 0 16px ${gem.glow}` : undefined,
+                    filter: isMatched ? 'brightness(2)' : undefined,
+                    transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+                    lineHeight: 1,
                   }}
                 >
-                  {/* Shine effect */}
-                  <div
-                    className="absolute top-[15%] left-[20%] w-[30%] h-[20%] rounded-full pointer-events-none"
-                    style={{
-                      background: 'rgba(255,255,255,0.35)',
-                      filter: 'blur(1px)',
-                    }}
-                  />
+                  <span style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
+                    {gem.emoji}
+                  </span>
                 </div>
               </div>
             );
           })
         )}
 
-        {/* Particles */}
-        {particles.map(p => (
-          <ParticleExplosion key={p.id} x={p.x} y={p.y} color={p.color} />
-        ))}
+        {/* Floating scores */}
+        {floats.map(f => <FloatingScore key={f.id} x={f.x} y={f.y} text={f.text} color={f.color} />)}
 
-        {/* Combo text */}
-        {showComboText && (
-          <div
-            key={showComboText.id}
-            className="absolute top-1/2 left-1/2 text-2xl font-black pointer-events-none whitespace-nowrap"
-            style={{
-              animation: 'combo-pop 1.2s ease-out forwards',
-              background: 'linear-gradient(90deg, #c8a96e, #fff, #c8a96e)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 20px rgba(200,169,110,0.5)',
-              filter: 'drop-shadow(0 0 10px rgba(200,169,110,0.5))',
-              zIndex: 50,
-            }}
-          >
-            {showComboText.text}
-          </div>
-        )}
-
-        {/* Game Over overlay */}
-        {gameOver && (
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="text-center" style={{ animation: 'level-celebration 0.5s ease-out forwards' }}>
-              <div className="text-4xl mb-3">💔</div>
-              <h3 className="text-white font-bold text-xl mb-1">Game Over</h3>
-              <p className="text-white/50 text-sm mb-1">Score: {score.toLocaleString()}</p>
-              <p className="text-[#c8a96e] text-xs mb-4">Best: {highScore.toLocaleString()}</p>
+        {/* Game Over */}
+        {over && (
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50">
+            <div className="text-center p-6" style={{ animation: 'overlayIn 0.5s ease-out forwards' }}>
+              <div className="text-5xl mb-3">😢</div>
+              <h3 className="text-white font-extrabold text-2xl mb-1">Game Over!</h3>
+              <p className="text-white/50 text-sm mb-1">Score: <strong className="text-white">{score.toLocaleString()}</strong></p>
+              <p className="text-[#c8a96e] text-xs mb-5">Best: {best.toLocaleString()}</p>
               <button
                 onClick={restart}
-                className="px-6 py-2.5 rounded-full text-sm font-semibold text-black"
-                style={{ background: 'linear-gradient(135deg, #c8a96e, #e9c86e)' }}
+                className="px-8 py-3 rounded-full text-sm font-bold text-black active:scale-95 transition-transform"
+                style={{ background: 'linear-gradient(135deg, #c8a96e, #e9c86e)', boxShadow: '0 4px 20px rgba(200,169,110,0.4)' }}
               >
-                Play Again
+                🔄 Play Again
               </button>
             </div>
           </div>
         )}
 
-        {/* Level Complete overlay */}
-        {levelComplete && (
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="text-center" style={{ animation: 'level-celebration 0.5s ease-out forwards' }}>
-              <div className="text-4xl mb-3">🏆</div>
-              <h3 className="text-white font-bold text-xl mb-1">Level {level} Complete!</h3>
-              <p className="text-[#c8a96e] text-sm mb-1">Score: {score.toLocaleString()}</p>
-              <p className="text-white/50 text-xs mb-4">{moves} moves remaining</p>
+        {/* Level Complete */}
+        {won && (
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50">
+            <div className="text-center p-6" style={{ animation: 'overlayIn 0.5s ease-out forwards' }}>
+              <div className="text-5xl mb-2">🎉</div>
+              <div className="flex items-center justify-center gap-1 mb-2">
+                {[1, 2, 3].map(i => (
+                  <span key={i} className="text-2xl" style={{ animation: `starBurst 0.5s ease-out ${i * 0.15}s backwards` }}>⭐</span>
+                ))}
+              </div>
+              <h3 className="text-white font-extrabold text-2xl mb-1">Level {level} Complete!</h3>
+              <p className="text-sm mb-1" style={{ color: '#c8a96e' }}>Score: <strong>{score.toLocaleString()}</strong></p>
+              <p className="text-white/40 text-xs mb-5">{moves} moves remaining</p>
               <button
-                onClick={nextLevel}
-                className="px-6 py-2.5 rounded-full text-sm font-semibold text-black"
-                style={{ background: 'linear-gradient(135deg, #c8a96e, #e9c86e)' }}
+                onClick={nextLvl}
+                className="px-8 py-3 rounded-full text-sm font-bold text-black active:scale-95 transition-transform"
+                style={{ background: 'linear-gradient(135deg, #c8a96e, #e9c86e)', boxShadow: '0 4px 20px rgba(200,169,110,0.4)' }}
               >
-                Next Level →
+                Next Level ✨
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-center gap-1 mt-3 flex-wrap">
-        {GEM_TYPES.map(type => (
-          <div
-            key={type}
-            className="w-4 h-4 rounded-[4px]"
-            style={{
-              background: GEM_COLORS[type].bg,
-              boxShadow: `0 1px 4px rgba(0,0,0,0.3)`,
-            }}
-          />
-        ))}
-        <span className="text-white/30 text-[10px] ml-1">Match 3+ to score!</span>
-      </div>
+      {/* Hint text */}
+      <p className="text-center text-white/20 text-[10px] mt-2.5 font-medium tracking-wider">
+        TAP or SWIPE to match 3+ gems
+      </p>
     </div>
   );
 }
 
-// ─── Offline Status Monitor ──────────────────────────────────────────────────
+// ─── Offline Status Monitor (exported) ───────────────────────────────────────
 export function OfflineStatusMonitor() {
   const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     setIsOffline(!navigator.onLine);
-
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+    const on = () => setIsOffline(false);
+    const off = () => setIsOffline(true);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); };
   }, []);
 
   if (!isOffline) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#0a0a0a] flex flex-col items-center justify-center p-5 overflow-y-auto">
-      {/* Ambient Glow */}
-      <div
-        className="absolute w-[300px] h-[300px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-60 animate-pulse"
-        style={{
-          background: 'radial-gradient(circle, rgba(200, 169, 110, 0.08) 0%, transparent 70%)',
-        }}
+    <div className="fixed inset-0 z-[9999] bg-[#0a0a0a] flex flex-col items-center justify-start p-4 pt-6 overflow-y-auto">
+      <div className="absolute w-[350px] h-[350px] rounded-full top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-50 animate-pulse"
+        style={{ background: 'radial-gradient(circle, rgba(200,169,110,0.1) 0%, transparent 70%)' }}
       />
 
-      <div className="relative z-10 w-full max-w-[440px] text-center flex flex-col items-center">
-        {/* Official JD Logo */}
-        <div className="mb-5 flex items-center justify-center w-16 h-16 rounded-2xl bg-[#c8a96e]/5 border border-[#c8a96e]/15 shadow-2xl">
-          <svg width="42" height="42" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg" fill="none">
-            <defs>
-              <linearGradient id="mon-silver" x1="40" y1="40" x2="170" y2="340" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#FFFFFF" />
-                <stop offset="35%" stopColor="#F3F3F3" />
-                <stop offset="75%" stopColor="#DADADA" />
-                <stop offset="100%" stopColor="#BABABA" />
-              </linearGradient>
-              <linearGradient id="mon-gold" x1="250" y1="20" x2="390" y2="380" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#FFF2C3" />
-                <stop offset="18%" stopColor="#E9C86E" />
-                <stop offset="38%" stopColor="#C99537" />
-                <stop offset="55%" stopColor="#B98128" />
-                <stop offset="80%" stopColor="#E0B85A" />
-                <stop offset="100%" stopColor="#8C6120" />
-              </linearGradient>
-            </defs>
-            <path fill="url(#mon-silver)" d="M122 72 C148 72 168 88 168 115 L168 278 C168 345 131 385 83 385 C49 385 26 365 26 337 C26 312 45 293 69 293 C92 293 109 308 109 329 C109 342 102 352 92 360 C98 362 106 363 116 363 C143 363 152 335 152 289 L152 118 C152 92 139 84 122 82 Z"/>
-            <rect x="122" y="66" width="70" height="6" rx="3" fill="url(#mon-silver)"/>
-            <path fill="url(#mon-gold)" d="M218 66 L218 72 L275 72 C355 72 394 121 394 210 C394 299 355 348 275 348 L218 348 L218 354 L280 354 C374 354 414 300 414 210 C414 120 374 66 280 66 Z"/>
-            <rect x="218" y="66" width="58" height="4" fill="url(#mon-gold)"/>
-            <rect x="218" y="350" width="58" height="4" fill="url(#mon-gold)"/>
-          </svg>
-        </div>
-
-        {/* Status card */}
-        <div className="w-full bg-white/[0.02] border border-white/[0.08] rounded-[24px] p-6 backdrop-blur-xl shadow-2xl mb-5">
-          <span className="inline-block px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-semibold tracking-wider uppercase mb-4">
-            Connection Lost
-          </span>
-          <h1 className="font-display text-xl font-bold tracking-tight text-white mb-2">
-            You&apos;re Offline
-          </h1>
-          <p className="text-white/50 text-sm leading-relaxed mb-4">
-            We&apos;ll bring you back the instant your connection is restored. Meanwhile, enjoy a game!
-          </p>
-          <div className="flex items-center justify-center gap-2 text-[#c8a96e] text-xs font-semibold uppercase tracking-widest animate-pulse">
+      <div className="relative z-10 w-full max-w-[440px] flex flex-col items-center">
+        {/* Compact status banner */}
+        <div className="w-full bg-white/[0.02] border border-white/[0.08] rounded-2xl px-5 py-4 backdrop-blur-xl shadow-2xl mb-4 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[#c8a96e]/5 border border-[#c8a96e]/15 flex items-center justify-center flex-shrink-0">
+            <svg width="28" height="28" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg" fill="none">
+              <defs>
+                <linearGradient id="s" x1="40" y1="40" x2="170" y2="340" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#FFF"/><stop offset="100%" stopColor="#BABABA"/>
+                </linearGradient>
+                <linearGradient id="g" x1="250" y1="20" x2="390" y2="380" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#FFF2C3"/><stop offset="50%" stopColor="#C99537"/><stop offset="100%" stopColor="#8C6120"/>
+                </linearGradient>
+              </defs>
+              <path fill="url(#s)" d="M122 72C148 72 168 88 168 115L168 278C168 345 131 385 83 385C49 385 26 365 26 337C26 312 45 293 69 293C92 293 109 308 109 329C109 342 102 352 92 360C98 362 106 363 116 363C143 363 152 335 152 289L152 118C152 92 139 84 122 82Z"/>
+              <path fill="url(#g)" d="M218 66L218 72L275 72C355 72 394 121 394 210C394 299 355 348 275 348L218 348L218 354L280 354C374 354 414 300 414 210C414 120 374 66 280 66Z"/>
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-display text-base font-bold text-white">You&apos;re Offline</h1>
+            <p className="text-white/40 text-xs leading-snug mt-0.5">
+              We&apos;ll reconnect you automatically.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 text-[#c8a96e] animate-pulse flex-shrink-0">
             <span className="w-2 h-2 rounded-full bg-[#c8a96e]" />
-            Reconnecting...
+            <span className="text-[10px] font-bold uppercase tracking-wider">Live</span>
           </div>
         </div>
 
         {/* Game */}
         <JDGemCrush />
 
-        <div className="text-white/40 text-xs mt-5 leading-relaxed">
-          Need support? Contact us on WhatsApp at<br />
+        <div className="text-white/30 text-[10px] mt-4 text-center">
+          Need help?{' '}
           <a href="https://wa.me/919360490974" target="_blank" rel="noopener noreferrer" className="text-[#c8a96e] font-medium hover:underline">
-            +91 9360490974
+            WhatsApp Us
           </a>
         </div>
       </div>
