@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Upload, CheckCircle2, AlertCircle, Loader2, Play, Settings, Image as ImageIcon, ChevronRight, ArrowLeft } from 'lucide-react';
+import { X, Upload, CheckCircle2, AlertCircle, Loader2, Play, Settings, Image as ImageIcon, ChevronRight, ArrowLeft, Save, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Category } from '@/types';
 import { cleanFilename } from '@/lib/utils/filenameToTitle';
@@ -38,6 +38,37 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
     variant_combinations: [],
     attributes: {}
   });
+
+  const saveTemplate = () => {
+    const template = {
+      categoryId,
+      isFeatured,
+      isTrending,
+      isBestSeller,
+      config
+    };
+    localStorage.setItem('bulkPosterTemplate', JSON.stringify(template));
+    toast.success('Configuration saved locally!');
+  };
+
+  const loadTemplate = () => {
+    try {
+      const saved = localStorage.getItem('bulkPosterTemplate');
+      if (saved) {
+        const template = JSON.parse(saved);
+        if (template.categoryId) setCategoryId(template.categoryId);
+        setIsFeatured(template.isFeatured || false);
+        setIsTrending(template.isTrending || false);
+        setIsBestSeller(template.isBestSeller || false);
+        if (template.config) setConfig(template.config);
+        toast.success('Saved configuration applied!');
+      } else {
+        toast.error('No saved configuration found.');
+      }
+    } catch (e) {
+      toast.error('Failed to load configuration.');
+    }
+  };
 
   const handleNextStep = () => {
     if (!categoryId) {
@@ -174,6 +205,29 @@ export function BulkPosterWorkspace({ categories, onClose, onComplete }: Props) 
             <div className="flex-1 overflow-y-auto overscroll-contain p-6 md:p-10 space-y-12">
               <div className="max-w-4xl mx-auto space-y-12">
                 
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Template Configuration</h3>
+                    <p className="text-sm text-white/50 mt-1">Configure the base settings that all uploaded posters will inherit.</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={loadTemplate}
+                      className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium text-white transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      Apply Saved
+                    </button>
+                    <button
+                      onClick={saveTemplate}
+                      className="flex items-center gap-2 px-4 py-2 bg-luxe-accent/20 hover:bg-luxe-accent/30 text-luxe-accent rounded-lg text-sm font-medium transition-colors"
+                    >
+                      <Save className="w-4 h-4" />
+                      Save Configuration
+                    </button>
+                  </div>
+                </div>
+
                 {/* Category & Features */}
                 <div className="glass-card p-6 md:p-8 rounded-xl border border-white/5 space-y-6">
                   <h3 className="text-xl font-semibold text-white">Basic Settings</h3>
