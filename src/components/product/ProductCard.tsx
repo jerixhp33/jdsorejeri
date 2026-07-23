@@ -30,7 +30,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   
   const { ref: inViewRef, inView } = useInView({
     threshold: 0.05,
-    triggerOnce: false,
+    triggerOnce: true,
   });
 
   const images = product.images || [];
