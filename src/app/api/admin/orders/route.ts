@@ -41,57 +41,26 @@ export async function POST(req: NextRequest) {
     // Send email notification to customer if requested
     if (body._send_email && body.email) {
       try {
-        const { sendEmail } = await import('@/lib/email');
-        let emailHtml = '';
+        const { sendReactEmail } = await import('@/lib/email');
+        const ShippingUpdateEmail = (await import('@/emails/ShippingUpdateEmail')).default;
+        const React = await import('react');
 
-        if (body.status === 'packed' || body.status === 'ready') {
-          const trackLink = 'https://stcourier.com/track/shipment';
+        const trackLink = 'https://stcourier.com/track/shipment';
+        const status = body.status === 'packed' ? 'packed' : body.status === 'out_for_delivery' ? 'out_for_delivery' : 'shipped';
 
-          emailHtml = `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #ffffff; color: #333333;">
-              <div style="text-align: center; border-bottom: 2px solid #000000; padding-bottom: 15px; margin-bottom: 20px;">
-                <h1 style="color: #000000; margin: 0; font-family: 'Playfair Display', serif; font-size: 24px;">JD Store Dispatch Update</h1>
-              </div>
-              <p>Hi ${body.customer_name},</p>
-              <p>Great news! Your order <strong>#${body.order_number}</strong> status is now <strong>${body.status === 'packed' ? 'Packed' : 'Dispatched'}</strong>.</p>
-              
-              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #e5e5e5; margin: 25px 0;">
-                <h3 style="color: #000000; margin-top: 0; margin-bottom: 15px; font-size: 16px; text-transform: uppercase; tracking-wider;">Shipping Details</h3>
-                <p style="margin: 0 0 10px 0; font-size: 14px;"><strong>Courier Partner:</strong> ${body.courier_name}</p>
-                <p style="margin: 0 0 15px 0; font-size: 14px;"><strong>Tracking AWB:</strong> <code style="font-family: monospace; background-color: #eaeaea; padding: 3px 6px; border-radius: 4px; font-size: 15px; font-weight: bold; color: #111;">${body.tracking_number}</code></p>
-                <p style="margin: 0 0 15px 0; font-size: 12px; color: #666666;">Copy the AWB number above and paste it on the tracking page linked below.</p>
-                <div style="text-align: center;">
-                  <a href="${trackLink}" target="_blank" style="background-color: #000000; color: #ffffff; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block; font-size: 14px;">Track Package</a>
-                </div>
-              </div>
+        const emailComponent = React.createElement(ShippingUpdateEmail, {
+          customerName: body.customer_name,
+          orderNumber: body.order_number,
+          status,
+          courierName: body.courier_name,
+          trackingNumber: body.tracking_number,
+          trackingUrl: trackLink
+        });
 
-              <p>If you have any questions or require support, please contact us via WhatsApp.</p>
-              <p style="margin-top: 30px; font-size: 12px; color: #888888; text-align: center; border-top: 1px solid #eeeeee; padding-top: 15px;">
-                Thank you for shopping with JD Store!<br>
-                <em>Art for every space</em>
-              </p>
-            </div>
-          `;
-        } else {
-          emailHtml = `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #ffffff; color: #333333;">
-              <div style="text-align: center; border-bottom: 2px solid #000000; padding-bottom: 15px; margin-bottom: 20px;">
-                <h1 style="color: #000000; margin: 0; font-size: 24px;">JD Store Update</h1>
-              </div>
-              <p>Hi ${body.customer_name},</p>
-              <p>Your order <strong>#${body.order_number}</strong> has been updated.</p>
-              <p style="font-size: 15px; line-height: 1.6; padding: 10px; background-color: #f9f9f9; border-left: 3px solid #000000;">${body.message}</p>
-              <p style="margin-top: 30px; font-size: 12px; color: #888888; text-align: center; border-top: 1px solid #eeeeee; padding-top: 15px;">
-                Thank you for shopping with JD Store!
-              </p>
-            </div>
-          `;
-        }
-
-        await sendEmail({
+        await sendReactEmail({
           to: body.email,
-          subject: `JD Store - Order #${body.order_number} Update`,
-          html: emailHtml
+          subject: \`JD Store - Order #\${body.order_number} Update\`,
+          react: emailComponent
         });
       } catch (err) {
         console.error('[email-notify] Failed to send dispatch email:', err);

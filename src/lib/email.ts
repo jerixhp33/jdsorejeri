@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import dns from 'dns';
+import * as React from 'react';
 
 // Force IPv4 DNS resolution — Node 18+ defaults to IPv6 which breaks Gmail SMTP
 // in many hosting environments (fetch failed / ECONNREFUSED on ::1)
@@ -110,6 +111,26 @@ export async function sendEmail({
   await transporter.sendMail(
     buildMailOptions(recipient, subject, html, fromAddress, replyTo)
   );
+}
+
+export interface SendReactEmailOptions {
+  to: string | string[];
+  subject: string;
+  react: React.ReactElement;
+  from?: string;
+  replyTo?: string;
+}
+
+export async function sendReactEmail({
+  to,
+  subject,
+  react,
+  from,
+  replyTo,
+}: SendReactEmailOptions): Promise<void> {
+  const { render } = await import('@react-email/render');
+  const html = await render(react);
+  await sendEmail({ to, subject, html, from, replyTo });
 }
 
 export async function sendBulkEmail(
