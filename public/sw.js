@@ -71,6 +71,12 @@ self.addEventListener('push', function (event) {
 // Notification click event listener
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
+  
+  if (event.action === 'close') {
+    // User clicked 'Dismiss', don't open the app
+    return;
+  }
+  
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(windowClients => {
       for (var i = 0; i < windowClients.length; i++) {
