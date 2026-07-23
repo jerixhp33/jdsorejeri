@@ -960,28 +960,34 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 sm:p-8"
+              className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl"
               onClick={() => setLightboxImage(null)}
             >
-              <button
-                onClick={() => setLightboxImage(null)}
-                className="absolute top-4 left-4 sm:top-8 sm:left-8 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus:outline-none"
-                aria-label="Close lightbox"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
+              {/* Header / Actions */}
+              <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex items-center justify-between z-10 bg-gradient-to-b from-black/80 to-transparent">
+                <button
+                  onClick={() => setLightboxImage(null)}
+                  className="p-3 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white shadow-xl hover:bg-white/20 transition-colors focus:outline-none flex items-center justify-center gap-2"
+                  aria-label="Close lightbox"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span className="text-sm font-medium pr-1">Back</span>
+                </button>
+              </div>
               
+              {/* Image Container */}
               <div 
-                className="relative w-full max-w-5xl h-full sm:h-[90vh] flex items-center justify-center"
-                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image wrapper
+                className="absolute inset-0 mt-20 mb-8 mx-4 sm:mx-12 flex items-center justify-center"
+                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image
               >
                 <Image
                   src={lightboxImage}
                   alt="Full review image"
                   fill
-                  className="object-contain"
+                  className="object-contain drop-shadow-2xl"
                   sizes="100vw"
                   quality={100}
+                  priority
                 />
               </div>
             </motion.div>
