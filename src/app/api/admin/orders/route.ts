@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
                 <p style="margin: 0 0 15px 0; font-size: 14px;"><strong>Tracking AWB:</strong> <code style="font-family: monospace; background-color: #eaeaea; padding: 3px 6px; border-radius: 4px; font-size: 15px; font-weight: bold; color: #111;">${body.tracking_number}</code></p>
                 <p style="margin: 0 0 15px 0; font-size: 12px; color: #666666;">Copy the AWB number above and paste it on the tracking page linked below.</p>
                 <div style="text-align: center;">
-                  <a href="${trackLink}" target="_blank" style="background-color: #000000; color: #000000; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block; font-size: 14px;">Track Package</a>
+                  <a href="${trackLink}" target="_blank" style="background-color: #000000; color: #ffffff; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block; font-size: 14px;">Track Package</a>
                 </div>
               </div>
 

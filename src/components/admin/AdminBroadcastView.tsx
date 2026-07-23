@@ -26,7 +26,7 @@ const EMAIL_TEMPLATES = [
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;max-width:600px;width:100%;">
         <!-- Header -->
         <tr><td style="background:#1a1a1a;padding:32px 40px;text-align:center;">
-          <p style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:bold;color:#c8a96e;letter-spacing:3px;">JD STORE</p>
+          <p style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:bold;color:#ffffff;letter-spacing:3px;">JD STORE</p>
         </td></tr>
         <!-- Body -->
         <tr><td style="padding:40px;">
@@ -35,8 +35,8 @@ const EMAIL_TEMPLATES = [
             We just added beautiful new posters and earrings to our collection. Discover premium wall art and handcrafted jewellery, delivered across Tamil Nadu.
           </p>
           <table role="presentation" cellpadding="0" cellspacing="0">
-            <tr><td style="background:#c8a96e;border-radius:50px;">
-              <a href="https://jdstorejeri.vercel.app" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:bold;color:#000000;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:1px;">Shop New Arrivals</a>
+            <tr><td style="background:#1a1a1a;border-radius:50px;">
+              <a href="https://jdstorejeri.vercel.app" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:1px;">Shop New Arrivals</a>
             </td></tr>
           </table>
         </td></tr>
@@ -66,11 +66,11 @@ const EMAIL_TEMPLATES = [
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;max-width:600px;width:100%;">
         <!-- Header -->
         <tr><td style="background:#1a1a1a;padding:32px 40px;text-align:center;">
-          <p style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:bold;color:#c8a96e;letter-spacing:3px;">JD STORE</p>
+          <p style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:bold;color:#ffffff;letter-spacing:3px;">JD STORE</p>
         </td></tr>
         <!-- Offer Banner -->
-        <tr><td style="background:#c8a96e;padding:20px 40px;text-align:center;">
-          <p style="margin:0;font-size:13px;font-weight:bold;color:#000000;letter-spacing:2px;font-family:Arial,sans-serif;">LIMITED TIME OFFER</p>
+        <tr><td style="background:#1a1a1a;padding:20px 40px;text-align:center;">
+          <p style="margin:0;font-size:13px;font-weight:bold;color:#ffffff;letter-spacing:2px;font-family:Arial,sans-serif;">LIMITED TIME OFFER</p>
         </td></tr>
         <!-- Body -->
         <tr><td style="padding:40px;">
@@ -79,8 +79,8 @@ const EMAIL_TEMPLATES = [
             Enjoy up to 30% off on selected wall posters and earrings this weekend only. Premium quality, delivered to your door across Tamil Nadu.
           </p>
           <table role="presentation" cellpadding="0" cellspacing="0">
-            <tr><td style="background:#c8a96e;border-radius:50px;">
-              <a href="https://jdstorejeri.vercel.app" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:bold;color:#000000;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:1px;">Grab the Deal</a>
+            <tr><td style="background:#1a1a1a;border-radius:50px;">
+              <a href="https://jdstorejeri.vercel.app" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:1px;">Grab the Deal</a>
             </td></tr>
           </table>
           <p style="margin:24px 0 0;font-size:12px;color:#999999;">Offer valid this weekend only. While stocks last.</p>
