@@ -264,7 +264,7 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
     if (p && onSaved) onSaved(p);
   };
 
-  const handlePublish = async () => {
+  const handlePublish = async (notify?: boolean) => {
     if (!formData.name || !formData.category_id || !formData.product_type) {
       toast.error('Name, Category, and Product Type are required to publish.');
       return;
@@ -274,9 +274,9 @@ export function ProductWorkspace({ initialData, categories, onClose, onSaved }: 
       return;
     }
     updateField('status', 'active');
-    const p = await saveAction({ ...formData, status: 'active' });
+    const p = await saveAction({ ...formData, status: 'active', notify_users: notify } as any);
     if (p) {
-      toast.success('Product published successfully!');
+      toast.success(notify ? 'Product published & users notified!' : 'Product published successfully!');
       if (onSaved) onSaved(p);
       onClose();
     }
