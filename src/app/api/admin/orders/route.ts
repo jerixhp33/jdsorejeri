@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
         await sendReactEmail({
           to: body.email,
-          subject: \`JD Store - Order #\${body.order_number} Update\`,
+          subject: `JD Store - Order #${body.order_number} Update`,
           react: emailComponent
         });
       } catch (err) {
