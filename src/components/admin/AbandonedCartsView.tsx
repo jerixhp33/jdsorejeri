@@ -140,14 +140,14 @@ export function AbandonedCartsView() {
                 {cart.cart_data.map((item: any, idx: number) => (
                   <div key={idx} className="flex items-center gap-3 bg-white/5 p-2 rounded-lg">
                     <div className="w-12 h-16 relative rounded overflow-hidden flex-shrink-0 bg-black">
-                      {item.product.images?.[0]?.url && (
+                      {item.product?.images?.[0]?.url && (
                         <Image src={item.product.images[0].url} alt="" fill className="object-cover" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{item.product.name}</p>
+                      <p className="text-sm font-medium text-white truncate">{item.product?.name || 'Unknown Product'}</p>
                       <p className="text-xs text-white/50">
-                        Qty: {item.quantity} × {formatCurrency(item.unit_price)}
+                        Qty: {item.quantity} × {formatCurrency(item.unit_price || 0)}
                       </p>
                     </div>
                   </div>
