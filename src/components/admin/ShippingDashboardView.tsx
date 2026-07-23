@@ -82,7 +82,7 @@ export function ShippingDashboardView({ initialShipments, pendingOrders = [] }: 
             trackUrl = `https://stcourier.com/track/shipment`;
           }
           
-          const text = `Hi ${customerName},\n\nYour JD Luxe order #${orderNumber} has been shipped via ${data.provider}.\n\nTracking Number: ${data.tracking_number}\n${trackUrl ? `Track here: ${trackUrl}` : ''}\n\nThank you for shopping with us!`;
+          const text = `Hi ${customerName},\n\nYour JD Store order #${orderNumber} has been shipped via ${data.provider}.\n\nTracking Number: ${data.tracking_number}\n${trackUrl ? `Track here: ${trackUrl}` : ''}\n\nThank you for shopping with us!`;
           window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`, '_blank');
         }
       }

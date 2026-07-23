@@ -64,7 +64,7 @@ export function OrderDetailsView({ initialOrder }: { initialOrder: Order }) {
                trackUrl = `https://stcourier.com/track/shipment`;
              }
              
-             const text = `Hi ${order.delivery_address?.full_name?.split(' ')[0] || 'Customer'},\n\nYour JD Luxe order #${order.order_number} has been shipped via ${trackingData.provider}.\n\nTracking Number: ${trackingData.tracking_number}\n${trackUrl ? `Track here: ${trackUrl}` : ''}\n\nThank you for shopping with us!`;
+             const text = `Hi ${order.delivery_address?.full_name?.split(' ')[0] || 'Customer'},\n\nYour JD Store order #${order.order_number} has been shipped via ${trackingData.provider}.\n\nTracking Number: ${trackingData.tracking_number}\n${trackUrl ? `Track here: ${trackUrl}` : ''}\n\nThank you for shopping with us!`;
              window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`, '_blank');
            }
         }
