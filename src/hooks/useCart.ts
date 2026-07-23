@@ -148,6 +148,46 @@ export function useCart() {
     }
   }, [profile, hasFetched, fetchCart, loading, setLoading]);
 
+  // Generate or retrieve a session ID for abandoned cart tracking
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      let sid = localStorage.getItem('cart_session_id');
+      if (!sid) {
+        sid = 'session_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+        localStorage.setItem('cart_session_id', sid);
+      }
+    }
+  }, []);
+
+  // Sync cart state to server for abandoned cart recovery
+  const syncAbandonedCart = useCallback((currentItems: CartItem[], phone?: string, name?: string, status?: string) => {
+    if (typeof window === 'undefined' || currentItems.length === 0) return;
+    const sid = localStorage.getItem('cart_session_id');
+    if (!sid) return;
+
+    fetch('/api/abandoned-carts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: sid,
+        cart_data: currentItems,
+        phone_number: phone,
+        customer_name: name,
+        status: status,
+      }),
+    }).catch(console.error);
+  }, []);
+
+  // Auto-sync when items change (debounced)
+  useEffect(() => {
+    if (hasFetched && items.length > 0) {
+      const timeoutId = setTimeout(() => {
+        syncAbandonedCart(items);
+      }, 2000); // 2 second debounce
+      return () => clearTimeout(timeoutId);
+    }
+  }, [items, hasFetched, syncAbandonedCart]);
+
   const addItem = async (
     productId: string,
     unitPrice: number,
@@ -257,5 +297,6 @@ export function useCart() {
     removeItem,
     clearCart: clearCartItems,
     refresh: fetchCart,
+    syncAbandonedCart,
   };
 }

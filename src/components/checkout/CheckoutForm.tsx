@@ -49,7 +49,7 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919360490974';
 
 export function CheckoutForm() {
-  const { items, subtotal, deliveryCharge, total, clearCart } = useCart();
+  const { items, subtotal, deliveryCharge, total, clearCart, syncAbandonedCart } = useCart();
   const { profile } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -109,9 +109,19 @@ export function CheckoutForm() {
     },
   });
 
-
-
   const currentPincode = watch('pincode');
+  const currentPhone = watch('phone');
+  const currentName = watch('full_name');
+
+  // Sync Abandoned Cart when phone number is entered
+  useEffect(() => {
+    if (currentPhone && currentPhone.length >= 10 && items.length > 0) {
+      const timeoutId = setTimeout(() => {
+        syncAbandonedCart(items, currentPhone, currentName);
+      }, 1000); // 1s debounce
+      return () => clearTimeout(timeoutId);
+    }
+  }, [currentPhone, currentName, items, syncAbandonedCart]);
 
   // Auto-fill email when profile loads
   useEffect(() => {
@@ -447,6 +457,12 @@ export function CheckoutForm() {
         }, 100);
       }
       
+      // Mark abandoned cart as recovered
+      if (typeof window !== 'undefined') {
+        syncAbandonedCart(items, data.phone, data.full_name, 'recovered');
+        localStorage.removeItem('cart_session_id');
+      }
+
       // Clear cart last to prevent race conditions with component unmounting
       await clearCart();
     } catch (err: any) {
