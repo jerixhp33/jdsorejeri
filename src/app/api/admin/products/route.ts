@@ -27,45 +27,43 @@ export async function POST(req: NextRequest) {
   const { data, error } = await admin.from('products').insert(body).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Background task to send New Arrivals emails
-  (async () => {
-    try {
-      // Find all users who opted in to new_arrivals
-      const { data: users } = await admin
-        .from('user_profiles')
-        .select('email, name')
-        .contains('notification_preferences', { new_arrivals: true });
+  // Send New Arrivals emails
+  try {
+    // Find all users who opted in to new_arrivals
+    const { data: users } = await admin
+      .from('user_profiles')
+      .select('email, name')
+      .contains('notification_preferences', { new_arrivals: true });
 
-      if (users && users.length > 0) {
-        if (body.notify_users) {
-          const { sendReactEmail } = await import('@/lib/email');
-          const NewArrivalEmail = (await import('@/emails/NewArrivalEmail')).default;
-          const React = await import('react');
-          
-          // Force the live site URL for emails so it never links to localhost, even when testing locally
-          const siteUrl = 'https://jdstorejeri.vercel.app';
-          
-          await Promise.all(users.map(async (u) => {
-            const emailComponent = React.createElement(NewArrivalEmail, {
-              customerName: u.name || 'there',
-              productName: data.name,
-              productUrl: `${siteUrl}/product/${data.slug}`
-            });
+    if (users && users.length > 0) {
+      if (body.notify_users) {
+        const { sendReactEmail } = await import('@/lib/email');
+        const NewArrivalEmail = (await import('@/emails/NewArrivalEmail')).default;
+        const React = await import('react');
+        
+        // Force the live site URL for emails so it never links to localhost, even when testing locally
+        const siteUrl = 'https://jdstorejeri.vercel.app';
+        
+        await Promise.all(users.map(async (u) => {
+          const emailComponent = React.createElement(NewArrivalEmail, {
+            customerName: u.name || 'there',
+            productName: data.name,
+            productUrl: `${siteUrl}/product/${data.slug}`
+          });
 
-            await sendReactEmail({
-              to: u.email,
-              subject: `New Arrival: ${data.name}`,
-              react: emailComponent
-            }).catch(err => {
-              console.error(`Failed to send new arrival email to ${u.email}:`, err);
-            });
-          }));
-        }
+          await sendReactEmail({
+            to: u.email,
+            subject: `New Arrival: ${data.name}`,
+            react: emailComponent
+          }).catch(err => {
+            console.error(`Failed to send new arrival email to ${u.email}:`, err);
+          });
+        }));
       }
-    } catch (err) {
-      console.error('Failed to send new arrivals broadcast:', err);
     }
-  })();
+  } catch (err) {
+    console.error('Failed to send new arrivals broadcast:', err);
+  }
 
   return NextResponse.json(data);
 }
