@@ -97,11 +97,7 @@ export default async function LabelPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Barcode Section (Bottom) */}
-        <div className="border-t-2 border-black p-4 bg-white flex flex-col items-center justify-center shrink-0">
-          <LabelBarcode value={`${order.order_number}-${order.delivery_address?.phone || ''}`} />
-          <div className="text-xs text-gray-500 mt-2 font-mono uppercase tracking-widest">Delivery Scan Code</div>
-        </div>
+
 
       </div>
 
