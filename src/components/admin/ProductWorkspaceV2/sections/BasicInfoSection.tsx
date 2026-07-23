@@ -43,12 +43,10 @@ export function BasicInfoSection({ formData, updateField, onGenerateTags, isGene
           className="input-luxe w-full capitalize"
         >
           <option value="">Select Type...</option>
-          <option value="poster">Poster</option>
-          <option value="earring">Earring</option>
-          <option value="bracelet">Bracelet</option>
-          <option value="hairband">Hairband</option>
-          <option value="keychain">Keychain</option>
-          <option value="other">Other</option>
+          {Array.from(new Set(categories.map(c => c.product_type).filter(Boolean))).sort().map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+          {!categories.some(c => c.product_type === 'other') && <option value="other">Other</option>}
         </select>
       </div>
 
