@@ -905,7 +905,7 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
                       </div>
                       <button 
                         type="button"
-                        onClick={() => setLightboxImage(review.image_url)}
+                        onClick={() => setLightboxImage(review.image_url || null)}
                         className="absolute inset-0 z-10 focus:outline-none" 
                         aria-label="View full image"
                       />
