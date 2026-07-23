@@ -69,7 +69,7 @@ export function FloatingActionBar({
       <div className="relative" ref={menuRef}>
         <div className="flex items-center">
           <button 
-            onClick={onPublish}
+            onClick={() => onPublish()}
             disabled={saving}
             className="bg-luxe-accent hover:bg-luxe-accent/90 text-black px-5 py-2 rounded-l-full text-sm font-medium transition-colors flex items-center gap-2 border-r border-black/10"
           >
