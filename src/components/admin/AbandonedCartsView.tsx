@@ -80,7 +80,7 @@ export function AbandonedCartsView() {
 
     const msg = `Hi ${cart.customer_name || 'there'}! 👋\n\nWe noticed you left some amazing items in your JD Store cart:\n${itemsList}\n\nTotal: ${formatCurrency(total)}\n\nStill interested? Let us know if you need any help completing your order!`;
     
-    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_self');
   };
 
   if (loading) {
