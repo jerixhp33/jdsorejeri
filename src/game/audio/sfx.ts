@@ -13,6 +13,12 @@ class SFX {
     return this.ctx;
   }
 
+  init() {
+    if (typeof window !== 'undefined') {
+      this.ac();
+    }
+  }
+
   private t(f: number, d: number, type: OscillatorType = 'sine', v = 0.1) {
     if (!this.enabled || typeof window === 'undefined') return;
     try {

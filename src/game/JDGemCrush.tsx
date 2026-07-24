@@ -583,6 +583,10 @@ export function JDGemCrush() {
   const [screen, setScreen] = useState<GameScreen>('menu');
   const [currentLevel, setCurrentLevel] = useState<number | 'daily'>(1);
 
+  useEffect(() => {
+    sfx.enabled = save.soundOn;
+  }, [save.soundOn]);
+
   const levelDef = currentLevel === 'daily' 
     ? generateDailyLevel() 
     : LEVELS[Math.min((currentLevel as number) - 1, LEVELS.length - 1)] || LEVELS[0];
@@ -621,14 +625,16 @@ export function JDGemCrush() {
         {screen === 'menu' && (
         <MainMenu
           save={save}
-          onPlay={() => setScreen('levels')}
+          onPlay={() => { sfx.init(); setScreen('levels'); }}
           onContinue={() => {
+            sfx.init();
             setCurrentLevel(save.unlockedLevel);
             setScreen('game');
           }}
-          onStore={() => setScreen('store')}
-          onStats={() => setScreen('stats')}
+          onStore={() => { sfx.init(); setScreen('store'); }}
+          onStats={() => { sfx.init(); setScreen('stats'); }}
           onDaily={() => {
+            sfx.init();
             const todayStr = new Date().toDateString();
             if (save.achievements[`daily_${todayStr}`]) {
               alert("You already completed today's challenge!");
@@ -637,7 +643,7 @@ export function JDGemCrush() {
             setCurrentLevel('daily');
             setScreen('game');
           }}
-          onSettings={() => setScreen('settings')}
+          onSettings={() => { sfx.init(); setScreen('settings'); }}
         />
       )}
 
