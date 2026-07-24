@@ -310,12 +310,12 @@ export function AdminBannersView({ banners: initial, products = [], categories =
                       className="input-luxe capitalize"
                     >
                       <option value="">All Types</option>
-                      <option value="poster">Poster</option>
-                      <option value="earring">Earring</option>
-                      <option value="bracelet">Bracelet</option>
-                      <option value="hairband">Hairband</option>
-                      <option value="keychain">Keychain</option>
-                      <option value="other">Other</option>
+                      {Array.from(new Set([
+                        ...(products || []).map(p => p.product_type),
+                        ...(categories || []).map(c => c.product_type)
+                      ].filter(Boolean))).sort().map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
                     </select>
                   </div>
                 )}
