@@ -11,11 +11,6 @@
   "theme_color": "#0a0a0a",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "any",
-      "type": "image/x-icon"
-    },
-    {
       "src": "/icon-192x192.png",
       "type": "image/png",
       "sizes": "192x192",

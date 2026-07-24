@@ -52,6 +52,7 @@ const uploadFile = (file: File): Promise<UploadedImage | null> => {
       xhr.setRequestHeader('apikey', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
       xhr.setRequestHeader('Content-Type', file.type);
       
+      xhr.timeout = 60000; // 60 seconds timeout
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           const { data } = supabase.storage.from('product-images').getPublicUrl(path);
@@ -61,6 +62,7 @@ const uploadFile = (file: File): Promise<UploadedImage | null> => {
         }
       };
       xhr.onerror = () => reject(new Error("Network error during upload"));
+      xhr.ontimeout = () => reject(new Error("Upload timed out after 60 seconds"));
       xhr.send(file);
     } catch (err: any) {
       reject(err);
