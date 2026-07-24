@@ -32,6 +32,11 @@ const GAME_CSS = `
 @keyframes gc-hint-shake { 0%{transform:rotate(0deg) scale(1)} 25%{transform:rotate(-15deg) scale(1.1)} 50%{transform:rotate(15deg) scale(1.1)} 75%{transform:rotate(-15deg) scale(1.1)} 100%{transform:rotate(0deg) scale(1)} }
 @keyframes gc-combo-bounce { 0%{transform:scale(0)} 50%{transform:scale(1.2)} 100%{transform:scale(1)} }
 @keyframes bg-gradient-flow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+@keyframes gc-fade-in { 0%{opacity:0;transform:translateY(20px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes gc-glow-pulse { 0%,100%{box-shadow:0 0 20px rgba(255,255,255,0.2)} 50%{box-shadow:0 0 40px rgba(255,255,255,0.5)} }
+@keyframes gc-float-particle { 0%{transform:translateY(100vh) scale(0);opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{transform:translateY(-10vh) scale(1);opacity:0} }
+@keyframes gc-crystal-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@keyframes gc-crystal-glow { 0%,100%{filter:drop-shadow(0 0 10px rgba(255,255,255,0.3))} 50%{filter:drop-shadow(0 0 25px rgba(255,255,255,0.8))} }
 `;
 
 function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextLevel }: {
@@ -586,7 +591,7 @@ export function JDGemCrush() {
   }, []);
 
   return (
-    <div className="min-h-screen text-white overflow-hidden flex flex-col font-sans select-none bg-gradient-to-br from-[#FF0080] via-[#7928CA] to-[#0070F3]"
+    <div className="fixed inset-0 text-white overflow-hidden flex flex-col font-sans select-none bg-gradient-to-br from-[#FF0080] via-[#7928CA] to-[#0070F3]"
          style={{ backgroundSize: '400% 400%', animation: save.settings?.reducedMotion ? 'none' : 'bg-gradient-flow 15s ease infinite' }}>
       <style>{GAME_CSS}</style>
       {save.settings?.reducedMotion && (
@@ -598,8 +603,20 @@ export function JDGemCrush() {
           }
         `}</style>
       )}
+
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {Array.from({length: 15}).map((_, i) => (
+          <div key={i} className="absolute rounded-full bg-white/20" style={{
+            width: 3 + (i % 4) * 2,
+            height: 3 + (i % 4) * 2,
+            left: `${(i * 7.3) % 100}%`,
+            animation: `gc-float-particle ${8 + (i % 5) * 3}s linear infinite`,
+            animationDelay: `${i * 0.7}s`,
+          }} />
+        ))}
+      </div>
       
-      <div className="relative w-full max-w-[440px] mx-auto flex flex-col items-center flex-1">
+      <div className="relative w-full max-w-[440px] mx-auto flex flex-col flex-1 overflow-hidden px-3 py-2 z-10">
         {screen === 'menu' && (
         <MainMenu
           save={save}
@@ -655,7 +672,7 @@ export function JDGemCrush() {
         />
       )}
       
-      <div className="text-white/25 text-[9px] mt-4 text-center">
+      <div className="text-white/30 text-[9px] py-3 text-center mt-auto">
         Need help?{' '}
         <a href="https://wa.me/919360490974" target="_blank" rel="noopener noreferrer" className="text-[#fff] font-medium">WhatsApp Us</a>
       </div>

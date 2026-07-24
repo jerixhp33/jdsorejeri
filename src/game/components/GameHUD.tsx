@@ -30,76 +30,92 @@ export function GameHUD({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-2">
-        <button onClick={onBack} disabled={busy}
-          className="text-white/40 text-xs hover:text-white transition-colors disabled:opacity-30">← Back</button>
-        <div className="flex-1 bg-white/10 backdrop-blur-md rounded-2xl p-2.5 flex flex-col items-center border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
-          <span className="text-xs font-bold text-white/80">
-            SCORE
-          </span>
-          <span className="text-xl font-black">{score.toLocaleString()}</span>
+      <div className="flex items-center justify-between mb-4 px-1">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} disabled={busy}
+            className="text-white/60 hover:text-white transition-colors disabled:opacity-30 p-2 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <div className="flex flex-col">
+            <span className="text-sm font-extrabold text-white tracking-wide">
+              {levelNum === 'daily' ? 'Daily Challenge' : `Level ${levelNum}`}
+            </span>
+            <span className="text-[10px] text-white/50 uppercase tracking-widest font-bold">
+              {levelNum === 'daily' ? 'Special Event' : WORLDS[Math.floor(((levelNum as number) - 1) / 10)]?.name || 'World'}
+            </span>
+          </div>
         </div>
-        <span className="text-[10px] text-white/30 ml-2">
-          {levelNum === 'daily' ? 'Daily' : WORLDS[Math.floor(((levelNum as number) - 1) / 10)]?.name}
-        </span>
+        
         <button onClick={onToggleSound}
-          className="text-sm w-7 h-7 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] transition-colors">
+          className="text-lg w-10 h-10 flex items-center justify-center rounded-xl border border-white/20 bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all shadow-sm">
           {save.soundOn ? '🔊' : '🔇'}
         </button>
       </div>
 
       <Objectives objectives={objectives} />
 
-      <div className="mb-2.5 p-2.5 rounded-2xl border border-white/[0.06]" style={{ background: 'linear-gradient(135deg, rgba(200,169,110,0.05), rgba(10,10,10,0.8))' }}>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <div>
-              <p className="text-[8px] text-white/30 uppercase tracking-widest font-bold">Score</p>
-              <p className="text-white font-extrabold text-lg leading-none">{score.toLocaleString()}</p>
-            </div>
-            <div className="flex justify-between items-end mb-1">
-              <span className="text-xs font-bold text-white/80 tracking-widest uppercase">Target</span>
-              <p className="text-lg font-extrabold leading-none text-white">{levelDef.target.toLocaleString()}</p>
-            </div>
+      <div className="mb-4 bg-white/10 backdrop-blur-xl border border-white/30 rounded-2xl p-4 shadow-lg">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-white/60 uppercase tracking-wider font-bold mb-0.5">Score</span>
+            <span className="text-2xl font-black text-white leading-none">{score.toLocaleString()}</span>
           </div>
-          <div className="text-center px-3 py-1 rounded-xl border border-white/[0.06]" style={{ background: moves <= 5 ? 'rgba(255,23,68,0.08)' : 'rgba(255,255,255,0.02)' }}>
-            <p className="text-[8px] text-white/30 uppercase tracking-widest font-bold">Moves</p>
-            <p className={`font-extrabold text-lg leading-none ${moves <= 5 ? 'text-red-400' : 'text-white'}`}>{moves}</p>
+          <div className="flex flex-col items-center">
+            <span className="text-[10px] text-white/60 uppercase tracking-wider font-bold mb-0.5">Target</span>
+            <span className="text-xl font-bold text-white/90 leading-none">{levelDef.target.toLocaleString()}</span>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] text-white/60 uppercase tracking-wider font-bold mb-0.5">Moves</span>
+            <span className={`text-3xl font-black leading-none ${moves <= 5 ? 'text-rose-400 animate-pulse' : 'text-white'}`}>{moves}</span>
           </div>
         </div>
-        <div className="w-full h-2 rounded-full bg-white/[0.04] overflow-hidden border border-white/[0.04]">
-          <div className="absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out" style={{ 
-            width: `${pct}%`, 
-            background: pct >= 100 ? 'linear-gradient(90deg,#00f2fe,#4facfe)' : 'linear-gradient(90deg,#ff7eb3,#ff758c)',
-            boxShadow: pct >= 100 ? '0 0 10px rgba(0,242,254,0.5)' : 'none'
-          }} />
-          <div className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 60%)' }} />
-        </div>
-        <div className="relative w-full h-0 mt-1">
-          {[
-            { p: (levelDef.target / levelDef.target) * 100, s: 1 },
-            { p: (levelDef.star2 / levelDef.star3) * 100 > 100 ? 66 : (levelDef.star2 / levelDef.star3) * 100, s: 2 },
-            { p: 100, s: 3 },
-          ].map(({ p, s }) => (
-            <div key={s} className="absolute -top-1 transition-all duration-500"
-              style={{ left: `${Math.min(p, 100)}%`, transform: 'translateX(-50%)', opacity: earnedStars >= s ? 1 : 0.2, fontSize: 9 }}>
-              ⭐
+        
+        <div className="relative mt-2">
+          <div className="w-full h-3 rounded-full bg-white/10 border border-white/10 overflow-hidden relative">
+            <div className="h-full rounded-full transition-all duration-1000 ease-out relative" 
+                 style={{ 
+                   width: `${pct}%`, 
+                   background: pct >= 100 ? 'linear-gradient(90deg,#00f2fe,#4facfe)' : 'linear-gradient(90deg,#ff7eb3,#ff758c)',
+                   boxShadow: pct >= 100 ? '0 0 10px rgba(0,242,254,0.5)' : 'none'
+                 }}>
+                 <div className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 60%)' }} />
             </div>
-          ))}
+          </div>
+          <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+            {[
+              { p: (levelDef.target / levelDef.target) * 100, s: 1 },
+              { p: (levelDef.star2 / levelDef.star3) * 100 > 100 ? 66 : (levelDef.star2 / levelDef.star3) * 100, s: 2 },
+              { p: 100, s: 3 },
+            ].map(({ p, s }) => (
+              <div key={s} className="absolute top-1/2 -translate-y-1/2 transition-all duration-500"
+                style={{ 
+                  left: `${Math.min(p, 100)}%`, 
+                  transform: 'translate(-50%, -50%)', 
+                  opacity: earnedStars >= s ? 1 : 0.4, 
+                  fontSize: 14,
+                  filter: earnedStars >= s ? 'drop-shadow(0 0 4px rgba(255,215,0,0.8))' : 'none'
+                }}>
+                ⭐
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {combo > 1 && (
-        <div className="text-center mb-1.5 h-6">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full z-10 font-black text-xs text-white" 
-            style={{ background: 'linear-gradient(90deg,#ff0844,#ffb199)', animation: 'gc-combo-bounce .3s ease-out', boxShadow: '0 0 16px rgba(255,8,68,0.4)' }}>
+      <div className="h-8 mb-2 flex justify-center items-center">
+        {combo > 1 && (
+          <div className="inline-block px-4 py-1 rounded-full font-black text-sm text-white" 
+            style={{ 
+              background: 'linear-gradient(90deg,#ff0844,#ffb199)', 
+              animation: 'gc-combo-bounce .3s ease-out', 
+              boxShadow: '0 4px 15px rgba(255,8,68,0.4)' 
+            }}>
             COMBO x{combo}
           </div>
-        </div>
-      )}
-      {combo <= 1 && <div className="h-6 mb-1.5" />}
+        )}
+      </div>
 
-      <div className="flex items-center justify-center gap-2 mb-2">
+      <div className="flex items-center justify-center gap-4 mb-2">
         {([
           { type: 'hammer' as BoosterType, emoji: '🔨', label: 'Hammer', count: save.boosters.hammer },
           { type: 'shuffle' as BoosterType, emoji: '🔀', label: 'Shuffle', count: save.boosters.shuffle },
@@ -107,21 +123,29 @@ export function GameHUD({
         ]).map(b => (
           <button key={b.type} disabled={b.count <= 0 || (busy && b.type !== 'hammer') || result !== 'none'}
             onClick={() => onBoosterClick(b.type)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold border transition-all disabled:opacity-30"
+            className="relative flex items-center justify-center w-14 h-14 rounded-2xl border transition-all disabled:opacity-40 bg-white/10 backdrop-blur-md"
             style={{ 
-              background: activeBooster === b.type ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)',
-              color: activeBooster === b.type ? '#fff' : 'rgba(255,255,255,0.7)',
-              borderColor: activeBooster === b.type ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.1)'
+              background: activeBooster === b.type ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)',
+              borderColor: activeBooster === b.type ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.2)',
+              boxShadow: activeBooster === b.type ? '0 0 20px rgba(255,255,255,0.3)' : '0 4px 10px rgba(0,0,0,0.1)'
             }}>
-            <span className="text-sm">{b.emoji}</span>
-            <span>{b.count}</span>
+            <span className="text-2xl">{b.emoji}</span>
+            <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center text-[11px] font-black text-white shadow-lg"
+                 style={{ 
+                   background: b.count > 0 ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : '#475569',
+                   borderColor: activeBooster === b.type ? '#fff' : 'rgba(255,255,255,0.5)'
+                 }}>
+              {b.count}
+            </div>
           </button>
         ))}
       </div>
 
       {activeBooster === 'hammer' && (
-        <div className="mt-2 text-center h-4">
-          <span className="text-[10px] text-white font-semibold animate-pulse">🔨 Tap a gem to destroy it</span>
+        <div className="mt-3 text-center h-4 flex justify-center">
+          <span className="text-xs text-white font-bold bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm animate-pulse border border-white/30 shadow-lg">
+            🔨 Tap a gem to destroy it
+          </span>
         </div>
       )}
     </>
