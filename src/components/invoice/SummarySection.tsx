@@ -8,9 +8,9 @@ export function SummarySection({ order }: SummarySectionProps) {
   const itemsTotal = (order.items || []).reduce((sum: number, item: any) => sum + (Number(item.unit_price) * Number(item.quantity)), 0);
   const discountAmount = Number(order.discount_amount || 0);
   const taxAmount = Number(order.tax || 0);
-  const shippingAmount = Number(order.shipping_cost ?? order.delivery_charge ?? 0);
+  const shippingAmount = Number(order.shipping_fee ?? order.shipping_cost ?? order.delivery_charge ?? 0);
   
-  const subTotalValue = itemsTotal;
+  const subTotalValue = Number(order.subtotal) > 0 ? Number(order.subtotal) : (Number(order.total) > 0 ? Number(order.total) : itemsTotal);
   const grandTotalValue = Number(order.grand_total) > 0 
     ? Number(order.grand_total) 
     : (subTotalValue + shippingAmount + taxAmount - discountAmount);

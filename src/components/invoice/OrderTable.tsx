@@ -41,9 +41,14 @@ export function OrderTable({ items }: OrderTableProps) {
               </td>
               <td className="py-4 px-2">
                 <div className="font-bold text-gray-900 text-sm mb-1">{productName}</div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 mt-1">
                   {item.selected_size && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium border border-gray-200">Size: {item.selected_size}</span>}
+                  {item.selected_color && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium border border-gray-200">Color: {item.selected_color}</span>}
+                  {item.selected_material && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium border border-gray-200">Material: {item.selected_material}</span>}
+                  {item.poster_size && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium border border-gray-200">Size: {item.poster_size}</span>}
                   {item.poster_frame && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium border border-gray-200">Frame: {item.poster_frame}</span>}
+                  {item.poster_finish && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium border border-gray-200">Finish: {item.poster_finish}</span>}
+                  {item.variant_name && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium border border-gray-200">Variant: {item.variant_name}</span>}
                 </div>
               </td>
               <td className="py-4 px-2 text-center align-middle font-semibold text-gray-900">{item.quantity}</td>
