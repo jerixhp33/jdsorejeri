@@ -1,6 +1,6 @@
 import React from 'react';
 import { ObjectiveProgress } from '../engine/objectives';
-import { SYMBOLS, GEM_STYLES } from './GemVisual';
+import { GemVisual } from './GemVisual';
 
 export function Objectives({ objectives }: { objectives: ObjectiveProgress[] }) {
   if (!objectives || objectives.length === 0) return null;
@@ -11,9 +11,17 @@ export function Objectives({ objectives }: { objectives: ObjectiveProgress[] }) 
         const isComplete = obj.completed;
         const pct = Math.min(100, (obj.currentAmount / obj.targetAmount) * 100);
 
-        let icon = '🎯';
+        let icon: React.ReactNode = '🎯';
         if (obj.type === 'collect' && obj.color !== undefined) {
-          icon = SYMBOLS[obj.color];
+          icon = (
+            <div className="w-5 h-5 flex items-center justify-center">
+              <GemVisual 
+                cell={{ id: 0, color: obj.color, special: 'none', matched: false }} 
+                size={22} 
+                colorBlind={true}
+              />
+            </div>
+          );
         } else if (obj.type === 'clear_obstacle') {
           if (obj.obstacleType === 'ice') icon = '🧊';
           if (obj.obstacleType === 'chain') icon = '⛓️';
@@ -24,12 +32,11 @@ export function Objectives({ objectives }: { objectives: ObjectiveProgress[] }) 
           <div key={i} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border backdrop-blur-md transition-all duration-300 ${
             isComplete ? 'bg-white/30 border-white/50' : 'bg-white/10 border-white/20'
           }`}>
-            <span className={`text-lg leading-none ${isComplete ? 'animate-bounce' : ''}`} style={{
-              color: obj.type === 'collect' ? 'inherit' : 'inherit',
+            <div className={`flex items-center justify-center leading-none ${isComplete ? 'animate-bounce text-lg' : ''}`} style={{
               textShadow: obj.type === 'collect' ? '0 1px 3px rgba(0,0,0,0.5)' : 'none'
             }}>
               {isComplete ? '✅' : icon}
-            </span>
+            </div>
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider leading-none">
                 {obj.type === 'score' ? 'Score' : obj.type === 'collect' ? 'Collect' : 'Clear'}
