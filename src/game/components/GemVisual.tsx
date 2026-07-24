@@ -68,12 +68,6 @@ export const GemVisual = React.memo(function GemVisual({ cell, size, selected, s
         pointerEvents: 'none',
       }} />
 
-      {colorBlind && cell.special === 'none' && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-          {COLORBLIND_SHAPES[cell.color]}
-        </div>
-      )}
-
       {isStriped && (
         <div style={{
           position: 'absolute', inset: 0, borderRadius: 'inherit',
@@ -94,10 +88,10 @@ export const GemVisual = React.memo(function GemVisual({ cell, size, selected, s
       )}
 
       <span style={{
-        fontSize: innerSize * 0.38,
-        color: isBomb ? '#fff' : 'rgba(255,255,255,0.7)',
+        fontSize: innerSize * 0.5,
+        color: isBomb ? '#fff' : 'rgba(255,255,255,0.75)',
         fontWeight: 900,
-        textShadow: `0 1px 3px rgba(0,0,0,0.4)`,
+        textShadow: `0 1px 3px rgba(0,0,0,0.5)`,
         zIndex: 1,
         lineHeight: 1,
         pointerEvents: 'none',
