@@ -90,31 +90,6 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
   const deleteProduct = async (productId: string) => {
     if (!confirm('Delete this product? This cannot be undone.')) return;
     try {
-      // Delete related images first (FK constraint)
-      await fetch('/api/admin/product-images', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: productId }),
-      });
-      // Delete poster sizes (FK constraint)
-      await fetch('/api/admin/poster-sizes', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: productId }),
-      });
-      // Delete order_items referencing this product (FK constraint: order_items_product_id_fkey)
-      await fetch('/api/admin/order-items', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: productId }),
-      });
-      // Delete collection_products referencing this product (FK constraint)
-      await fetch('/api/admin/products', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ _type: 'collection_products_by_product', product_id: productId }),
-      });
-      // Now delete the product itself
       const res = await fetch('/api/admin/products', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },

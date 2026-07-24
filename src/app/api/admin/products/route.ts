@@ -121,27 +121,56 @@ export async function DELETE(req: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
+
   // Delete all collection_products entries for a given collection
   if (body._type === 'products') {
     const { error } = await admin.from('collection_products').delete().eq('collection_id', body.collection_id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   }
-  // Delete all collection_products entries for a given product (called before product delete)
+
+  const clearProductDependencies = async (productIds: string[]) => {
+    await admin.from('product_images').delete().in('product_id', productIds);
+    await admin.from('poster_sizes').delete().in('product_id', productIds);
+    await admin.from('order_items').delete().in('product_id', productIds);
+    await admin.from('collection_products').delete().in('product_id', productIds);
+    await admin.from('product_cross_sells').delete().in('product_id', productIds);
+    await admin.from('product_cross_sells').delete().in('cross_sell_product_id', productIds);
+    await admin.from('cart_items').delete().in('product_id', productIds);
+    await admin.from('wishlists').delete().in('product_id', productIds);
+    await admin.from('waitlists').delete().in('product_id', productIds);
+  };
+
+  // Handle bulk delete
+  if (body._type === 'bulk_delete' && Array.isArray(body.ids)) {
+    try {
+      await clearProductDependencies(body.ids);
+      const { error } = await admin.from('products').delete().in('id', body.ids);
+      if (error) throw error;
+      return NextResponse.json({ success: true });
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: 500 });
+    }
+  }
+
+  // Handle single delete
+  if (body.id) {
+    try {
+      await clearProductDependencies([body.id]);
+      const { error } = await admin.from('products').delete().eq('id', body.id);
+      if (error) throw error;
+      return NextResponse.json({ success: true });
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: 500 });
+    }
+  }
+
+  // Fallback for legacy calls
   if (body._type === 'collection_products_by_product') {
     const { error } = await admin.from('collection_products').delete().eq('product_id', body.product_id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   }
 
-  // Handle bulk delete
-  if (body._type === 'bulk_delete' && Array.isArray(body.ids)) {
-    const { error } = await admin.from('products').delete().in('id', body.ids);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ success: true });
-  }
-
-  const { error } = await admin.from('products').delete().eq('id', body.id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
 }
