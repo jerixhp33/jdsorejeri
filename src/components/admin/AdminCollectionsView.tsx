@@ -11,7 +11,7 @@ import type { Collection } from '@/types';
 
 interface AdminCollectionsViewProps {
   collections: any[];
-  allProducts: Array<{ id: string; name: string; product_type: string; slug: string; images?: string[] }>;
+  allProducts: Array<{ id: string; name: string; product_type: string; slug: string; images?: { image_url: string }[] }>;
 }
 
 export function AdminCollectionsView({ collections: initial, allProducts }: AdminCollectionsViewProps) {
@@ -292,9 +292,9 @@ export function AdminCollectionsView({ collections: initial, allProducts }: Admi
                         onChange={() => toggleProduct(product.id)}
                         className="w-3.5 h-3.5 accent-luxe-accent mr-2 shrink-0"
                       />
-                      {product.images?.[0] ? (
+                      {product.images?.[0]?.image_url ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={product.images[0]} alt="" className="w-8 h-8 object-cover rounded-md shrink-0 bg-white/10" />
+                        <img src={product.images[0].image_url} alt="" className="w-8 h-8 object-cover rounded-md shrink-0 bg-white/10" />
                       ) : (
                         <div className="w-8 h-8 rounded-md bg-white/5 flex items-center justify-center shrink-0">
                           <Layers className="w-3 h-3 text-white/20" />
