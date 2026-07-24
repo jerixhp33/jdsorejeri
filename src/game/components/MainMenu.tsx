@@ -99,9 +99,13 @@ export function MainMenu({ save, onPlay, onContinue, onStore, onStats, onDaily, 
           >
             JD GEM CRUSH
           </h2>
-          <p className="text-white/70 text-sm mb-10 tracking-[0.2em] uppercase font-bold animate-fade-in-up delay-200">
+          <p className="text-white/70 text-sm tracking-[0.2em] uppercase font-bold animate-fade-in-up delay-200">
             Match · Crush · Conquer
           </p>
+          <div className="mt-2 mb-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 animate-fade-in-up delay-200">
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-[10px] text-white/90 font-bold uppercase tracking-wider">JD Store Offline</span>
+          </div>
 
           <div className="w-full space-y-4 mb-8 animate-fade-in-up delay-300">
             {save.unlockedLevel > 1 && (

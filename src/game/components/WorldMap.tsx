@@ -65,8 +65,7 @@ export function WorldMap({ save, onSelect, onBack }: WorldMapProps) {
                 </div>
                 
                 <div className="flex flex-col-reverse gap-8 items-center">
-                  {levelsInWorld.map((lvlIdx, idx) => {
-                    const lvl = lvlIdx + 1;
+                  {levelsInWorld.map((lvl, idx) => {
                     const unlocked = lvl <= save.unlockedLevel;
                     const stars = save.levelStars[lvl] || 0;
                     const isLatest = lvl === save.unlockedLevel;
