@@ -453,7 +453,7 @@ function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextL
   const restart = () => { setScore(0); setMoves(levelDef.moves); setGrid(buildGrid(gemCount)); setResult('none'); setSel(null); setCombo(0); };
 
   return (
-    <div className="w-full max-w-[420px] mx-auto select-none" style={{ touchAction: 'none' }}>
+    <div className="flex flex-col flex-1 h-full w-full max-w-[420px] mx-auto select-none" style={{ touchAction: 'none' }}>
       <GameHUD
         levelNum={levelNum}
         levelDef={levelDef}
@@ -483,7 +483,8 @@ function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextL
         }}
       />
       
-      <GameBoard
+      <div className="flex-1 min-h-0 w-full flex items-center justify-center relative pb-2">
+        <GameBoard
         grid={grid}
         sel={sel}
         busy={busy}
@@ -498,9 +499,10 @@ function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextL
         onSwap={doSwap}
         floats={floats}
         obstacles={obstacles}
-      />
+        />
+      </div>
 
-      <p className="text-center text-white/15 text-[9px] mt-2 font-medium tracking-wider">
+      <p className="text-center text-white/15 text-[9px] mt-2 font-medium tracking-wider shrink-0">
         TAP or SWIPE · Match 4 = Striped · L/T = Wrapped · Match 5 = 💫 Bomb
       </p>
 
@@ -591,8 +593,7 @@ export function JDGemCrush() {
   }, []);
 
   return (
-    <div className="fixed inset-0 text-white overflow-hidden flex flex-col font-sans select-none bg-gradient-to-br from-[#FF0080] via-[#7928CA] to-[#0070F3]"
-         style={{ backgroundSize: '400% 400%', animation: save.settings?.reducedMotion ? 'none' : 'bg-gradient-flow 15s ease infinite' }}>
+    <div className="fixed inset-0 text-white overflow-hidden flex flex-col font-sans select-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-purple-900 to-black">
       <style>{GAME_CSS}</style>
       {save.settings?.reducedMotion && (
         <style>{`
@@ -616,7 +617,7 @@ export function JDGemCrush() {
         ))}
       </div>
       
-      <div className="relative w-full max-w-[440px] mx-auto flex flex-col flex-1 overflow-hidden px-3 py-2 z-10">
+      <div className="relative w-full max-w-[440px] mx-auto flex flex-col flex-1 overflow-hidden px-3 py-0 pb-1 z-10">
         {screen === 'menu' && (
         <MainMenu
           save={save}

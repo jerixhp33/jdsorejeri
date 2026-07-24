@@ -61,10 +61,10 @@ export function GameBoard({
   }, [busy, result, onSwap]);
 
   return (
-    <div ref={boardRef} className="relative w-full rounded-2xl overflow-hidden border border-white/20 backdrop-blur-sm"
+    <div ref={boardRef} className="relative h-full max-w-full rounded-2xl overflow-hidden border border-white/20 backdrop-blur-sm shadow-2xl"
       style={{
         aspectRatio: `${COLS}/${ROWS}`,
-        background: 'rgba(255,255,255,0.1)',
+        maxHeight: '100%',
         boxShadow: '0 0 50px rgba(255,255,255,0.06), inset 0 0 30px rgba(255,255,255,0.1), 0 4px 25px rgba(0,0,0,0.4)',
       }}
     >

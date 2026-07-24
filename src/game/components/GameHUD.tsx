@@ -27,37 +27,38 @@ export function GameHUD({
   objectives, activeBooster, busy, result, onBoosterClick, onToggleSound, onBack
 }: GameHUDProps) {
   const pct = Math.min(100, (score / levelDef.target) * 100);
+  const displayObjectives = objectives.filter(o => o.type !== 'score');
 
   return (
     <>
-      <div className="flex items-center justify-between mb-4 px-1">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mb-2 px-1">
+        <div className="flex items-center gap-2">
           <button onClick={onBack} disabled={busy}
-            className="text-white/60 hover:text-white transition-colors disabled:opacity-30 p-2 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10">
+            className="text-white/60 hover:text-white transition-colors disabled:opacity-30 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
           <div className="flex flex-col">
-            <span className="text-sm font-extrabold text-white tracking-wide">
+            <span className="text-sm font-extrabold text-white tracking-wide leading-none">
               {levelNum === 'daily' ? 'Daily Challenge' : `Level ${levelNum}`}
             </span>
-            <span className="text-[10px] text-white/50 uppercase tracking-widest font-bold">
+            <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">
               {levelNum === 'daily' ? 'Special Event' : WORLDS[Math.floor(((levelNum as number) - 1) / 10)]?.name || 'World'}
             </span>
           </div>
         </div>
         
         <button onClick={onToggleSound}
-          className="text-lg w-10 h-10 flex items-center justify-center rounded-xl border border-white/20 bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all shadow-sm">
+          className="text-base w-8 h-8 flex items-center justify-center rounded-xl border border-white/20 bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all shadow-sm">
           {save.soundOn ? '🔊' : '🔇'}
         </button>
       </div>
 
-      <Objectives objectives={objectives} />
+      {displayObjectives.length > 0 && <Objectives objectives={displayObjectives} />}
 
-      <div className="mb-4 bg-white/10 backdrop-blur-xl border border-white/30 rounded-2xl p-4 shadow-lg">
-        <div className="flex items-center justify-between mb-3">
+      <div className="mb-2 bg-white/10 backdrop-blur-xl border border-white/30 rounded-xl p-3 shadow-lg">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col">
-            <span className="text-[10px] text-white/60 uppercase tracking-wider font-bold mb-0.5">Score</span>
+            <span className="text-[9px] text-white/60 uppercase tracking-wider font-bold mb-0.5">Score</span>
             <span className="text-2xl font-black text-white leading-none">{score.toLocaleString()}</span>
           </div>
           <div className="flex flex-col items-center">
