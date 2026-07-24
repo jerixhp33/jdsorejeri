@@ -50,18 +50,15 @@ export function anyValidMove(grid: Cell[][]): boolean {
 }
 
 export function findHintMove(grid: Cell[][]): [Pos, Pos] | null {
-  const g = cloneGrid(grid);
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       if (c < COLS - 1) {
-        swapInGrid(g, { r, c }, { r, c: c + 1 });
-        if (hasAnyMatch(g)) return [{ r, c }, { r, c: c + 1 }];
-        swapInGrid(g, { r, c }, { r, c: c + 1 });
+        const sw = swapInGrid(grid, { r, c }, { r, c: c + 1 });
+        if (hasAnyMatch(sw)) return [{ r, c }, { r, c: c + 1 }];
       }
       if (r < ROWS - 1) {
-        swapInGrid(g, { r, c }, { r: r + 1, c });
-        if (hasAnyMatch(g)) return [{ r, c }, { r: r + 1, c }];
-        swapInGrid(g, { r, c }, { r: r + 1, c });
+        const sw = swapInGrid(grid, { r, c }, { r: r + 1, c });
+        if (hasAnyMatch(sw)) return [{ r, c }, { r: r + 1, c }];
       }
     }
   }
