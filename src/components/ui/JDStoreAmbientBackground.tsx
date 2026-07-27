@@ -172,52 +172,121 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
               y: isMobile ? 0 : mousePosition.y,
             }}
           >
-          {/* Light 01 - Emerald Glow */}
+          {/* Light 01 - Lavender */}
           <div 
-            className="ambient-layer bg-[#059669]"
+            className="ambient-layer bg-[#9B8AFB]"
             style={{
               top: '-15%',
-              left: '0%',
-              width: isMobile ? '500px' : '800px',
-              height: isMobile ? '300px' : '450px',
+              left: '10%',
+              width: isMobile ? '400px' : '750px',
+              height: isMobile ? '250px' : '400px',
               filter: isMobile ? 'blur(100px)' : 'blur(160px)',
-              opacity: 0.35 * baseOpacity,
-              animation: 'ambientDrift1 20s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+              opacity: 0.25 * baseOpacity,
+              animation: 'ambientDrift1 24s cubic-bezier(0.4, 0, 0.2, 1) infinite',
               transformOrigin: 'top left'
             }}
           />
 
-          {/* Light 02 - Cyan Glow */}
+          {/* Light 02 - Muted Cyan */}
           <div 
-            className="ambient-layer bg-[#0891b2]"
+            className="ambient-layer bg-[#6FBFC4]"
             style={{
               top: '-10%',
-              right: '0%',
-              width: isMobile ? '600px' : '900px',
-              height: isMobile ? '350px' : '500px',
-              filter: isMobile ? 'blur(120px)' : 'blur(180px)',
-              opacity: 0.3 * baseOpacity,
-              animation: 'ambientDrift3 25s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+              right: '5%',
+              width: isMobile ? '450px' : '850px',
+              height: isMobile ? '300px' : '450px',
+              filter: isMobile ? 'blur(110px)' : 'blur(170px)',
+              opacity: 0.20 * baseOpacity,
+              animation: 'ambientDrift2 27s cubic-bezier(0.4, 0, 0.2, 1) infinite',
               animationDelay: '-5s',
               transformOrigin: 'top right'
             }}
           />
 
-          {/* Light 03 - Deep Blue / Indigo Glow */}
+          {/* Light 03 - Dusty Rose */}
           <div 
-            className="ambient-layer bg-[#4338ca]"
+            className="ambient-layer bg-[#C58FA5]"
             style={{
-              top: '-20%',
-              left: '30%',
-              width: isMobile ? '400px' : '700px',
-              height: isMobile ? '250px' : '400px',
-              filter: isMobile ? 'blur(110px)' : 'blur(170px)',
-              opacity: 0.25 * baseOpacity,
-              animation: 'ambientDrift5 22s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+              top: '-5%',
+              left: '20%',
+              width: isMobile ? '350px' : '650px',
+              height: isMobile ? '200px' : '350px',
+              filter: isMobile ? 'blur(100px)' : 'blur(150px)',
+              opacity: 0.18 * baseOpacity,
+              animation: 'ambientDrift3 31s cubic-bezier(0.4, 0, 0.2, 1) infinite',
               animationDelay: '-12s',
               transformOrigin: 'top center'
             }}
           />
+
+          {/* Light 04 - Soft Sage */}
+          {(!isMobile || variant === 'home') && (
+            <div 
+              className="ambient-layer bg-[#7FA58A]"
+              style={{
+                top: '-15%',
+                right: '30%',
+                width: isMobile ? '400px' : '700px',
+                height: isMobile ? '250px' : '400px',
+                filter: isMobile ? 'blur(110px)' : 'blur(180px)',
+                opacity: 0.15 * baseOpacity,
+                animation: 'ambientDrift4 35s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+                animationDelay: '-2s',
+                transformOrigin: 'top center'
+              }}
+            />
+          )}
+
+          {/* Light 05 - Warm Cream */}
+          <div 
+            className="ambient-layer bg-[#E6D5B8]"
+            style={{
+              top: '-10%',
+              left: '35%',
+              width: isMobile ? '300px' : '550px',
+              height: isMobile ? '150px' : '300px',
+              filter: isMobile ? 'blur(90px)' : 'blur(140px)',
+              opacity: 0.15 * baseOpacity,
+              animation: 'ambientDrift5 21s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+              animationDelay: '-8s',
+              transformOrigin: 'top left'
+            }}
+          />
+
+          {/* Light 06 - Burgundy */}
+          {(!isMobile) && (
+            <div 
+              className="ambient-layer bg-[#6B3045]"
+              style={{
+                top: '-20%',
+                right: '10%',
+                width: '700px',
+                height: '450px',
+                filter: 'blur(190px)',
+                opacity: 0.15 * baseOpacity,
+                animation: 'ambientDrift6 39s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+                animationDelay: '-15s',
+                transformOrigin: 'top right'
+              }}
+            />
+          )}
+
+          {/* Light 07 - Optional Champagne */}
+          {(!isMobile && variant === 'home') && (
+            <div 
+              className="ambient-layer bg-[#C9A96E]"
+              style={{
+                top: '-5%',
+                left: '45%',
+                width: '500px',
+                height: '350px',
+                filter: 'blur(160px)',
+                opacity: 0.12 * baseOpacity,
+                animation: 'ambientDrift1 29s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse',
+                transformOrigin: 'top center'
+              }}
+            />
+          )}
 
           </motion.div>
         </motion.div>
