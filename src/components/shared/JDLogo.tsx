@@ -91,7 +91,7 @@ export function JDLogo({
       {/* D */}
 
       <path
-        fill={`url(#${goldId})`}
+        fill={`url(#${silverId})`}
         d="
         M218 66
         L218 72
@@ -100,9 +100,9 @@ export function JDLogo({
         C394 299 355 348 275 348
         L218 348
         L218 354
-        L280 354
-        C374 354 414 300 414 210
-        C414 120 374 66 280 66
+        L275 354
+        C360 354 402 301 402 210
+        C402 119 360 66 275 66
         Z
         "
       />

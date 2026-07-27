@@ -5,121 +5,112 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { JDLogo } from '@/components/shared/JDLogo';
 
 export function PageLoader() {
-  // Start visible so it covers the page immediately on load without flashing
   const [visible, setVisible] = useState(true);
-  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-
-    // Animate progress bar (sped up)
-    const t1 = setTimeout(() => setProgress(40), 50);
-    const t2 = setTimeout(() => setProgress(70), 200);
-    const t3 = setTimeout(() => setProgress(90), 400);
-    const t4 = setTimeout(() => setProgress(100), 550);
-    // Dismiss after progress completes
-    const t5 = setTimeout(() => setVisible(false), 800);
-
-    return () => { [t1,t2,t3,t4,t5].forEach(clearTimeout); };
+    // Keep loader visible for 1.2s to show off animation, then fade out
+    const t = setTimeout(() => setVisible(false), 1200);
+    return () => clearTimeout(t);
   }, []);
+
+  // Generate 60 magical particles deterministically
+  const particles = Array.from({ length: 60 }).map((_, i) => {
+    // Golden angle distribution for natural starry look
+    const angle = (i * 137.5) % 360; 
+    // Radius between 70px and 240px
+    const radius = 70 + ((i * 61) % 170); 
+    const size = 1 + ((i * 17) % 3);
+    const delay = (i * 0.13) % 2;
+    const duration = 2 + ((i * 7) % 3);
+    
+    // Polar to Cartesian
+    const x = Math.cos((angle * Math.PI) / 180) * radius;
+    const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+    return { x, y, size, delay, duration };
+  });
 
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden"
-          exit={{ opacity: 0, scale: 1.04 }}
-          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#070707] overflow-hidden"
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
         >
-          {/* Soft ambient glow — tiny opacity so it doesn't flood and is easy on mobile GPU */}
-          <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(200,169,110,0.06) 0%, transparent 70%)' }}
-            animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          <style dangerouslySetInnerHTML={{ __html: `
+            @keyframes floatParticle {
+              0%, 100% { transform: translate(var(--x), var(--y)) scale(1); opacity: 0.1; }
+              50% { transform: translate(var(--x), var(--y)) scale(1.8); opacity: 0.9; }
+            }
+            @keyframes orbit {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            @keyframes orbitReverse {
+              0% { transform: rotate(360deg); }
+              100% { transform: rotate(0deg); }
+            }
+            @keyframes constellationRotate {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(10deg); }
+            }
+          `}} />
+
+          {/* Central Blended Glow */}
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 60%)' }}
           />
 
-          {/* Center content */}
-          <div className="relative z-10 flex flex-col items-center gap-8">
-            {/* Logo with pulse ring */}
-            <div className="relative flex items-center justify-center">
-              {/* Pulsing ring */}
-              <motion.div
-                className="absolute rounded-full border border-luxe-accent/20"
-                animate={{ scale: [1, 1.6, 2], opacity: [0.6, 0.2, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-                style={{ width: 80, height: 80 }}
-              />
-              <motion.div
-                className="absolute rounded-full border border-luxe-accent/15"
-                animate={{ scale: [1, 1.8, 2.4], opacity: [0.4, 0.15, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeOut', delay: 0.4 }}
-                style={{ width: 80, height: 80 }}
-              />
-
-              {/* Logo */}
-              <motion.div
-                initial={{ opacity: 1, scale: 1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <JDLogo size={56} />
-              </motion.div>
-            </div>
-
-            {/* Brand name */}
-            <motion.div
-              initial={{ opacity: 1, y: 0 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-center"
-            >
-              <p className="font-display text-2xl font-bold tracking-widest text-white">
-                JD Store
-              </p>
-              <motion.p
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="text-white/30 text-[11px] tracking-[0.3em] uppercase mt-1"
-              >
-                Premium · Curated · Delivered
-              </motion.p>
-            </motion.div>
-
-            {/* Progress bar */}
-            <motion.div
-              initial={{ opacity: 1, scaleX: 1 }}
-              animate={{ opacity: 1, scaleX: 1 }}
-              transition={{ delay: 0.4 }}
-              className="w-48 h-px bg-white/10 rounded-full overflow-hidden relative"
-            >
-              <motion.div
-                className="absolute inset-y-0 left-0 rounded-full"
-                style={{
-                  background: 'linear-gradient(90deg, #c8a96e, #e8d5a3, #c8a96e)',
-                  backgroundSize: '200% 100%',
-                }}
-                animate={{
-                  width: `${progress}%`,
-                  backgroundPosition: ['0% 0%', '100% 0%'],
-                }}
-                transition={{
-                  width: { duration: 0.4, ease: 'easeOut' },
-                  backgroundPosition: { duration: 1.5, repeat: Infinity, ease: 'linear' },
-                }}
-              />
-            </motion.div>
-          </div>
-
-          {/* Bottom tag */}
-          <motion.p
-            initial={{ opacity: 0.2 }}
-            animate={{ opacity: 0.2 }}
-            transition={{ delay: 0.8 }}
-            className="absolute bottom-8 text-white/40 text-[10px] tracking-[0.25em] uppercase"
+          <div 
+            className="relative flex items-center justify-center"
+            style={{ animation: 'constellationRotate 20s linear infinite' }}
           >
-            Art for every space
-          </motion.p>
+            {/* Particles */}
+            {particles.map((p, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+                style={{
+                  width: p.size,
+                  height: p.size,
+                  '--x': `${p.x}px`,
+                  '--y': `${p.y}px`,
+                  transform: `translate(${p.x}px, ${p.y}px)`,
+                  animation: `floatParticle ${p.duration}s ease-in-out infinite`,
+                  animationDelay: `${p.delay}s`,
+                } as React.CSSProperties}
+              />
+            ))}
+
+            {/* Orbiting Ring 1 (Inner Swoosh) */}
+            <div 
+              className="absolute w-[180px] h-[180px] rounded-full border border-white/5 border-t-white/60 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+              style={{ animation: 'orbit 3s linear infinite' }}
+            />
+            
+            {/* Orbiting Ring 2 (Outer Swoosh) */}
+            <div 
+              className="absolute w-[220px] h-[220px] rounded-full border border-white/5 border-b-white/40"
+              style={{ animation: 'orbitReverse 5s linear infinite' }}
+            />
+
+            {/* JD Logo with Counter-Rotation to keep it upright */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="relative z-10"
+              style={{ 
+                animation: 'orbitReverse 20s linear infinite',
+                filter: 'drop-shadow(0 0 15px rgba(255,255,255,0.5))' 
+              }}
+            >
+              <JDLogo size={85} />
+            </motion.div>
+
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
