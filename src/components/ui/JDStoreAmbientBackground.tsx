@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion, useSpring, useTransform, useScroll } from 'framer-motion';
 
 interface Props {
   variant?: 'home' | 'minimal' | 'dark';
@@ -9,71 +8,25 @@ interface Props {
   interactive?: boolean;
 }
 
-export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium', interactive = true }: Props) {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isMobile, setIsMobile] = useState(true);
+export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium' }: Props) {
+  const [mounted, setMounted] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  // Scroll position mapping
-  const { scrollY } = useScroll();
-  const scrollYSpring = useSpring(scrollY, { stiffness: 100, damping: 30, restDelta: 0.001 });
-  const bgY = useTransform(scrollYSpring, [0, 2000], [0, 50]);
-
   useEffect(() => {
-    // Check mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
     // Check reduced motion
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
     const motionHandler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener('change', motionHandler);
 
+    // Trigger mount animation
+    const timer = setTimeout(() => setMounted(true), 100);
+
     return () => {
-      window.removeEventListener('resize', checkMobile);
       mediaQuery.removeEventListener('change', motionHandler);
+      clearTimeout(timer);
     };
   }, []);
-
-  useEffect(() => {
-    if (isMobile || !interactive || prefersReducedMotion) return;
-
-    let rafId: number;
-    let targetX = window.innerWidth / 2;
-    let targetY = window.innerHeight / 2;
-    let currentX = window.innerWidth / 2;
-    let currentY = window.innerHeight / 2;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      targetX = e.clientX;
-      targetY = e.clientY;
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-
-    const animate = () => {
-      // Lerp
-      currentX += (targetX - currentX) * 0.03;
-      currentY += (targetY - currentY) * 0.03;
-      
-      const xOffset = ((currentX / window.innerWidth) - 0.5) * 30; // Max movement 15px
-      const yOffset = ((currentY / window.innerHeight) - 0.5) * 30;
-
-      setMousePosition({ x: xOffset, y: yOffset });
-      rafId = requestAnimationFrame(animate);
-    };
-    
-    rafId = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(rafId);
-    };
-  }, [isMobile, interactive, prefersReducedMotion]);
 
   if (prefersReducedMotion) {
     return (
@@ -84,55 +37,65 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
   }
 
   const opacityMap = {
-    low: 0.6,
-    medium: 1,
-    high: 1.3
+    low: 0.5,
+    medium: 0.8,
+    high: 1.2
   };
   const baseOpacity = opacityMap[intensity];
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes ambientDrift1 {
-          0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 0.7; }
-          25% { transform: translate3d(5%, 3%, 0) scale(1.06) rotate(2deg); opacity: 0.8; }
-          50% { transform: translate3d(2%, 7%, 0) scale(1.12) rotate(-1deg); opacity: 0.65; }
-          75% { transform: translate3d(-3%, 2%, 0) scale(1.05) rotate(1deg); opacity: 0.78; }
-          100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 0.7; }
+        @keyframes colorShift1 {
+          0% { background: #9B8AFB; }
+          33% { background: #6FBFC4; }
+          66% { background: #C58FA5; }
+          100% { background: #9B8AFB; }
         }
-        @keyframes ambientDrift2 {
-          0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 0.6; }
-          33% { transform: translate3d(-4%, -5%, 0) scale(1.08) rotate(-3deg); opacity: 0.75; }
-          66% { transform: translate3d(-8%, 2%, 0) scale(0.95) rotate(2deg); opacity: 0.5; }
-          100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 0.6; }
+        @keyframes colorShift2 {
+          0% { background: #E6D5B8; }
+          33% { background: #7FA58A; }
+          66% { background: #6B3045; }
+          100% { background: #E6D5B8; }
         }
-        @keyframes ambientDrift3 {
-          0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.5; }
-          50% { transform: translate3d(6%, -2%, 0) scale(1.1); opacity: 0.7; }
-          100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.5; }
+        @keyframes colorShift3 {
+          0% { background: #C9A96E; }
+          33% { background: #9B8AFB; }
+          66% { background: #7FA58A; }
+          100% { background: #C9A96E; }
         }
-        @keyframes ambientDrift4 {
-          0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
-          50% { transform: translate3d(-2%, 8%, 0) scale(1.15); opacity: 0.65; }
-          100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
+        @keyframes driftHorizontal1 {
+          0% { transform: translateX(-5%); }
+          50% { transform: translateX(5%); }
+          100% { transform: translateX(-5%); }
         }
-        @keyframes ambientDrift5 {
-          0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
-          50% { transform: translate3d(3%, 3%, 0) scale(1.05); opacity: 0.6; }
-          100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
+        @keyframes driftHorizontal2 {
+          0% { transform: translateX(5%); }
+          50% { transform: translateX(-5%); }
+          100% { transform: translateX(5%); }
         }
-        @keyframes ambientDrift6 {
-          0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.5; }
-          50% { transform: translate3d(-5%, -5%, 0) scale(1.1); opacity: 0.75; }
-          100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.5; }
+        @keyframes driftHorizontal3 {
+          0% { transform: translateX(-3%); }
+          50% { transform: translateX(3%); }
+          100% { transform: translateX(-3%); }
         }
-        
-        .ambient-layer {
+
+        .ambient-top-layer {
           position: absolute;
-          border-radius: 50%;
+          border-radius: 100%;
           mix-blend-mode: screen;
           pointer-events: none;
-          will-change: transform, opacity;
+        }
+
+        .glow-wrapper {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 450px;
+          pointer-events: none;
+          mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
+          -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
         }
 
         .ambient-noise {
@@ -145,154 +108,61 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
           pointer-events: none;
           z-index: 6;
         }
-
-        .ambient-vignette {
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(circle at center, transparent 30%, rgba(3,3,3,0.6) 100%);
-          pointer-events: none;
-          z-index: 7;
-        }
       `}} />
 
-      <div className="fixed inset-0 z-0 bg-[#030303] pointer-events-none overflow-hidden flex items-center justify-center">
+      <div className="fixed inset-0 z-0 bg-[#030303] pointer-events-none overflow-hidden">
         {/* Charcoal Gradient Base */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#080808] to-[#030303] opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#060606] to-[#030303]" />
 
-        {/* Scroll Parallax Wrapper */}
-        <motion.div className="absolute inset-0 w-full h-full" style={{ y: bgY }}>
-          {/* Mount Animation & Mouse Interaction Wrapper */}
-          <motion.div 
-            className="absolute inset-0 w-full h-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 2, ease: 'easeOut' }}
-            style={{ 
-              x: isMobile ? 0 : mousePosition.x,
-              y: isMobile ? 0 : mousePosition.y,
-            }}
-          >
-          {/* Light 01 - Lavender */}
+        {/* Top Glow Wrapper with Mask to completely prevent bottom bleeding */}
+        <div 
+          className="glow-wrapper transition-opacity duration-[2000ms] ease-out"
+          style={{ opacity: mounted ? 1 : 0 }}
+        >
+          {/* Glow 1 - Left Side */}
           <div 
-            className="ambient-layer bg-[#9B8AFB]"
+            className="ambient-top-layer"
             style={{
-              top: '-15%',
-              left: '10%',
-              width: isMobile ? '400px' : '750px',
-              height: isMobile ? '250px' : '400px',
-              filter: isMobile ? 'blur(100px)' : 'blur(160px)',
-              opacity: 0.25 * baseOpacity,
-              animation: 'ambientDrift1 24s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-              transformOrigin: 'top left'
+              top: '-150px',
+              left: '-10%',
+              width: '70%',
+              height: '350px',
+              filter: 'blur(120px)',
+              opacity: 0.5 * baseOpacity,
+              animation: 'colorShift1 24s ease-in-out infinite, driftHorizontal1 18s ease-in-out infinite'
             }}
           />
 
-          {/* Light 02 - Muted Cyan */}
+          {/* Glow 2 - Right Side */}
           <div 
-            className="ambient-layer bg-[#6FBFC4]"
+            className="ambient-top-layer"
             style={{
-              top: '-10%',
-              right: '5%',
-              width: isMobile ? '450px' : '850px',
-              height: isMobile ? '300px' : '450px',
-              filter: isMobile ? 'blur(110px)' : 'blur(170px)',
-              opacity: 0.20 * baseOpacity,
-              animation: 'ambientDrift2 27s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-              animationDelay: '-5s',
-              transformOrigin: 'top right'
+              top: '-150px',
+              right: '-10%',
+              width: '70%',
+              height: '350px',
+              filter: 'blur(120px)',
+              opacity: 0.45 * baseOpacity,
+              animation: 'colorShift2 28s ease-in-out infinite, driftHorizontal2 22s ease-in-out infinite'
             }}
           />
 
-          {/* Light 03 - Dusty Rose */}
+          {/* Glow 3 - Center Overlay */}
           <div 
-            className="ambient-layer bg-[#C58FA5]"
+            className="ambient-top-layer"
             style={{
-              top: '-5%',
+              top: '-100px',
               left: '20%',
-              width: isMobile ? '350px' : '650px',
-              height: isMobile ? '200px' : '350px',
-              filter: isMobile ? 'blur(100px)' : 'blur(150px)',
-              opacity: 0.18 * baseOpacity,
-              animation: 'ambientDrift3 31s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-              animationDelay: '-12s',
-              transformOrigin: 'top center'
+              width: '60%',
+              height: '300px',
+              filter: 'blur(100px)',
+              opacity: 0.4 * baseOpacity,
+              animation: 'colorShift3 32s ease-in-out infinite, driftHorizontal3 25s ease-in-out infinite'
             }}
           />
-
-          {/* Light 04 - Soft Sage */}
-          {(!isMobile || variant === 'home') && (
-            <div 
-              className="ambient-layer bg-[#7FA58A]"
-              style={{
-                top: '-15%',
-                right: '30%',
-                width: isMobile ? '400px' : '700px',
-                height: isMobile ? '250px' : '400px',
-                filter: isMobile ? 'blur(110px)' : 'blur(180px)',
-                opacity: 0.15 * baseOpacity,
-                animation: 'ambientDrift4 35s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-                animationDelay: '-2s',
-                transformOrigin: 'top center'
-              }}
-            />
-          )}
-
-          {/* Light 05 - Warm Cream */}
-          <div 
-            className="ambient-layer bg-[#E6D5B8]"
-            style={{
-              top: '-10%',
-              left: '35%',
-              width: isMobile ? '300px' : '550px',
-              height: isMobile ? '150px' : '300px',
-              filter: isMobile ? 'blur(90px)' : 'blur(140px)',
-              opacity: 0.15 * baseOpacity,
-              animation: 'ambientDrift5 21s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-              animationDelay: '-8s',
-              transformOrigin: 'top left'
-            }}
-          />
-
-          {/* Light 06 - Burgundy */}
-          {(!isMobile) && (
-            <div 
-              className="ambient-layer bg-[#6B3045]"
-              style={{
-                top: '-20%',
-                right: '10%',
-                width: '700px',
-                height: '450px',
-                filter: 'blur(190px)',
-                opacity: 0.15 * baseOpacity,
-                animation: 'ambientDrift6 39s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-                animationDelay: '-15s',
-                transformOrigin: 'top right'
-              }}
-            />
-          )}
-
-          {/* Light 07 - Optional Champagne */}
-          {(!isMobile && variant === 'home') && (
-            <div 
-              className="ambient-layer bg-[#C9A96E]"
-              style={{
-                top: '-5%',
-                left: '45%',
-                width: '500px',
-                height: '350px',
-                filter: 'blur(160px)',
-                opacity: 0.12 * baseOpacity,
-                animation: 'ambientDrift1 29s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse',
-                transformOrigin: 'top center'
-              }}
-            />
-          )}
-
-          </motion.div>
-        </motion.div>
+        </div>
 
         <div className="ambient-noise" />
-        <div className="ambient-vignette" />
       </div>
     </>
   );
