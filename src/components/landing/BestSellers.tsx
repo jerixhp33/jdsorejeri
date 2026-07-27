@@ -14,7 +14,7 @@ interface BestSellersProps {
   noContainer?: boolean;
 }
 
-export function BestSellers({ products, title = "Best Sellers", subtitle = "Trending Now", viewAllLink = "/best-sellers", noContainer = false }: BestSellersProps) {
+export function BestSellers({ products, title = "Best Sellers", subtitle = "Most Loved", viewAllLink = "/best-sellers", noContainer = false }: BestSellersProps) {
   if (!products.length) return null;
 
   return (

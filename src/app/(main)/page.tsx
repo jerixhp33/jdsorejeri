@@ -36,7 +36,7 @@ export default async function HomePage() {
       
       <div className="relative z-10">
         {/* Hero-position banners */}
-        <div className="pt-20 sm:pt-24 pb-4">
+        <div className="pt-0 pb-4">
           <BannersSection banners={heroBanners} />
         </div>
 
