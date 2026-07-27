@@ -77,41 +77,41 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
 
       {/* Top Glow - ABSOLUTE so it scrolls away naturally when the user scrolls down */}
       <div 
-        className="absolute top-0 left-0 w-full h-[1000px] z-0 pointer-events-none transition-opacity duration-[2500ms] ease-out"
+        className="absolute top-0 left-0 w-full h-[800px] z-0 pointer-events-none transition-opacity duration-[2500ms] ease-out"
         style={{ opacity: mounted ? baseOpacity : 0 }}
       >
-        {/* Layer 1: Lavender */}
+        {/* Layer 1: Vibrant Teal */}
         <div 
           className="ambient-radial-glow"
           style={{
-            background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(155, 138, 251, 0.55) 0%, transparent 100%)',
+            background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(0, 242, 254, 0.55) 0%, transparent 100%)',
             animation: 'crossfade1 24s ease-in-out infinite'
           }}
         />
 
-        {/* Layer 2: Muted Cyan */}
+        {/* Layer 2: Deep Sky Blue */}
         <div 
           className="ambient-radial-glow"
           style={{
-            background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(111, 191, 196, 0.55) 0%, transparent 100%)',
+            background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(79, 172, 254, 0.55) 0%, transparent 100%)',
             animation: 'crossfade2 24s ease-in-out infinite'
           }}
         />
 
-        {/* Layer 3: Warm Cream / Champagne */}
+        {/* Layer 3: Neon Purple / Pink */}
         <div 
           className="ambient-radial-glow"
           style={{
-            background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(230, 213, 184, 0.55) 0%, transparent 100%)',
+            background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(240, 147, 251, 0.55) 0%, transparent 100%)',
             animation: 'crossfade3 24s ease-in-out infinite'
           }}
         />
 
-        {/* Layer 4: Dusty Rose */}
+        {/* Layer 4: Electric Mint */}
         <div 
           className="ambient-radial-glow"
           style={{
-            background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(197, 143, 165, 0.55) 0%, transparent 100%)',
+            background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(0, 255, 135, 0.55) 0%, transparent 100%)',
             animation: 'crossfade4 24s ease-in-out infinite'
           }}
         />

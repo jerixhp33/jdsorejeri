@@ -45,14 +45,6 @@ export default async function HomePage() {
         <BannersSection banners={topBanners} />
       </div>
 
-      {/* Wavy Ambient Cutoff SVG */}
-      <div className="relative w-full overflow-hidden leading-none z-10 pointer-events-none -mt-2 lg:-mt-4 mb-2 lg:mb-4">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-12 sm:h-16 lg:h-24 fill-[#0a0a0a]">
-          {/* Base solid wave */}
-          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C62.29,19.92,126.8,36.56,189.5,49.19,233.15,57.94,277.6,60.84,321.39,56.44Z"></path>
-        </svg>
-      </div>
-
       {/* Best Sellers Section - Streamed via Suspense */}
       <div className="mb-4 lg:mb-6">
         <Suspense fallback={
