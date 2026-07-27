@@ -161,123 +161,64 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
 
         {/* Scroll Parallax Wrapper */}
         <motion.div className="absolute inset-0 w-full h-full" style={{ y: bgY }}>
-          {/* Mouse Interaction Wrapper */}
+          {/* Mount Animation & Mouse Interaction Wrapper */}
           <motion.div 
             className="absolute inset-0 w-full h-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 2, ease: 'easeOut' }}
             style={{ 
               x: isMobile ? 0 : mousePosition.x,
               y: isMobile ? 0 : mousePosition.y,
             }}
           >
-          {/* Light 01 - Lavender */}
+          {/* Light 01 - Emerald Glow */}
           <div 
-            className="ambient-layer bg-[#9B8AFB]"
+            className="ambient-layer bg-[#059669]"
+            style={{
+              top: '-15%',
+              left: '0%',
+              width: isMobile ? '500px' : '800px',
+              height: isMobile ? '300px' : '450px',
+              filter: isMobile ? 'blur(100px)' : 'blur(160px)',
+              opacity: 0.35 * baseOpacity,
+              animation: 'ambientDrift1 20s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+              transformOrigin: 'top left'
+            }}
+          />
+
+          {/* Light 02 - Cyan Glow */}
+          <div 
+            className="ambient-layer bg-[#0891b2]"
             style={{
               top: '-10%',
-              left: '10%',
-              width: isMobile ? '400px' : '650px',
-              height: isMobile ? '400px' : '650px',
-              filter: isMobile ? 'blur(120px)' : 'blur(200px)',
-              opacity: 0.12 * baseOpacity,
-              animation: 'ambientDrift1 24s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-              transformOrigin: 'center center'
-            }}
-          />
-
-          {/* Light 02 - Muted Cyan */}
-          <div 
-            className="ambient-layer bg-[#6FBFC4]"
-            style={{
-              bottom: '-5%',
-              right: '-5%',
-              width: isMobile ? '450px' : '750px',
-              height: isMobile ? '450px' : '750px',
-              filter: isMobile ? 'blur(140px)' : 'blur(220px)',
-              opacity: 0.09 * baseOpacity,
-              animation: 'ambientDrift2 27s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+              right: '0%',
+              width: isMobile ? '600px' : '900px',
+              height: isMobile ? '350px' : '500px',
+              filter: isMobile ? 'blur(120px)' : 'blur(180px)',
+              opacity: 0.3 * baseOpacity,
+              animation: 'ambientDrift3 25s cubic-bezier(0.4, 0, 0.2, 1) infinite',
               animationDelay: '-5s',
+              transformOrigin: 'top right'
             }}
           />
 
-          {/* Light 03 - Dusty Rose */}
+          {/* Light 03 - Deep Blue / Indigo Glow */}
           <div 
-            className="ambient-layer bg-[#C58FA5]"
+            className="ambient-layer bg-[#4338ca]"
             style={{
-              top: '30%',
-              left: '-10%',
-              width: isMobile ? '350px' : '550px',
-              height: isMobile ? '350px' : '550px',
-              filter: isMobile ? 'blur(130px)' : 'blur(190px)',
-              opacity: 0.08 * baseOpacity,
-              animation: 'ambientDrift3 31s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+              top: '-20%',
+              left: '30%',
+              width: isMobile ? '400px' : '700px',
+              height: isMobile ? '250px' : '400px',
+              filter: isMobile ? 'blur(110px)' : 'blur(170px)',
+              opacity: 0.25 * baseOpacity,
+              animation: 'ambientDrift5 22s cubic-bezier(0.4, 0, 0.2, 1) infinite',
               animationDelay: '-12s',
+              transformOrigin: 'top center'
             }}
           />
 
-          {/* Light 04 - Soft Sage */}
-          {(!isMobile || variant === 'home') && (
-            <div 
-              className="ambient-layer bg-[#7FA58A]"
-              style={{
-                bottom: '10%',
-                left: '20%',
-                width: isMobile ? '400px' : '650px',
-                height: isMobile ? '400px' : '650px',
-                filter: isMobile ? 'blur(140px)' : 'blur(220px)',
-                opacity: 0.07 * baseOpacity,
-                animation: 'ambientDrift4 35s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-                animationDelay: '-2s',
-              }}
-            />
-          )}
-
-          {/* Light 05 - Warm Cream */}
-          <div 
-            className="ambient-layer bg-[#E6D5B8]"
-            style={{
-              top: '15%',
-              right: '25%',
-              width: isMobile ? '300px' : '500px',
-              height: isMobile ? '300px' : '500px',
-              filter: isMobile ? 'blur(110px)' : 'blur(180px)',
-              opacity: 0.06 * baseOpacity,
-              animation: 'ambientDrift5 21s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-              animationDelay: '-8s',
-            }}
-          />
-
-          {/* Light 06 - Burgundy */}
-          {(!isMobile) && (
-            <div 
-              className="ambient-layer bg-[#6B3045]"
-              style={{
-                bottom: '20%',
-                right: '15%',
-                width: '600px',
-                height: '600px',
-                filter: 'blur(240px)',
-                opacity: 0.07 * baseOpacity,
-                animation: 'ambientDrift6 39s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-                animationDelay: '-15s',
-              }}
-            />
-          )}
-
-          {/* Light 07 - Optional Champagne */}
-          {(!isMobile && variant === 'home') && (
-            <div 
-              className="ambient-layer bg-[#C9A96E]"
-              style={{
-                top: '40%',
-                left: '40%',
-                width: '400px',
-                height: '400px',
-                filter: 'blur(210px)',
-                opacity: 0.035 * baseOpacity,
-                animation: 'ambientDrift1 29s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse',
-              }}
-            />
-          )}
           </motion.div>
         </motion.div>
 
