@@ -28,8 +28,8 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
 
   if (prefersReducedMotion) {
     return (
-      <div className="fixed inset-0 z-0 bg-[#030303] pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#080808] to-[#030303]" />
+      <div className="fixed inset-0 z-0 bg-[#0a0a0a] pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] to-[#0a0a0a]" />
       </div>
     );
   }
@@ -73,7 +73,7 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
       `}} />
 
       {/* Base Black Background - FIXED so it covers the whole screen */}
-      <div className="fixed inset-0 z-0 bg-[#030303] pointer-events-none" />
+      <div className="fixed inset-0 z-0 bg-[#0a0a0a] pointer-events-none" />
 
       {/* Top Glow - ABSOLUTE so it scrolls away naturally when the user scrolls down */}
       <div 
