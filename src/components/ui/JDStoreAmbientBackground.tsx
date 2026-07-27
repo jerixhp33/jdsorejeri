@@ -66,7 +66,7 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
           top: 0;
           left: 0;
           right: 0;
-          height: 600px;
+          height: 1000px;
           pointer-events: none;
           will-change: opacity;
         }
@@ -77,7 +77,7 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
 
       {/* Top Glow - ABSOLUTE so it scrolls away naturally when the user scrolls down */}
       <div 
-        className="absolute top-0 left-0 w-full h-[600px] z-0 pointer-events-none transition-opacity duration-[2500ms] ease-out"
+        className="absolute top-0 left-0 w-full h-[1000px] z-0 pointer-events-none transition-opacity duration-[2500ms] ease-out"
         style={{ opacity: mounted ? baseOpacity : 0 }}
       >
         {/* Layer 1: Lavender */}
