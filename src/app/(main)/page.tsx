@@ -10,6 +10,7 @@ import { ContactSection } from '@/components/landing/ContactSection';
 import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
 import { getFeaturedProducts } from '@/lib/products';
 import { createPublicClient } from '@/lib/supabase/server';
+import { JDStoreAmbientBackground } from '@/components/ui/JDStoreAmbientBackground';
 
 export const revalidate = 60;
 
@@ -31,10 +32,13 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero-position banners */}
-      <div className="pt-20 sm:pt-24 pb-4">
-        <BannersSection banners={heroBanners} />
-      </div>
+      <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} />
+      
+      <div className="relative z-10">
+        {/* Hero-position banners */}
+        <div className="pt-20 sm:pt-24 pb-4">
+          <BannersSection banners={heroBanners} />
+        </div>
 
       {/* Top banners */}
       <div className="mb-4 lg:mb-6">
@@ -115,6 +119,7 @@ export default async function HomePage() {
       </div>
 
       <ContactSection />
+      </div>
     </>
   );
 }
