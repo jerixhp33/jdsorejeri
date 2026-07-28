@@ -7,7 +7,7 @@ interface Props {
 }
 
 export function PriceSummary({ order, className = '' }: Props) {
-  const shipping = order.shipping_cost ?? order.delivery_charge ?? 0;
+  const shipping = order.shipping_cost || order.delivery_charge || 0;
   const tax = order.tax ?? 0;
   const discount = order.discount_amount ?? 0;
   

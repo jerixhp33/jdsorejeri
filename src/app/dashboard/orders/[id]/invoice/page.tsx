@@ -55,7 +55,7 @@ export default async function CustomerInvoicePage({ params }: PageProps) {
   const itemsTotal = (order.items || []).reduce((sum: number, item: any) => sum + (Number(item.unit_price) * Number(item.quantity)), 0);
   const discountAmount = Number(order.discount_amount || 0);
   const taxAmount = Number(order.tax || 0);
-  const shippingAmount = Number(order.shipping_cost ?? order.delivery_charge ?? 0);
+  const shippingAmount = Number(order.shipping_cost || order.delivery_charge || 0);
   
   // Calculate final totals with fallbacks
   const subTotalValue = Number(order.total) > 0 ? Number(order.total) : itemsTotal;
