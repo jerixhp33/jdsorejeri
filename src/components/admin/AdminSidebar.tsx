@@ -23,6 +23,7 @@ const NAV = [
   { href: '/admin/customers', label: 'Customers', icon: Users },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/banners', label: 'Banners', icon: ImageIcon },
+  { href: '/admin/banner-generator', label: 'Banner Generator', icon: ImageIcon },
   { href: '/admin/collections', label: 'Collections', icon: Layers },
   { href: '/admin/broadcast', label: 'Broadcast', icon: Mail },
   { href: '/admin/reviews', label: 'Reviews', icon: Star },
