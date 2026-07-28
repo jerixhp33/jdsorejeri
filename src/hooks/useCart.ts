@@ -122,11 +122,18 @@ export function useCart() {
 
       let settings = { charge: 60, threshold: 999 };
       if (settingsData) {
-        const chargeStr = settingsData.find(s => s.key === 'delivery_charge')?.value;
-        const thresholdStr = settingsData.find(s => s.key === 'free_delivery_threshold')?.value;
+        const chargeObj = settingsData.find(s => s.key === 'delivery_charge');
+        const thresholdObj = settingsData.find(s => s.key === 'free_delivery_threshold');
+        
+        const parseSetting = (val: any, fallback: number) => {
+          if (val === undefined || val === null) return fallback;
+          const parsed = Number(String(val).replace(/"/g, ''));
+          return isNaN(parsed) ? fallback : parsed;
+        };
+
         settings = {
-          charge: chargeStr ? parseInt(String(chargeStr).replace(/"/g, ''), 10) : 60,
-          threshold: thresholdStr ? parseInt(String(thresholdStr).replace(/"/g, ''), 10) : 999,
+          charge: parseSetting(chargeObj?.value, 60),
+          threshold: parseSetting(thresholdObj?.value, 999),
         };
       }
 
