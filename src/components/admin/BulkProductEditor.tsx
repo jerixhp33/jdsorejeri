@@ -116,11 +116,15 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
 
       const sizeUpdates: any[] = [];
       Object.entries(sizeModifications).forEach(([productId, sizes]) => {
+        const product = products.find(p => p.id === productId);
         Object.entries(sizes).forEach(([sizeId, updates]) => {
-          sizeUpdates.push({
-            id: sizeId,
-            ...updates
-          });
+          const originalSize = (product?.sizes as any[])?.find(s => s.id === sizeId);
+          if (originalSize) {
+            sizeUpdates.push({
+              ...originalSize,
+              ...updates
+            });
+          }
         });
       });
 
