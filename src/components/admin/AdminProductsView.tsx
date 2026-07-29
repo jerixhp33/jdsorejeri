@@ -10,6 +10,7 @@ import type { Product, Category, ProductType } from '@/types';
 import { ProductFormModal } from './ProductFormModal';
 import { ProductWorkspace } from './ProductWorkspaceV2/ProductWorkspace';
 import { BulkPosterWorkspace } from './BulkPosterWorkspace';
+import { BulkProductEditor } from './BulkProductEditor';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { Portal } from '@/components/ui/Portal';
 
@@ -33,8 +34,9 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
   const [showModal, setShowModal] = useState(false);
   const [showV2, setShowV2] = useState(false);
   const [showBulk, setShowBulk] = useState(false);
+  const [showBulkEditor, setShowBulkEditor] = useState(false);
   
-  useScrollLock(showModal || showV2 || showBulk);
+  useScrollLock(showModal || showV2 || showBulk || showBulkEditor);
 
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -121,6 +123,13 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-white">Products</h1>
         <div className="flex gap-3">
+          <button
+            onClick={() => setShowBulkEditor(true)}
+            className="flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl transition-colors font-medium border border-white/10"
+          >
+            <Edit2 className="w-4 h-4" />
+            Bulk Edit
+          </button>
           <button
             onClick={() => setShowBulk(true)}
             className="flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl transition-colors font-medium border border-white/10"
@@ -362,9 +371,18 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
           <BulkPosterWorkspace
             categories={categories}
             onClose={() => setShowBulk(false)}
-            onComplete={() => {
-              setShowBulk(false);
-              window.location.reload(); // Quick refresh to show new items
+            onSave={handleSaved}
+          />
+        </Portal>
+      )}
+
+      {showBulkEditor && (
+        <Portal>
+          <BulkProductEditor
+            products={products}
+            onClose={() => setShowBulkEditor(false)}
+            onSave={(updatedProducts) => {
+              setProducts(updatedProducts);
             }}
           />
         </Portal>

@@ -72,6 +72,13 @@ export async function PATCH(req: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
+
+  if (body._type === 'bulk_update') {
+    const { error } = await admin.from('products').upsert(body.items);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
   const { id, key, notify_users, ...updates } = body;
   const col = id ? 'id' : 'key';
   const val = id ?? key;
