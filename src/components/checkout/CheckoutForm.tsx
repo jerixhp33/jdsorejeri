@@ -430,7 +430,7 @@ export function CheckoutForm() {
           size: (i.poster_size as { label?: string } | null)?.label,
           quantity: i.quantity,
           price: i.unit_price,
-          image: i.product?.images?.[0]?.url ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${i.product.images[0].url}` : undefined,
+          image: i.product?.images?.[0]?.url,
         })),
         subtotal,
         deliveryCharge,
