@@ -240,9 +240,9 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
                 <tr>
                   <th className="px-6 py-3 font-medium text-white/60 w-[60px]">Image</th>
                   <th className="px-6 py-3 font-medium text-white/60 min-w-[250px]">Product Name</th>
-                  <th className="px-6 py-3 font-medium text-white/60 w-[150px]">Base Price</th>
-                  <th className="px-6 py-3 font-medium text-white/60 w-[150px]">Stock</th>
-                  <th className="px-6 py-3 font-medium text-white/60 w-[150px]">Status</th>
+                  <th className="px-6 py-3 font-medium text-white/60 w-[200px]">Base Price</th>
+                  <th className="px-6 py-3 font-medium text-white/60 w-[180px]">Stock</th>
+                  <th className="px-6 py-3 font-medium text-white/60 w-[120px]">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -288,21 +288,21 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
                       </td>
                       <td className="px-6 py-3">
                         {isPoster ? (
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-1">
                             {((product.sizes as any[]) || []).map(size => {
                               const currentSizeVal = sizeModifications[product.id]?.[size.id]?.price ?? size.price;
                               const isSizeModified = sizeModifications[product.id]?.[size.id]?.price !== undefined;
                               return (
-                                <div key={size.id} className="flex items-center gap-2">
-                                  <span className="text-[10px] text-white/50 w-12 shrink-0">{size.label}</span>
+                                <div key={size.id} className="flex items-center gap-2 h-8">
+                                  <span className="text-[10px] text-white/50 w-16 shrink-0 truncate" title={size.label}>{size.label}</span>
                                   <div className="relative flex-1">
                                     <span className="absolute left-2 top-1/2 -translate-y-1/2 text-white/40 text-xs">₹</span>
                                     <input
                                       type="number"
-                                      value={currentSizeVal}
+                                      value={currentSizeVal ?? ''}
                                       onChange={(e) => handleSizeModify(product.id, size.id, 'price', Number(e.target.value))}
                                       className={cn(
-                                        "w-full bg-transparent border-b border-white/5 focus:border-[#e5d083]/50 pl-6 pr-2 py-0.5 outline-none transition-colors text-xs",
+                                        "w-full bg-transparent border-b border-white/5 focus:border-[#e5d083]/50 pl-6 pr-1 py-1 outline-none transition-colors text-xs [&::-webkit-inner-spin-button]:appearance-none",
                                         isSizeModified ? "text-[#e5d083]" : "text-white"
                                       )}
                                     />
@@ -328,18 +328,18 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
                       </td>
                       <td className="px-6 py-3">
                         {isPoster ? (
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-1">
                             {((product.sizes as any[]) || []).map(size => {
                               const currentSizeStock = sizeModifications[product.id]?.[size.id]?.stock ?? size.stock;
                               const isStockModified = sizeModifications[product.id]?.[size.id]?.stock !== undefined;
                               return (
-                                <div key={size.id} className="flex items-center gap-2">
+                                <div key={size.id} className="flex items-center gap-2 h-8">
                                   <input
                                     type="number"
-                                    value={currentSizeStock}
+                                    value={currentSizeStock ?? ''}
                                     onChange={(e) => handleSizeModify(product.id, size.id, 'stock', Number(e.target.value))}
                                     className={cn(
-                                      "w-full bg-transparent border-b border-white/5 focus:border-[#e5d083]/50 px-2 py-0.5 outline-none transition-colors text-xs",
+                                      "w-full bg-transparent border-b border-white/5 focus:border-[#e5d083]/50 px-2 py-1 outline-none transition-colors text-xs [&::-webkit-inner-spin-button]:appearance-none",
                                       isStockModified ? "text-[#e5d083]" : "text-white"
                                     )}
                                   />
