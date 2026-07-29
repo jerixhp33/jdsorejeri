@@ -19,6 +19,7 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [modifications, setModifications] = useState<Record<string, Partial<Product>>>({});
+  const [sizeModifications, setSizeModifications] = useState<Record<string, Record<string, any>>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   const uniqueTypes = Array.from(new Set(products.map(p => p.product_type).filter(Boolean)));
@@ -58,9 +59,47 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
     });
   };
 
+  const handleSizeModify = (productId: string, sizeId: string, field: string, value: any) => {
+    setSizeModifications(prev => {
+      const productSizes = prev[productId] || {};
+      const currentSizeMods = productSizes[sizeId] || {};
+      
+      const product = products.find(p => p.id === productId);
+      const originalSize = (product?.sizes as any[])?.find(s => s.id === sizeId);
+      
+      if (originalSize?.[field] === value) {
+        const newSizeMods = { ...currentSizeMods };
+        delete newSizeMods[field];
+        if (Object.keys(newSizeMods).length === 0) {
+          const newProductSizes = { ...productSizes };
+          delete newProductSizes[sizeId];
+          if (Object.keys(newProductSizes).length === 0) {
+            const next = { ...prev };
+            delete next[productId];
+            return next;
+          }
+          return { ...prev, [productId]: newProductSizes };
+        }
+        return {
+          ...prev,
+          [productId]: { ...productSizes, [sizeId]: newSizeMods }
+        };
+      }
+      
+      return {
+        ...prev,
+        [productId]: {
+          ...productSizes,
+          [sizeId]: { ...currentSizeMods, [field]: value }
+        }
+      };
+    });
+  };
+
   const handleSaveAll = async () => {
     const modKeys = Object.keys(modifications);
-    if (modKeys.length === 0) {
+    const sizeModKeys = Object.keys(sizeModifications);
+    if (modKeys.length === 0 && sizeModKeys.length === 0) {
       onClose();
       return;
     }
@@ -68,7 +107,6 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
     setIsSaving(true);
     try {
       const itemsToUpdate = modKeys.map(id => {
-        const original = products.find(p => p.id === id)!;
         return {
           id,
           ...modifications[id],
@@ -76,12 +114,23 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
         };
       });
 
+      const sizeUpdates: any[] = [];
+      Object.entries(sizeModifications).forEach(([productId, sizes]) => {
+        Object.entries(sizes).forEach(([sizeId, updates]) => {
+          sizeUpdates.push({
+            id: sizeId,
+            ...updates
+          });
+        });
+      });
+
       const res = await fetch('/api/admin/products', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           _type: 'bulk_update',
-          items: itemsToUpdate
+          items: itemsToUpdate,
+          sizeUpdates: sizeUpdates
         })
       });
 
@@ -89,13 +138,23 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
 
       // Create new products array with changes applied locally
       const updatedProducts = products.map(p => {
+        let updatedProduct = { ...p };
         if (modifications[p.id]) {
-          return { ...p, ...modifications[p.id] } as Product;
+          updatedProduct = { ...updatedProduct, ...modifications[p.id] } as Product;
         }
-        return p;
+        if (sizeModifications[p.id]) {
+          const sizes = (updatedProduct.sizes as any[] || []).map(s => {
+            if (sizeModifications[p.id][s.id]) {
+              return { ...s, ...sizeModifications[p.id][s.id] };
+            }
+            return s;
+          });
+          updatedProduct = { ...updatedProduct, sizes } as any;
+        }
+        return updatedProduct;
       });
 
-      toast.success(`Successfully updated ${modKeys.length} products`);
+      toast.success(`Successfully updated products`);
       onSave(updatedProducts);
       onClose();
     } catch (e: any) {
@@ -166,7 +225,7 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
 
             <button
               onClick={handleSaveAll}
-              disabled={Object.keys(modifications).length === 0 || isSaving}
+              disabled={(Object.keys(modifications).length === 0 && Object.keys(sizeModifications).length === 0) || isSaving}
               className="btn-gold flex items-center gap-2 py-2 px-5 text-sm"
             >
               <Save className="w-4 h-4" />
@@ -188,7 +247,7 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filteredProducts.map(product => {
-                  const isModified = !!modifications[product.id];
+                  const isModified = !!modifications[product.id] || !!sizeModifications[product.id];
                   const currentVals = { ...product, ...modifications[product.id] };
                   
                   const images = product.images as any[];
@@ -229,7 +288,29 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
                       </td>
                       <td className="px-6 py-3">
                         {isPoster ? (
-                          <span className="text-white/40 px-2 text-xs italic">Var. Prices (Sizes)</span>
+                          <div className="flex flex-col gap-2">
+                            {((product.sizes as any[]) || []).map(size => {
+                              const currentSizeVal = sizeModifications[product.id]?.[size.id]?.price ?? size.price;
+                              const isSizeModified = sizeModifications[product.id]?.[size.id]?.price !== undefined;
+                              return (
+                                <div key={size.id} className="flex items-center gap-2">
+                                  <span className="text-[10px] text-white/50 w-12 shrink-0">{size.label}</span>
+                                  <div className="relative flex-1">
+                                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-white/40 text-xs">₹</span>
+                                    <input
+                                      type="number"
+                                      value={currentSizeVal}
+                                      onChange={(e) => handleSizeModify(product.id, size.id, 'price', Number(e.target.value))}
+                                      className={cn(
+                                        "w-full bg-transparent border-b border-white/5 focus:border-[#e5d083]/50 pl-6 pr-2 py-0.5 outline-none transition-colors text-xs",
+                                        isSizeModified ? "text-[#e5d083]" : "text-white"
+                                      )}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
                         ) : (
                           <div className="relative">
                             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-white/40">₹</span>
@@ -247,7 +328,25 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
                       </td>
                       <td className="px-6 py-3">
                         {isPoster ? (
-                          <span className="text-white/40 px-2 text-xs italic">Var. Stock (Sizes)</span>
+                          <div className="flex flex-col gap-2">
+                            {((product.sizes as any[]) || []).map(size => {
+                              const currentSizeStock = sizeModifications[product.id]?.[size.id]?.stock ?? size.stock;
+                              const isStockModified = sizeModifications[product.id]?.[size.id]?.stock !== undefined;
+                              return (
+                                <div key={size.id} className="flex items-center gap-2">
+                                  <input
+                                    type="number"
+                                    value={currentSizeStock}
+                                    onChange={(e) => handleSizeModify(product.id, size.id, 'stock', Number(e.target.value))}
+                                    className={cn(
+                                      "w-full bg-transparent border-b border-white/5 focus:border-[#e5d083]/50 px-2 py-0.5 outline-none transition-colors text-xs",
+                                      isStockModified ? "text-[#e5d083]" : "text-white"
+                                    )}
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
                         ) : (
                           <input
                             type="number"

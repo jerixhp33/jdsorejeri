@@ -74,8 +74,14 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json();
 
   if (body._type === 'bulk_update') {
-    const { error } = await admin.from('products').upsert(body.items);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (body.items && body.items.length > 0) {
+      const { error } = await admin.from('products').upsert(body.items);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    if (body.sizeUpdates && body.sizeUpdates.length > 0) {
+      const { error } = await admin.from('poster_sizes').upsert(body.sizeUpdates);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
     return NextResponse.json({ success: true });
   }
 
