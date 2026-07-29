@@ -356,6 +356,13 @@ export function CheckoutForm() {
         })
       }).catch(err => console.error('Failed to send admin notification:', err));
 
+      // Send automated invoice email to customer asynchronously
+      fetch('/api/orders/invoice/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id })
+      }).catch(err => console.error('Failed to send invoice email:', err));
+
       const whatsappMsg = generateWhatsAppMessage({
         order_number: ordNum,
         customer_name: data.full_name,
