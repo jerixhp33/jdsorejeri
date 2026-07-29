@@ -109,10 +109,11 @@ function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextL
     }
   }, []);
 
-  const cascade = useCallback(async (g: Cell[][], startCombo: number, swapPos?: Pos) => {
+  const cascade = useCallback(async (g: Cell[][], startCombo: number, swapPos?: Pos, startObs?: import('./engine/obstacles').Obstacle[]) => {
     let cur = cloneGrid(g);
     let c = startCombo;
     let floatId = Date.now();
+    let currentObs = startObs || [...obstacles];
 
     while (true) {
       const { toRemove, specials } = analyzeMatches(cur, c === 0 ? swapPos : undefined);
@@ -129,30 +130,29 @@ function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextL
       let hadSpecialActivation = false;
       let objEvents: any[] = [];
       
-      setObstacles(prevObs => {
-        let newObs = [...prevObs];
-        for (const key of fullRemove) {
-          const [r, cc] = key.split(',').map(Number);
-          const cell = cur[r][cc];
-          
-          if (cell.special !== 'none') hadSpecialActivation = true;
-          objEvents.push({ type: 'collect', amount: 1, color: cell.color });
+      let newObs = [...currentObs];
+      for (const key of fullRemove) {
+        const [r, cc] = key.split(',').map(Number);
+        const cell = cur[r][cc];
+        
+        if (cell.special !== 'none') hadSpecialActivation = true;
+        objEvents.push({ type: 'collect', amount: 1, color: cell.color });
 
-          // Damage adjacent obstacles
-          const adjObs = getAdjacentObstacles({ r, c: cc }, newObs);
-          for (const obs of adjObs) {
-            const damaged = damageObstacle(obs);
-            if (!damaged) {
-              objEvents.push({ type: 'clear_obstacle', amount: 1, obstacleType: obs.type });
-              newObs = newObs.filter(o => o.id !== obs.id);
-            } else {
-              const idx = newObs.findIndex(o => o.id === obs.id);
-              if (idx >= 0) newObs[idx] = damaged;
-            }
+        // Damage adjacent obstacles
+        const adjObs = getAdjacentObstacles({ r, c: cc }, newObs);
+        for (const obs of adjObs) {
+          const damaged = damageObstacle(obs);
+          if (!damaged) {
+            objEvents.push({ type: 'clear_obstacle', amount: 1, obstacleType: obs.type });
+            newObs = newObs.filter(o => o.id !== obs.id);
+          } else {
+            const idx = newObs.findIndex(o => o.id === obs.id);
+            if (idx >= 0) newObs[idx] = damaged;
           }
         }
-        return newObs;
-      });
+      }
+      currentObs = newObs;
+      setObstacles(currentObs);
 
       if (hadSpecialActivation) sfx.special();
 
@@ -238,27 +238,25 @@ function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextL
       const pts = comboResult.size * 100;
       
       let objEvents: any[] = [{ type: 'score', amount: pts }];
-      setObstacles(prevObs => {
-        let newObs = [...prevObs];
-        for (const key of comboResult) {
-          const [r, c] = key.split(',').map(Number);
-          const cell = swapped[r][c];
-          objEvents.push({ type: 'collect', amount: 1, color: cell.color });
-          
-          const adjObs = getAdjacentObstacles({ r, c }, newObs);
-          for (const obs of adjObs) {
-            const damaged = damageObstacle(obs);
-            if (!damaged) {
-              objEvents.push({ type: 'clear_obstacle', amount: 1, obstacleType: obs.type });
-              newObs = newObs.filter(o => o.id !== obs.id);
-            } else {
-              const idx = newObs.findIndex(o => o.id === obs.id);
-              if (idx >= 0) newObs[idx] = damaged;
-            }
+      let newObs = [...obstacles];
+      for (const key of comboResult) {
+        const [r, c] = key.split(',').map(Number);
+        const cell = swapped[r][c];
+        objEvents.push({ type: 'collect', amount: 1, color: cell.color });
+        
+        const adjObs = getAdjacentObstacles({ r, c }, newObs);
+        for (const obs of adjObs) {
+          const damaged = damageObstacle(obs);
+          if (!damaged) {
+            objEvents.push({ type: 'clear_obstacle', amount: 1, obstacleType: obs.type });
+            newObs = newObs.filter(o => o.id !== obs.id);
+          } else {
+            const idx = newObs.findIndex(o => o.id === obs.id);
+            if (idx >= 0) newObs[idx] = damaged;
           }
         }
-        return newObs;
-      });
+      }
+      setObstacles(newObs);
       setScore(s => s + pts);
       setObjectives(prev => updateObjectives(prev, objEvents));
       
@@ -282,7 +280,7 @@ function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextL
       setGrid(filled);
       await new Promise(r => setTimeout(r, 300));
 
-      const final = await cascade(filled, 1);
+      const final = await cascade(filled, 1, undefined, newObs);
       setGrid(final);
       setBusy(false);
       return;
@@ -301,7 +299,7 @@ function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextL
 
     setMoves(m => m - 1);
     setSel(null);
-    const final = await cascade(swapped, 0, a);
+    const final = await cascade(swapped, 0, a, [...obstacles]);
     setGrid(final);
     setBusy(false);
   }, [grid, busy, result, cascade, flashEffect, gemCount, obstacles, onSave, save]);
@@ -318,46 +316,44 @@ function GameScreenComponent({ levelNum, levelDef, save, onSave, onBack, onNextL
       let objEvents: any[] = [];
       let full = new Set<string>();
       
-      setObstacles(prevObs => {
-        let newObs = [...prevObs];
+      let newObs = [...obstacles];
+      
+      if (obs) {
+        sfx.special();
+        const damaged = damageObstacle(obs);
+        if (!damaged) {
+          objEvents.push({ type: 'clear_obstacle', amount: 1, obstacleType: obs.type });
+          newObs = newObs.filter(o => o.id !== obs.id);
+        } else {
+          const idx = newObs.findIndex(o => o.id === obs.id);
+          if (idx >= 0) newObs[idx] = damaged;
+        }
+        // Only damage the obstacle, don't clear the gem if it was a crate/chain
+        if (obs.type === 'ice') {
+           full = activateSpecials(ng, new Set<string>([`${r},${c}`]));
+        }
+      } else {
+        if (cell.special !== 'none') sfx.special(); else sfx.booster();
+        full = activateSpecials(ng, new Set<string>([`${r},${c}`]));
+      }
+
+      for (const key of full) {
+        const [fr, fc] = key.split(',').map(Number);
+        objEvents.push({ type: 'collect', amount: 1, color: ng[fr][fc].color });
         
-        if (obs) {
-          sfx.special();
-          const damaged = damageObstacle(obs);
+        const adjObs = getAdjacentObstacles({ r: fr, c: fc }, newObs);
+        for (const aObs of adjObs) {
+          const damaged = damageObstacle(aObs);
           if (!damaged) {
-            objEvents.push({ type: 'clear_obstacle', amount: 1, obstacleType: obs.type });
-            newObs = newObs.filter(o => o.id !== obs.id);
+            objEvents.push({ type: 'clear_obstacle', amount: 1, obstacleType: aObs.type });
+            newObs = newObs.filter(o => o.id !== aObs.id);
           } else {
-            const idx = newObs.findIndex(o => o.id === obs.id);
+            const idx = newObs.findIndex(o => o.id === aObs.id);
             if (idx >= 0) newObs[idx] = damaged;
           }
-          // Only damage the obstacle, don't clear the gem if it was a crate/chain
-          if (obs.type === 'ice') {
-             full = activateSpecials(ng, new Set<string>([`${r},${c}`]));
-          }
-        } else {
-          if (cell.special !== 'none') sfx.special(); else sfx.booster();
-          full = activateSpecials(ng, new Set<string>([`${r},${c}`]));
         }
-
-        for (const key of full) {
-          const [fr, fc] = key.split(',').map(Number);
-          objEvents.push({ type: 'collect', amount: 1, color: ng[fr][fc].color });
-          
-          const adjObs = getAdjacentObstacles({ r: fr, c: fc }, newObs);
-          for (const aObs of adjObs) {
-            const damaged = damageObstacle(aObs);
-            if (!damaged) {
-              objEvents.push({ type: 'clear_obstacle', amount: 1, obstacleType: aObs.type });
-              newObs = newObs.filter(o => o.id !== aObs.id);
-            } else {
-              const idx = newObs.findIndex(o => o.id === aObs.id);
-              if (idx >= 0) newObs[idx] = damaged;
-            }
-          }
-        }
-        return newObs;
-      });
+      }
+      setObstacles(newObs);
 
       setObjectives(prev => updateObjectives(prev, objEvents));
       setMatchedSet(full);
