@@ -208,7 +208,7 @@ export function BulkProductEditor({ products, onClose, onSave }: BulkProductEdit
                         <div className="w-10 h-10 rounded overflow-hidden bg-black/50 border border-white/10 relative shrink-0">
                           {img ? (
                             <Image
-                              src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/products/${img}`}
+                              src={img}
                               alt={product.name}
                               fill
                               className="object-cover"
