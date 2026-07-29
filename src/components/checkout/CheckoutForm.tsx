@@ -563,7 +563,8 @@ export function CheckoutForm() {
                       <div className="flex items-center gap-4">
                         {item.image && (
                           <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
-                            <Image src={item.image} alt={item.name} width={64} height={64} className="w-full h-full object-cover" crossOrigin="anonymous" />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={item.image} alt={item.name} width={64} height={64} className="w-full h-full object-cover" crossOrigin="anonymous" />
                           </div>
                         )}
                         <div>
