@@ -371,7 +371,10 @@ export function AdminProductsView({ initialProducts, categories }: AdminProducts
           <BulkPosterWorkspace
             categories={categories}
             onClose={() => setShowBulk(false)}
-            onSave={handleSaved}
+            onComplete={() => {
+              setShowBulk(false);
+              window.location.reload();
+            }}
           />
         </Portal>
       )}
