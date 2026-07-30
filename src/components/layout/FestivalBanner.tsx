@@ -40,7 +40,7 @@ export function FestivalBanner() {
   };
 
   return (
-    <div className="w-full bg-festival-primary text-festival-primary-foreground relative z-[60] overflow-hidden">
+    <div className="w-full bg-accent text-accent-foreground relative z-[60] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm font-medium">
           
@@ -76,7 +76,7 @@ export function FestivalBanner() {
           {/* Right: Countdown */}
           <div className="flex items-center gap-2 text-xs opacity-90">
              <span className="hidden lg:inline">Ends in:</span>
-             <FlashSaleTimerClient endTime={activeFestival.end_at} />
+             <FlashSaleTimerClient endAt={activeFestival.end_at} />
           </div>
 
         </div>

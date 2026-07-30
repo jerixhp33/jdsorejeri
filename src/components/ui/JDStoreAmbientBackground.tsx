@@ -106,7 +106,7 @@ export function JDStoreAmbientBackground() {
               p.y = -10;
               p.x = Math.random() * canvas.width;
             }
-          } else if (config.particleType === 'sparkle' || config.particleType === 'valentines') {
+          } else if (config.particleType === 'sparkle') {
             const pulse = Math.abs(Math.sin(p.life * 0.05));
             ctx.fillStyle = `rgba(${config.glowColor}, ${p.opacity * pulse})`;
             ctx.beginPath();

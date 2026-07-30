@@ -36,7 +36,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} />
+      <JDStoreAmbientBackground />
       
       <div className="relative z-10">
         {flashSale && (
