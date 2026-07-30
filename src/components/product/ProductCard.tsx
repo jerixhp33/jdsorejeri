@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
+import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
@@ -12,7 +12,6 @@ import { useHaptic } from '@/hooks/useHaptic';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useFlashSale } from '@/hooks/useFlashSale';
 import { Tooltip } from '@/components/shared/Tooltip';
-import { ExpressCheckOutModal } from '@/components/checkout/ExpressCheckOutModal';
 import type { Product } from '@/types';
 
 interface ProductCardProps {
@@ -26,7 +25,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { isWishlisted, toggle } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
-  const [expressOpen, setExpressOpen] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const { getProductSalePrice } = useFlashSale();
@@ -96,14 +94,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     }
   };
 
-  const handleExpressBuy = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isInStock) return;
-    haptic('heavy');
-    setExpressOpen(true);
-  };
-
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -118,20 +108,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       onMouseLeave={() => setIsHovered(false)}
       className="group relative h-full flex flex-col rounded-2xl bg-luxe-card border border-white/10 hover:border-luxe-accent/40 transition-all duration-300 overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-luxe-accent/5"
     >
-      {/* Express Checkout Modal */}
-      <ExpressCheckOutModal
-        isOpen={expressOpen}
-        onClose={() => setExpressOpen(false)}
-        item={{
-          product_id: product.id,
-          title: product.name,
-          price: displayPrice,
-          quantity: 1,
-          image: currentImage?.url,
-          size: activeSizes[0]?.label || 'Standard',
-        }}
-      />
-
       <Link prefetch={true} href={`/product/${product.slug}`} className="flex flex-col h-full">
         {/* Image Container */}
         <div className="relative aspect-square w-full overflow-hidden bg-[#111]">
@@ -204,29 +180,31 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </button>
           </Tooltip>
 
-          {/* Express & Add to Cart Action Buttons */}
-          <div className="absolute bottom-0 left-0 right-0 p-2 z-10 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-1.5 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-4">
-            {isInStock && (
-              <button
-                onClick={handleExpressBuy}
-                className="py-2 px-2.5 rounded-xl bg-luxe-accent text-black font-extrabold text-[11px] flex items-center justify-center gap-1 hover:bg-luxe-accent/90 transition shadow-lg shrink-0"
-              >
-                <Zap size={13} fill="currentColor" /> Express UPI
-              </button>
-            )}
-            <button
-              onClick={handleAddToCart}
-              disabled={!isInStock}
-              className={cn(
-                'flex-1 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 transition-all duration-200 min-h-[34px]',
-                isInStock
-                  ? 'bg-white text-black hover:bg-luxe-accent'
-                  : 'bg-black/80 border border-white/10 text-white/50 cursor-not-allowed'
-              )}
+          {/* Add to cart */}
+          <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300 flex">
+            <Tooltip 
+              content={isInStock ? 'Quick Add' : 'Out of Stock'} 
+              position="top" 
+              className="w-full flex-1"
             >
-              <ShoppingCart className="w-3.5 h-3.5" />
-              {!isInStock ? 'Out of Stock' : 'Add'}
-            </button>
+              <button
+                onClick={handleAddToCart}
+                disabled={!isInStock}
+                className={cn(
+                  'w-full py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 transition-all duration-200 min-h-[36px]',
+                  isInStock
+                    ? 'bg-white text-black hover:bg-luxe-accent'
+                    : 'bg-black/80 border border-white/10 text-white/50 cursor-not-allowed'
+                )}
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+                {!isInStock
+                  ? 'Out of Stock'
+                  : (product.product_type || 'other') === 'poster'
+                    ? 'Select Poster'
+                    : `Select ${(product.product_type || 'other') === 'other' ? 'Option' : (product.product_type || 'other').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}`}
+              </button>
+            </Tooltip>
           </div>
         </div>
 
