@@ -63,7 +63,7 @@ export default async function HomePage() {
 
         {/* Hero-position banners */}
         <div className="relative z-10">
-          <BannersSection banners={heroBanners} isAttachedTop={!!flashSale} themeConfig={homeTheme} />
+          <BannersSection banners={heroBanners} isAttachedTop={!!flashSale} />
         </div>
 
       {/* Top banners */}
