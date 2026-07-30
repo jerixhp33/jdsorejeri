@@ -87,8 +87,8 @@ function SingleBanner({ banner, priority, isAttachedTop }: { banner: Banner; pri
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] group z-10",
-        isAttachedTop ? "rounded-b-3xl md:rounded-b-[2.5rem]" : "rounded-3xl md:rounded-[2.5rem]"
+        "relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] group z-10 rounded-3xl md:rounded-[2.5rem]",
+        isAttachedTop && "!rounded-t-none md:!rounded-t-none"
       )}
       style={glowColor ? {
         boxShadow: `0 0 60px rgba(${glowColor},0.2), 0 20px 40px rgba(${glowColor},0.15)`,
@@ -253,8 +253,8 @@ function SliderBanners({ banners, isAttachedTop }: { banners: Banner[]; isAttach
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] group z-10",
-        isAttachedTop ? "rounded-b-3xl md:rounded-b-[2.5rem]" : "rounded-3xl md:rounded-[2.5rem]"
+        "relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] group z-10 rounded-3xl md:rounded-[2.5rem]",
+        isAttachedTop && "!rounded-t-none md:!rounded-t-none"
       )}
       style={activeGlow ? {
         boxShadow: `0 0 60px rgba(${activeGlow},0.2), 0 20px 40px rgba(${activeGlow},0.15)`,
