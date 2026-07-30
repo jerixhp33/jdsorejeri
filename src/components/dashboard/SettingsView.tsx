@@ -6,7 +6,6 @@ import { Bell, Shield, Trash2, Smartphone, Download, MonitorOff, X, AlertTriangl
 import { useAuth } from '@/hooks/useAuth';
 import { useWebPush } from '@/hooks/useWebPush';
 import { toast } from 'sonner';
-import { useFestival } from '@/components/providers/FestivalProvider';
 
 interface NotificationPrefs {
   order_updates: boolean;
@@ -22,7 +21,6 @@ const DEFAULT_PREFS: NotificationPrefs = {
 
 export function SettingsView() {
   const { profile } = useAuth();
-  const { optOut, setOptOut, activeFestival } = useFestival();
   const [loading, setLoading] = useState(false);
   const [savingNotifs, setSavingNotifs] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -228,43 +226,6 @@ export function SettingsView() {
           )}
         </div>
       </motion.div>
-
-      {/* Appearance Settings */}
-      {activeFestival && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-card p-4 sm:p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <PartyPopper className="w-4 h-4 text-luxe-accent" />
-            <h2 className="text-white font-semibold">Appearance</h2>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <div>
-                <p className="text-white text-sm">Festive Theme Elements</p>
-                <p className="text-white/40 text-xs mt-1">Enable festive colors, lighting, and particles across the store.</p>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={!optOut}
-                onClick={() => setOptOut(!optOut)}
-                className="relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                style={{
-                  background: !optOut
-                    ? 'var(--luxe-accent, #D4AF37)'
-                    : 'rgba(255,255,255,0.15)',
-                }}
-              >
-                <span
-                  className="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                  style={{
-                    transform: !optOut ? 'translateX(1.25rem)' : 'translateX(0)',
-                  }}
-                />
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      )}
 
       {/* Privacy & Security */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card p-4 sm:p-6">
