@@ -1,3 +1,4 @@
--- Add JSONB config column to festivals table
 ALTER TABLE public.festivals 
-ADD COLUMN IF NOT EXISTS config JSONB DEFAULT '{}'::jsonb;
+ADD COLUMN IF NOT EXISTS config JSONB DEFAULT '{}'::jsonb,
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+

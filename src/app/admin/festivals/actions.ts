@@ -28,9 +28,13 @@ export async function upsertFestival(data: any) {
     }
   }
 
-  const payload = {
-    ...data,
-    updated_at: new Date().toISOString(),
+  const payload: any = {
+    name: data.name,
+    theme_type: data.theme_type,
+    start_at: data.start_at,
+    end_at: data.end_at,
+    is_active: Boolean(data.is_active),
+    config: data.config || {},
   };
 
   if (data.id) {
