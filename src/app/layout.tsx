@@ -117,15 +117,32 @@ export const metadata: Metadata = {
 
 
 
+import { cookies } from 'next/headers';
 import { getActiveFestival } from '@/lib/festivals';
 import { FestivalProvider } from '@/components/providers/FestivalProvider';
+import { FESTIVAL_THEME_TYPES, FestivalThemeType } from '@/lib/festival/types';
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const activeFestival = await getActiveFestival();
+  let activeFestival = await getActiveFestival();
+  
+  if (process.env.NODE_ENV === 'development') {
+    const cookieStore = await cookies();
+    const previewVal = cookieStore.get('festival_preview')?.value as FestivalThemeType | undefined;
+    if (previewVal && FESTIVAL_THEME_TYPES.includes(previewVal)) {
+      activeFestival = {
+        id: 'mock',
+        name: `Preview: ${previewVal}`,
+        theme_type: previewVal,
+        start_at: new Date().toISOString(),
+        end_at: new Date(Date.now() + 86400000).toISOString(),
+        is_active: true,
+      };
+    }
+  }
 
   return (
     <html
@@ -135,6 +152,16 @@ export default async function RootLayout({
       data-theme={activeFestival?.theme_type}
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var pref = localStorage.getItem('jd_festival_opt_out');
+              if (pref === 'true') {
+                document.documentElement.removeAttribute('data-theme');
+              }
+            } catch (e) {}
+          })();
+        ` }} />
         {/* JSON-LD for Site Name */}
         <script
           type="application/ld+json"

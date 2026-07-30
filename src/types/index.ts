@@ -681,7 +681,7 @@ export interface AbandonedCartReminder {
   created_at: string;
 }
 
-export type FestivalThemeType = 'diwali' | 'christmas' | 'pongal' | 'valentines' | 'halloween' | 'newyear';
+import { FestivalThemeType, FestivalConfig } from '../lib/festival/types';
 
 export interface Festival {
   id: string;
@@ -690,6 +690,6 @@ export interface Festival {
   start_at: string;
   end_at: string;
   is_active: boolean;
-  config?: Record<string, any>;
+  config?: FestivalConfig;
   created_at?: string;
 }

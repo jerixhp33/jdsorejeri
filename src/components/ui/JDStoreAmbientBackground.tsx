@@ -1,165 +1,173 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useFestival } from '@/components/providers/FestivalProvider';
+import { FESTIVAL_CONFIGS } from '@/lib/festival/configs';
 
-interface Props {
-  variant?: 'home' | 'minimal' | 'dark';
-  intensity?: 'low' | 'medium' | 'high';
-  interactive?: boolean;
-}
-
-export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium' }: Props) {
+export function JDStoreAmbientBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mounted, setMounted] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const { activeFestival, optOut } = useFestival();
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
-    const motionHandler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    mediaQuery.addEventListener('change', motionHandler);
-
-    const timer = setTimeout(() => setMounted(true), 100);
-
-    return () => {
-      mediaQuery.removeEventListener('change', motionHandler);
-      clearTimeout(timer);
-    };
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
-  if (prefersReducedMotion) {
-    return (
-      <div className="fixed inset-0 z-0 bg-[#0a0a0a] pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] to-[#0a0a0a]" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!mounted || !canvasRef.current) return;
 
-  const opacityMap = {
-    low: 0.5,
-    medium: 0.9,
-    high: 1.3
-  };
-  const baseOpacity = opacityMap[intensity];
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-  const showFestival = activeFestival && !optOut;
-  const themeType = activeFestival?.theme_type;
+    let animationFrameId: number;
+    let particles: any[] = [];
+    
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      // Height can be just the top portion if we only want it at the top, or full window.
+      canvas.height = Math.max(800, window.innerHeight); 
+    };
 
-  // Render the default JD Store ambient background
-  const renderDefaultAmbient = () => (
-    <>
-      {/* Layer 1: Vibrant Teal */}
-      <div 
-        className="ambient-radial-glow"
-        style={{
-          background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(0, 242, 254, 0.55) 0%, transparent 100%)',
-          animation: 'crossfade1 24s ease-in-out infinite'
-        }}
-      />
-      {/* Layer 2: Deep Sky Blue */}
-      <div 
-        className="ambient-radial-glow"
-        style={{
-          background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(79, 172, 254, 0.55) 0%, transparent 100%)',
-          animation: 'crossfade2 24s ease-in-out infinite'
-        }}
-      />
-      {/* Layer 3: Neon Purple / Pink */}
-      <div 
-        className="ambient-radial-glow"
-        style={{
-          background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(240, 147, 251, 0.55) 0%, transparent 100%)',
-          animation: 'crossfade3 24s ease-in-out infinite'
-        }}
-      />
-      {/* Layer 4: Electric Mint */}
-      <div 
-        className="ambient-radial-glow"
-        style={{
-          background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(0, 255, 135, 0.55) 0%, transparent 100%)',
-          animation: 'crossfade4 24s ease-in-out infinite'
-        }}
-      />
-    </>
-  );
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-  const renderFestivalAmbient = () => {
-    switch(themeType) {
-      case 'diwali':
-        return (
-          <>
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(255, 138, 61, 0.7) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(143, 61, 61, 0.7) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
-          </>
-        );
-      case 'christmas':
-        return (
-          <>
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(173, 216, 230, 0.7) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(212, 36, 38, 0.5) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
-          </>
-        );
-      case 'pongal':
-        return (
-          <>
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(224, 122, 95, 0.7) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(61, 64, 91, 0.7) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
-          </>
-        );
-      case 'valentines':
-        return (
-          <>
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(230, 57, 70, 0.7) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(168, 218, 220, 0.6) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
-          </>
-        );
-      default:
-        return renderDefaultAmbient();
+    const config = (activeFestival && !optOut) 
+      ? FESTIVAL_CONFIGS[activeFestival.theme_type] 
+      : null;
+
+    // Base default gradients if no festival
+    const defaultGradients = [
+      'rgba(200, 169, 110, 0.1)', // Gold
+      'rgba(20, 20, 20, 0.05)',
+      'transparent'
+    ];
+
+    const currentGradients = config ? config.gradients : defaultGradients;
+
+    // Capped particle count based on hardware
+    const maxCount = config ? config.baseCount : 0;
+    const hardwareCap = (typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) <= 4) ? 0.5 : 1;
+    const particleCount = Math.floor(maxCount * hardwareCap);
+
+    if (config && !prefersReducedMotion && particleCount > 0) {
+      // Initialize particles based on type
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 3 + 1,
+          speedX: (Math.random() - 0.5) * 0.5,
+          speedY: config.particleType === 'snow' ? Math.random() * 1 + 0.5 : (Math.random() - 0.5) * 0.5,
+          angle: Math.random() * Math.PI * 2,
+          opacity: Math.random() * 0.5 + 0.1,
+          life: Math.random() * 100
+        });
+      }
     }
-  };
+
+    const render = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Layer 1: Radial Gradient
+      const gradient = ctx.createRadialGradient(
+        canvas.width / 2, 0, 0,
+        canvas.width / 2, 0, canvas.width * 0.8
+      );
+      gradient.addColorStop(0, currentGradients[0]);
+      gradient.addColorStop(0.5, currentGradients[1]);
+      gradient.addColorStop(1, currentGradients[2]);
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Layer 2: Particles
+      if (config && !prefersReducedMotion) {
+        particles.forEach(p => {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.angle);
+          
+          ctx.fillStyle = `rgba(${config.glowColor}, ${p.opacity})`;
+          
+          if (config.particleType === 'snow') {
+            ctx.beginPath();
+            ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            p.y += p.speedY;
+            p.x += Math.sin(p.life * 0.05) * 0.5;
+            if (p.y > canvas.height) {
+              p.y = -10;
+              p.x = Math.random() * canvas.width;
+            }
+          } else if (config.particleType === 'sparkle' || config.particleType === 'valentines') {
+            const pulse = Math.abs(Math.sin(p.life * 0.05));
+            ctx.fillStyle = `rgba(${config.glowColor}, ${p.opacity * pulse})`;
+            ctx.beginPath();
+            ctx.arc(0, 0, p.size * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            p.y -= 0.5; // Float up
+            if (p.y < -10) p.y = canvas.height + 10;
+          } else if (config.particleType === 'firefly') {
+            ctx.beginPath();
+            ctx.arc(0, 0, p.size * 2, 0, Math.PI * 2);
+            ctx.fill();
+            p.x += Math.sin(p.life * 0.02) * 1.5;
+            p.y += Math.cos(p.life * 0.02) * 1.5;
+          } else if (config.particleType === 'fog') {
+            ctx.fillStyle = `rgba(${config.glowColor}, ${p.opacity * 0.2})`;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, p.size * 10, p.size * 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            p.x += 0.2;
+            if (p.x > canvas.width + 100) p.x = -100;
+          } else if (config.particleType === 'burst') {
+            ctx.beginPath();
+            ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            p.x += p.speedX * 2;
+            p.y += p.speedY * 2;
+            p.opacity -= 0.005;
+            if (p.opacity <= 0) {
+              p.x = Math.random() * canvas.width;
+              p.y = Math.random() * canvas.height;
+              p.opacity = Math.random() * 0.5 + 0.1;
+            }
+          }
+          
+          p.life++;
+          p.angle += 0.01;
+          ctx.restore();
+        });
+      }
+
+      if (!prefersReducedMotion) {
+        animationFrameId = requestAnimationFrame(render);
+      }
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [mounted, activeFestival, optOut, prefersReducedMotion]);
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes crossfade1 {
-          0%, 100% { opacity: 1; }
-          25%, 50%, 75% { opacity: 0; }
-        }
-        @keyframes crossfade2 {
-          0%, 50%, 75%, 100% { opacity: 0; }
-          25% { opacity: 1; }
-        }
-        @keyframes crossfade3 {
-          0%, 25%, 75%, 100% { opacity: 0; }
-          50% { opacity: 1; }
-        }
-        @keyframes crossfade4 {
-          0%, 25%, 50%, 100% { opacity: 0; }
-          75% { opacity: 1; }
-        }
-
-        .ambient-radial-glow {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 1000px;
-          pointer-events: none;
-          will-change: opacity;
-        }
-      `}} />
-
-      {/* Base Black Background - FIXED so it covers the whole screen */}
-      <div className="fixed inset-0 z-0 bg-[#0a0a0a] pointer-events-none" />
-
-      {/* Top Glow - ABSOLUTE so it scrolls away naturally when the user scrolls down */}
-      <div 
-        className="absolute top-0 left-0 w-full h-[800px] z-0 pointer-events-none transition-opacity duration-[2500ms] ease-out"
-        style={{ opacity: mounted ? baseOpacity : 0 }}
-      >
-        {showFestival ? renderFestivalAmbient() : renderDefaultAmbient()}
-      </div>
+      <div className="fixed inset-0 z-0 bg-background pointer-events-none transition-colors duration-500" />
+      <canvas
+        ref={canvasRef}
+        className="absolute top-0 left-0 w-full pointer-events-none z-0 transition-opacity duration-1000"
+        style={{ opacity: mounted ? 1 : 0 }}
+      />
     </>
   );
 }

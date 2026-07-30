@@ -5,7 +5,7 @@ import { Festival } from '@/types';
 import { upsertFestival, deleteFestival } from './actions';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Trash2, Edit2, Plus, Calendar, Power } from 'lucide-react';
+import { Trash2, Edit2, Plus, Calendar, X } from 'lucide-react';
 
 export function FestivalClient({ initialFestivals }: { initialFestivals: Festival[] }) {
   const [festivals, setFestivals] = useState(initialFestivals);
@@ -22,11 +22,16 @@ export function FestivalClient({ initialFestivals }: { initialFestivals: Festiva
     
     const payload = {
       ...isEditing,
-      name: formData.get('name'),
-      theme_type: formData.get('theme_type'),
+      name: formData.get('name') as string,
+      theme_type: formData.get('theme_type') as string,
       start_at: new Date(startAtStr).toISOString(),
       end_at: new Date(endAtStr).toISOString(),
       is_active: formData.get('is_active') === 'on',
+      config: {
+        banner_text: formData.get('banner_text') as string,
+        promo_code: formData.get('promo_code') as string,
+        sale_pct: formData.get('sale_pct') ? parseInt(formData.get('sale_pct') as string, 10) : undefined,
+      }
     };
 
     const res = await upsertFestival(payload);
@@ -34,7 +39,6 @@ export function FestivalClient({ initialFestivals }: { initialFestivals: Festiva
     if (res.success) {
       toast.success('Festival saved successfully');
       setIsEditing(null);
-      // Ideally we refresh data via router.refresh, but for simple optimistic UI:
       window.location.reload(); 
     } else {
       toast.error(res.error || 'Failed to save festival');
@@ -66,11 +70,11 @@ export function FestivalClient({ initialFestivals }: { initialFestivals: Festiva
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative overflow-hidden h-full">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-white">All Festivals</h2>
         <button
-          onClick={() => setIsEditing({ is_active: true })}
+          onClick={() => setIsEditing({ is_active: true, config: {} })}
           className="flex items-center gap-2 bg-luxe-accent text-black px-4 py-2 rounded-lg font-medium hover:bg-luxe-accent/90 transition"
         >
           <Plus size={18} />
@@ -100,6 +104,9 @@ export function FestivalClient({ initialFestivals }: { initialFestivals: Festiva
                 <tr key={festival.id} className="hover:bg-white/5 transition">
                   <td className="p-4">
                     <p className="text-white font-medium">{festival.name}</p>
+                    {festival.config?.promo_code && (
+                       <span className="text-xs text-white/40 block mt-1">Code: {festival.config.promo_code}</span>
+                    )}
                   </td>
                   <td className="p-4">
                     <span className="inline-flex items-center px-2 py-1 rounded bg-white/10 text-white/80 text-xs capitalize">
@@ -148,95 +155,152 @@ export function FestivalClient({ initialFestivals }: { initialFestivals: Festiva
         </table>
       </div>
 
-      {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 className="text-xl font-bold text-white mb-6">
-              {isEditing.id ? 'Edit Festival' : 'New Festival'}
+      {/* Slide-over Editor */}
+      <div className={`fixed inset-0 z-50 transition-opacity duration-300 ${isEditing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsEditing(null)} />
+        <div className={`absolute top-0 right-0 h-[100dvh] w-full max-w-md bg-[#111] border-l border-white/10 shadow-2xl transition-transform duration-300 transform ${isEditing ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}>
+          
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <h3 className="text-xl font-bold text-white">
+              {isEditing?.id ? 'Edit Festival' : 'New Festival'}
             </h3>
-            
-            <form onSubmit={handleSave} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Name</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  defaultValue={isEditing.name}
-                  required 
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-luxe-accent transition"
-                  placeholder="e.g. Diwali Dhamaka 2026"
-                />
-              </div>
+            <button onClick={() => setIsEditing(null)} className="p-2 hover:bg-white/10 rounded-full transition text-white/60 hover:text-white">
+              <X size={20} />
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-6">
+            <form id="festival-form" onSubmit={handleSave} className="space-y-6">
               
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Theme Type</label>
-                <select 
-                  name="theme_type"
-                  defaultValue={isEditing.theme_type || 'diwali'}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-luxe-accent transition"
-                >
-                  <option value="diwali">Diwali (Orange/Gold Particles)</option>
-                  <option value="christmas">Christmas (Icy/Snow Particles)</option>
-                  <option value="pongal">Pongal (Terracotta/Green)</option>
-                  <option value="valentines">Valentine's Day (Crimson/Pink)</option>
-                  <option value="halloween">Halloween (Purple/Orange)</option>
-                  <option value="newyear">New Year (Gold Fireworks)</option>
-                </select>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
+              {/* Basic Info */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-luxe-accent uppercase tracking-wider">Basic Details</h4>
                 <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Start Date & Time</label>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Name</label>
                   <input 
-                    type="datetime-local" 
-                    name="start_at"
-                    defaultValue={isEditing.start_at ? new Date(new Date(isEditing.start_at).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
-                    required
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-luxe-accent transition text-sm"
+                    type="text" 
+                    name="name" 
+                    defaultValue={isEditing?.name}
+                    required 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-luxe-accent transition"
+                    placeholder="e.g. Diwali Dhamaka 2026"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">End Date & Time</label>
-                  <input 
-                    type="datetime-local" 
-                    name="end_at"
-                    defaultValue={isEditing.end_at ? new Date(new Date(isEditing.end_at).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
-                    required
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-luxe-accent transition text-sm"
-                  />
+                  <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Theme Type</label>
+                  <select 
+                    name="theme_type"
+                    defaultValue={isEditing?.theme_type || 'diwali'}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-luxe-accent transition"
+                  >
+                    <option value="diwali">Diwali (Orange/Gold Particles)</option>
+                    <option value="christmas">Christmas (Icy/Snow Particles)</option>
+                    <option value="pongal">Pongal (Terracotta/Green)</option>
+                    <option value="valentines">Valentine's Day (Crimson/Pink)</option>
+                    <option value="halloween">Halloween (Purple/Orange)</option>
+                    <option value="newyear">New Year (Gold Fireworks)</option>
+                  </select>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-3 pt-2">
-                <input 
-                  type="checkbox"
-                  name="is_active" 
-                  defaultChecked={isEditing.is_active} 
-                  className="w-4 h-4 cursor-pointer accent-luxe-accent"
-                />
-                <label className="text-sm text-white/80">Allow Activation</label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-6 border-t border-white/10 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(null)}
-                  className="px-5 py-2.5 rounded-xl font-medium text-white/60 hover:text-white hover:bg-white/10 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-5 py-2.5 rounded-xl font-medium bg-luxe-accent text-black hover:bg-luxe-accent/90 transition disabled:opacity-50"
-                >
-                  {loading ? 'Saving...' : 'Save Festival'}
-                </button>
+              {/* Schedule */}
+              <div className="space-y-4 pt-4 border-t border-white/10">
+                <h4 className="text-sm font-semibold text-luxe-accent uppercase tracking-wider">Schedule</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Start Date & Time</label>
+                    <input 
+                      type="datetime-local" 
+                      name="start_at"
+                      defaultValue={isEditing?.start_at ? new Date(new Date(isEditing.start_at).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
+                      required
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-luxe-accent transition text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">End Date & Time</label>
+                    <input 
+                      type="datetime-local" 
+                      name="end_at"
+                      defaultValue={isEditing?.end_at ? new Date(new Date(isEditing.end_at).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
+                      required
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-luxe-accent transition text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 pt-2">
+                  <input 
+                    type="checkbox"
+                    name="is_active" 
+                    defaultChecked={isEditing?.is_active} 
+                    className="w-4 h-4 cursor-pointer accent-luxe-accent"
+                  />
+                  <label className="text-sm text-white/80">Allow Activation</label>
+                </div>
               </div>
+
+              {/* Banner Configuration */}
+              <div className="space-y-4 pt-4 border-t border-white/10">
+                <h4 className="text-sm font-semibold text-luxe-accent uppercase tracking-wider">Banner Configuration</h4>
+                <div>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Banner Text</label>
+                  <input 
+                    type="text" 
+                    name="banner_text" 
+                    defaultValue={isEditing?.config?.banner_text}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-luxe-accent transition"
+                    placeholder="e.g. Celebrate the festival of lights!"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Sale Percentage</label>
+                    <input 
+                      type="number" 
+                      name="sale_pct"
+                      min="0"
+                      max="100"
+                      defaultValue={isEditing?.config?.sale_pct}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-luxe-accent transition"
+                      placeholder="e.g. 30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Promo Code</label>
+                    <input 
+                      type="text" 
+                      name="promo_code"
+                      defaultValue={isEditing?.config?.promo_code}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white uppercase focus:outline-none focus:border-luxe-accent transition"
+                      placeholder="e.g. FESTIVAL30"
+                    />
+                  </div>
+                </div>
+              </div>
+
             </form>
           </div>
+          
+          <div className="p-6 border-t border-white/10 bg-[#111] flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setIsEditing(null)}
+              className="px-5 py-2.5 rounded-xl font-medium text-white/60 hover:text-white hover:bg-white/10 transition"
+            >
+              Cancel
+            </button>
+            <button
+              form="festival-form"
+              type="submit"
+              disabled={loading}
+              className="px-5 py-2.5 rounded-xl font-medium bg-luxe-accent text-black hover:bg-luxe-accent/90 transition disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Save Festival'}
+            </button>
+          </div>
+
         </div>
-      )}
+      </div>
     </div>
   );
 }

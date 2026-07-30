@@ -60,33 +60,95 @@
   }
 }
 
-/* ─── FESTIVAL ATMOSPHERE LAYER ─── */
-/* Default fallback if variables are used without a theme */
-:root {
-  --festival-primary: #c8a96e; /* Fallback to luxe-accent */
-  --festival-secondary: #0a0a0a;
-  --festival-glow: rgba(200, 169, 110, 0.15);
+html {
+  transition:
+    background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s ease;
 }
 
+/* ─── FESTIVAL ATMOSPHERE LAYER ─── */
 [data-theme='diwali'] {
-  --festival-primary: #ff8a3d;
-  --festival-secondary: #8f3d3d;
-  --festival-glow: rgba(255, 138, 61, 0.18);
+  --background: 24 10% 8%;
+  --foreground: 0 0% 98%;
+  --primary: 18 100% 50%;
+  --primary-foreground: 0 0% 98%;
+  --accent: 27 100% 50%;
+  --accent-foreground: 0 0% 98%;
+  --border: 24 10% 15%;
+  --ring: 27 100% 50%;
+  --card: 24 10% 10%;
 }
+
 [data-theme='christmas'] {
-  --festival-primary: #d42426;
-  --festival-secondary: #0f5132;
-  --festival-glow: rgba(212, 36, 38, 0.18);
+  --background: 220 15% 10%;
+  --foreground: 0 0% 98%;
+  --primary: 142 71% 25%;
+  --primary-foreground: 0 0% 98%;
+  --accent: 348 83% 47%;
+  --accent-foreground: 0 0% 98%;
+  --border: 220 15% 18%;
+  --ring: 348 83% 47%;
+  --card: 220 15% 12%;
 }
+
+[data-theme='newyear'] {
+  --background: 225 30% 12%;
+  --foreground: 0 0% 98%;
+  --primary: 215 100% 40%;
+  --primary-foreground: 0 0% 98%;
+  --accent: 45 100% 50%;
+  --accent-foreground: 225 30% 12%;
+  --border: 225 30% 20%;
+  --ring: 45 100% 50%;
+  --card: 225 30% 14%;
+}
+
 [data-theme='pongal'] {
-  --festival-primary: #e07a5f;
-  --festival-secondary: #3d405b;
-  --festival-glow: rgba(224, 122, 95, 0.18);
+  --background: 30 15% 10%;
+  --foreground: 0 0% 98%;
+  --primary: 43 90% 50%;
+  --primary-foreground: 0 0% 10%;
+  --accent: 32 100% 50%;
+  --accent-foreground: 0 0% 98%;
+  --border: 30 15% 18%;
+  --ring: 32 100% 50%;
+  --card: 30 15% 12%;
 }
+
+[data-theme='halloween'] {
+  --background: 280 20% 8%;
+  --foreground: 0 0% 98%;
+  --primary: 270 70% 35%;
+  --primary-foreground: 0 0% 98%;
+  --accent: 120 100% 40%;
+  --accent-foreground: 0 0% 10%;
+  --border: 280 20% 15%;
+  --ring: 120 100% 40%;
+  --card: 280 20% 10%;
+}
+
+[data-theme='eid'] {
+  --background: 170 30% 8%;
+  --foreground: 0 0% 98%;
+  --primary: 150 80% 30%;
+  --primary-foreground: 0 0% 98%;
+  --accent: 45 100% 50%;
+  --accent-foreground: 170 30% 8%;
+  --border: 170 30% 15%;
+  --ring: 45 100% 50%;
+  --card: 170 30% 10%;
+}
+
 [data-theme='valentines'] {
-  --festival-primary: #e63946;
-  --festival-secondary: #a8dadc;
-  --festival-glow: rgba(230, 57, 70, 0.18);
+  --background: 340 30% 10%;
+  --foreground: 0 0% 98%;
+  --primary: 345 80% 45%;
+  --primary-foreground: 0 0% 98%;
+  --accent: 330 90% 65%;
+  --accent-foreground: 0 0% 10%;
+  --border: 340 30% 18%;
+  --ring: 330 90% 65%;
+  --card: 340 30% 12%;
 }
 
 @layer base {
