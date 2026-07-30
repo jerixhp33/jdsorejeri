@@ -85,7 +85,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     setAddingToCart(true);
 
     try {
-      haptic.impact('medium');
+      haptic('medium');
       if (hasVariants) {
         router.push(`/product/${product.slug}`);
       } else {
@@ -105,14 +105,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     if (!isInStock) return;
-    haptic.impact('heavy');
+    haptic('heavy');
     setExpressOpen(true);
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    haptic.impact('light');
+    haptic('light');
     toggle(product);
   };
 
