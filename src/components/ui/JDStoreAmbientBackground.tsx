@@ -209,6 +209,14 @@ export function JDStoreAmbientBackground({
           0%, 50%, 75%, 100% { opacity: 0; }
           25% { opacity: 1; }
         }
+        @keyframes crossfade3 {
+          0%, 25%, 75%, 100% { opacity: 0; }
+          50% { opacity: 1; }
+        }
+        @keyframes crossfade4 {
+          0%, 25%, 50%, 100% { opacity: 0; }
+          75% { opacity: 1; }
+        }
 
         .ambient-radial-glow {
           position: absolute;
@@ -246,23 +254,41 @@ export function JDStoreAmbientBackground({
         </div>
       )}
 
-      {/* Top Ambient Aura Glow */}
+      {/* Full 4-Layer Dynamic Ambient Aura Glow */}
       <div 
         className="absolute top-0 left-0 w-full h-[800px] z-[2] pointer-events-none transition-opacity duration-[2500ms] ease-out"
         style={{ opacity: mounted ? baseOpacity : 0 }}
       >
+        {/* Layer 1: Vibrant Teal / Cyan or Primary Glow */}
         <div 
           className="ambient-radial-glow"
           style={{
             background: `radial-gradient(ellipse 100% 100% at 50% -20%, ${primaryGlow} 0%, transparent 100%)`,
-            animation: 'crossfade1 20s ease-in-out infinite'
+            animation: 'crossfade1 24s ease-in-out infinite'
           }}
         />
+        {/* Layer 2: Deep Sky Blue */}
+        <div 
+          className="ambient-radial-glow"
+          style={{
+            background: `radial-gradient(ellipse 100% 100% at 50% -20%, rgba(79, 172, 254, 0.55) 0%, transparent 100%)`,
+            animation: 'crossfade2 24s ease-in-out infinite'
+          }}
+        />
+        {/* Layer 3: Neon Purple / Pink or Secondary Glow */}
         <div 
           className="ambient-radial-glow"
           style={{
             background: `radial-gradient(ellipse 100% 100% at 50% -20%, ${secondaryGlow} 0%, transparent 100%)`,
-            animation: 'crossfade2 20s ease-in-out infinite'
+            animation: 'crossfade3 24s ease-in-out infinite'
+          }}
+        />
+        {/* Layer 4: Electric Mint */}
+        <div 
+          className="ambient-radial-glow"
+          style={{
+            background: `radial-gradient(ellipse 100% 100% at 50% -20%, rgba(0, 255, 135, 0.55) 0%, transparent 100%)`,
+            animation: 'crossfade4 24s ease-in-out infinite'
           }}
         />
       </div>
