@@ -89,29 +89,29 @@ export function JDStoreAmbientBackground({ variant = 'home', intensity = 'medium
       case 'diwali':
         return (
           <>
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(255, 138, 61, 0.45) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(143, 61, 61, 0.45) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
+            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(255, 138, 61, 0.7) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
+            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(143, 61, 61, 0.7) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
           </>
         );
       case 'christmas':
         return (
           <>
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(173, 216, 230, 0.45) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(212, 36, 38, 0.25) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
+            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(173, 216, 230, 0.7) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
+            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(212, 36, 38, 0.5) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
           </>
         );
       case 'pongal':
         return (
           <>
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(224, 122, 95, 0.45) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(61, 64, 91, 0.45) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
+            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(224, 122, 95, 0.7) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
+            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(61, 64, 91, 0.7) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
           </>
         );
       case 'valentines':
         return (
           <>
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(230, 57, 70, 0.45) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
-            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(168, 218, 220, 0.35) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
+            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(230, 57, 70, 0.7) 0%, transparent 100%)', animation: 'crossfade1 16s ease-in-out infinite' }} />
+            <div className="ambient-radial-glow" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% -20%, rgba(168, 218, 220, 0.6) 0%, transparent 100%)', animation: 'crossfade3 16s ease-in-out infinite' }} />
           </>
         );
       default:
