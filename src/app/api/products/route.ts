@@ -25,19 +25,12 @@ export async function GET(request: NextRequest) {
       .select(selectStr, { count: 'exact' })
       .eq('is_active', true);
 
-    // Text search — split into words, match against name/description/tags
+    // Smart Full-Text Search (Web Search syntax)
     if (search) {
-      const words = search.trim().toLowerCase().split(/\s+/).filter(w => w.length >= 2);
-      if (words.length > 0) {
-        const validTypes = ['poster', 'earring', 'hairband', 'bracelet', 'keychain', 'apparel', 'accessory'];
-        const orConditions = words.map(w => {
-          let condition = `name.ilike.%${w}%,description.ilike.%${w}%,tags.cs.{"${w}"}`;
-          if (validTypes.includes(w)) {
-            condition += `,product_type.eq.${w}`;
-          }
-          return condition;
-        }).join(',');
-        query = query.or(orConditions);
+      const formattedSearch = search.trim();
+      if (formattedSearch) {
+        // We use websearch_to_tsquery (wfts) which handles stemming and advanced queries automatically
+        query = query.or(`name.wfts.${formattedSearch},description.wfts.${formattedSearch}`);
       }
     }
 

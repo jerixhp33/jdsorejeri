@@ -64,7 +64,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       .eq('is_approved', true)
       .order('created_at', { ascending: false })
       .limit(20),
-    getRelatedProducts(product.id, product.category_id, 4, product.product_type),
+    getRelatedProducts(product.id, product.category_id, product.tags, 4, product.product_type),
     product.bundle_product_id ? getProductById(product.bundle_product_id) : Promise.resolve(null),
     getCrossSells(product.id),
   ]);

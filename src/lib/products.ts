@@ -234,6 +234,7 @@ export async function getBestSellers(limit = 8): Promise<Product[]> {
 export async function getRelatedProducts(
   productId: string,
   categoryId: string,
+  tags: string[] = [],
   limit = 4,
   productType?: string
 ): Promise<Product[]> {
@@ -246,20 +247,26 @@ export async function getRelatedProducts(
     sizes:poster_sizes(id, label, price, stock, is_active, sku)
   `;
 
-  // ── Stage 1: same category ──────────────────────────────────────
-  let stage1 = supabase
-    .from('products')
-    .select(FIELDS)
-    .eq('is_active', true)
-    .eq('category_id', categoryId)
-    .neq('id', productId);
+  const results: Product[] = [];
 
-  if (productType) stage1 = stage1.eq('product_type', productType);
+  // ── Stage 1: matching tags ──────────────────────────────────────
+  if (tags && tags.length > 0) {
+    let stage1 = supabase
+      .from('products')
+      .select(FIELDS)
+      .eq('is_active', true)
+      .neq('id', productId)
+      .overlaps('tags', tags);
 
-  const { data: sameCat } = await stage1.limit(limit);
-  const results: Product[] = (sameCat as unknown as Product[]) || [];
+    if (productType) stage1 = stage1.eq('product_type', productType);
 
-  // ── Stage 2: fill remaining with same type, any category ─────────
+    const { data: tagMatches } = await stage1.limit(limit);
+    if (tagMatches) {
+      results.push(...(tagMatches as unknown as Product[]));
+    }
+  }
+
+  // ── Stage 2: same category (fill remaining) ──────────────────────
   if (results.length < limit) {
     const needed = limit - results.length;
     const excludeIds = [productId, ...results.map((p) => p.id)];
@@ -268,16 +275,37 @@ export async function getRelatedProducts(
       .from('products')
       .select(FIELDS)
       .eq('is_active', true)
-      .neq('category_id', categoryId)   // avoid duplicates from stage 1
+      .eq('category_id', categoryId)
       .not('id', 'in', `(${excludeIds.join(',')})`);
 
     if (productType) stage2 = stage2.eq('product_type', productType);
 
-    // Prefer trending / best sellers as fillers
-    stage2 = stage2.order('is_trending', { ascending: false });
+    const { data: sameCat } = await stage2.limit(needed);
+    if (sameCat) {
+      results.push(...(sameCat as unknown as Product[]));
+    }
+  }
 
-    const { data: otherCat } = await stage2.limit(needed);
-    results.push(...((otherCat as unknown as Product[]) || []));
+  // ── Stage 3: same type, any category (fill remaining) ────────────
+  if (results.length < limit) {
+    const needed = limit - results.length;
+    const excludeIds = [productId, ...results.map((p) => p.id)];
+
+    let stage3 = supabase
+      .from('products')
+      .select(FIELDS)
+      .eq('is_active', true)
+      .not('id', 'in', `(${excludeIds.join(',')})`);
+
+    if (productType) stage3 = stage3.eq('product_type', productType);
+
+    // Prefer trending / best sellers as fillers
+    stage3 = stage3.order('is_trending', { ascending: false });
+
+    const { data: otherCat } = await stage3.limit(needed);
+    if (otherCat) {
+      results.push(...(otherCat as unknown as Product[]));
+    }
   }
 
   return results;
