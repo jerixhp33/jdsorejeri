@@ -10,6 +10,7 @@ import type { Banner } from '@/types';
 
 interface BannersSectionProps {
   banners: Banner[];
+  isAttachedTop?: boolean;
 }
 
 // ─── Shared color sampler ────────────────────────────────────────────────────
@@ -49,7 +50,7 @@ function sampleColor(imgEl: HTMLImageElement): string | null {
 
 // ─── SingleBanner ─────────────────────────────────────────────────────────────
 
-function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean }) {
+function SingleBanner({ banner, priority, isAttachedTop }: { banner: Banner; priority: boolean; isAttachedTop?: boolean }) {
   const [glowColor, setGlowColor] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -85,7 +86,10 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] rounded-3xl md:rounded-[2.5rem] group z-10"
+      className={cn(
+        "relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] group z-10",
+        isAttachedTop ? "rounded-b-3xl md:rounded-b-[2.5rem]" : "rounded-3xl md:rounded-[2.5rem]"
+      )}
       style={glowColor ? {
         boxShadow: `0 0 60px rgba(${glowColor},0.2), 0 20px 40px rgba(${glowColor},0.15)`,
         transition: 'box-shadow 0.7s ease',
@@ -194,7 +198,7 @@ function SingleBanner({ banner, priority }: { banner: Banner; priority: boolean 
   );
 }
 
-function SliderBanners({ banners }: { banners: Banner[] }) {
+function SliderBanners({ banners, isAttachedTop }: { banners: Banner[]; isAttachedTop?: boolean }) {
   const [current, setCurrent] = useState(0);
   const [glowColors, setGlowColors] = useState<Record<number, string>>({});
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -248,7 +252,10 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className="relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] rounded-3xl md:rounded-[2.5rem] group z-10"
+      className={cn(
+        "relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] group z-10",
+        isAttachedTop ? "rounded-b-3xl md:rounded-b-[2.5rem]" : "rounded-3xl md:rounded-[2.5rem]"
+      )}
       style={activeGlow ? {
         boxShadow: `0 0 60px rgba(${activeGlow},0.2), 0 20px 40px rgba(${activeGlow},0.15)`,
         transition: 'box-shadow 0.7s ease',
@@ -386,15 +393,15 @@ function SliderBanners({ banners }: { banners: Banner[] }) {
 
 // ─── BannersSection ───────────────────────────────────────────────────────────
 
-export function BannersSection({ banners }: BannersSectionProps) {
+export function BannersSection({ banners, isAttachedTop }: BannersSectionProps) {
   if (!banners.length) return null;
 
   return (
     <section className="px-4 md:px-8 lg:px-12 py-6 max-w-[1400px] mx-auto w-full">
       {banners.length === 1 ? (
-        <SingleBanner banner={banners[0]} priority />
+        <SingleBanner banner={banners[0]} priority isAttachedTop={isAttachedTop} />
       ) : (
-        <SliderBanners banners={banners} />
+        <SliderBanners banners={banners} isAttachedTop={isAttachedTop} />
       )}
     </section>
   );
