@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Tag, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import type { FlashSale, Product } from '@/types';
 
@@ -122,9 +121,9 @@ export function AdminFlashSalesView() {
           <h2 className="text-2xl font-bold tracking-tight">Flash Sales</h2>
           <p className="text-muted-foreground">Manage time-limited promotions and discounts.</p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2">
+        <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-md font-medium text-sm hover:bg-gray-200">
           {showForm ? 'Cancel' : <><Plus className="h-4 w-4" /> Create Sale</>}
-        </Button>
+        </button>
       </div>
 
       {showForm && (
@@ -204,7 +203,7 @@ export function AdminFlashSalesView() {
               <label htmlFor="is_active" className="text-sm font-medium">Activate immediately</label>
             </div>
 
-            <Button type="submit" className="w-full">Create Flash Sale</Button>
+            <button type="submit" className="w-full bg-luxe-accent text-white px-4 py-2 rounded-md font-medium hover:opacity-90">Create Flash Sale</button>
           </form>
         </div>
       )}
@@ -244,12 +243,12 @@ export function AdminFlashSalesView() {
                 </div>
                 
                 <div className="flex items-center gap-2 mt-4 md:mt-0">
-                  <Button variant="outline" size="sm" onClick={() => toggleActive(sale.id, sale.is_active)}>
+                  <button className="px-3 py-1.5 border border-input bg-background rounded-md text-sm hover:bg-accent hover:text-accent-foreground" onClick={() => toggleActive(sale.id, sale.is_active)}>
                     {sale.is_active ? 'Disable' : 'Enable'}
-                  </Button>
-                  <Button variant="destructive" size="sm" onClick={() => deleteSale(sale.id)}>
+                  </button>
+                  <button className="px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-md" onClick={() => deleteSale(sale.id)}>
                     <Trash2 className="w-4 h-4" />
-                  </Button>
+                  </button>
                 </div>
               </div>
             );
