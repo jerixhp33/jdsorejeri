@@ -8,6 +8,8 @@ export interface HomeThemeConfig {
   end_at: string;
   glow_primary_color?: string;
   glow_secondary_color?: string;
+  glow_tertiary_color?: string;
+  glow_quaternary_color?: string;
   text_accent_color?: string;
   element_image_url?: string;
   element_images?: string[]; // Array of multiple PNG element URLs

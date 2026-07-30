@@ -186,7 +186,9 @@ export function JDStoreAmbientBackground({
   const baseOpacity = opacityMap[intensity];
 
   const primaryGlow = themeConfig?.glow_primary_color || 'rgba(0, 242, 254, 0.55)';
-  const secondaryGlow = themeConfig?.glow_secondary_color || 'rgba(240, 147, 251, 0.55)';
+  const secondaryGlow = themeConfig?.glow_secondary_color || 'rgba(79, 172, 254, 0.55)';
+  const tertiaryGlow = themeConfig?.glow_tertiary_color || 'rgba(240, 147, 251, 0.55)';
+  const quaternaryGlow = themeConfig?.glow_quaternary_color || 'rgba(0, 255, 135, 0.55)';
   const accentColor = themeConfig?.text_accent_color || '#c8a96e';
   const bgMediaUrl = themeConfig?.home_bg_media_url;
   const bgMediaType = themeConfig?.home_bg_media_type || 'image';
@@ -259,7 +261,7 @@ export function JDStoreAmbientBackground({
         className="absolute top-0 left-0 w-full h-[800px] z-[2] pointer-events-none transition-opacity duration-[2500ms] ease-out"
         style={{ opacity: mounted ? baseOpacity : 0 }}
       >
-        {/* Layer 1: Vibrant Teal / Cyan or Primary Glow */}
+        {/* Layer 1: Color 1 (Default: Teal / Cyan) */}
         <div 
           className="ambient-radial-glow"
           style={{
@@ -267,27 +269,27 @@ export function JDStoreAmbientBackground({
             animation: 'crossfade1 24s ease-in-out infinite'
           }}
         />
-        {/* Layer 2: Deep Sky Blue */}
-        <div 
-          className="ambient-radial-glow"
-          style={{
-            background: `radial-gradient(ellipse 100% 100% at 50% -20%, rgba(79, 172, 254, 0.55) 0%, transparent 100%)`,
-            animation: 'crossfade2 24s ease-in-out infinite'
-          }}
-        />
-        {/* Layer 3: Neon Purple / Pink or Secondary Glow */}
+        {/* Layer 2: Color 2 (Default: Sky Blue) */}
         <div 
           className="ambient-radial-glow"
           style={{
             background: `radial-gradient(ellipse 100% 100% at 50% -20%, ${secondaryGlow} 0%, transparent 100%)`,
-            animation: 'crossfade3 24s ease-in-out infinite'
+            animation: 'crossfade2 24s ease-in-out infinite'
           }}
         />
-        {/* Layer 4: Electric Mint */}
+        {/* Layer 3: Color 3 (Default: Purple / Pink) */}
         <div 
           className="ambient-radial-glow"
           style={{
-            background: `radial-gradient(ellipse 100% 100% at 50% -20%, rgba(0, 255, 135, 0.55) 0%, transparent 100%)`,
+            background: `radial-gradient(ellipse 100% 100% at 50% -20%, ${tertiaryGlow} 0%, transparent 100%)`,
+            animation: 'crossfade3 24s ease-in-out infinite'
+          }}
+        />
+        {/* Layer 4: Color 4 (Default: Electric Mint) */}
+        <div 
+          className="ambient-radial-glow"
+          style={{
+            background: `radial-gradient(ellipse 100% 100% at 50% -20%, ${quaternaryGlow} 0%, transparent 100%)`,
             animation: 'crossfade4 24s ease-in-out infinite'
           }}
         />

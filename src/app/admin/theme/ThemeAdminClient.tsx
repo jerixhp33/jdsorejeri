@@ -618,7 +618,7 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
 
                   <div className="grid grid-cols-2 gap-4 pt-2">
                     <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Primary Aura Glow</label>
+                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Color 1 (Cyan / Primary)</label>
                       <input
                         type="text"
                         value={isEditing?.glow_primary_color || 'rgba(0, 242, 254, 0.55)'}
@@ -628,13 +628,33 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Secondary Aura Glow</label>
+                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Color 2 (Sky Blue / Secondary)</label>
                       <input
                         type="text"
-                        value={isEditing?.glow_secondary_color || 'rgba(240, 147, 251, 0.55)'}
+                        value={isEditing?.glow_secondary_color || 'rgba(79, 172, 254, 0.55)'}
                         onChange={e => setIsEditing({ ...isEditing, glow_secondary_color: e.target.value })}
                         className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-mono"
+                        placeholder="rgba(79, 172, 254, 0.55)"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Color 3 (Purple / Pink)</label>
+                      <input
+                        type="text"
+                        value={isEditing?.glow_tertiary_color || 'rgba(240, 147, 251, 0.55)'}
+                        onChange={e => setIsEditing({ ...isEditing, glow_tertiary_color: e.target.value })}
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-mono"
                         placeholder="rgba(240, 147, 251, 0.55)"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Color 4 (Electric Mint)</label>
+                      <input
+                        type="text"
+                        value={isEditing?.glow_quaternary_color || 'rgba(0, 255, 135, 0.55)'}
+                        onChange={e => setIsEditing({ ...isEditing, glow_quaternary_color: e.target.value })}
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-mono"
+                        placeholder="rgba(0, 255, 135, 0.55)"
                       />
                     </div>
                   </div>
