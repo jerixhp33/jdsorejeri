@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function FestivalsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   const { data: festivals, error } = await supabase
     .from('festivals')

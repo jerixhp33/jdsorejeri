@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function upsertFestival(data: any) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // Enforce overlap protection
   if (data.is_active) {
@@ -56,7 +56,7 @@ export async function upsertFestival(data: any) {
 }
 
 export async function deleteFestival(id: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   const { error } = await supabase
     .from('festivals')
