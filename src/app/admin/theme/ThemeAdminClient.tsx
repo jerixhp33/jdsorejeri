@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import type { HomeThemeConfig } from '@/lib/theme';
 import { upsertHomeTheme, deleteHomeTheme, uploadThemeAsset } from './actions';
 import { toast } from 'sonner';
@@ -206,23 +207,65 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
     }
   };
 
-  const handleAddPngFile = async (file: File) => {
+import { createClient } from '@/lib/supabase/client';
+
+async function uploadFileDirectly(file: File): Promise<string> {
+  try {
+    const supabase = createClient();
+    const ext = file.name.split('.').pop() || 'bin';
+    const filePath = `themes/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
+
+    // Try banners bucket first (public bucket)
+    const { data, error } = await supabase.storage
+      .from('banners')
+      .upload(filePath, file, { upsert: true });
+
+    if (!error && data) {
+      const { data: pubData } = supabase.storage.from('banners').getPublicUrl(data.path);
+      return pubData.publicUrl;
+    }
+
+    // Try theme-assets bucket
+    const { data: taData, error: taError } = await supabase.storage
+      .from('theme-assets')
+      .upload(filePath, file, { upsert: true });
+
+    if (!taError && taData) {
+      const { data: pubData } = supabase.storage.from('theme-assets').getPublicUrl(taData.path);
+      return pubData.publicUrl;
+    }
+
+    // Fallback to server action
     const fd = new FormData();
     fd.append('file', file);
     const res = await uploadThemeAsset(fd);
-    if (res.success && res.url) {
+    if (res.success && res.url) return res.url;
+
+    throw new Error(res.error || error?.message || 'Upload failed');
+  } catch (e: any) {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await uploadThemeAsset(fd);
+    if (res.success && res.url) return res.url;
+    throw e;
+  }
+}
+
+  const handleAddPngFile = async (file: File) => {
+    try {
+      const url = await uploadFileDirectly(file);
       setIsEditing(prev => {
         const currentList = prev?.element_images || (prev?.element_image_url ? [prev.element_image_url] : []);
-        const newList = [...currentList, res.url!];
+        const newList = [...currentList, url];
         return {
           ...prev,
           element_images: newList,
           element_image_url: newList[0],
         };
       });
-      toast.success('Added new element PNG!');
-    } else {
-      toast.error(res.error || 'Upload failed');
+      toast.success('Added new element image!');
+    } catch (e: any) {
+      toast.error(e.message || 'Upload failed');
     }
   };
 
@@ -239,20 +282,17 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
   };
 
   const handleHomeBgFile = async (file: File) => {
-    const fd = new FormData();
-    fd.append('file', file);
-    const isVideo = file.type.startsWith('video/');
-
-    const res = await uploadThemeAsset(fd);
-    if (res.success && res.url) {
+    try {
+      const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|webm|mov)$/i);
+      const url = await uploadFileDirectly(file);
       setIsEditing(prev => ({
         ...prev,
-        home_bg_media_url: res.url,
+        home_bg_media_url: url,
         home_bg_media_type: isVideo ? 'video' : 'image',
       }));
       toast.success('Home background media uploaded!');
-    } else {
-      toast.error(res.error || 'Upload failed');
+    } catch (e: any) {
+      toast.error(e.message || 'Upload failed');
     }
   };
 

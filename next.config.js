@@ -9,7 +9,9 @@ const nextConfig = {
 
   // Experimental optimizations
   experimental: {
-    // Optimizes package imports to reduce bundle size
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
     optimizePackageImports: [
       'lucide-react',
       'framer-motion',
