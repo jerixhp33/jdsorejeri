@@ -128,7 +128,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           price: displayPrice,
           quantity: 1,
           image: currentImage?.url,
-          size: activeSizes[0]?.name || 'Standard',
+          size: activeSizes[0]?.label || 'Standard',
         }}
       />
 
