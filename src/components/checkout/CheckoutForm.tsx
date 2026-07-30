@@ -307,42 +307,25 @@ export function CheckoutForm() {
         data.landmark ? `Near: ${data.landmark}` : ''
       ].filter(Boolean).join(', ');
 
-      const { data: order, error: orderErr } = await supabase
-        .from('orders')
-        .insert({
-          order_number: ordNum,
-          user_id: profile.id,
-          status: 'pending',
-          delivery_address_id: finalAddressId,
-          subtotal,
-          delivery_charge: deliveryCharge,
-          discount_amount: discountAmount,
-          coupon_id: appliedCoupon?.id || null,
-          total: finalTotal,
-          delivery_notes: data.delivery_notes || null,
-          delivery_instructions: data.delivery_instructions || null,
-          whatsapp_sent: false,
-          is_gift: data.is_gift || false,
-          gift_message: data.gift_message || null,
+      const response = await fetch('/api/checkout/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items,
+          finalAddressId,
+          deliveryCharge,
+          couponCode: appliedCoupon?.code || null,
+          delivery_notes: data.delivery_notes,
+          delivery_instructions: data.delivery_instructions,
+          is_gift: data.is_gift,
+          gift_message: data.gift_message,
         })
-        .select().single();
-      if (orderErr) throw orderErr;
-      
-      if (appliedCoupon) {
-        await supabase.from('coupons').update({ used_count: appliedCoupon.used_count + 1 }).eq('id', appliedCoupon.id);
-      }
+      });
 
-      const { error: itemsErr } = await supabase.from('order_items').insert(
-        items.map((item) => ({
-          order_id: order.id,
-          product_id: item.product_id,
-          poster_size_id: item.poster_size_id || null,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          total_price: item.unit_price * item.quantity,
-        }))
-      );
-      if (itemsErr) throw itemsErr;
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to place order');
+      
+      const order = result.order;
 
       // Notify admins of new order asynchronously
       fetch('/api/admin/notify-order', {

@@ -96,9 +96,10 @@ function NotifItem({
 
 interface NavbarProps {
   categories?: Category[];
+  hasBanner?: boolean;
 }
 
-export function Navbar({ categories = [] }: NavbarProps) {
+export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
   // Get unique product types from active categories, filtering out undefined/null
   const uniqueTypes = Array.from(new Set(categories.map(c => c?.product_type).filter(Boolean)));
   
@@ -291,7 +292,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
     <>
       <div className={cn(
         "fixed z-50 transition-all duration-500 left-1/2 -translate-x-1/2 w-[calc(100%-16px)] sm:w-[calc(100%-32px)] max-w-[1400px] pointer-events-none flex flex-col items-center",
-        scrolled ? "top-2 sm:top-4" : "top-2 sm:top-4"
+        scrolled ? (hasBanner ? "top-[48px] sm:top-[60px]" : "top-2 sm:top-4") : (hasBanner ? "top-[48px] sm:top-[60px]" : "top-2 sm:top-4")
       )}>
         <header
           className={cn(

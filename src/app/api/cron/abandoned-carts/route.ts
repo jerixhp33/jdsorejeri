@@ -1,95 +1,111 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { sendReactEmail } from '@/lib/email';
 import AbandonedCartEmail from '@/emails/AbandonedCartEmail';
 import * as React from 'react';
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
+  // Verify Cron Secret if set
+  const authHeader = req.headers.get('authorization');
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const supabase = createAdminClient();
+
   try {
-    // Check cron secret to prevent unauthorized access
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
+    const now = new Date();
+    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
 
-    const supabase = await createAdminClient();
+    // Fetch carts that haven't been modified in 2 hours
+    const { data: carts, error: cartsErr } = await supabase
+      .from('carts')
+      .select(`
+        id, 
+        user_id, 
+        updated_at,
+        user:user_profiles!inner(email, name),
+        items:cart_items(count)
+      `)
+      .lt('updated_at', twoHoursAgo.toISOString());
 
-    // Find carts that have been pending for more than 1 hour, but less than 24 hours, and haven't been reminded
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-
-    const { data: carts, error } = await supabase
-      .from('abandoned_carts')
-      .select('*')
-      .eq('status', 'pending')
-      .lt('updated_at', oneHourAgo)
-      .gt('updated_at', twentyFourHoursAgo);
-
-    if (error) {
-      throw error;
-    }
-
+    if (cartsErr) throw cartsErr;
     if (!carts || carts.length === 0) {
-      return NextResponse.json({ success: true, message: 'No abandoned carts to remind' });
+      return NextResponse.json({ message: 'No abandoned carts found.' });
     }
 
-    let sentCount = 0;
+    let processedCount = 0;
 
     for (const cart of carts) {
-      if (!cart.phone) continue;
+      // Only process carts with items
+      if (cart.items?.[0]?.count === 0) continue;
 
-      // Extract items and name
-      let customerName = 'there';
-      if (cart.cart_data && typeof cart.cart_data === 'object' && 'name' in cart.cart_data) {
-        customerName = (cart.cart_data as any).name || 'there';
+      // Check if user has already ordered after this cart was last updated
+      const { data: recentOrder } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('user_id', cart.user_id)
+        .gt('created_at', cart.updated_at)
+        .limit(1)
+        .maybeSingle();
+
+      if (recentOrder) {
+        continue; // User has placed an order, cart is not abandoned
       }
 
-      let items: any[] = [];
-      if (cart.cart_data && typeof cart.cart_data === 'object' && 'items' in cart.cart_data) {
-        items = (cart.cart_data as any).items || [];
-      }
+      // Check existing reminders for this cart
+      const { data: existingReminders } = await supabase
+        .from('abandoned_cart_reminders')
+        .select('sequence_number')
+        .eq('cart_id', cart.id);
 
-      if (items.length === 0) continue;
+      const sentSequences = existingReminders?.map(r => r.sequence_number) || [];
+      const lastUpdatedAt = new Date(cart.updated_at);
 
-      // We need their email to send an email. If they don't have an email in cart_data, we can't email them.
-      // Wait, abandoned carts only capture phone? Let's check.
-      const cartEmail = (cart.cart_data as any).email;
-      if (!cartEmail) continue;
+      let targetSequence = 0;
+      if (lastUpdatedAt <= fortyEightHoursAgo && !sentSequences.includes(3)) targetSequence = 3;
+      else if (lastUpdatedAt <= twentyFourHoursAgo && !sentSequences.includes(2)) targetSequence = 2;
+      else if (lastUpdatedAt <= twoHoursAgo && !sentSequences.includes(1)) targetSequence = 1;
 
-      const checkoutUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/checkout?cartId=${cart.id}`;
+      if (targetSequence > 0) {
+        const cartEmail = (cart.user as any).email;
+        const customerName = (cart.user as any).name || 'there';
+        const checkoutUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/checkout`;
+        
+        // Attempt to insert reminder to claim lock
+        const { error: insertErr } = await supabase
+          .from('abandoned_cart_reminders')
+          .insert({
+            cart_id: cart.id,
+            user_id: cart.user_id,
+            email: cartEmail,
+            sequence_number: targetSequence,
+            status: 'sent'
+          });
 
-      const emailComponent = React.createElement(AbandonedCartEmail, {
-        customerName,
-        items,
-        checkoutUrl,
-      });
+        // If insert succeeds (no unique constraint violation), send email
+        if (!insertErr) {
+          const emailComponent = React.createElement(AbandonedCartEmail, {
+            customerName,
+            items: [], // we aren't fetching full item data for now to simplify
+            checkoutUrl,
+          });
 
-      try {
-        await sendReactEmail({
-          to: cartEmail,
-          subject: 'Did you forget something amazing? 🛒',
-          react: emailComponent,
-        });
-
-        // Update status to reminded
-        await supabase
-          .from('abandoned_carts')
-          .update({ status: 'reminded' })
-          .eq('id', cart.id);
-
-        sentCount++;
-      } catch (e) {
-        console.error('Failed to send abandoned cart email to', cartEmail, e);
+          await sendReactEmail({
+            to: cartEmail,
+            subject: targetSequence === 3 ? 'Final Reminder: Your JD Store Cart' : 'You left something behind!',
+            react: emailComponent,
+          });
+          processedCount++;
+        }
       }
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: `Sent ${sentCount} abandoned cart emails` 
-    });
-
+    return NextResponse.json({ success: true, processed: processedCount });
   } catch (error: any) {
-    console.error('Abandoned cart cron error:', error);
+    console.error('Cron Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -10,6 +10,7 @@ import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useHaptic } from '@/hooks/useHaptic';
 import { formatCurrency, cn } from '@/lib/utils';
+import { useFlashSale } from '@/hooks/useFlashSale';
 import { Tooltip } from '@/components/shared/Tooltip';
 import type { Product } from '@/types';
 
@@ -26,6 +27,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [addingToCart, setAddingToCart] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const { getProductSalePrice } = useFlashSale();
   
   const { ref: inViewRef, inView } = useInView({
     threshold: 0.05,
@@ -61,9 +63,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const sizePrices = activeSizes.map((s) => s.price).filter((p) => p > 0);
   const hasVariants = activeSizes.length > 0;
 
-  const displayPrice = hasVariants
+  const originalPrice = hasVariants
     ? (sizePrices.length > 0 ? Math.min(...sizePrices) : 0)
     : product.price || 0;
+
+  const salePrice = getProductSalePrice(product.id, originalPrice);
+  const displayPrice = salePrice ?? originalPrice;
 
   const isInStock = hasVariants
     ? activeSizes.some((s) => s.stock > 0)
@@ -243,13 +248,22 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   Coming Soon
                 </span>
               ) : (
-                <div className="flex items-baseline gap-1">
-                  {hasVariants && displayPrice > 0 && (
-                    <span className="text-white/40 text-[10px] uppercase tracking-widest">From</span>
+                <div className="flex flex-col">
+                  {salePrice ? (
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-base sm:text-lg font-bold text-white tracking-tight">
+                        {formatCurrency(salePrice)}
+                      </span>
+                      <span className="text-xs sm:text-sm text-gray-500 line-through">
+                        {formatCurrency(originalPrice)}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-base sm:text-lg font-bold text-white tracking-tight">
+                      {formatCurrency(originalPrice)}
+                    </span>
                   )}
-                  <span className="text-white font-semibold text-sm sm:text-base">
-                    {displayPrice > 0 ? formatCurrency(displayPrice) : 'Coming Soon'}
-                  </span>
+                  <span className="text-[10px] sm:text-xs text-gray-500 font-medium">Included taxes</span>
                 </div>
               )}
             </div>

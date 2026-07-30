@@ -23,6 +23,7 @@ import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useHaptic } from '@/hooks/useHaptic';
 import { formatCurrency, cn } from '@/lib/utils';
+import { useFlashSale } from '@/hooks/useFlashSale';
 import type { Product, PosterSize, Review } from '@/types';
 import { toast } from 'sonner';
 import { VirtualTryOnModal } from './VirtualTryOnModal';
@@ -38,6 +39,7 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
   const router = useRouter();
   const { addItem, updateQuantity, items: cartItems, deliverySettings } = useCart();
   const { isWishlisted, toggle } = useWishlist();
+  const { getProductSalePrice } = useFlashSale();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
@@ -106,10 +108,13 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
   const wishlisted = isWishlisted(product.id);
   const currentImage = images[selectedImage];
 
-  const unitPrice =
+  const originalPrice =
     (product.sizes && product.sizes.length > 0 && selectedSize)
       ? selectedSize.price
       : (product.price ?? 0);
+
+  const salePrice = getProductSalePrice(product.id, originalPrice);
+  const displayPrice = salePrice ?? originalPrice;
 
   // How many of this exact item (and size) are already in the cart?
   const cartQuantity = cartItems
@@ -167,7 +172,7 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
     setAddingToCart(true);
     try {
       await new Promise(r => setTimeout(r, 400));
-      await addItem(product.id, unitPrice, quantity, hasVariants ? selectedSize?.id : undefined);
+      await addItem(product.id, displayPrice, quantity, hasVariants ? selectedSize?.id : undefined);
     } finally {
       setAddingToCart(false);
     }
@@ -181,7 +186,7 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
       await new Promise(r => setTimeout(r, 400));
       
       const hasVariants = product.sizes && product.sizes.length > 0;
-      await addItem(product.id, unitPrice, quantity, hasVariants ? selectedSize?.id : undefined, true);
+      await addItem(product.id, displayPrice, quantity, hasVariants ? selectedSize?.id : undefined, true);
       
       const bundleHasVariants = bundleProduct.sizes && bundleProduct.sizes.length > 0;
       const bundlePrice = bundleHasVariants && bundleProduct.sizes?.[0] ? bundleProduct.sizes[0].price : (bundleProduct.price || 0);
@@ -431,13 +436,22 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
             )}
 
             {/* Price */}
-            <div className="flex items-baseline gap-3 mb-6">
-              <span className="font-display text-3xl font-bold text-white">
-                {formatCurrency(unitPrice)}
-              </span>
-              {(product.sizes && product.sizes.length > 0 && selectedSize) && (
-                <span className="text-white/40 text-sm">for {selectedSize.label}</span>
+            <div className="flex flex-col mb-6">
+              {salePrice ? (
+                <div className="flex items-baseline gap-3">
+                  <span className="text-3xl font-bold text-white tracking-tight">
+                    {formatCurrency(salePrice)}
+                  </span>
+                  <span className="text-lg text-gray-500 line-through">
+                    {formatCurrency(originalPrice)}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-3xl font-bold text-white tracking-tight">
+                  {formatCurrency(originalPrice)}
+                </span>
               )}
+              <span className="text-sm text-gray-500 font-medium">Included all taxes</span>
             </div>
 
             {/* ── Variant Selector ── */}

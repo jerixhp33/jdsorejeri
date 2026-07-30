@@ -645,3 +645,38 @@ export interface WhatsAppOrderPayload {
   total: number;
   notes?: string;
 }
+
+// ============================================================
+// MARKETING & AUTOMATION TYPES
+// ============================================================
+
+export interface FlashSale {
+  id: string;
+  title: string;
+  description?: string;
+  discount_percentage: number;
+  start_at: string;
+  end_at: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  products?: FlashSaleProduct[];
+}
+
+export interface FlashSaleProduct {
+  id: string;
+  flash_sale_id: string;
+  product_id: string;
+  product?: Product;
+}
+
+export interface AbandonedCartReminder {
+  id: string;
+  cart_id: string;
+  user_id: string;
+  email: string;
+  sent_at: string;
+  sequence_number: number;
+  status: string;
+  created_at: string;
+}
