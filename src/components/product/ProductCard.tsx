@@ -152,7 +152,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 Sale
               </span>
             )}
-            {product.is_bestseller && (
+            {product.is_best_seller && (
               <span className="inline-block px-2 py-0.5 rounded-full bg-[#1a150f]/90 border border-luxe-accent/30 text-luxe-accent text-[10px] font-semibold tracking-wider uppercase shadow-md">
                 Best Seller
               </span>
