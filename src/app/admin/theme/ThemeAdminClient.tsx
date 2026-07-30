@@ -4,15 +4,170 @@ import React, { useState } from 'react';
 import type { HomeThemeConfig } from '@/lib/theme';
 import { upsertHomeTheme, deleteHomeTheme, uploadThemeAsset } from './actions';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { Plus, Trash2, Edit2, Sparkles, Upload, X, Calendar, Image as ImageIcon, Video, Layers, Check } from 'lucide-react';
+import { Plus, Trash2, Edit2, Sparkles, Upload, X, Image as ImageIcon, Video, Check } from 'lucide-react';
+
+function FileUploadZone({
+  label,
+  accept,
+  currentUrl,
+  mediaType = 'image',
+  onUpload,
+  onRemove,
+  description,
+}: {
+  label: string;
+  accept: string;
+  currentUrl?: string | null;
+  mediaType?: 'image' | 'video';
+  onUpload: (file: File) => Promise<void>;
+  onRemove?: () => void;
+  description?: string;
+}) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const processFile = async (file: File) => {
+    setUploading(true);
+    setProgress(15);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => (prev < 90 ? prev + 15 : prev));
+    }, 150);
+
+    try {
+      await onUpload(file);
+      setProgress(100);
+    } catch {
+      toast.error('Upload failed');
+    } finally {
+      clearInterval(interval);
+      setTimeout(() => {
+        setUploading(false);
+        setProgress(0);
+      }, 300);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const file = e.clipboardData.files?.[0];
+    if (file) {
+      e.preventDefault();
+      processFile(file);
+      toast.success('Pasted file from clipboard!');
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="block text-xs font-medium text-white/60 uppercase tracking-wider">{label}</label>
+
+      {currentUrl ? (
+        <div className="relative rounded-2xl border border-white/10 bg-black/60 p-3 flex items-center justify-between group overflow-hidden shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-xl bg-black/80 border border-white/10 overflow-hidden flex items-center justify-center shrink-0">
+              {mediaType === 'video' || currentUrl.match(/\.(mp4|webm)$/i) ? (
+                <video src={currentUrl} className="w-full h-full object-cover" muted loop autoPlay />
+              ) : (
+                <img src={currentUrl} alt="Preview" className="w-full h-full object-contain p-1" />
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-white truncate max-w-[200px]">
+                {currentUrl.split('/').pop()?.split('?')[0] || 'Uploaded Asset'}
+              </p>
+              <span className="text-[10px] text-green-400 font-medium flex items-center gap-1 mt-0.5">
+                <Check size={10} /> Active Preview
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium cursor-pointer transition">
+              Replace
+              <input type="file" accept={accept} onChange={handleChange} className="hidden" />
+            </label>
+            {onRemove && (
+              <button
+                type="button"
+                onClick={onRemove}
+                className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium transition"
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          onPaste={handlePaste}
+          tabIndex={0}
+          className={`relative border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer outline-none ${
+            isDragging
+              ? 'border-luxe-accent bg-luxe-accent/10 scale-[1.01]'
+              : 'border-white/15 hover:border-white/30 bg-black/30 hover:bg-black/50'
+          }`}
+        >
+          <input
+            type="file"
+            accept={accept}
+            onChange={handleChange}
+            disabled={uploading}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+          />
+
+          <div className="flex flex-col items-center justify-center gap-2 pointer-events-none">
+            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-luxe-accent">
+              <Upload size={18} />
+            </div>
+            <p className="text-xs font-semibold text-white">
+              Drag & Drop file here, or <span className="text-luxe-accent underline">Browse</span>
+            </p>
+            <p className="text-[11px] text-white/40">
+              {description || 'Press Ctrl+V to paste file directly from clipboard'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Bar */}
+      {uploading && (
+        <div className="space-y-1 pt-1">
+          <div className="flex justify-between text-[10px] text-white/60">
+            <span>Uploading to Supabase Storage...</span>
+            <span className="font-semibold text-luxe-accent">{progress}%</span>
+          </div>
+          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-luxe-accent to-yellow-300 transition-all duration-300 rounded-full"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeConfig[] }) {
   const [themes, setThemes] = useState(initialThemes);
   const [isEditing, setIsEditing] = useState<Partial<HomeThemeConfig> | null>(null);
   const [loading, setLoading] = useState(false);
-  const [uploadingPng, setUploadingPng] = useState(false);
-  const [uploadingMedia, setUploadingMedia] = useState(false);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,14 +206,9 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
     }
   };
 
-  const handlePngUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingPng(true);
-
+  const handlePngFile = async (file: File) => {
     const fd = new FormData();
     fd.append('file', file);
-
     const res = await uploadThemeAsset(fd);
     if (res.success && res.url) {
       setIsEditing(prev => ({ ...prev, element_image_url: res.url }));
@@ -66,17 +216,11 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
     } else {
       toast.error(res.error || 'Upload failed');
     }
-    setUploadingPng(false);
   };
 
-  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingMedia(true);
-
+  const handleMediaFile = async (file: File) => {
     const fd = new FormData();
     fd.append('file', file);
-
     const isVideo = file.type.startsWith('video/');
 
     const res = await uploadThemeAsset(fd);
@@ -90,7 +234,6 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
     } else {
       toast.error(res.error || 'Upload failed');
     }
-    setUploadingMedia(false);
   };
 
   return (
@@ -257,24 +400,17 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                 </div>
               </div>
 
-              {/* Falling PNG Element Upload */}
+              {/* Drag & Drop / Paste Falling PNG Element Upload */}
               <div className="space-y-4 pt-4 border-t border-white/10">
-                <h4 className="text-xs font-bold text-luxe-accent uppercase tracking-wider">Falling Element (Transparent PNG)</h4>
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-2 uppercase">Upload Custom PNG Image</label>
-                  <div className="flex items-center gap-4">
-                    {isEditing?.element_image_url && (
-                      <div className="relative w-16 h-16 bg-black/60 rounded-xl border border-white/10 p-2 flex items-center justify-center">
-                        <img src={isEditing.element_image_url} alt="PNG" className="max-w-full max-h-full object-contain" />
-                      </div>
-                    )}
-                    <label className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2.5 rounded-xl cursor-pointer text-xs font-medium transition">
-                      <Upload size={14} />
-                      {uploadingPng ? 'Uploading...' : 'Choose PNG File'}
-                      <input type="file" accept="image/png,image/webp" onChange={handlePngUpload} disabled={uploadingPng} className="hidden" />
-                    </label>
-                  </div>
-                </div>
+                <FileUploadZone
+                  label="Falling Element (Transparent PNG)"
+                  accept="image/png,image/webp"
+                  currentUrl={isEditing?.element_image_url}
+                  mediaType="image"
+                  onUpload={handlePngFile}
+                  onRemove={() => setIsEditing(prev => ({ ...prev, element_image_url: undefined }))}
+                  description="Drag & drop PNG image here, or press Ctrl+V to paste from clipboard"
+                />
 
                 {isEditing?.element_image_url && (
                   <div className="grid grid-cols-2 gap-4 pt-2">
@@ -327,28 +463,17 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                 )}
               </div>
 
-              {/* Hero Right Side Media Slot */}
+              {/* Drag & Drop / Paste Hero Right Side Media Slot */}
               <div className="space-y-4 pt-4 border-t border-white/10">
-                <h4 className="text-xs font-bold text-luxe-accent uppercase tracking-wider">Hero Right-Side Media Slot</h4>
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-2 uppercase">Upload Hero Side Media (Video MP4 / Image)</label>
-                  <div className="flex items-center gap-4">
-                    {isEditing?.hero_side_media_url && (
-                      <div className="relative w-24 h-16 bg-black/60 rounded-xl border border-white/10 overflow-hidden flex items-center justify-center">
-                        {isEditing.hero_side_media_type === 'video' ? (
-                          <video src={isEditing.hero_side_media_url} className="w-full h-full object-cover" muted loop autoPlay />
-                        ) : (
-                          <img src={isEditing.hero_side_media_url} alt="Media" className="w-full h-full object-cover" />
-                        )}
-                      </div>
-                    )}
-                    <label className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2.5 rounded-xl cursor-pointer text-xs font-medium transition">
-                      <Upload size={14} />
-                      {uploadingMedia ? 'Uploading...' : 'Choose Media File'}
-                      <input type="file" accept="image/*,video/mp4,video/webm" onChange={handleMediaUpload} disabled={uploadingMedia} className="hidden" />
-                    </label>
-                  </div>
-                </div>
+                <FileUploadZone
+                  label="Hero Right-Side Media Slot (Video MP4 / Image)"
+                  accept="image/*,video/mp4,video/webm"
+                  currentUrl={isEditing?.hero_side_media_url}
+                  mediaType={isEditing?.hero_side_media_type || 'image'}
+                  onUpload={handleMediaFile}
+                  onRemove={() => setIsEditing(prev => ({ ...prev, hero_side_media_url: undefined }))}
+                  description="Drag & drop Video or Image here, or press Ctrl+V to paste"
+                />
 
                 {isEditing?.hero_side_media_url && (
                   <div className="space-y-3 pt-2">
