@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { MessageCircle, MapPin, User, ArrowLeft, Check, Trash2, Tag, X, ChevronLeft } from 'lucide-react';
+import { MessageCircle, MapPin, User, ArrowLeft, Check, Trash2, Tag, X, ChevronLeft, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 
 import { useCart } from '@/hooks/useCart';
@@ -90,16 +90,38 @@ export function CheckoutForm() {
     });
   }, [supabase]);
 
-  // Store Settings (for Gift Wrapping)
-  const [storeSettings, setStoreSettings] = useState<any>(null);
+  // Restore pending UTR order on page refresh / reload
   useEffect(() => {
-    supabase.from('settings').select('key, value').then(({ data }) => {
-      if (data) {
-        const config = data.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
-        setStoreSettings(config);
+    try {
+      const savedPending = localStorage.getItem('pending_utr_order');
+      if (savedPending) {
+        const parsed = JSON.parse(savedPending);
+        if (parsed && parsed.orderId && parsed.orderNumber) {
+          setCreatedOrderId(parsed.orderId);
+          setOrderNumber(parsed.orderNumber);
+          setPlacedOrderTotal(parsed.placedOrderTotal || parsed.total);
+          setPlacedOrderData(parsed);
+          setPaymentMethod('upi');
+          setOrderPlaced(true);
+        }
       }
-    });
-  }, [supabase]);
+    } catch (err) {
+      console.error('Failed to load pending UTR order:', err);
+    }
+  }, []);
+
+  // Alert on tab close or page reload if UTR submission is pending
+  useEffect(() => {
+    if (orderPlaced && paymentMethod === 'upi' && !utrSubmitted) {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = 'Please enter your 12-digit UTR number to complete payment verification!';
+        return e.returnValue;
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }
+  }, [orderPlaced, paymentMethod, utrSubmitted]);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -420,6 +442,29 @@ export function CheckoutForm() {
         discountAmount,
         total: finalTotal,
       });
+      if (paymentMethod === 'upi') {
+        const pendingData = {
+          orderId: order.id,
+          orderNumber: ordNum,
+          placedOrderTotal: finalTotal,
+          customerName: data.full_name,
+          phone: data.phone,
+          address: fullAddress,
+          items: items.map((i) => ({
+            name: i.product?.name || 'Item',
+            size: (i.poster_size as { label?: string } | null)?.label,
+            quantity: i.quantity,
+            price: i.unit_price,
+            image: i.product?.images?.[0]?.url,
+          })),
+          subtotal,
+          deliveryCharge,
+          discountAmount,
+          total: finalTotal,
+        };
+        localStorage.setItem('pending_utr_order', JSON.stringify(pendingData));
+      }
+
       setOrderPlaced(true);
 
       const cleanPhone = WHATSAPP_NUMBER.replace(/\D/g, '');
@@ -471,8 +516,9 @@ export function CheckoutForm() {
   }
 
   const submitUTR = async () => {
-    if (utrNumber.length < 12) {
-      toast.error('Please enter a valid 12-digit UTR number');
+    const cleanUTR = utrNumber.trim();
+    if (cleanUTR.length !== 12 || !/^\d{12}$/.test(cleanUTR)) {
+      toast.error('Please enter a valid 12-digit numeric UTR number');
       return;
     }
     setUtrSubmitting(true);
@@ -480,7 +526,7 @@ export function CheckoutForm() {
       const res = await fetch('/api/orders/utr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: createdOrderId, utrNumber }),
+        body: JSON.stringify({ orderId: createdOrderId, utrNumber: cleanUTR }),
       });
       
       const data = await res.json();
@@ -488,6 +534,9 @@ export function CheckoutForm() {
       
       toast.success('Payment verified successfully!');
       setUtrSubmitted(true);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('pending_utr_order');
+      }
       
       setTimeout(() => {
         window.location.href = '/dashboard/orders';
@@ -688,10 +737,17 @@ export function CheckoutForm() {
             Download PDF Receipt
           </button>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link prefetch={true} href="/dashboard/orders" className="btn-secondary flex-1 text-center text-sm">View My Orders</Link>
-            <Link prefetch={true} href="/" className="btn-luxe-outline flex-1 text-center text-sm">Continue Shopping</Link>
-          </div>
+          {paymentMethod === 'upi' && !utrSubmitted ? (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold text-center mb-8 flex items-center justify-center gap-2">
+              <ShieldAlert className="w-4 h-4 shrink-0 text-amber-400" />
+              <span>Mandatory: Please submit your 12-digit UTR number above to verify payment and complete order placement.</span>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link prefetch={true} href="/dashboard/orders" className="btn-secondary flex-1 text-center text-sm">View My Orders</Link>
+              <Link prefetch={true} href="/" className="btn-luxe-outline flex-1 text-center text-sm">Continue Shopping</Link>
+            </div>
+          )}
         </motion.div>
       </div>
       </>
