@@ -67,15 +67,34 @@ export async function upsertHomeTheme(data: Partial<HomeThemeConfig>) {
     };
 
     if (data.id) {
-      const { error } = await supabase
+      let { error } = await supabase
         .from('home_theme_config')
         .update(payload)
         .eq('id', data.id);
+
+      if (error && error.message?.includes('element_images')) {
+        delete payload.element_images;
+        const fallback = await supabase
+          .from('home_theme_config')
+          .update(payload)
+          .eq('id', data.id);
+        error = fallback.error;
+      }
+
       if (error) return { success: false, error: error.message };
     } else {
-      const { error } = await supabase
+      let { error } = await supabase
         .from('home_theme_config')
         .insert([payload]);
+
+      if (error && error.message?.includes('element_images')) {
+        delete payload.element_images;
+        const fallback = await supabase
+          .from('home_theme_config')
+          .insert([payload]);
+        error = fallback.error;
+      }
+
       if (error) return { success: false, error: error.message };
     }
 
