@@ -20,18 +20,18 @@ export function FestivalDecorations() {
 
   // Generate some random values for particles to avoid hydration mismatches
   // by only rendering them after mount.
-  const particles = Array.from({ length: 15 }).map((_, i) => ({
+  const particles = Array.from({ length: 30 }).map((_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
     animationDuration: `${Math.random() * 5 + 5}s`,
     animationDelay: `${Math.random() * 5}s`,
-    size: Math.random() * 4 + 2,
-    opacity: Math.random() * 0.5 + 0.3,
+    size: Math.random() * 6 + 4,
+    opacity: Math.random() * 0.6 + 0.4,
   }));
 
   const renderParticles = (colorClass: string, isFalling = false) => {
     return (
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
+      <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden" aria-hidden="true">
         {particles.map((p) => (
           <div
             key={p.id}
