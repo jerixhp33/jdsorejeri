@@ -35,37 +35,39 @@ export async function POST(req: NextRequest) {
     const validatedItems = [];
 
     for (const item of items) {
+      const targetId = item.product_id || item.product?.id || item.id;
+
       // Fetch product details
-      const { data: product, error: productErr } = await supabase
+      const { data: product } = await supabase
         .from('products')
         .select('*, product_sizes(*)')
-        .eq('id', item.product_id)
-        .single();
+        .eq('id', targetId)
+        .maybeSingle();
 
-      if (productErr || !product) {
-        throw new Error(`Product ${item.product_id} not found`);
-      }
+      let dbPrice = item.unit_price || item.price || 0;
+      let finalPrice = dbPrice;
 
-      let dbPrice = product.price || 0;
-      let finalPrice = 0;
+      if (product) {
+        dbPrice = product.price || dbPrice || 0;
 
-      // Check if variant based
-      if (item.poster_size_id && product.product_type === 'poster') {
-        const size = product.product_sizes?.find((s: any) => s.id === item.poster_size_id);
-        if (size) dbPrice = size.price;
-      }
+        // Check if variant based
+        if (item.poster_size_id && product.product_type === 'poster') {
+          const size = product.product_sizes?.find((s: any) => s.id === item.poster_size_id);
+          if (size) dbPrice = size.price;
+        }
 
-      // Check flash sale
-      if (activeSale && activeSale.products?.some(p => p.product_id === product.id)) {
-        finalPrice = Math.round(dbPrice * (1 - activeSale.discount_percentage / 100));
-      } else {
-        finalPrice = dbPrice;
+        // Check flash sale
+        if (activeSale && activeSale.products?.some(p => p.product_id === product.id)) {
+          finalPrice = Math.round(dbPrice * (1 - activeSale.discount_percentage / 100));
+        } else {
+          finalPrice = dbPrice;
+        }
       }
 
       calculatedSubtotal += finalPrice * item.quantity;
 
       validatedItems.push({
-        product_id: product.id,
+        product_id: product?.id || targetId || null,
         poster_size_id: item.poster_size_id || null,
         quantity: item.quantity,
         unit_price: finalPrice,
