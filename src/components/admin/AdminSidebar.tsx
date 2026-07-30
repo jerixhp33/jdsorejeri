@@ -24,7 +24,6 @@ const NAV = [
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/banners', label: 'Banners', icon: ImageIcon },
   { href: '/admin/flash-sales', label: 'Flash Sales', icon: Tag },
-  { href: '/admin/festivals', label: 'Festivals', icon: PartyPopper },
   { href: '/admin/banner-generator', label: 'Banner Generator', icon: ImageIcon },
   { href: '/admin/collections', label: 'Collections', icon: Layers },
   { href: '/admin/broadcast', label: 'Broadcast', icon: Mail },

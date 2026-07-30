@@ -64,21 +64,5 @@ const HalloweenDecorations = () => {
 };
 
 export function FestivalDecorations() {
-  const { activeFestival, optOut } = useFestival();
-  const pathname = usePathname();
-
-  // Only show decorations on the home page
-  if (!activeFestival || optOut || pathname !== '/') return null;
-
-  const decorationMap: Record<string, React.ReactNode> = {
-    diwali: <DiwaliDecorations />,
-    christmas: <ChristmasDecorations />,
-    newyear: <NewYearDecorations />,
-    halloween: <HalloweenDecorations />,
-    pongal: null,
-    eid: null,
-    valentines: null,
-  };
-
-  return <>{decorationMap[activeFestival.theme_type] ?? null}</>;
+  return null;
 }
