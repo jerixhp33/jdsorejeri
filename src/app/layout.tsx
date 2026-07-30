@@ -8,6 +8,7 @@ import { OfflineStatusMonitor } from '@/components/shared/OfflineStatusMonitor';
 import { ToastSound } from '@/components/shared/ToastSound';
 import { PwaInstallPrompt } from '@/components/shared/PwaInstallPrompt';
 import { PushNotificationPrompt } from '@/components/shared/PushNotificationPrompt';
+import { FestivalDecorations } from '@/components/layout/FestivalDecorations';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/Providers';
 import { ContentProtector } from '@/components/shared/ContentProtector';
@@ -116,16 +117,22 @@ export const metadata: Metadata = {
 
 
 
-export default function RootLayout({
+import { getActiveFestival } from '@/lib/festivals';
+import { FestivalProvider } from '@/components/providers/FestivalProvider';
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const activeFestival = await getActiveFestival();
+
   return (
     <html
       lang="en"
       suppressHydrationWarning
       className={`${inter.variable} ${playfair.variable}`}
+      data-theme={activeFestival?.theme_type}
     >
       <head>
         {/* JSON-LD for Site Name */}
@@ -150,16 +157,19 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
-            <ContentProtector />
-            <SmoothScroll />
-            <ServiceWorkerRegister />
-            <OfflineStatusMonitor />
-            <ToastSound />
-            <PwaInstallPrompt />
-            <PushNotificationPrompt />
-            <PageLoader />
-            {children}
-            <MobileBottomNav />
+            <FestivalProvider initialFestival={activeFestival}>
+              <ContentProtector />
+              <SmoothScroll />
+              <ServiceWorkerRegister />
+              <OfflineStatusMonitor />
+              <ToastSound />
+              <PwaInstallPrompt />
+              <PushNotificationPrompt />
+              <FestivalDecorations />
+              <PageLoader />
+              {children}
+              <MobileBottomNav />
+
             <Toaster
               position="top-right"
               expand={true}
@@ -177,6 +187,7 @@ export default function RootLayout({
                 },
               }}
             />
+            </FestivalProvider>
           </Providers>
         </ThemeProvider>
         <Analytics />

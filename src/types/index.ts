@@ -680,3 +680,16 @@ export interface AbandonedCartReminder {
   status: string;
   created_at: string;
 }
+
+export type FestivalThemeType = 'diwali' | 'christmas' | 'pongal' | 'valentines' | 'halloween' | 'newyear';
+
+export interface Festival {
+  id: string;
+  name: string;
+  theme_type: FestivalThemeType;
+  start_at: string;
+  end_at: string;
+  is_active: boolean;
+  config?: Record<string, any>;
+  created_at?: string;
+}

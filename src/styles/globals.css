@@ -60,6 +60,35 @@
   }
 }
 
+/* ─── FESTIVAL ATMOSPHERE LAYER ─── */
+/* Default fallback if variables are used without a theme */
+:root {
+  --festival-primary: #c8a96e; /* Fallback to luxe-accent */
+  --festival-secondary: #0a0a0a;
+  --festival-glow: rgba(200, 169, 110, 0.15);
+}
+
+[data-theme='diwali'] {
+  --festival-primary: #ff8a3d;
+  --festival-secondary: #8f3d3d;
+  --festival-glow: rgba(255, 138, 61, 0.18);
+}
+[data-theme='christmas'] {
+  --festival-primary: #d42426;
+  --festival-secondary: #0f5132;
+  --festival-glow: rgba(212, 36, 38, 0.18);
+}
+[data-theme='pongal'] {
+  --festival-primary: #e07a5f;
+  --festival-secondary: #3d405b;
+  --festival-glow: rgba(224, 122, 95, 0.18);
+}
+[data-theme='valentines'] {
+  --festival-primary: #e63946;
+  --festival-secondary: #a8dadc;
+  --festival-glow: rgba(230, 57, 70, 0.18);
+}
+
 @layer base {
   * {
     @apply border-border;

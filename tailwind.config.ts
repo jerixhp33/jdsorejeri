@@ -65,6 +65,12 @@ const config: Config = {
           accent: '#c8a96e', // Premium gold accent
           'accent-light': '#e8d5a3',
         },
+        // Festival Atmosphere Layer colors
+        festival: {
+          primary: 'var(--festival-primary)',
+          secondary: 'var(--festival-secondary)',
+          glow: 'var(--festival-glow)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
