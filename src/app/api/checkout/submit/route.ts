@@ -104,6 +104,18 @@ export async function POST(req: NextRequest) {
 
     const calculatedTotal = Math.max(0, calculatedSubtotal - discountAmount + deliveryCharge);
 
+    // Fetch user_profiles ID to satisfy orders_user_id_fkey foreign key constraint
+    let profileId = user.id;
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .or(`uid.eq.${user.id},id.eq.${user.id}`)
+      .maybeSingle();
+
+    if (userProfile?.id) {
+      profileId = userProfile.id;
+    }
+
     // Generate Order Number
     const ordNum = `LX${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2,6).toUpperCase()}`;
 
@@ -112,7 +124,7 @@ export async function POST(req: NextRequest) {
       .from('orders')
       .insert({
         order_number: ordNum,
-        user_id: user.id,
+        user_id: profileId,
         status: 'pending',
         delivery_address_id: finalAddressId,
         subtotal: calculatedSubtotal,

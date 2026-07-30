@@ -152,6 +152,16 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 Sale
               </span>
             )}
+            {product.is_bestseller && (
+              <span className="inline-block px-2 py-0.5 rounded-full bg-[#1a150f]/90 border border-luxe-accent/30 text-luxe-accent text-[10px] font-semibold tracking-wider uppercase shadow-md">
+                Best Seller
+              </span>
+            )}
+            {product.is_trending && (
+              <span className="inline-block px-2 py-0.5 rounded-full bg-black/70 border border-white/20 text-white text-[10px] font-semibold tracking-wider uppercase shadow-md">
+                Trending
+              </span>
+            )}
             {!isInStock && (
               <span className="inline-block px-2 py-0.5 rounded-full bg-[#200505]/90 border border-red-500/30 text-red-400 text-[10px] font-semibold tracking-wider uppercase">Out of Stock</span>
             )}
