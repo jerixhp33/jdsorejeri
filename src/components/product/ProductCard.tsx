@@ -233,7 +233,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
 
         {/* Product Info */}
-        <div className="p-3 sm:p-4 flex flex-col justify-between h-[90px] sm:h-[104px]">
+        <div className="p-3 sm:p-4 flex flex-col justify-between flex-1 min-h-[120px] gap-2">
           <div>
             <p className="text-white/40 text-[10px] sm:text-[11px] mb-0.5 leading-none">{product.category?.name}</p>
             <h3 className="text-white text-xs sm:text-sm font-medium leading-snug line-clamp-2 group-hover:text-luxe-accent transition-colors">
@@ -241,7 +241,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </h3>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-end justify-between mt-auto">
             <div className="flex items-center h-6">
               {!isInStock ? (
                 <span className="inline-block px-2.5 py-0.5 rounded-full bg-black/70 border border-white/20 text-white/80 text-[10px] font-semibold tracking-wider uppercase">

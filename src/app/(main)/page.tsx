@@ -12,16 +12,20 @@ import { getFeaturedProducts } from '@/lib/products';
 import { createPublicClient } from '@/lib/supabase/server';
 import { JDStoreAmbientBackground } from '@/components/ui/JDStoreAmbientBackground';
 
+import { getActiveFlashSale } from '@/lib/flash-sales';
+import { FlashSaleTimerClient } from '@/components/layout/FlashSaleTimerClient';
+
 export const revalidate = 60;
 
 export default async function HomePage() {
   const supabase = createPublicClient();
   
   // Fetch ONLY fast, layout-blocking data here to ensure rapid First Contentful Paint
-  const [banners, collections, marqueeLabels] = await Promise.all([
+  const [banners, collections, marqueeLabels, flashSale] = await Promise.all([
     supabase.from('banners').select('*').eq('is_active', true).order('display_order').then(({ data }) => data || []),
     supabase.from('collections').select('*').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
     supabase.from('marquee_labels').select('*').eq('is_active', true).order('order_index').then(({ data }) => data || []),
+    getActiveFlashSale(),
   ]);
 
   const heroBanners    = banners.filter((b: any) => b.position === 'hero');
@@ -35,8 +39,24 @@ export default async function HomePage() {
       <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} />
       
       <div className="relative z-10">
+        {flashSale && (
+          <div className="w-full bg-black/90 text-white backdrop-blur-md border-b border-white/10 relative z-[60]">
+            <div className="absolute inset-0 bg-gradient-to-r from-luxe-accent/10 via-purple-500/10 to-cyan-500/10 opacity-50" />
+            <div className="max-w-7xl mx-auto px-4 py-2 sm:py-3 relative flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-sm sm:text-base font-medium">
+              <div className="flex items-center gap-2">
+                <span className="text-luxe-accent">⚡</span>
+                <span className="tracking-wide text-gray-100">{flashSale.title}</span>
+                <span className="bg-white/10 px-2 py-0.5 rounded text-luxe-accent font-bold">
+                  {flashSale.discount_percentage}% OFF
+                </span>
+              </div>
+              <FlashSaleTimerClient endAt={flashSale.end_at} />
+            </div>
+          </div>
+        )}
+
         {/* Hero-position banners */}
-        <div className="pt-12 md:pt-8 pb-4">
+        <div className="pt-6 md:pt-8 pb-4">
           <BannersSection banners={heroBanners} />
         </div>
 
