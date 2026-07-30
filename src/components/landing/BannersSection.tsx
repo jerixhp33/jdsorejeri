@@ -246,19 +246,7 @@ function SliderBanners({ banners, isAttachedTop }: { banners: Banner[]; isAttach
     }
   }, []);
 
-  const { activeFestival, optOut } = useFestival();
-  const getFestivalGlow = (themeType?: string) => {
-    switch (themeType) {
-      case 'diwali': return '255, 138, 61';
-      case 'christmas': return '200, 230, 255';
-      case 'pongal': return '249, 168, 37';
-      case 'valentines': return '230, 57, 70';
-      default: return null;
-    }
-  };
-  
-  const festivalGlow = (!optOut && activeFestival) ? getFestivalGlow(activeFestival.theme_type) : null;
-  const activeGlow = festivalGlow || glowColors[current];
+  const activeGlow = glowColors[current];
 
   return (
     <motion.div
@@ -435,19 +423,7 @@ function SidebarBannerCard({ banner, priority }: { banner: Banner; priority: boo
     }, 100);
   }, []);
 
-  const { activeFestival, optOut } = useFestival();
-  const getFestivalGlow = (themeType?: string) => {
-    switch (themeType) {
-      case 'diwali': return '255, 138, 61';
-      case 'christmas': return '200, 230, 255';
-      case 'pongal': return '249, 168, 37';
-      case 'valentines': return '230, 57, 70';
-      default: return null;
-    }
-  };
-  
-  const festivalGlow = (!optOut && activeFestival) ? getFestivalGlow(activeFestival.theme_type) : null;
-  const activeGlow = festivalGlow || glowColor;
+  const activeGlow = glowColor;
 
   return (
     <motion.div
