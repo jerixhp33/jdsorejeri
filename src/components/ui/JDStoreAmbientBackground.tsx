@@ -32,9 +32,15 @@ export function JDStoreAmbientBackground({
     };
   }, []);
 
-  // HTML5 Canvas particle engine with auto-background-removal (transparent PNG filter)
+  // Multi-element HTML5 Canvas particle engine with auto-background-removal
   useEffect(() => {
-    if (!mounted || prefersReducedMotion || !themeConfig?.element_image_url || !canvasRef.current) {
+    const rawUrls = themeConfig?.element_images && themeConfig.element_images.length > 0
+      ? themeConfig.element_images
+      : themeConfig?.element_image_url
+      ? [themeConfig.element_image_url]
+      : [];
+
+    if (!mounted || prefersReducedMotion || rawUrls.length === 0 || !canvasRef.current) {
       return;
     }
 
@@ -52,16 +58,13 @@ export function JDStoreAmbientBackground({
       rotation: number;
       rotSpeed: number;
       opacity: number;
+      imgIndex: number;
     }[] = [];
 
-    const rawImg = new Image();
-    rawImg.crossOrigin = 'anonymous';
-    rawImg.src = themeConfig.element_image_url;
-
-    const size = themeConfig.element_size || 32;
-    const count = Math.min(themeConfig.element_count || 25, 45);
-    const speedMult = themeConfig.element_speed === 'fast' ? 2.2 : themeConfig.element_speed === 'slow' ? 0.8 : 1.4;
-    const isFloat = themeConfig.element_direction === 'float';
+    const size = themeConfig?.element_size || 32;
+    const count = Math.min(themeConfig?.element_count || 25, 50);
+    const speedMult = themeConfig?.element_speed === 'fast' ? 2.2 : themeConfig?.element_speed === 'slow' ? 0.8 : 1.4;
+    const isFloat = themeConfig?.element_direction === 'float';
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -70,30 +73,46 @@ export function JDStoreAmbientBackground({
     resize();
     window.addEventListener('resize', resize);
 
-    rawImg.onload = () => {
-      // Create offscreen canvas for background removal (making white/light-grey pixels transparent)
-      const offCanvas = document.createElement('canvas');
-      offCanvas.width = rawImg.width;
-      offCanvas.height = rawImg.height;
-      const offCtx = offCanvas.getContext('2d');
-      if (!offCtx) return;
+    // Preload & filter background pixels for ALL uploaded element images
+    const loadPromises = rawUrls.map((url) => {
+      return new Promise<HTMLCanvasElement | null>((resolve) => {
+        const rawImg = new Image();
+        rawImg.crossOrigin = 'anonymous';
+        rawImg.src = url;
 
-      offCtx.drawImage(rawImg, 0, 0);
-      const imgData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
-      const d = imgData.data;
+        rawImg.onload = () => {
+          const offCanvas = document.createElement('canvas');
+          offCanvas.width = rawImg.width;
+          offCanvas.height = rawImg.height;
+          const offCtx = offCanvas.getContext('2d');
+          if (!offCtx) return resolve(null);
 
-      // Filter out pure white and light grey background pixels
-      for (let i = 0; i < d.length; i += 4) {
-        const r = d[i];
-        const g = d[i + 1];
-        const b = d[i + 2];
-        if (r > 215 && g > 215 && b > 215) {
-          d[i + 3] = 0; // Alpha = transparent
-        }
-      }
-      offCtx.putImageData(imgData, 0, 0);
+          offCtx.drawImage(rawImg, 0, 0);
+          const imgData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
+          const d = imgData.data;
 
-      // Initialize particles
+          // Filter out pure white and light grey background pixels
+          for (let i = 0; i < d.length; i += 4) {
+            const r = d[i];
+            const g = d[i + 1];
+            const b = d[i + 2];
+            if (r > 215 && g > 215 && b > 215) {
+              d[i + 3] = 0; // Make transparent
+            }
+          }
+          offCtx.putImageData(imgData, 0, 0);
+          resolve(offCanvas);
+        };
+
+        rawImg.onerror = () => resolve(null);
+      });
+    });
+
+    Promise.all(loadPromises).then((loadedCanvases) => {
+      const validCanvases = loadedCanvases.filter((c): c is HTMLCanvasElement => c !== null);
+      if (validCanvases.length === 0) return;
+
+      // Create particle instances with random image selection from validCanvases
       particles = Array.from({ length: count }).map(() => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -103,12 +122,16 @@ export function JDStoreAmbientBackground({
         rotation: Math.random() * Math.PI * 2,
         rotSpeed: (Math.random() - 0.5) * 0.03,
         opacity: Math.random() * 0.5 + 0.5,
+        imgIndex: Math.floor(Math.random() * validCanvases.length),
       }));
 
       const loop = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         particles.forEach((p) => {
+          const offCanvas = validCanvases[p.imgIndex];
+          if (!offCanvas) return;
+
           ctx.save();
           ctx.translate(p.x, p.y);
           ctx.rotate(p.rotation);
@@ -139,7 +162,7 @@ export function JDStoreAmbientBackground({
       };
 
       loop();
-    };
+    });
 
     return () => {
       window.removeEventListener('resize', resize);
@@ -168,6 +191,8 @@ export function JDStoreAmbientBackground({
   const bgMediaUrl = themeConfig?.home_bg_media_url;
   const bgMediaType = themeConfig?.home_bg_media_type || 'image';
   const bgOpacity = themeConfig?.home_bg_opacity ?? 0.35;
+
+  const hasElements = (themeConfig?.element_images && themeConfig.element_images.length > 0) || Boolean(themeConfig?.element_image_url);
 
   return (
     <>
@@ -242,8 +267,8 @@ export function JDStoreAmbientBackground({
         />
       </div>
 
-      {/* Canvas Layer for Transparent PNG Particles */}
-      {themeConfig?.element_image_url && (
+      {/* Canvas Layer for Multi-Element Transparent PNG Particles */}
+      {hasElements && (
         <canvas
           ref={canvasRef}
           className="fixed inset-0 z-[15] pointer-events-none overflow-hidden"

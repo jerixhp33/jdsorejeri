@@ -10,6 +10,7 @@ export interface HomeThemeConfig {
   glow_secondary_color?: string;
   text_accent_color?: string;
   element_image_url?: string;
+  element_images?: string[]; // Array of multiple PNG element URLs
   element_size?: number;
   element_count?: number;
   element_speed?: 'slow' | 'medium' | 'fast';

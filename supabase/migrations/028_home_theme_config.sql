@@ -11,8 +11,9 @@ CREATE TABLE IF NOT EXISTS public.home_theme_config (
   glow_secondary_color text DEFAULT 'rgba(240, 147, 251, 0.55)',
   text_accent_color text DEFAULT '#c8a96e',
   
-  -- Falling Custom PNG Elements
+  -- Falling Custom PNG Elements (Single + Multiple Images)
   element_image_url text,
+  element_images text[] DEFAULT '{}'::text[],
   element_size integer DEFAULT 32,
   element_count integer DEFAULT 25,
   element_speed text DEFAULT 'medium',

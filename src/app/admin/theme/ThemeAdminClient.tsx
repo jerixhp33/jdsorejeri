@@ -206,16 +206,36 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
     }
   };
 
-  const handlePngFile = async (file: File) => {
+  const handleAddPngFile = async (file: File) => {
     const fd = new FormData();
     fd.append('file', file);
     const res = await uploadThemeAsset(fd);
     if (res.success && res.url) {
-      setIsEditing(prev => ({ ...prev, element_image_url: res.url }));
-      toast.success('Falling element image uploaded!');
+      setIsEditing(prev => {
+        const currentList = prev?.element_images || (prev?.element_image_url ? [prev.element_image_url] : []);
+        const newList = [...currentList, res.url!];
+        return {
+          ...prev,
+          element_images: newList,
+          element_image_url: newList[0],
+        };
+      });
+      toast.success('Added new element PNG!');
     } else {
       toast.error(res.error || 'Upload failed');
     }
+  };
+
+  const handleRemovePng = (index: number) => {
+    setIsEditing(prev => {
+      const currentList = prev?.element_images || (prev?.element_image_url ? [prev.element_image_url] : []);
+      const newList = currentList.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        element_images: newList,
+        element_image_url: newList[0] || null,
+      };
+    });
   };
 
   const handleHomeBgFile = async (file: File) => {
@@ -236,6 +256,12 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
     }
   };
 
+  const getElementList = (t: Partial<HomeThemeConfig>) => {
+    if (t.element_images && t.element_images.length > 0) return t.element_images;
+    if (t.element_image_url) return [t.element_image_url];
+    return [];
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
@@ -246,7 +272,7 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
             Home Theme & Atmosphere
           </h2>
           <p className="text-white/40 text-xs mt-1">
-            Configure custom falling PNG particles, home background video/image, aura glow colors, and text accents.
+            Configure multiple custom falling PNG particles, home background video/image, aura glow colors, and text accents.
           </p>
         </div>
         <button
@@ -257,6 +283,7 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
               glow_primary_color: 'rgba(0, 242, 254, 0.55)',
               glow_secondary_color: 'rgba(240, 147, 251, 0.55)',
               text_accent_color: '#c8a96e',
+              element_images: [],
               element_size: 32,
               element_count: 25,
               element_speed: 'medium',
@@ -278,7 +305,7 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
           <thead className="bg-[#161616] border-b border-white/10 text-white/50 text-xs uppercase tracking-wider">
             <tr>
               <th className="p-4 font-medium">Title</th>
-              <th className="p-4 font-medium">Particle Image</th>
+              <th className="p-4 font-medium">Falling Elements</th>
               <th className="p-4 font-medium">Home BG Media</th>
               <th className="p-4 font-medium">Status</th>
               <th className="p-4 font-medium text-right">Actions</th>
@@ -290,6 +317,7 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
               const start = new Date(theme.start_at);
               const end = new Date(theme.end_at);
               const isRunning = theme.is_active && now >= start && now < end;
+              const elemList = getElementList(theme);
 
               return (
                 <tr key={theme.id} className="hover:bg-white/5 transition">
@@ -301,10 +329,16 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                     </div>
                   </td>
                   <td className="p-4">
-                    {theme.element_image_url ? (
+                    {elemList.length > 0 ? (
                       <div className="flex items-center gap-2">
-                        <img src={theme.element_image_url} alt="Element" className="w-7 h-7 object-contain bg-black/40 p-1 rounded border border-white/10" />
-                        <span className="text-xs text-white/60">{theme.element_size}px ({theme.element_count} items)</span>
+                        <div className="flex -space-x-2 overflow-hidden">
+                          {elemList.slice(0, 4).map((url, idx) => (
+                            <img key={idx} src={url} alt="Element" className="w-7 h-7 object-contain bg-black/60 p-0.5 rounded-full border border-white/20" />
+                          ))}
+                        </div>
+                        <span className="text-xs text-white/60 font-medium">
+                          {elemList.length} Image{elemList.length > 1 ? 's' : ''} ({theme.element_size}px)
+                        </span>
                       </div>
                     ) : (
                       <span className="text-xs text-white/30">None (Glow Only)</span>
@@ -401,19 +435,46 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                 </div>
               </div>
 
-              {/* Falling Element Image Upload (Auto White BG Removal) */}
+              {/* Multiple Falling Element Images */}
               <div className="space-y-4 pt-4 border-t border-white/10">
+                <h4 className="text-xs font-bold text-luxe-accent uppercase tracking-wider">Multiple Falling Element Images</h4>
+                
+                {/* Active Uploaded List */}
+                {isEditing && getElementList(isEditing).length > 0 && (
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium text-white/60 uppercase tracking-wider">
+                      Uploaded Elements ({getElementList(isEditing).length})
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {getElementList(isEditing).map((url, idx) => (
+                        <div key={idx} className="relative rounded-xl border border-white/10 bg-black/60 p-2 flex items-center justify-between group">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <img src={url} alt={`Elem ${idx}`} className="w-8 h-8 object-contain bg-black/80 p-0.5 rounded border border-white/10 shrink-0" />
+                            <span className="text-[11px] text-white/80 truncate">Item #{idx + 1}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePng(idx)}
+                            className="p-1 text-white/40 hover:text-red-400 transition"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload Zone */}
                 <FileUploadZone
-                  label="Falling Element Image (PNG / WebP)"
+                  label={getElementList(isEditing || {}).length > 0 ? "Add Another Element Image" : "Upload Element Image (PNG / WebP)"}
                   accept="image/*"
-                  currentUrl={isEditing?.element_image_url}
                   mediaType="image"
-                  onUpload={handlePngFile}
-                  onRemove={() => setIsEditing(prev => ({ ...prev, element_image_url: undefined }))}
-                  description="Drag & drop image, or press Ctrl+V to paste. White background is automatically made transparent!"
+                  onUpload={handleAddPngFile}
+                  description="Drag & drop image, or press Ctrl+V to paste. White background is automatically removed!"
                 />
 
-                {isEditing?.element_image_url && (
+                {isEditing && getElementList(isEditing).length > 0 && (
                   <div className="grid grid-cols-2 gap-4 pt-2">
                     <div>
                       <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Element Size ({isEditing.element_size || 32}px)</label>
@@ -427,11 +488,11 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Item Count ({isEditing.element_count || 25})</label>
+                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Total Particle Count ({isEditing.element_count || 25})</label>
                       <input
                         type="range"
                         min="10"
-                        max="45"
+                        max="50"
                         value={isEditing.element_count || 25}
                         onChange={e => setIsEditing({ ...isEditing, element_count: parseInt(e.target.value, 10) })}
                         className="w-full accent-luxe-accent cursor-pointer"
