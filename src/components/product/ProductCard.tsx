@@ -108,7 +108,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     haptic('light');
-    toggle(product);
+    toggle(product.id);
   };
 
   return (
