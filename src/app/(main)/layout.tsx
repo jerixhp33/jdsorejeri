@@ -4,6 +4,8 @@ import { createPublicClient } from '@/lib/supabase/server';
 import { getActiveFlashSale } from '@/lib/flash-sales';
 import { FlashSaleTimerClient } from '@/components/layout/FlashSaleTimerClient';
 
+export const revalidate = 60; // Revalidate every 60 seconds (ISR)
+
 export default async function MainLayout({
   children,
 }: {
