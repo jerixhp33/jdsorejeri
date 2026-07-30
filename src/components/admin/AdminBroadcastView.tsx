@@ -193,6 +193,8 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
 
     setSending(true);
     try {
+      const currentProfile = await fetch('/api/profile').then((r) => r.json());
+
       const res = await fetch('/api/admin/send-notification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
