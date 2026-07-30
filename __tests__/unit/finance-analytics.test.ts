@@ -16,7 +16,7 @@ describe('FinanceAnalyticsService', () => {
       expect(result.shippingIncome).toBe(100);
       expect(result.shippingExpense).toBe(190); // 100 * 0.9 = 90. 0 shipping = 100. Total = 190.
       expect(result.netRevenue).toBe(3000 - 100 + 100); // 3000 net
-      expect(result.estimatedProfit).toBe(3000 - (3000 * 0.6) - 190 - 0); // 3000 - 1800 - 190 = 1010
+      expect(result.netProfit).toBe(3000 - (3000 * 0.6) - 190 - 0); // 3000 - 1800 - 190 = 1010
     });
 
     it('ignores cancelled orders completely', () => {

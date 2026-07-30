@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
 
   try {
     const now = new Date();
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
         .select('sequence_number')
         .eq('cart_id', cart.id);
 
-      const sentSequences = existingReminders?.map(r => r.sequence_number) || [];
+      const sentSequences = existingReminders?.map((r: any) => r.sequence_number) || [];
       const lastUpdatedAt = new Date(cart.updated_at);
 
       let targetSequence = 0;
