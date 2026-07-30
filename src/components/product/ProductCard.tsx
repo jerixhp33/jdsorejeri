@@ -110,7 +110,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     >
       <Link prefetch={true} href={`/product/${product.slug}`} className="flex flex-col h-full">
         {/* Image Container */}
-        <div className="relative aspect-square w-full overflow-hidden bg-[#111]">
+        <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#111]">
           {inView && currentImage ? (
             <Image
               src={currentImage.url}
@@ -163,7 +163,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             position="left"
             className={cn(
               'absolute top-2 right-2 z-10',
-              'sm:opacity-0 sm:translate-x-2 sm:group-hover:opacity-100 sm:group-hover:translate-x-0 transition-all duration-200'
+              'opacity-0 group-hover:opacity-100 transition-all duration-200'
             )}
           >
             <button
@@ -171,7 +171,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               className={cn(
                 'p-2 rounded-full border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center',
                 wishlisted
-                  ? 'bg-[#200505]/90 border-red-500/40 text-red-400'
+                  ? 'bg-[#200505]/90 border-red-500/40 text-red-400 opacity-100'
                   : 'bg-black/60 border-white/20 text-white hover:bg-black/80'
               )}
               aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
@@ -180,8 +180,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </button>
           </Tooltip>
 
-          {/* Add to cart */}
-          <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300 flex">
+          {/* Add to cart (Only visible on hover/focus to keep poster artwork 100% clean) */}
+          <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 flex">
             <Tooltip 
               content={isInStock ? 'Quick Add' : 'Out of Stock'} 
               position="top" 
