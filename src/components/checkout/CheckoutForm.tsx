@@ -121,18 +121,7 @@ export function CheckoutForm() {
     }
   }, []);
 
-  // Alert on tab close or page reload if UTR submission is pending
-  useEffect(() => {
-    if (orderPlaced && paymentMethod === 'upi' && !utrSubmitted) {
-      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-        e.preventDefault();
-        e.returnValue = 'Please enter your 12-digit UTR number to complete payment verification!';
-        return e.returnValue;
-      };
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }
-  }, [orderPlaced, paymentMethod, utrSubmitted]);
+
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
