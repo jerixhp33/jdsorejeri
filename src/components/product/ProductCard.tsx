@@ -89,12 +89,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       if (hasVariants) {
         router.push(`/product/${product.slug}`);
       } else {
-        await addItem({
-          product_id: product.id,
-          title: product.name,
-          price: displayPrice,
-          image: currentImage?.url,
-        });
+        await addItem(product.id, displayPrice, 1);
       }
     } finally {
       setAddingToCart(false);
