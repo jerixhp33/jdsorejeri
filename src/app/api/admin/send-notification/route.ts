@@ -58,6 +58,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No target specified' }, { status: 400 });
     }
 
+    // Save history in email_campaigns table with text_body = 'push'
+    await supabase.from('email_campaigns').insert({
+      title: title,
+      subject: body,
+      html_body: url || '/',
+      text_body: 'push',
+      status: 'sent',
+      target_all: target_all,
+      target_user_ids: target_all ? null : target_user_ids,
+      sent_count: target_all ? 0 : target_user_ids.length, // Ideally we'd get total users if target_all
+      created_by: user.id
+    });
+
     return NextResponse.json({ success: true, message: 'Notification sent successfully' });
   } catch (error: any) {
     console.error('Error sending admin notification:', error);

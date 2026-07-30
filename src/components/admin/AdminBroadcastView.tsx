@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { motion } from 'framer-motion';
-import { Plus, Mail, Send, Clock, CheckCircle, XCircle, Users } from 'lucide-react';
+import { Plus, Mail, Send, Clock, CheckCircle, XCircle, Users, Bell } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { EmailCampaign, UserProfile } from '@/types';
@@ -205,6 +205,25 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
 
       toast.success('Push notification sent successfully!');
       setShowCompose(false);
+      
+      const newPushCampaign: EmailCampaign = {
+        id: Math.random().toString(),
+        title: pushForm.title,
+        subject: pushForm.body,
+        html_body: pushForm.url || '/',
+        text_body: 'push',
+        status: 'sent',
+        target_all: pushForm.target_all,
+        target_user_ids: pushForm.target_all ? undefined : pushForm.target_user_ids,
+        sent_count: pushForm.target_all ? users.length : pushForm.target_user_ids.length,
+        failed_count: 0,
+        opened_count: 0,
+        created_at: new Date().toISOString(),
+        created_by: currentProfile?.id || '',
+        sent_at: new Date().toISOString()
+      };
+      setCampaigns((prev) => [newPushCampaign, ...prev]);
+      
       setPushForm({ title: '', body: '', url: '/dashboard', target_all: true, target_user_ids: [] });
     } catch (err: any) {
       toast.error(err.message || 'Failed to send push notification');
@@ -262,11 +281,23 @@ export function AdminBroadcastView({ campaigns: initial, users }: AdminBroadcast
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-luxe-accent/10 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-4 h-4 text-luxe-accent" />
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                    c.text_body === 'push' ? "bg-amber-500/10" : "bg-luxe-accent/10"
+                  )}>
+                    {c.text_body === 'push' ? (
+                      <Bell className="w-4 h-4 text-amber-400" />
+                    ) : (
+                      <Mail className="w-4 h-4 text-luxe-accent" />
+                    )}
                   </div>
                   <div>
-                    <p className="text-white font-medium">{c.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-white font-medium">{c.title}</p>
+                      {c.text_body === 'push' && (
+                        <span className="text-[9px] uppercase tracking-wider bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded">Push</span>
+                      )}
+                    </div>
                     <p className="text-white/50 text-sm">{c.subject}</p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-white/30">
                       <span className="flex items-center gap-1">
