@@ -44,7 +44,7 @@ export function AdminFlashSalesView() {
       const res = await fetch('/api/products');
       if (!res.ok) throw new Error('Failed to fetch products');
       const data = await res.json();
-      setProducts(data.products || data);
+      setProducts(Array.isArray(data.data) ? data.data : (Array.isArray(data.products) ? data.products : (Array.isArray(data) ? data : [])));
     } catch (err: any) {
       console.error(err);
     }
