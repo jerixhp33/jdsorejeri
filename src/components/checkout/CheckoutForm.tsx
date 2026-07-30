@@ -90,6 +90,17 @@ export function CheckoutForm() {
     });
   }, [supabase]);
 
+  // Store Settings (for Gift Wrapping)
+  const [storeSettings, setStoreSettings] = useState<any>(null);
+  useEffect(() => {
+    supabase.from('settings').select('key, value').then(({ data }) => {
+      if (data) {
+        const config = data.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
+        setStoreSettings(config);
+      }
+    });
+  }, [supabase]);
+
   // Restore pending UTR order on page refresh / reload
   useEffect(() => {
     try {
