@@ -1,7 +1,6 @@
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { createPublicClient } from '@/lib/supabase/server';
-import { FestivalBanner } from '@/components/layout/FestivalBanner';
 
 export const revalidate = 60; // Revalidate every 60 seconds (ISR)
 

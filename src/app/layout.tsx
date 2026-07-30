@@ -8,7 +8,6 @@ import { OfflineStatusMonitor } from '@/components/shared/OfflineStatusMonitor';
 import { ToastSound } from '@/components/shared/ToastSound';
 import { PwaInstallPrompt } from '@/components/shared/PwaInstallPrompt';
 import { PushNotificationPrompt } from '@/components/shared/PushNotificationPrompt';
-import { FestivalDecorations } from '@/components/layout/FestivalDecorations';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/Providers';
 import { ContentProtector } from '@/components/shared/ContentProtector';
@@ -116,52 +115,18 @@ export const metadata: Metadata = {
 };
 
 
-
-import { cookies } from 'next/headers';
-import { getActiveFestival } from '@/lib/festivals';
-import { FestivalProvider } from '@/components/providers/FestivalProvider';
-import { FESTIVAL_THEME_TYPES, FestivalThemeType } from '@/lib/festival/types';
-
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let activeFestival = await getActiveFestival();
-  
-  if (process.env.NODE_ENV === 'development') {
-    const cookieStore = await cookies();
-    const previewVal = cookieStore.get('festival_preview')?.value as FestivalThemeType | undefined;
-    if (previewVal && FESTIVAL_THEME_TYPES.includes(previewVal)) {
-      activeFestival = {
-        id: 'mock',
-        name: `Preview: ${previewVal}`,
-        theme_type: previewVal,
-        start_at: new Date().toISOString(),
-        end_at: new Date(Date.now() + 86400000).toISOString(),
-        is_active: true,
-      };
-    }
-  }
-
   return (
     <html
       lang="en"
       suppressHydrationWarning
       className={`${inter.variable} ${playfair.variable}`}
-      data-theme={activeFestival?.theme_type}
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `
-          (function() {
-            try {
-              var pref = localStorage.getItem('jd_festival_opt_out');
-              if (pref === 'true') {
-                document.documentElement.removeAttribute('data-theme');
-              }
-            } catch (e) {}
-          })();
-        ` }} />
         {/* JSON-LD for Site Name */}
         <script
           type="application/ld+json"
@@ -184,7 +149,6 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
-            <FestivalProvider initialFestival={activeFestival}>
               <ContentProtector />
               <SmoothScroll />
               <ServiceWorkerRegister />
@@ -192,7 +156,6 @@ export default async function RootLayout({
               <ToastSound />
               <PwaInstallPrompt />
               <PushNotificationPrompt />
-              <FestivalDecorations />
               <PageLoader />
               {children}
               <MobileBottomNav />
@@ -214,7 +177,6 @@ export default async function RootLayout({
                 },
               }}
             />
-            </FestivalProvider>
           </Providers>
         </ThemeProvider>
         <Analytics />

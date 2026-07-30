@@ -7,7 +7,6 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Banner } from '@/types';
-import { useFestival } from '@/components/providers/FestivalProvider';
 
 interface BannersSectionProps {
   banners: Banner[];
@@ -80,19 +79,8 @@ function SingleBanner({ banner, priority, isAttachedTop }: { banner: Banner; pri
     }
   }, []);
 
-  const { activeFestival, optOut } = useFestival();
-  const getFestivalGlow = (themeType?: string) => {
-    switch (themeType) {
-      case 'diwali': return '255, 138, 61';
-      case 'christmas': return '200, 230, 255';
-      case 'pongal': return '249, 168, 37';
-      case 'valentines': return '230, 57, 70';
-      default: return null;
-    }
-  };
-  
-  const festivalGlow = (!optOut && activeFestival) ? getFestivalGlow(activeFestival.theme_type) : null;
-  const activeGlow = festivalGlow || glowColor;
+
+  const activeGlow = glowColor;
 
   return (
     <motion.div

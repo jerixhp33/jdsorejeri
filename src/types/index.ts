@@ -681,15 +681,4 @@ export interface AbandonedCartReminder {
   created_at: string;
 }
 
-import { FestivalThemeType, FestivalConfig } from '../lib/festival/types';
 
-export interface Festival {
-  id: string;
-  name: string;
-  theme_type: FestivalThemeType;
-  start_at: string;
-  end_at: string;
-  is_active: boolean;
-  config?: FestivalConfig;
-  created_at?: string;
-}

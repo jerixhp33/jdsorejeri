@@ -34,7 +34,6 @@ import { toast } from 'sonner';
 import type { Notification } from '@/types';
 import { JDLogo } from '@/components/shared/JDLogo';
 import { Tooltip } from '@/components/shared/Tooltip';
-import { useFestival } from '@/components/providers/FestivalProvider';
 
 import type { Category } from '@/types';
 
@@ -139,8 +138,7 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
   const { user, profile, loading } = useAuth();
   const { itemCount } = useCart();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
-  const { activeFestival, optOut } = useFestival();
-  const hasFestivalBanner = activeFestival && !optOut && activeFestival.config && (activeFestival.config.banner_text || activeFestival.config.promo_code || activeFestival.config.sale_pct);
+
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
