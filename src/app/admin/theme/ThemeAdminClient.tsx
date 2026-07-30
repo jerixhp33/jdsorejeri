@@ -233,7 +233,7 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
       return {
         ...prev,
         element_images: newList,
-        element_image_url: newList[0] || null,
+        element_image_url: newList[0] || undefined,
       };
     });
   };
