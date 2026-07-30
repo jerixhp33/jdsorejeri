@@ -40,38 +40,25 @@ export default async function HomePage() {
       
       <div className="relative z-10">
         {flashSale && (
-          <div className="w-[92%] sm:w-[85%] max-w-4xl mx-auto overflow-hidden relative z-20 mt-4 -mb-3 sm:-mb-5 md:-mb-5 bg-[#e8d5a3] text-black border-t border-x border-[#c8a96e]/30 rounded-t-2xl sm:rounded-t-3xl py-1.5 sm:py-2 shadow-[0_-10px_30px_rgba(200,169,110,0.15)]">
-            <div className="flex w-[200%] animate-marquee">
-              {/* First half of marquee */}
-              <div className="flex w-1/2 justify-around whitespace-nowrap items-center text-[10px] sm:text-xs font-extrabold tracking-widest uppercase text-black/80">
-                {Array(4).fill(0).map((_, i) => (
-                  <div key={`a-${i}`} className="flex items-center mx-4 gap-4">
-                    <span className="text-orange-600 animate-pulse text-sm">⚡</span>
-                    <span>{flashSale.title} • {flashSale.discount_percentage}% OFF</span>
-                    <div className="scale-90 origin-left opacity-80">
+          <div className="w-[92%] sm:w-[90%] max-w-[85rem] mx-auto overflow-hidden relative z-20 mt-4 -mb-3 sm:-mb-5 md:-mb-5 bg-white/10 backdrop-blur-xl text-white border-t border-x border-white/20 rounded-t-2xl sm:rounded-t-3xl py-2">
+            <div className="flex w-max animate-marquee">
+              {[1, 2].map((blockId) => (
+                <div key={blockId} className="flex shrink-0 items-center whitespace-nowrap text-[10px] sm:text-xs font-extrabold tracking-widest uppercase">
+                  {Array(6).fill(0).map((_, i) => (
+                    <div key={`${blockId}-${i}`} className="flex items-center mx-6 gap-6">
+                      <span className="text-yellow-400 animate-pulse text-sm">⚡</span>
+                      <span>{flashSale.title} • {flashSale.discount_percentage}% OFF</span>
                       <FlashSaleTimerClient endAt={flashSale.end_at} />
                     </div>
-                  </div>
-                ))}
-              </div>
-              {/* Second half of marquee (duplicate for seamless loop) */}
-              <div className="flex w-1/2 justify-around whitespace-nowrap items-center text-[10px] sm:text-xs font-extrabold tracking-widest uppercase text-black/80">
-                {Array(4).fill(0).map((_, i) => (
-                  <div key={`b-${i}`} className="flex items-center mx-4 gap-4">
-                    <span className="text-orange-600 animate-pulse text-sm">⚡</span>
-                    <span>{flashSale.title} • {flashSale.discount_percentage}% OFF</span>
-                    <div className="scale-90 origin-left opacity-80">
-                      <FlashSaleTimerClient endAt={flashSale.end_at} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         )}
 
         {/* Hero-position banners */}
-        <div className="pt-2 md:pt-4 pb-4 relative z-10">
+        <div className="pt-0 md:pt-0 pb-4 relative z-10">
           <BannersSection banners={heroBanners} />
         </div>
 
