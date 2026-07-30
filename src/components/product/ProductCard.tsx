@@ -138,7 +138,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           {inView && currentImage ? (
             <Image
               src={currentImage.url}
-              alt={currentImage.alt || product.name}
+              alt={currentImage.alt_text || product.name}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               onLoad={() => setImageLoaded(true)}
