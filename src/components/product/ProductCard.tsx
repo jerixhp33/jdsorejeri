@@ -233,9 +233,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
 
         {/* Product Info */}
-        <div className="p-3 sm:p-4 flex flex-col flex-1 gap-1.5">
-          <div>
-            <p className="text-white/40 text-[10px] sm:text-[11px] mb-0.5 leading-none">{product.category?.name}</p>
+        <div className="p-3 sm:p-4 flex flex-col flex-1 gap-2">
+          <div className="min-h-[46px] sm:min-h-[52px] flex flex-col justify-start">
+            <p className="text-white/40 text-[10px] sm:text-[11px] mb-1 leading-none">{product.category?.name}</p>
             <h3 className="text-white text-xs sm:text-sm font-medium leading-snug line-clamp-2 group-hover:text-luxe-accent transition-colors">
               {product.name}
             </h3>
