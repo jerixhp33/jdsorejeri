@@ -3,13 +3,33 @@ import { createAdminClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { session_id, cart_data, phone_number, customer_name, customer_email, status } = await req.json();
+    const { session_id, cart_data, phone_number, customer_name, customer_email, status, user_id } = await req.json();
 
     if (!session_id) {
       return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
     }
 
     const admin = await createAdminClient();
+
+    let finalPhone = phone_number;
+    if (user_id && !finalPhone) {
+      // Try to get phone from profile first
+      const { data: profileData } = await admin.from('user_profiles').select('phone').eq('id', user_id).single();
+      if (profileData?.phone) {
+        finalPhone = profileData.phone;
+      } else {
+        // Fallback to delivery addresses
+        const { data: address } = await admin.from('delivery_addresses')
+          .select('phone')
+          .eq('user_id', user_id)
+          .order('is_default', { ascending: false })
+          .limit(1)
+          .single();
+        if (address?.phone) {
+          finalPhone = address.phone;
+        }
+      }
+    }
 
     // Use upsert to create or update the cart session
     const { error } = await admin
@@ -18,7 +38,7 @@ export async function POST(req: NextRequest) {
         {
           session_id,
           cart_data,
-          phone_number,
+          phone_number: finalPhone,
           customer_name,
           customer_email,
           updated_at: new Date().toISOString(),

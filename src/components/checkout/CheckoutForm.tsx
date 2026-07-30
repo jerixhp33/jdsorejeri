@@ -136,12 +136,16 @@ export function CheckoutForm() {
   const currentName = watch('full_name');
   const currentEmail = watch('email');
 
-  // Sync Abandoned Cart when phone number is entered
+  // Sync Abandoned Cart when contact info is entered
   useEffect(() => {
-    if (currentPhone && currentPhone.length >= 10 && items.length > 0) {
+    const hasContactInfo = (currentPhone && currentPhone.length >= 10) || 
+                           (currentEmail && currentEmail.length > 5) || 
+                           (currentName && currentName.length > 2);
+                           
+    if (hasContactInfo && items.length > 0) {
       const timeoutId = setTimeout(() => {
         syncAbandonedCart(items, currentPhone, currentName, currentEmail || profile?.email || '');
-      }, 1000); // 1s debounce
+      }, 1500); // 1.5s debounce
       return () => clearTimeout(timeoutId);
     }
   }, [currentPhone, currentName, currentEmail, items, syncAbandonedCart, profile]);

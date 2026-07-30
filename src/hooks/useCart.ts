@@ -177,14 +177,15 @@ export function useCart() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         session_id: sid,
+        user_id: profile?.id,
         cart_data: currentItems,
         phone_number: phone,
-        customer_name: name,
-        customer_email: email,
+        customer_name: name || profile?.name,
+        customer_email: email || profile?.email,
         status: status,
       }),
     }).catch(console.error);
-  }, []);
+  }, [profile]);
 
   // Auto-sync when items change (debounced)
   useEffect(() => {
