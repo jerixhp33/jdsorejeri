@@ -53,15 +53,6 @@ export function FestivalDecorations() {
     );
   };
 
-  const TopGlowLine = ({ colors, shadow }: { colors: string; shadow: string }) => (
-    <div className="fixed top-0 left-0 w-full z-[100] pointer-events-none">
-      {/* Intense core line */}
-      <div className={`w-full h-[2px] ${colors} opacity-100 ${shadow}`} />
-      {/* Soft gradient fade down */}
-      <div className={`w-full h-12 bg-gradient-to-b ${colors} to-transparent opacity-20`} />
-    </div>
-  );
-
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
@@ -84,10 +75,6 @@ export function FestivalDecorations() {
       {/* DIWALI */}
       {theme_type === 'diwali' && (
         <>
-          <TopGlowLine 
-            colors="from-[#ff9900] via-[#ff5500] to-[#ff0055]" 
-            shadow="shadow-[0_0_30px_rgba(255,138,61,0.9)]" 
-          />
           {renderParticles('bg-gradient-to-tr from-yellow-400 to-orange-500 shadow-[0_0_12px_rgba(255,165,0,1)]')}
         </>
       )}
@@ -95,10 +82,6 @@ export function FestivalDecorations() {
       {/* CHRISTMAS */}
       {theme_type === 'christmas' && (
         <>
-          <TopGlowLine 
-            colors="from-[#e0f7fa] via-[#ffffff] to-[#e0f7fa]" 
-            shadow="shadow-[0_0_20px_rgba(255,255,255,1)]" 
-          />
           {renderParticles('bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)] blur-[0.5px]', true)}
         </>
       )}
@@ -106,10 +89,6 @@ export function FestivalDecorations() {
       {/* PONGAL */}
       {theme_type === 'pongal' && (
         <>
-          <TopGlowLine 
-            colors="from-[#2e7d32] via-[#f9a825] to-[#2e7d32]" 
-            shadow="shadow-[0_0_20px_rgba(249,168,37,0.7)]" 
-          />
           {renderParticles('bg-gradient-to-t from-orange-400 to-yellow-300 shadow-[0_0_10px_rgba(249,168,37,0.8)]')}
         </>
       )}
@@ -117,10 +96,6 @@ export function FestivalDecorations() {
       {/* VALENTINES */}
       {theme_type === 'valentines' && (
         <>
-          <TopGlowLine 
-            colors="from-[#ff4081] via-[#f50057] to-[#ff4081]" 
-            shadow="shadow-[0_0_25px_rgba(245,0,87,0.8)]" 
-          />
           {renderParticles('bg-gradient-to-tr from-pink-400 to-red-500 shadow-[0_0_12px_rgba(255,64,129,0.8)]')}
         </>
       )}

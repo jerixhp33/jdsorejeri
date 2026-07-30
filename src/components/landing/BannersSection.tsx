@@ -7,6 +7,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Banner } from '@/types';
+import { useFestival } from '@/components/providers/FestivalProvider';
 
 interface BannersSectionProps {
   banners: Banner[];
@@ -79,6 +80,20 @@ function SingleBanner({ banner, priority, isAttachedTop }: { banner: Banner; pri
     }
   }, []);
 
+  const { activeFestival, optOut } = useFestival();
+  const getFestivalGlow = (themeType?: string) => {
+    switch (themeType) {
+      case 'diwali': return '255, 138, 61';
+      case 'christmas': return '200, 230, 255';
+      case 'pongal': return '249, 168, 37';
+      case 'valentines': return '230, 57, 70';
+      default: return null;
+    }
+  };
+  
+  const festivalGlow = (!optOut && activeFestival) ? getFestivalGlow(activeFestival.theme_type) : null;
+  const activeGlow = festivalGlow || glowColor;
+
   return (
     <motion.div
       ref={containerRef}
@@ -90,17 +105,17 @@ function SingleBanner({ banner, priority, isAttachedTop }: { banner: Banner; pri
         "relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] group z-10",
         isAttachedTop ? "rounded-b-3xl md:rounded-b-[2.5rem]" : "rounded-3xl md:rounded-[2.5rem]"
       )}
-      style={glowColor ? {
-        boxShadow: `0 0 60px rgba(${glowColor},0.2), 0 20px 40px rgba(${glowColor},0.15)`,
+      style={activeGlow ? {
+        boxShadow: `0 0 60px rgba(${activeGlow},0.2), 0 20px 40px rgba(${activeGlow},0.15)`,
         transition: 'box-shadow 0.7s ease',
       } : undefined}
     >
       {/* Ambient background bloom */}
-      {glowColor && (
+      {activeGlow && (
         <div
           className="absolute inset-0 pointer-events-none z-0 transition-opacity duration-700"
           style={{
-            background: `radial-gradient(circle at 50% 50%, rgba(${glowColor}, 0.25) 0%, transparent 70%)`,
+            background: `radial-gradient(circle at 50% 50%, rgba(${activeGlow}, 0.25) 0%, transparent 70%)`,
             filter: 'blur(40px)',
             transform: 'scale(1.1)',
           }}
@@ -243,7 +258,19 @@ function SliderBanners({ banners, isAttachedTop }: { banners: Banner[]; isAttach
     }
   }, []);
 
-  const activeGlow = glowColors[current];
+  const { activeFestival, optOut } = useFestival();
+  const getFestivalGlow = (themeType?: string) => {
+    switch (themeType) {
+      case 'diwali': return '255, 138, 61';
+      case 'christmas': return '200, 230, 255';
+      case 'pongal': return '249, 168, 37';
+      case 'valentines': return '230, 57, 70';
+      default: return null;
+    }
+  };
+  
+  const festivalGlow = (!optOut && activeFestival) ? getFestivalGlow(activeFestival.theme_type) : null;
+  const activeGlow = festivalGlow || glowColors[current];
 
   return (
     <motion.div
@@ -420,6 +447,20 @@ function SidebarBannerCard({ banner, priority }: { banner: Banner; priority: boo
     }, 100);
   }, []);
 
+  const { activeFestival, optOut } = useFestival();
+  const getFestivalGlow = (themeType?: string) => {
+    switch (themeType) {
+      case 'diwali': return '255, 138, 61';
+      case 'christmas': return '200, 230, 255';
+      case 'pongal': return '249, 168, 37';
+      case 'valentines': return '230, 57, 70';
+      default: return null;
+    }
+  };
+  
+  const festivalGlow = (!optOut && activeFestival) ? getFestivalGlow(activeFestival.theme_type) : null;
+  const activeGlow = festivalGlow || glowColor;
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -427,17 +468,17 @@ function SidebarBannerCard({ banner, priority }: { banner: Banner; priority: boo
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       className="relative w-full overflow-hidden card-edge-light group"
-      style={glowColor ? {
-        boxShadow: `0 0 40px rgba(${glowColor},0.15), 0 8px 24px rgba(${glowColor},0.1)`,
+      style={activeGlow ? {
+        boxShadow: `0 0 40px rgba(${activeGlow},0.15), 0 8px 24px rgba(${activeGlow},0.1)`,
         transition: 'box-shadow 0.7s ease',
       } : undefined}
     >
       {/* Adaptive background bloom */}
-      {glowColor && (
+      {activeGlow && (
         <div
           className="absolute -inset-4 pointer-events-none z-0 transition-opacity duration-700"
           style={{
-            background: `radial-gradient(ellipse at 50% 100%, rgba(${glowColor},0.08) 0%, transparent 62%)`,
+            background: `radial-gradient(ellipse at 50% 100%, rgba(${activeGlow},0.08) 0%, transparent 62%)`,
           }}
         />
       )}
