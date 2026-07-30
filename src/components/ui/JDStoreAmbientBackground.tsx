@@ -32,7 +32,7 @@ export function JDStoreAmbientBackground({
     };
   }, []);
 
-  // HTML5 Canvas custom PNG falling element particle engine
+  // HTML5 Canvas particle engine with auto-background-removal (transparent PNG filter)
   useEffect(() => {
     if (!mounted || prefersReducedMotion || !themeConfig?.element_image_url || !canvasRef.current) {
       return;
@@ -54,13 +54,13 @@ export function JDStoreAmbientBackground({
       opacity: number;
     }[] = [];
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = themeConfig.element_image_url;
+    const rawImg = new Image();
+    rawImg.crossOrigin = 'anonymous';
+    rawImg.src = themeConfig.element_image_url;
 
     const size = themeConfig.element_size || 32;
     const count = Math.min(themeConfig.element_count || 25, 45);
-    const speedMult = themeConfig.element_speed === 'fast' ? 2.5 : themeConfig.element_speed === 'slow' ? 0.8 : 1.5;
+    const speedMult = themeConfig.element_speed === 'fast' ? 2.2 : themeConfig.element_speed === 'slow' ? 0.8 : 1.4;
     const isFloat = themeConfig.element_direction === 'float';
 
     const resize = () => {
@@ -70,7 +70,30 @@ export function JDStoreAmbientBackground({
     resize();
     window.addEventListener('resize', resize);
 
-    img.onload = () => {
+    rawImg.onload = () => {
+      // Create offscreen canvas for background removal (making white/light-grey pixels transparent)
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = rawImg.width;
+      offCanvas.height = rawImg.height;
+      const offCtx = offCanvas.getContext('2d');
+      if (!offCtx) return;
+
+      offCtx.drawImage(rawImg, 0, 0);
+      const imgData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
+      const d = imgData.data;
+
+      // Filter out pure white and light grey background pixels
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i];
+        const g = d[i + 1];
+        const b = d[i + 2];
+        if (r > 215 && g > 215 && b > 215) {
+          d[i + 3] = 0; // Alpha = transparent
+        }
+      }
+      offCtx.putImageData(imgData, 0, 0);
+
+      // Initialize particles
       particles = Array.from({ length: count }).map(() => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -91,7 +114,7 @@ export function JDStoreAmbientBackground({
           ctx.rotate(p.rotation);
           ctx.globalAlpha = p.opacity;
 
-          ctx.drawImage(img, -p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.drawImage(offCanvas, -p.size / 2, -p.size / 2, p.size, p.size);
 
           ctx.restore();
 
@@ -141,10 +164,18 @@ export function JDStoreAmbientBackground({
 
   const primaryGlow = themeConfig?.glow_primary_color || 'rgba(0, 242, 254, 0.55)';
   const secondaryGlow = themeConfig?.glow_secondary_color || 'rgba(240, 147, 251, 0.55)';
+  const accentColor = themeConfig?.text_accent_color || '#c8a96e';
+  const bgMediaUrl = themeConfig?.home_bg_media_url;
+  const bgMediaType = themeConfig?.home_bg_media_type || 'image';
+  const bgOpacity = themeConfig?.home_bg_opacity ?? 0.35;
 
   return (
     <>
+      {/* Global Text Accent & Luxe Accent binding */}
       <style dangerouslySetInnerHTML={{ __html: `
+        :root {
+          --luxe-accent: ${accentColor} !important;
+        }
         @keyframes crossfade1 {
           0%, 100% { opacity: 1; }
           25%, 50%, 75% { opacity: 0; }
@@ -165,12 +196,34 @@ export function JDStoreAmbientBackground({
         }
       `}} />
 
-      {/* Base Black Background - FIXED */}
+      {/* Base Black Background */}
       <div className="fixed inset-0 z-0 bg-[#0a0a0a] pointer-events-none" />
+
+      {/* Full Home Background Media (Video or Image) */}
+      {bgMediaUrl && (
+        <div
+          className="fixed inset-0 z-[1] pointer-events-none overflow-hidden transition-opacity duration-1000"
+          style={{ opacity: bgOpacity }}
+        >
+          {bgMediaType === 'video' ? (
+            <video
+              src={bgMediaUrl}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <img src={bgMediaUrl} alt="Background" className="w-full h-full object-cover" />
+          )}
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+      )}
 
       {/* Top Ambient Aura Glow */}
       <div 
-        className="absolute top-0 left-0 w-full h-[800px] z-0 pointer-events-none transition-opacity duration-[2500ms] ease-out"
+        className="absolute top-0 left-0 w-full h-[800px] z-[2] pointer-events-none transition-opacity duration-[2500ms] ease-out"
         style={{ opacity: mounted ? baseOpacity : 0 }}
       >
         <div 
@@ -189,7 +242,7 @@ export function JDStoreAmbientBackground({
         />
       </div>
 
-      {/* Canvas Layer for Custom PNG Particles */}
+      {/* Canvas Layer for Transparent PNG Particles */}
       {themeConfig?.element_image_url && (
         <canvas
           ref={canvasRef}

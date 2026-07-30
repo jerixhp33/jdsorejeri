@@ -14,10 +14,9 @@ export interface HomeThemeConfig {
   element_count?: number;
   element_speed?: 'slow' | 'medium' | 'fast';
   element_direction?: 'fall' | 'float';
-  hero_side_media_url?: string;
-  hero_side_media_type?: 'image' | 'video';
-  hero_side_link_url?: string;
-  hero_side_title?: string;
+  home_bg_media_url?: string;
+  home_bg_media_type?: 'image' | 'video';
+  home_bg_opacity?: number;
 }
 
 export async function getActiveHomeTheme(): Promise<HomeThemeConfig | null> {

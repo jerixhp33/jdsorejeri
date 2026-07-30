@@ -59,10 +59,9 @@ export async function upsertHomeTheme(data: Partial<HomeThemeConfig>) {
       element_count: data.element_count || 25,
       element_speed: data.element_speed || 'medium',
       element_direction: data.element_direction || 'fall',
-      hero_side_media_url: data.hero_side_media_url || null,
-      hero_side_media_type: data.hero_side_media_type || 'image',
-      hero_side_link_url: data.hero_side_link_url || null,
-      hero_side_title: data.hero_side_title || null,
+      home_bg_media_url: data.home_bg_media_url || null,
+      home_bg_media_type: data.home_bg_media_type || 'image',
+      home_bg_opacity: data.home_bg_opacity ?? 0.35,
       updated_at: new Date().toISOString(),
     };
 

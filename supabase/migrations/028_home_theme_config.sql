@@ -18,11 +18,10 @@ CREATE TABLE IF NOT EXISTS public.home_theme_config (
   element_speed text DEFAULT 'medium',
   element_direction text DEFAULT 'fall',
   
-  -- Hero Right-side Media Slot
-  hero_side_media_url text,
-  hero_side_media_type text DEFAULT 'image',
-  hero_side_link_url text,
-  hero_side_title text,
+  -- Home Page Background Media (Image or Video)
+  home_bg_media_url text,
+  home_bg_media_type text DEFAULT 'image',
+  home_bg_opacity numeric DEFAULT 0.35,
 
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()

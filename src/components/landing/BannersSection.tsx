@@ -396,74 +396,20 @@ function SliderBanners({ banners, isAttachedTop }: { banners: Banner[]; isAttach
 
 // ─── BannersSection ───────────────────────────────────────────────────────────
 
-import type { HomeThemeConfig } from '@/lib/theme';
-
 interface BannersSectionProps {
   banners: Banner[];
   isAttachedTop?: boolean;
-  themeConfig?: HomeThemeConfig | null;
 }
 
-export function BannersSection({ banners, isAttachedTop, themeConfig }: BannersSectionProps) {
-  if (!banners.length && !themeConfig?.hero_side_media_url) return null;
-
-  const hasSideMedia = Boolean(themeConfig?.hero_side_media_url);
+export function BannersSection({ banners, isAttachedTop }: BannersSectionProps) {
+  if (!banners.length) return null;
 
   return (
     <section className="px-4 md:px-8 lg:px-12 py-6 max-w-[1400px] mx-auto w-full">
-      {hasSideMedia ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          <div className="lg:col-span-8 flex flex-col justify-center">
-            {banners.length === 1 ? (
-              <SingleBanner banner={banners[0]} priority isAttachedTop={isAttachedTop} />
-            ) : (
-              <SliderBanners banners={banners} isAttachedTop={isAttachedTop} />
-            )}
-          </div>
-          <div className="lg:col-span-4 flex flex-col justify-center">
-            <div className="relative w-full h-full min-h-[240px] max-h-[400px] rounded-3xl overflow-hidden glass-card border border-white/10 group shadow-2xl">
-              {themeConfig?.hero_side_media_type === 'video' ? (
-                <video
-                  src={themeConfig.hero_side_media_url}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-              ) : (
-                <Image
-                  src={themeConfig!.hero_side_media_url!}
-                  alt={themeConfig?.hero_side_title || 'Featured'}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              {themeConfig?.hero_side_title && (
-                <div className="absolute bottom-4 left-4 right-4 z-10">
-                  <p className="text-white font-semibold text-base drop-shadow-md">
-                    {themeConfig.hero_side_title}
-                  </p>
-                  {themeConfig.hero_side_link_url && (
-                    <Link
-                      href={themeConfig.hero_side_link_url}
-                      className="inline-flex items-center gap-1.5 text-xs text-luxe-accent font-medium mt-1 hover:underline"
-                    >
-                      Explore now <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+      {banners.length === 1 ? (
+        <SingleBanner banner={banners[0]} priority isAttachedTop={isAttachedTop} />
       ) : (
-        banners.length === 1 ? (
-          <SingleBanner banner={banners[0]} priority isAttachedTop={isAttachedTop} />
-        ) : (
-          <SliderBanners banners={banners} isAttachedTop={isAttachedTop} />
-        )
+        <SliderBanners banners={banners} isAttachedTop={isAttachedTop} />
       )}
     </section>
   );

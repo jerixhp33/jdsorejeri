@@ -62,7 +62,7 @@ const config: Config = {
           'light-gray': '#f5f5f5',
           'mid-gray': '#888888',
           white: '#ffffff',
-          accent: '#c8a96e', // Premium gold accent
+          accent: 'var(--luxe-accent, #c8a96e)', // Dynamic accent color
           'accent-light': '#e8d5a3',
         },
       },

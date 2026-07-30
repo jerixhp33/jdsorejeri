@@ -212,13 +212,13 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
     const res = await uploadThemeAsset(fd);
     if (res.success && res.url) {
       setIsEditing(prev => ({ ...prev, element_image_url: res.url }));
-      toast.success('Falling element PNG uploaded!');
+      toast.success('Falling element image uploaded!');
     } else {
       toast.error(res.error || 'Upload failed');
     }
   };
 
-  const handleMediaFile = async (file: File) => {
+  const handleHomeBgFile = async (file: File) => {
     const fd = new FormData();
     fd.append('file', file);
     const isVideo = file.type.startsWith('video/');
@@ -227,10 +227,10 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
     if (res.success && res.url) {
       setIsEditing(prev => ({
         ...prev,
-        hero_side_media_url: res.url,
-        hero_side_media_type: isVideo ? 'video' : 'image',
+        home_bg_media_url: res.url,
+        home_bg_media_type: isVideo ? 'video' : 'image',
       }));
-      toast.success('Hero right-side media uploaded!');
+      toast.success('Home background media uploaded!');
     } else {
       toast.error(res.error || 'Upload failed');
     }
@@ -246,7 +246,7 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
             Home Theme & Atmosphere
           </h2>
           <p className="text-white/40 text-xs mt-1">
-            Configure custom falling PNG particles, aura glow colors, text accents, and hero side media.
+            Configure custom falling PNG particles, home background video/image, aura glow colors, and text accents.
           </p>
         </div>
         <button
@@ -261,7 +261,8 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
               element_count: 25,
               element_speed: 'medium',
               element_direction: 'fall',
-              hero_side_media_type: 'image',
+              home_bg_media_type: 'image',
+              home_bg_opacity: 0.35,
             })
           }
           className="flex items-center gap-2 bg-luxe-accent text-black px-4 py-2.5 rounded-xl font-semibold hover:bg-luxe-accent/90 transition shadow-lg text-sm"
@@ -277,8 +278,8 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
           <thead className="bg-[#161616] border-b border-white/10 text-white/50 text-xs uppercase tracking-wider">
             <tr>
               <th className="p-4 font-medium">Title</th>
-              <th className="p-4 font-medium">PNG Particle</th>
-              <th className="p-4 font-medium">Hero Media</th>
+              <th className="p-4 font-medium">Particle Image</th>
+              <th className="p-4 font-medium">Home BG Media</th>
               <th className="p-4 font-medium">Status</th>
               <th className="p-4 font-medium text-right">Actions</th>
             </tr>
@@ -295,8 +296,8 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                   <td className="p-4">
                     <p className="text-white font-medium">{theme.title}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="w-3 h-3 rounded-full border border-white/20" style={{ background: theme.text_accent_color || '#c8a96e' }} />
-                      <span className="text-xs text-white/40">{theme.text_accent_color}</span>
+                      <span className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ background: theme.text_accent_color || '#c8a96e' }} />
+                      <span className="text-xs text-white/40">Accent: {theme.text_accent_color}</span>
                     </div>
                   </td>
                   <td className="p-4">
@@ -306,17 +307,17 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                         <span className="text-xs text-white/60">{theme.element_size}px ({theme.element_count} items)</span>
                       </div>
                     ) : (
-                      <span className="text-xs text-white/30">None (Default Glow)</span>
+                      <span className="text-xs text-white/30">None (Glow Only)</span>
                     )}
                   </td>
                   <td className="p-4">
-                    {theme.hero_side_media_url ? (
+                    {theme.home_bg_media_url ? (
                       <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-white/10 text-xs text-white/80 capitalize">
-                        {theme.hero_side_media_type === 'video' ? <Video size={12} /> : <ImageIcon size={12} />}
-                        {theme.hero_side_media_type}
+                        {theme.home_bg_media_type === 'video' ? <Video size={12} /> : <ImageIcon size={12} />}
+                        {theme.home_bg_media_type} ({Math.round((theme.home_bg_opacity || 0.35) * 100)}%)
                       </span>
                     ) : (
-                      <span className="text-xs text-white/30">Standard Layout</span>
+                      <span className="text-xs text-white/30">Matte Black</span>
                     )}
                   </td>
                   <td className="p-4">
@@ -400,16 +401,16 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                 </div>
               </div>
 
-              {/* Drag & Drop / Paste Falling PNG Element Upload */}
+              {/* Falling Element Image Upload (Auto White BG Removal) */}
               <div className="space-y-4 pt-4 border-t border-white/10">
                 <FileUploadZone
-                  label="Falling Element (Transparent PNG)"
-                  accept="image/png,image/webp"
+                  label="Falling Element Image (PNG / WebP)"
+                  accept="image/*"
                   currentUrl={isEditing?.element_image_url}
                   mediaType="image"
                   onUpload={handlePngFile}
                   onRemove={() => setIsEditing(prev => ({ ...prev, element_image_url: undefined }))}
-                  description="Drag & drop PNG image here, or press Ctrl+V to paste from clipboard"
+                  description="Drag & drop image, or press Ctrl+V to paste. White background is automatically made transparent!"
                 />
 
                 {isEditing?.element_image_url && (
@@ -463,62 +464,78 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
                 )}
               </div>
 
-              {/* Drag & Drop / Paste Hero Right Side Media Slot */}
+              {/* Full Home Page Background Video/Image Media Slot */}
               <div className="space-y-4 pt-4 border-t border-white/10">
                 <FileUploadZone
-                  label="Hero Right-Side Media Slot (Video MP4 / Image)"
+                  label="Home Page Background Media (Video MP4 / Image)"
                   accept="image/*,video/mp4,video/webm"
-                  currentUrl={isEditing?.hero_side_media_url}
-                  mediaType={isEditing?.hero_side_media_type || 'image'}
-                  onUpload={handleMediaFile}
-                  onRemove={() => setIsEditing(prev => ({ ...prev, hero_side_media_url: undefined }))}
-                  description="Drag & drop Video or Image here, or press Ctrl+V to paste"
+                  currentUrl={isEditing?.home_bg_media_url}
+                  mediaType={isEditing?.home_bg_media_type || 'image'}
+                  onUpload={handleHomeBgFile}
+                  onRemove={() => setIsEditing(prev => ({ ...prev, home_bg_media_url: undefined }))}
+                  description="Drag & drop Video or Image here, or press Ctrl+V to paste for full background media"
                 />
 
-                {isEditing?.hero_side_media_url && (
-                  <div className="space-y-3 pt-2">
-                    <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Title / Heading</label>
-                      <input
-                        type="text"
-                        value={isEditing.hero_side_title || ''}
-                        onChange={e => setIsEditing({ ...isEditing, hero_side_title: e.target.value })}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs"
-                        placeholder="e.g. Exclusive Collection"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Click Destination Link URL</label>
-                      <input
-                        type="text"
-                        value={isEditing.hero_side_link_url || ''}
-                        onChange={e => setIsEditing({ ...isEditing, hero_side_link_url: e.target.value })}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs"
-                        placeholder="e.g. /collections/festive"
-                      />
-                    </div>
+                {isEditing?.home_bg_media_url && (
+                  <div className="pt-2">
+                    <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">
+                      Background Opacity ({Math.round((isEditing.home_bg_opacity ?? 0.35) * 100)}%)
+                    </label>
+                    <input
+                      type="range"
+                      min="0.05"
+                      max="0.8"
+                      step="0.05"
+                      value={isEditing.home_bg_opacity ?? 0.35}
+                      onChange={e => setIsEditing({ ...isEditing, home_bg_opacity: parseFloat(e.target.value) })}
+                      className="w-full accent-luxe-accent cursor-pointer"
+                    />
                   </div>
                 )}
               </div>
 
-              {/* Colors & Aura Glow */}
+              {/* Colors, Accent & Aura Glow */}
               <div className="space-y-4 pt-4 border-t border-white/10">
-                <h4 className="text-xs font-bold text-luxe-accent uppercase tracking-wider">Aura Glow & Text Colors</h4>
-                <div className="grid grid-cols-2 gap-4">
+                <h4 className="text-xs font-bold text-luxe-accent uppercase tracking-wider">Aura Glow & Text Accent Colors</h4>
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Text Accent Color</label>
+                    <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Text Accent Color (Headings & Buttons)</label>
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
                         value={isEditing?.text_accent_color || '#c8a96e'}
                         onChange={e => setIsEditing({ ...isEditing, text_accent_color: e.target.value })}
-                        className="w-8 h-8 rounded cursor-pointer bg-transparent border-0"
+                        className="w-9 h-9 rounded cursor-pointer bg-transparent border-0"
                       />
                       <input
                         type="text"
                         value={isEditing?.text_accent_color || '#c8a96e'}
                         onChange={e => setIsEditing({ ...isEditing, text_accent_color: e.target.value })}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-1.5 text-white text-xs"
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-mono"
+                        placeholder="#c8a96e or #c20000"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-2">
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Primary Aura Glow</label>
+                      <input
+                        type="text"
+                        value={isEditing?.glow_primary_color || 'rgba(0, 242, 254, 0.55)'}
+                        onChange={e => setIsEditing({ ...isEditing, glow_primary_color: e.target.value })}
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-mono"
+                        placeholder="rgba(0, 242, 254, 0.55)"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1.5 uppercase">Secondary Aura Glow</label>
+                      <input
+                        type="text"
+                        value={isEditing?.glow_secondary_color || 'rgba(240, 147, 251, 0.55)'}
+                        onChange={e => setIsEditing({ ...isEditing, glow_secondary_color: e.target.value })}
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-mono"
+                        placeholder="rgba(240, 147, 251, 0.55)"
                       />
                     </div>
                   </div>
@@ -541,7 +558,7 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
               form="theme-form"
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl font-semibold bg-luxe-accent text-black hover:bg-luxe-accent/90 transition text-sm disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl font-semibold bg-luxe-accent text-black hover:bg-luxe-accent/90 transition text-sm disabled:opacity-50 shadow-lg"
             >
               {loading ? 'Saving...' : 'Save & Activate'}
             </button>
