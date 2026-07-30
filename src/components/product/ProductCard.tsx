@@ -168,24 +168,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
 
           {/* Wishlist button */}
-          <Tooltip
-            content={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-            position="left"
-            className="absolute top-2 right-2 z-10"
+          <button
+            onClick={handleWishlist}
+            className={cn(
+              'absolute top-2 right-2 z-10 p-2 rounded-full border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center shadow-lg',
+              wishlisted
+                ? 'bg-red-500/20 border-red-500/60 text-red-500 backdrop-blur-md opacity-100 scale-105'
+                : 'bg-black/60 border-white/20 text-white hover:bg-black/80 sm:opacity-80 sm:group-hover:opacity-100'
+            )}
+            aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            <button
-              onClick={handleWishlist}
-              className={cn(
-                'p-2 rounded-full border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center shadow-lg',
-                wishlisted
-                  ? 'bg-red-500/20 border-red-500/60 text-red-500 backdrop-blur-md opacity-100 scale-105'
-                  : 'bg-black/60 border-white/20 text-white hover:bg-black/80 sm:opacity-80 sm:group-hover:opacity-100'
-              )}
-              aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-            >
-              <Heart className={cn('w-4 h-4', wishlisted && 'fill-current text-red-500')} />
-            </button>
-          </Tooltip>
+            <Heart className={cn('w-4 h-4', wishlisted && 'fill-current text-red-500')} />
+          </button>
 
           {/* Add to cart (Only visible on hover/focus to keep poster artwork 100% clean) */}
           <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 flex">

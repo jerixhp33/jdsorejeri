@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
       `;
     });
 
-    const storeUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://luxe-store.vercel.app';
-    const checkoutUrl = `${storeUrl}/checkout`;
+    const storeUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
+    const checkoutUrl = `${storeUrl}/cart`;
 
     const emailHtml = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
