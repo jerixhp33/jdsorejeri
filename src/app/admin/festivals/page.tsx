@@ -1,6 +1,5 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
-import { AdminHeader } from '@/components/admin/AdminHeader';
 import { PartyPopper } from 'lucide-react';
 import { FestivalClient } from './FestivalClient';
 
@@ -23,11 +22,15 @@ export default async function FestivalsPage() {
   return (
     <div className="flex-1 overflow-y-auto bg-black min-h-screen">
       <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
-        <AdminHeader 
-          title="Festivals & Themes" 
-          description="Manage festive overlays, atmospheric lighting, and particle effects."
-          icon={PartyPopper}
-        />
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-3 bg-luxe-accent/10 rounded-xl">
+            <PartyPopper className="text-luxe-accent w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Festivals & Themes</h1>
+            <p className="text-white/40 text-sm">Manage festive overlays, atmospheric lighting, and particle effects.</p>
+          </div>
+        </div>
         
         <FestivalClient initialFestivals={festivals || []} />
       </div>

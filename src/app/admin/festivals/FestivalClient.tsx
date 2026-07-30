@@ -6,7 +6,6 @@ import { upsertFestival, deleteFestival } from './actions';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Trash2, Edit2, Plus, Calendar, Power } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
 
 export function FestivalClient({ initialFestivals }: { initialFestivals: Festival[] }) {
   const [festivals, setFestivals] = useState(initialFestivals);
@@ -109,9 +108,11 @@ export function FestivalClient({ initialFestivals }: { initialFestivals: Festiva
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <Switch
+                      <input 
+                        type="checkbox"
+                        className="w-4 h-4 cursor-pointer accent-luxe-accent"
                         checked={festival.is_active}
-                        onCheckedChange={(checked) => handleToggle(festival, checked)}
+                        onChange={(e) => handleToggle(festival, e.target.checked)}
                       />
                       <span className={`text-xs ${isCurrentlyRunning ? 'text-green-400' : 'text-white/40'}`}>
                         {isCurrentlyRunning ? 'Currently Active' : (festival.is_active ? 'Scheduled' : 'Inactive')}
@@ -207,9 +208,11 @@ export function FestivalClient({ initialFestivals }: { initialFestivals: Festiva
               </div>
               
               <div className="flex items-center gap-3 pt-2">
-                <Switch 
+                <input 
+                  type="checkbox"
                   name="is_active" 
                   defaultChecked={isEditing.is_active} 
+                  className="w-4 h-4 cursor-pointer accent-luxe-accent"
                 />
                 <label className="text-sm text-white/80">Allow Activation</label>
               </div>
