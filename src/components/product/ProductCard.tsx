@@ -171,22 +171,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           <Tooltip
             content={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             position="left"
-            className={cn(
-              'absolute top-2 right-2 z-10',
-              'opacity-0 group-hover:opacity-100 transition-all duration-200'
-            )}
+            className="absolute top-2 right-2 z-10"
           >
             <button
               onClick={handleWishlist}
               className={cn(
-                'p-2 rounded-full border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center',
+                'p-2 rounded-full border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center shadow-lg',
                 wishlisted
-                  ? 'bg-[#200505]/90 border-red-500/40 text-red-400 opacity-100'
-                  : 'bg-black/60 border-white/20 text-white hover:bg-black/80'
+                  ? 'bg-red-500/20 border-red-500/60 text-red-500 backdrop-blur-md opacity-100 scale-105'
+                  : 'bg-black/60 border-white/20 text-white hover:bg-black/80 sm:opacity-80 sm:group-hover:opacity-100'
               )}
               aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
-              <Heart className={cn('w-3.5 h-3.5', wishlisted && 'fill-current')} />
+              <Heart className={cn('w-4 h-4', wishlisted && 'fill-current text-red-500')} />
             </button>
           </Tooltip>
 
