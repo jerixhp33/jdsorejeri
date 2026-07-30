@@ -208,45 +208,46 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
   };
 
   const uploadFileDirectly = async (file: File): Promise<string> => {
-    const supabase = createClient();
-    const ext = file.name.split('.').pop() || 'bin';
-    const filePath = `themes/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
+    try {
+      const supabase = createClient();
+      const ext = file.name.split('.').pop() || 'bin';
+      const filePath = `themes/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
 
-    // Try banners bucket first (public bucket)
-    const { data, error } = await supabase.storage
-      .from('banners')
-      .upload(filePath, file, { upsert: true });
+      // Try banners bucket first (public bucket)
+      const { data, error } = await supabase.storage
+        .from('banners')
+        .upload(filePath, file, { upsert: true });
 
-    if (!error && data) {
-      const { data: pubData } = supabase.storage.from('banners').getPublicUrl(data.path);
-      return pubData.publicUrl;
+      if (!error && data) {
+        const { data: pubData } = supabase.storage.from('banners').getPublicUrl(data.path);
+        return pubData.publicUrl;
+      }
+
+      // Try theme-assets bucket
+      const { data: taData, error: taError } = await supabase.storage
+        .from('theme-assets')
+        .upload(filePath, file, { upsert: true });
+
+      if (!taError && taData) {
+        const { data: pubData } = supabase.storage.from('theme-assets').getPublicUrl(taData.path);
+        return pubData.publicUrl;
+      }
+
+      // Fallback to server action
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await uploadThemeAsset(fd);
+      if (res.success && res.url) return res.url;
+
+      throw new Error(res.error || error?.message || 'Upload failed');
+    } catch (e: any) {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await uploadThemeAsset(fd);
+      if (res.success && res.url) return res.url;
+      throw e;
     }
-
-    // Try theme-assets bucket
-    const { data: taData, error: taError } = await supabase.storage
-      .from('theme-assets')
-      .upload(filePath, file, { upsert: true });
-
-    if (!taError && taData) {
-      const { data: pubData } = supabase.storage.from('theme-assets').getPublicUrl(taData.path);
-      return pubData.publicUrl;
-    }
-
-    // Fallback to server action
-    const fd = new FormData();
-    fd.append('file', file);
-    const res = await uploadThemeAsset(fd);
-    if (res.success && res.url) return res.url;
-
-    throw new Error(res.error || error?.message || 'Upload failed');
-  } catch (e: any) {
-    const fd = new FormData();
-    fd.append('file', file);
-    const res = await uploadThemeAsset(fd);
-    if (res.success && res.url) return res.url;
-    throw e;
-  }
-}
+  };
 
   const handleAddPngFile = async (file: File) => {
     try {
