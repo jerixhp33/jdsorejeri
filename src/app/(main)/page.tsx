@@ -14,6 +14,7 @@ import { JDStoreAmbientBackground } from '@/components/ui/JDStoreAmbientBackgrou
 
 import { getActiveFlashSale } from '@/lib/flash-sales';
 import { FlashSaleTimerClient } from '@/components/layout/FlashSaleTimerClient';
+import { getActiveHomeTheme } from '@/lib/theme';
 
 export const revalidate = 60;
 
@@ -21,11 +22,12 @@ export default async function HomePage() {
   const supabase = createPublicClient();
   
   // Fetch ONLY fast, layout-blocking data here to ensure rapid First Contentful Paint
-  const [banners, collections, marqueeLabels, flashSale] = await Promise.all([
+  const [banners, collections, marqueeLabels, flashSale, homeTheme] = await Promise.all([
     supabase.from('banners').select('*').eq('is_active', true).order('display_order').then(({ data }) => data || []),
     supabase.from('collections').select('*').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
     supabase.from('marquee_labels').select('*').eq('is_active', true).order('order_index').then(({ data }) => data || []),
     getActiveFlashSale(),
+    getActiveHomeTheme(),
   ]);
 
   const heroBanners    = banners.filter((b: any) => b.position === 'hero');
@@ -36,7 +38,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} />
+      <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} themeConfig={homeTheme} />
       
       <div className="relative z-10">
         {flashSale && (
@@ -61,7 +63,7 @@ export default async function HomePage() {
 
         {/* Hero-position banners */}
         <div className="relative z-10">
-          <BannersSection banners={heroBanners} isAttachedTop={!!flashSale} />
+          <BannersSection banners={heroBanners} isAttachedTop={!!flashSale} themeConfig={homeTheme} />
         </div>
 
       {/* Top banners */}

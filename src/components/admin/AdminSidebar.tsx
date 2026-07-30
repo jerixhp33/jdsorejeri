@@ -7,7 +7,7 @@ import { JDLogo } from '@/components/shared/JDLogo';
 import {
   LayoutDashboard, Package, ShoppingBag, Users, BarChart3,
   Image as ImageIcon, Layers, Mail, Settings, FileText, LogOut,
-  Star, HelpCircle, Menu, X, Ticket, ChevronLeft, Type, Bell, Tag, Truck, ShoppingCart, PartyPopper
+  Star, HelpCircle, Menu, X, Ticket, ChevronLeft, Type, Bell, Tag, Truck, ShoppingCart, Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -24,6 +24,7 @@ const NAV = [
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/banners', label: 'Banners', icon: ImageIcon },
   { href: '/admin/flash-sales', label: 'Flash Sales', icon: Tag },
+  { href: '/admin/theme', label: 'Theme & Atmosphere', icon: Sparkles },
   { href: '/admin/banner-generator', label: 'Banner Generator', icon: ImageIcon },
   { href: '/admin/collections', label: 'Collections', icon: Layers },
   { href: '/admin/broadcast', label: 'Broadcast', icon: Mail },
