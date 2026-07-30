@@ -101,6 +101,10 @@ const config: Config = {
           '0%': { opacity: '0', transform: 'scale(0.95)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -109,6 +113,7 @@ const config: Config = {
         fadeIn: 'fadeIn 0.5s ease-out',
         slideIn: 'slideIn 0.3s ease-out',
         scaleIn: 'scaleIn 0.2s ease-out',
+        marquee: 'marquee 20s linear infinite',
       },
       backgroundImage: {
         'glass-gradient':
