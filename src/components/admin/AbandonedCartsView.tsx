@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { formatCurrency } from '@/lib/utils';
-import { Phone, MessageCircle, Clock, ShoppingBag, Check } from 'lucide-react';
+import { Phone, MessageCircle, Clock, ShoppingBag, Check, Mail } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 
@@ -12,6 +12,7 @@ const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919360490974
 export function AbandonedCartsView() {
   const [carts, setCarts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -83,6 +84,25 @@ export function AbandonedCartsView() {
     window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_self');
   };
 
+  const sendCartEmail = async (cart: any) => {
+    if (!cart.customer_email) return;
+    setSendingEmailId(cart.id);
+    try {
+      const res = await fetch('/api/admin/abandoned-carts/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart }),
+      });
+      if (!res.ok) throw new Error('Failed to send email');
+      toast.success('Email sent successfully!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to send email');
+    } finally {
+      setSendingEmailId(null);
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-white/50 text-center font-medium animate-pulse">Loading carts...</div>;
   }
@@ -121,6 +141,9 @@ export function AbandonedCartsView() {
                   <h3 className="text-lg font-semibold text-white mb-1">
                     {cart.customer_name || 'Anonymous User'}
                   </h3>
+                  {cart.customer_email && (
+                    <div className="text-sm text-white/70 mb-2">{cart.customer_email}</div>
+                  )}
                   <div className="flex items-center gap-3 text-sm text-white/50">
                     <span className="flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" />
@@ -155,35 +178,55 @@ export function AbandonedCartsView() {
               </div>
 
               <div className="flex items-center gap-3 pt-4 border-t border-white/10">
-                {cart.phone_number ? (
-                  <button
-                    onClick={() => sendWhatsApp(cart)}
-                    className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors text-sm"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Recover on WhatsApp
-                  </button>
-                ) : (
-                  <div className="flex-1 bg-white/5 text-white/40 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium">
-                    <Phone className="w-4 h-4" />
-                    No Phone Number
-                  </div>
-                )}
+                <div className="flex-1 flex flex-col gap-2">
+                  {cart.phone_number ? (
+                    <button
+                      onClick={() => sendWhatsApp(cart)}
+                      className="w-full bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors text-sm"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp
+                    </button>
+                  ) : (
+                    <div className="w-full bg-white/5 text-white/40 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium">
+                      <Phone className="w-4 h-4" />
+                      No Phone
+                    </div>
+                  )}
+
+                  {cart.customer_email ? (
+                    <button
+                      onClick={() => sendCartEmail(cart)}
+                      disabled={sendingEmailId === cart.id}
+                      className="w-full bg-luxe-accent hover:bg-luxe-accent/90 text-black py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors text-sm disabled:opacity-50"
+                    >
+                      <Mail className="w-4 h-4" />
+                      {sendingEmailId === cart.id ? 'Sending...' : 'Send Email'}
+                    </button>
+                  ) : (
+                    <div className="w-full bg-white/5 text-white/40 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium">
+                      <Mail className="w-4 h-4" />
+                      No Email
+                    </div>
+                  )}
+                </div>
                 
-                <button
-                  onClick={() => markAsRecovered(cart.id)}
-                  title="Mark as Recovered"
-                  className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-luxe-accent/20 hover:text-luxe-accent text-white rounded-lg transition-colors"
-                >
-                  <Check className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => markAsIgnored(cart.id)}
-                  title="Dismiss Cart"
-                  className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-white rounded-lg transition-colors"
-                >
-                  <Clock className="w-4 h-4" />
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => markAsRecovered(cart.id)}
+                    title="Mark as Recovered"
+                    className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-luxe-accent/20 hover:text-luxe-accent text-white rounded-lg transition-colors"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => markAsIgnored(cart.id)}
+                    title="Dismiss Cart"
+                    className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-white rounded-lg transition-colors"
+                  >
+                    <Clock className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           );

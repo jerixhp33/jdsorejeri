@@ -134,16 +134,17 @@ export function CheckoutForm() {
   const currentPincode = watch('pincode');
   const currentPhone = watch('phone');
   const currentName = watch('full_name');
+  const currentEmail = watch('email');
 
   // Sync Abandoned Cart when phone number is entered
   useEffect(() => {
     if (currentPhone && currentPhone.length >= 10 && items.length > 0) {
       const timeoutId = setTimeout(() => {
-        syncAbandonedCart(items, currentPhone, currentName);
+        syncAbandonedCart(items, currentPhone, currentName, currentEmail || profile?.email || '');
       }, 1000); // 1s debounce
       return () => clearTimeout(timeoutId);
     }
-  }, [currentPhone, currentName, items, syncAbandonedCart]);
+  }, [currentPhone, currentName, currentEmail, items, syncAbandonedCart, profile]);
 
   // Auto-fill email when profile loads
   useEffect(() => {
@@ -487,7 +488,7 @@ export function CheckoutForm() {
       
       // Mark abandoned cart as recovered
       if (typeof window !== 'undefined') {
-        syncAbandonedCart(items, data.phone, data.full_name, 'recovered');
+        syncAbandonedCart(items, data.phone, data.full_name, data.email || profile?.email || '', 'recovered');
         localStorage.removeItem('cart_session_id');
       }
 

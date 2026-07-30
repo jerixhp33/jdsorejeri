@@ -167,7 +167,7 @@ export function useCart() {
   }, []);
 
   // Sync cart state to server for abandoned cart recovery
-  const syncAbandonedCart = useCallback((currentItems: CartItem[], phone?: string, name?: string, status?: string) => {
+  const syncAbandonedCart = useCallback((currentItems: CartItem[], phone?: string, name?: string, email?: string, status?: string) => {
     if (typeof window === 'undefined' || currentItems.length === 0) return;
     const sid = localStorage.getItem('cart_session_id');
     if (!sid) return;
@@ -180,6 +180,7 @@ export function useCart() {
         cart_data: currentItems,
         phone_number: phone,
         customer_name: name,
+        customer_email: email,
         status: status,
       }),
     }).catch(console.error);

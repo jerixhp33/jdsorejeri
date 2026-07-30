@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { session_id, cart_data, phone_number, customer_name, status } = await req.json();
+    const { session_id, cart_data, phone_number, customer_name, customer_email, status } = await req.json();
 
     if (!session_id) {
       return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
           cart_data,
           phone_number,
           customer_name,
+          customer_email,
           updated_at: new Date().toISOString(),
           ...(status && { status }), // allow updating status (e.g. 'recovered')
         },
