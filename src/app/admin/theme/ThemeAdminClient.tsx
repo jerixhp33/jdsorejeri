@@ -207,10 +207,7 @@ export function ThemeAdminClient({ initialThemes }: { initialThemes: HomeThemeCo
     }
   };
 
-import { createClient } from '@/lib/supabase/client';
-
-async function uploadFileDirectly(file: File): Promise<string> {
-  try {
+  const uploadFileDirectly = async (file: File): Promise<string> => {
     const supabase = createClient();
     const ext = file.name.split('.').pop() || 'bin';
     const filePath = `themes/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
