@@ -25,11 +25,7 @@ CREATE POLICY "Allow public read access on festivals"
 CREATE POLICY "Allow admin full access on festivals"
   ON public.festivals
   USING (
-    EXISTS (
-      SELECT 1 FROM public.user_roles 
-      WHERE user_id = auth.uid() 
-      AND role = 'admin'
-    )
+    get_my_role() IN ('admin', 'super_admin')
   );
 
 -- Grant permissions
