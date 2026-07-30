@@ -40,23 +40,28 @@ export default async function HomePage() {
       
       <div className="relative z-10">
         {flashSale && (
-          <div className="w-full bg-black/90 text-white backdrop-blur-md border-b border-white/10 relative z-[60]">
-            <div className="absolute inset-0 bg-gradient-to-r from-luxe-accent/10 via-purple-500/10 to-cyan-500/10 opacity-50" />
-            <div className="max-w-7xl mx-auto px-4 py-2 sm:py-3 relative flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-sm sm:text-base font-medium">
+          <div className="w-[92%] sm:w-[85%] max-w-4xl mx-auto bg-white/20 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.15)] rounded-2xl sm:rounded-[2rem] overflow-hidden relative z-20 mt-4 mb-2">
+            <div className="absolute inset-0 bg-gradient-to-r from-white/40 via-white/10 to-white/30 opacity-60" />
+            
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+
+            <div className="px-4 py-3 sm:py-4 relative flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8 text-sm sm:text-base font-bold text-black/90 tracking-wide">
               <div className="flex items-center gap-2">
-                <span className="text-luxe-accent">⚡</span>
-                <span className="tracking-wide text-gray-100">{flashSale.title}</span>
-                <span className="bg-white/10 px-2 py-0.5 rounded text-luxe-accent font-bold">
+                <span className="text-yellow-600 text-lg animate-pulse">⚡</span>
+                <span className="uppercase">{flashSale.title}</span>
+                <span className="bg-black/90 px-3 py-1 rounded-xl text-white font-extrabold shadow-sm">
                   {flashSale.discount_percentage}% OFF
                 </span>
               </div>
+              <div className="hidden sm:block w-px h-6 bg-black/10" />
               <FlashSaleTimerClient endAt={flashSale.end_at} />
             </div>
           </div>
         )}
 
         {/* Hero-position banners */}
-        <div className="pt-6 md:pt-8 pb-4">
+        <div className="pt-2 md:pt-4 pb-4">
           <BannersSection banners={heroBanners} />
         </div>
 

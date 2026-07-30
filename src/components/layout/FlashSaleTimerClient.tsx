@@ -46,15 +46,15 @@ export function FlashSaleTimerClient({ endAt }: { endAt: string }) {
   if (isExpired) return null;
 
   return (
-    <div className="flex items-center gap-1.5 text-gray-300">
+    <div className="flex items-center gap-1.5 text-black/70">
       <Clock className="w-4 h-4" />
-      <span>ENDS IN:</span>
-      <div className="flex items-center gap-1 font-mono font-bold text-white bg-white/5 px-2 py-0.5 rounded">
+      <span className="font-bold tracking-wider text-[11px] sm:text-xs">ENDS IN:</span>
+      <div className="flex items-center gap-1 font-mono font-bold text-black bg-black/5 px-2 py-0.5 rounded-lg border border-black/10">
         <span>{timeLeft.hours}</span>
-        <span className="text-white/50">:</span>
+        <span className="text-black/40">:</span>
         <span>{timeLeft.minutes}</span>
-        <span className="text-white/50">:</span>
-        <span className="text-luxe-accent/80">{timeLeft.seconds}</span>
+        <span className="text-black/40">:</span>
+        <span className="text-red-600">{timeLeft.seconds}</span>
       </div>
     </div>
   );
