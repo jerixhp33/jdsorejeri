@@ -40,25 +40,27 @@ export default async function HomePage() {
       
       <div className="relative z-10">
         {flashSale && (
-          <div className="w-[92%] sm:w-[90%] max-w-[85rem] mx-auto overflow-hidden relative z-20 mt-4 -mb-3 sm:-mb-5 md:-mb-5 bg-white/10 backdrop-blur-xl text-white border-t border-x border-white/20 rounded-t-2xl sm:rounded-t-3xl py-2">
-            <div className="flex w-max animate-marquee">
-              {[1, 2].map((blockId) => (
-                <div key={blockId} className="flex shrink-0 items-center whitespace-nowrap text-[10px] sm:text-xs font-extrabold tracking-widest uppercase">
-                  {Array(6).fill(0).map((_, i) => (
-                    <div key={`${blockId}-${i}`} className="flex items-center mx-6 gap-6">
-                      <span className="text-yellow-400 animate-pulse text-sm">⚡</span>
-                      <span>{flashSale.title} • {flashSale.discount_percentage}% OFF</span>
-                      <FlashSaleTimerClient endAt={flashSale.end_at} />
-                    </div>
-                  ))}
-                </div>
-              ))}
+          <div className="px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto w-full relative z-20 -mb-6 mt-4">
+            <div className="w-full overflow-hidden bg-white/10 backdrop-blur-xl text-white border-t border-x border-white/20 rounded-t-3xl md:rounded-t-[2.5rem] py-2 shadow-lg">
+              <div className="flex w-max animate-marquee">
+                {[1, 2].map((blockId) => (
+                  <div key={blockId} className="flex shrink-0 items-center whitespace-nowrap text-[10px] sm:text-xs font-extrabold tracking-widest uppercase">
+                    {Array(6).fill(0).map((_, i) => (
+                      <div key={`${blockId}-${i}`} className="flex items-center mx-6 gap-6">
+                        <span className="text-yellow-400 animate-pulse text-sm">⚡</span>
+                        <span>{flashSale.title} • {flashSale.discount_percentage}% OFF</span>
+                        <FlashSaleTimerClient endAt={flashSale.end_at} />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {/* Hero-position banners */}
-        <div className="pt-0 md:pt-0 pb-4 relative z-10">
+        <div className="relative z-10">
           <BannersSection banners={heroBanners} />
         </div>
 
