@@ -24,7 +24,12 @@ export async function sendWhatsApp(phone: string, message: string) {
   }
 
   // Normalize: strip +, spaces, dashes — keep only digits
-  const normalized = phone.replace(/[+\s\-()]/g, '');
+  let normalized = phone.replace(/[+\s\-()]/g, '');
+
+  // Automatically prepend India country code if user only entered 10 digits
+  if (normalized.length === 10) {
+    normalized = '91' + normalized;
+  }
 
   if (!normalized || normalized.length < 10) {
     console.warn(`[whatsapp] Invalid phone number: ${phone}`);
