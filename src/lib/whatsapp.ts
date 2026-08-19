@@ -5,7 +5,7 @@
  * Used for order confirmations, status updates, and shipping notifications.
  */
 
-const WHATSAPP_API_URL = process.env.WHATSAPP_API_URL || 'http://localhost:8000';
+const WHATSAPP_API_URL = process.env.WHATSAPP_API_URL || 'http://localhost:8001';
 const WHATSAPP_API_KEY = process.env.WHATSAPP_API_KEY || '';
 const WHATSAPP_ACCOUNT_ID = process.env.WHATSAPP_ACCOUNT_ID || '';
 
