@@ -28,7 +28,7 @@ export async function sendWhatsApp(phone: string, message: string) {
   }
 
   // Normalize: strip +, spaces, dashes — keep only digits
-  let normalized = phone.replace(/[+\s\-()]/g, '');
+  let normalized = String(phone).replace(/[+\s\-()]/g, '');
 
   // Automatically prepend India country code if user only entered 10 digits
   if (normalized.length === 10) {
