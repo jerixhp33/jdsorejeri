@@ -18,6 +18,10 @@ const WHATSAPP_ACCOUNT_ID = process.env.WHATSAPP_ACCOUNT_ID || '';
  * @throws If the API call fails
  */
 export async function sendWhatsApp(phone: string, message: string) {
+  console.log(`[whatsapp] Attempting to send message to ${phone}`);
+  console.log(`[whatsapp] URL: ${WHATSAPP_API_URL}`);
+  console.log(`[whatsapp] Key exists: ${!!WHATSAPP_API_KEY}, Account exists: ${!!WHATSAPP_ACCOUNT_ID}`);
+
   if (!WHATSAPP_API_KEY || !WHATSAPP_ACCOUNT_ID) {
     console.warn('[whatsapp] Missing WHATSAPP_API_KEY or WHATSAPP_ACCOUNT_ID env vars, skipping');
     return null;
