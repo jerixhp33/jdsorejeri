@@ -162,6 +162,30 @@ export async function POST(req: NextRequest) {
     // 7. Prevent duplicate abandoned cart processing for this order
     // Update local setting logic is handled in the cron job by stopping if cart orders exist
 
+    // 8. Send WhatsApp order confirmation
+    try {
+      const { sendWhatsApp } = await import('@/lib/whatsapp');
+      const { data: address } = await supabase
+        .from('delivery_addresses')
+        .select('phone, full_name')
+        .eq('id', finalAddressId)
+        .single();
+
+      if (address?.phone) {
+        const name = address.full_name?.split(' ')[0] || 'Customer';
+        await sendWhatsApp(
+          address.phone,
+          `Hi ${name}! ✅ Your JD Store order #${ordNum} has been placed successfully!\n\n` +
+          `💰 Total: ₹${calculatedTotal}\n` +
+          `📦 We'll notify you when it ships.\n\n` +
+          `Thank you for shopping with JD Store! 🎨`
+        );
+      }
+    } catch (waErr) {
+      console.error('[whatsapp] Order confirmation failed:', waErr);
+      // Non-fatal: don't fail the order if WhatsApp fails
+    }
+
     return NextResponse.json({ success: true, order });
 
   } catch (error: any) {

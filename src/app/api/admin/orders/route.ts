@@ -136,6 +136,22 @@ export async function PATCH(req: NextRequest) {
         icon: '/icon-192x192.png'
       }).catch(() => {});
 
+      // WhatsApp Notification
+      try {
+        const { data: addr } = await admin
+          .from('delivery_addresses')
+          .select('phone')
+          .eq('id', data.delivery_address_id)
+          .single();
+
+        if (addr?.phone) {
+          const { sendWhatsApp } = await import('@/lib/whatsapp');
+          await sendWhatsApp(addr.phone, msg);
+        }
+      } catch (waErr) {
+        console.error('[whatsapp] Status notification failed:', waErr);
+      }
+
       // General Email Notification (only if not sending a dispatch email later)
       if (customerEmail && !tracking_data?.notify_email) {
         const { sendEmail } = await import('@/lib/email');
@@ -204,6 +220,28 @@ export async function PATCH(req: NextRequest) {
         });
       } catch (e) {
         console.error('Failed to send web push', e);
+      }
+
+      // 4. WhatsApp dispatch notification
+      try {
+        const { data: addr } = await admin
+          .from('delivery_addresses')
+          .select('phone')
+          .eq('id', data.delivery_address_id)
+          .single();
+
+        if (addr?.phone) {
+          const { sendWhatsApp } = await import('@/lib/whatsapp');
+          const trackLink = tracking_data.tracking_url ||
+            `https://www.google.com/search?q=${tracking_data.provider}+tracking+${tracking_data.tracking_number}`;
+
+          await sendWhatsApp(
+            addr.phone,
+            `${msg}\n\n🔗 Track your package: ${trackLink}`
+          );
+        }
+      } catch (waErr) {
+        console.error('[whatsapp] Dispatch notification failed:', waErr);
       }
     }
 
