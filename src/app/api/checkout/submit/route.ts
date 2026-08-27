@@ -198,7 +198,7 @@ export async function POST(req: NextRequest) {
         
         // Let the invoice generation happen asynchronously in the background so it doesn't block the checkout response
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
-        const invoiceUrl = `${siteUrl}/dashboard/orders/${order.id}/invoice`;
+        const invoiceUrl = `${siteUrl}/invoice/${order.id}`;
         generateAndSendInvoice(address.phone, invoiceUrl).catch(err => console.error('Failed to async generate invoice', err));
       }
     } catch (waErr) {
