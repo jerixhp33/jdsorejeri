@@ -233,11 +233,18 @@ export async function PATCH(req: NextRequest) {
 
         if (addr?.phone) {
           const { sendWhatsApp, sendWhatsAppImage } = await import('@/lib/whatsapp');
-          await sendWhatsApp(addr.phone, waMsg || msg);
+          const fullMessageText = waMsg || msg;
           
-          // Send native product images directly to WhatsApp
-          for (const imgItem of statusProductImages) {
-            await sendWhatsAppImage(addr.phone, imgItem.url, imgItem.caption).catch(() => {});
+          if (statusProductImages.length > 0) {
+            // Send single merged message: product photo on top, order details as caption
+            await sendWhatsAppImage(addr.phone, statusProductImages[0].url, fullMessageText).catch(() => {});
+            
+            // If multiple products in order, send remaining images cleanly
+            for (let i = 1; i < statusProductImages.length; i++) {
+              await sendWhatsAppImage(addr.phone, statusProductImages[i].url, statusProductImages[i].caption).catch(() => {});
+            }
+          } else {
+            await sendWhatsApp(addr.phone, fullMessageText);
           }
         }
       } catch (waErr) {

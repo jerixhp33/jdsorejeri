@@ -219,7 +219,10 @@ def on_message(client: NewClient, ev: MessageEv):
         reply_text = ask_gemini(incoming_text)
         print(f"📤 Replying: {reply_text[:100]}...")
         log_chat_message(sender_jid, "ai", reply_text)
-        client.reply_message(reply_text, ev)
+        
+        # Send standard direct message to avoid bot quote context and AI badge
+        jid_obj = build_jid(sender_jid)
+        client.send_message(jid_obj, reply_text)
 
         # If user asked about products, automatically send native product photo cards!
         if any(w in incoming_text.lower() for w in ["product", "item", "sell", "buy", "store", "collection", "catalog", "what"]):

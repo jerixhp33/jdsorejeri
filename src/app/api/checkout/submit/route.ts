@@ -198,8 +198,7 @@ export async function POST(req: NextRequest) {
         }
         const itemsList = productLines.join('\n\n');
 
-        await sendWhatsApp(
-          address.phone,
+        const orderConfirmationText = 
           `🎉 *Order Placed Successfully!*\n\n` +
           `Hey ${name}! 👋\n\n` +
           `Thank you for your order at *JD Store*! ✨\n\n` +
@@ -209,12 +208,17 @@ export async function POST(req: NextRequest) {
           (deliveryCharge > 0 ? `🚚 *Delivery:* ₹${deliveryCharge}\n` : `🚚 *Delivery:* FREE ✨\n`) +
           `💵 *Total:* ₹${calculatedTotal}\n\n` +
           `📦 We'll notify you at every step — from packing to delivery!\n\n` +
-          `_JD Store — Art for every space_ 🎨`
-        );
+          `_JD Store — Art for every space_ 🎨`;
 
-        // Send native product pictures directly to WhatsApp
-        for (const pImg of productImagesToSend) {
-          await sendWhatsAppImage(address.phone, pImg.url, pImg.caption).catch(err => console.error('Failed to send product image', err));
+        if (productImagesToSend.length > 0) {
+          // Send single merged card: Product photo on top, Order Confirmation as caption
+          await sendWhatsAppImage(address.phone, productImagesToSend[0].url, orderConfirmationText).catch(err => console.error('Failed to send product image', err));
+          
+          for (let i = 1; i < productImagesToSend.length; i++) {
+            await sendWhatsAppImage(address.phone, productImagesToSend[i].url, productImagesToSend[i].caption).catch(err => console.error('Failed to send product image', err));
+          }
+        } else {
+          await sendWhatsApp(address.phone, orderConfirmationText);
         }
         
         // Let the invoice generation happen asynchronously in the background so it doesn't block the checkout response
