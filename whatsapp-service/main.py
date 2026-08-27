@@ -20,27 +20,36 @@ SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL"
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 def fetch_products_context() -> str:
-    """Fetch active products from Supabase to inform Gemini AI assistant."""
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        return ""
+    """Fetch active products directly from the live Vercel API (guarantees real store items)."""
     try:
-        url = f"{SUPABASE_URL}/rest/v1/products?select=name,slug,price,product_type,images:product_images(url)&is_active=eq.true&limit=15"
-        headers = {
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}"
-        }
-        resp = httpx.get(url, headers=headers, timeout=10)
+        url = "https://jdstorejeri.vercel.app/api/products?limit=15"
+        resp = httpx.get(url, timeout=10)
         if resp.status_code == 200:
-            products = resp.json()
+            res_data = resp.json()
+            products = res_data.get("data", [])
             lines = []
             for p in products:
                 name = p.get("name", "Product")
                 slug = p.get("slug", "")
                 price = p.get("price", 0)
                 lines.append(f"- Name: {name} | Price: ₹{price} | Link: https://jdstorejeri.vercel.app/product/{slug}")
-            return "\n".join(lines)
+            if lines:
+                return "\n".join(lines)
     except Exception as e:
-        print(f"⚠️ Error fetching products for AI: {e}")
+        print(f"⚠️ Error fetching products from Vercel API: {e}")
+
+    # Fallback to Supabase REST API if Vercel API fails
+    if SUPABASE_URL and SUPABASE_KEY:
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/products?select=name,slug,price&is_active=eq.true&limit=15"
+            headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+            resp = httpx.get(url, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                products = resp.json()
+                lines = [f"- Name: {p.get('name')} | Price: ₹{p.get('price')} | Link: https://jdstorejeri.vercel.app/product/{p.get('slug')}" for p in products]
+                return "\n".join(lines)
+        except Exception as e:
+            print(f"⚠️ Fallback Supabase product fetch error: {e}")
     return ""
 
 def ask_gemini(prompt: str) -> str:
@@ -53,12 +62,18 @@ def ask_gemini(prompt: str) -> str:
     system_instruction = (
         "You are the official AI Shopping Assistant for JD Store (https://jdstorejeri.vercel.app).\n"
         "Your goal is to assist customers, answer questions, and recommend products from the store catalog.\n\n"
-        f"AVAILABLE STORE PRODUCTS:\n{catalog_info}\n\n"
-        "CRITICAL RULES:\n"
-        "1. When customers ask what products exist, what you sell, or ask for recommendations, list the products with their exact Name (in bold *Name*), Price (in ₹), and Direct Product Link (https://jdstorejeri.vercel.app/product/slug).\n"
-        "2. Note: The product detail URL pattern is strictly https://jdstorejeri.vercel.app/product/slug (singular product).\n"
-        "3. ALWAYS include the main store app link at the end of product listings: '📱 *Shop on our App:* https://jdstorejeri.vercel.app'\n"
-        "4. Keep responses warm, attractive, well-formatted, and filled with appropriate emojis.\n"
+        f"REAL STORE PRODUCTS AVAILABLE:\n{catalog_info}\n\n"
+        "STRICT FORMATTING & RESPONSE RULES:\n"
+        "1. DO NOT repeat long introductory greetings like 'Hello! Welcome to JD Store...' in every message. Keep conversation natural and direct.\n"
+        "2. Recommend products ONLY from the REAL STORE PRODUCTS list above. Never invent fake items or dummy links.\n"
+        "3. For each product recommendation, list:\n"
+        "   🛍️ *[Product Name]*\n"
+        "   💰 Price: ₹[Price]\n"
+        "   🔗 Direct Link: https://jdstorejeri.vercel.app/product/[slug]\n"
+        "4. Note: The URL pattern MUST be strictly https://jdstorejeri.vercel.app/product/[slug] (singular 'product').\n"
+        "5. DO NOT output text image links like '🖼️ Image: https://...'. The system will send actual photo cards separately.\n"
+        "6. ALWAYS end product recommendations with: '📱 *Shop on our App:* https://jdstorejeri.vercel.app'\n"
+        "7. Use emojis and clean formatting."
     )
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={GEMINI_API_KEY}"
@@ -103,6 +118,7 @@ app.add_middleware(
 whatsapp_status = "disconnected"
 qr_code_data = ""
 chat_store = {}  # phone -> {"phone": str, "messages": list, "last_activity": str}
+processed_msg_ids = set()
 
 def log_chat_message(phone: str, sender: str, text: str):
     clean_phone = ''.join(c for c in phone if c.isdigit())
@@ -175,6 +191,16 @@ def on_message(client: NewClient, ev: MessageEv):
     if ev.Info.MessageSource.IsFromMe:
         return
 
+    # Message deduplication check to prevent double responses
+    msg_id = str(ev.Info.ID) if hasattr(ev.Info, 'ID') else None
+    if msg_id:
+        if msg_id in processed_msg_ids:
+            print(f"⏩ Duplicate message ID ignored: {msg_id}")
+            return
+        processed_msg_ids.add(msg_id)
+        if len(processed_msg_ids) > 1000:
+            processed_msg_ids.clear()
+
     incoming_text = ""
     if ev.Message.conversation:
         incoming_text = ev.Message.conversation
@@ -194,6 +220,34 @@ def on_message(client: NewClient, ev: MessageEv):
         print(f"📤 Replying: {reply_text[:100]}...")
         log_chat_message(sender_jid, "ai", reply_text)
         client.reply_message(reply_text, ev)
+
+        # If user asked about products, automatically send native product photo cards!
+        if any(w in incoming_text.lower() for w in ["product", "item", "sell", "buy", "store", "collection", "catalog", "what"]):
+            try:
+                prod_resp = httpx.get("https://jdstorejeri.vercel.app/api/products?limit=3", timeout=10)
+                if prod_resp.status_code == 200:
+                    prods = prod_resp.json().get("data", [])
+                    for p in prods:
+                        p_name = p.get("name", "Product")
+                        p_price = p.get("price", 0)
+                        p_slug = p.get("slug", "")
+                        p_images = p.get("images", [])
+                        p_img = p_images[0].get("url") if (p_images and isinstance(p_images, list) and len(p_images) > 0) else None
+                        if p_img:
+                            caption = f"🛍️ *{p_name}* — ₹{p_price}\n🔗 https://jdstorejeri.vercel.app/product/{p_slug}"
+                            jid_obj = build_jid(sender_jid)
+                            ext = "png" if ".png" in p_img.lower() else "jpg"
+                            temp_path = f"/tmp/prod_{abs(hash(p_img))}.{ext}"
+                            r = httpx.get(p_img, timeout=10)
+                            if r.status_code == 200:
+                                with open(temp_path, "wb") as f:
+                                    f.write(r.content)
+                                try:
+                                    client.send_image(jid_obj, temp_path, caption=caption)
+                                except AttributeError:
+                                    pass
+            except Exception as img_err:
+                print(f"⚠️ Error sending product photo cards: {img_err}")
     elif incoming_text:
         print(f"📥 Received from {sender_jid}: {incoming_text} (no API key, skipping AI)")
         reply_text = "Bot is running but AI is not configured yet."
