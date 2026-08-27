@@ -1,21 +1,47 @@
 import os
 import threading
 import asyncio
+import json
+import traceback
+import httpx
 from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from google import genai
 from neonize.client import NewClient
 from neonize.events import ConnectedEv, MessageEv, DisconnectedEv, event
 from playwright.async_api import async_playwright
 
 load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    gemini_client = genai.Client(api_key=api_key)
-else:
-    gemini_client = None
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+print(f"🔑 Gemini API Key loaded: {'Yes (' + GEMINI_API_KEY[:8] + '...)' if GEMINI_API_KEY else 'No'}")
+
+def ask_gemini(prompt: str) -> str:
+    """Call Gemini API directly via HTTP to avoid SDK incompatibilities with AQ. keys."""
+    if not GEMINI_API_KEY:
+        return "Gemini API key is not configured."
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}]
+    }
+    try:
+        resp = httpx.post(url, json=payload, timeout=30)
+        print(f"🌐 Gemini API response status: {resp.status_code}")
+        if resp.status_code != 200:
+            print(f"❌ Gemini API error body: {resp.text}")
+            return f"AI service error (status {resp.status_code}). Please check API key."
+        data = resp.json()
+        # Extract text from the response
+        candidates = data.get("candidates", [])
+        if candidates:
+            parts = candidates[0].get("content", {}).get("parts", [])
+            if parts:
+                return parts[0].get("text", "No response generated.")
+        return "No response generated."
+    except Exception as e:
+        print(f"❌ Gemini HTTP error: {traceback.format_exc()}")
+        return "Sorry, I couldn't reach the AI service."
 
 app = FastAPI(title="WhatsApp Bot Service")
 
@@ -67,19 +93,14 @@ def on_message(client: NewClient, ev: MessageEv):
     elif ev.Message.extendedTextMessage and ev.Message.extendedTextMessage.text:
         incoming_text = ev.Message.extendedTextMessage.text
 
-    if incoming_text and gemini_client:
+    if incoming_text and GEMINI_API_KEY:
         print(f"📥 Received: {incoming_text}")
-        try:
-            response = gemini_client.models.generate_content(
-                model='gemini-1.5-flash',
-                contents=incoming_text
-            )
-            reply_text = response.text
-            print(f"📤 Replying: {reply_text}")
-            client.reply_message(reply_text, ev)
-        except Exception as e:
-            print(f"❌ Error generating response: {e}")
-            client.reply_message("Sorry, I encountered an error.", ev)
+        reply_text = ask_gemini(incoming_text)
+        print(f"📤 Replying: {reply_text[:100]}...")
+        client.reply_message(reply_text, ev)
+    elif incoming_text:
+        print(f"📥 Received: {incoming_text} (no API key, skipping AI)")
+        client.reply_message("Bot is running but AI is not configured yet.", ev)
 
 def start_neonize():
     import time
