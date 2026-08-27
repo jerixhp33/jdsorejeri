@@ -4,6 +4,7 @@ import { Instagram, Twitter, Mail, Phone, MapPin, ExternalLink } from 'lucide-re
 
 const FOOTER_LINKS = {
   Shop: [
+    { label: 'Custom Photo Poster 🎨', href: '/product/custom-photo-poster' },
     { label: 'Wall Posters', href: '/category/poster' },
     { label: 'Earrings', href: '/category/earring' },
     { label: 'Collections', href: '/collections' },

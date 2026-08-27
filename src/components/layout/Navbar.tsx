@@ -357,7 +357,19 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
                       )}
                     </AnimatePresence>
                   </div>
-                )}
+            <nav className="hidden lg:flex items-center space-[#1.5rem] space-x-6 text-sm">
+                <Link prefetch={true} href="/" className={cn("nav-link", pathname === '/' && "active")}>
+                  Home
+                </Link>
+
+                <Link 
+                  prefetch={true} 
+                  href="/product/custom-photo-poster" 
+                  className={cn("nav-link text-amber-400 font-semibold flex items-center gap-1", pathname === '/product/custom-photo-poster' && "active")}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                  Custom Poster
+                </Link>
 
                 <Link prefetch={true} href="/collections" className={cn("nav-link", pathname === '/collections' && "active")}>
                   Collections
@@ -365,7 +377,14 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
             </nav>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
+              <Link
+                href="/product/custom-photo-poster"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold text-xs shadow-md shadow-amber-400/20 hover:scale-105 transition-transform"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-black" />
+                Custom Poster
+              </Link>
               {/* Search */}
               <Tooltip content="Search">
                 <button
