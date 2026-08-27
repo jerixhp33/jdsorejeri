@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 
-export async function GET(req: NextRequest, { params }: { params: { uploadId: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ uploadId: string }> }) {
   try {
+    const { uploadId } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: { uploadId: st
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const uploadId = params.uploadId;
+
     const { data: upload, error: uploadErr } = await admin
       .from('custom_uploads')
       .select('*')
