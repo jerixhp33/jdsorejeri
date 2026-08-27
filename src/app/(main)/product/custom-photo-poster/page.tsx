@@ -253,7 +253,7 @@ export default function CustomPhotoPosterPage() {
             <div className="bg-luxe-gray/60 border border-white/10 rounded-2xl p-6 space-y-6">
               <h2 className="text-base font-semibold text-white flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-amber-400 text-black font-bold text-xs flex items-center justify-center">2</span>
-                Choose Size & Framing
+                Choose Size{frames.length > 0 ? ' & Framing' : ''}
               </h2>
 
               <PosterSizeSelector

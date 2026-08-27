@@ -28,7 +28,7 @@ BEGIN
             is_active, is_featured, is_customizable, product_type, attributes
         ) VALUES (
             v_product_id, 'custom-photo-poster', 'Custom Photo Poster', 'Turn your memories into premium wall art.', 
-            'Upload a high-resolution photo and get it printed on museum-grade gallery paper. Available in multiple sizes and elegant framing options.',
+            'Upload a high-resolution photo and get it printed on museum-grade gallery paper. Available in multiple sizes.',
             199, 100, 999, 'CP-BASE', v_category_id,
             true, true, true, 'poster', '{}'::jsonb
         );
