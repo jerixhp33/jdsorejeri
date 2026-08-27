@@ -107,44 +107,67 @@ function DesktopGrid({ products }: { products: Product[] }) {
   );
 }
 
-/* ─── Mobile Carousel with Curved Depth + Infinite Loop ─── */
+/* ─── Mobile Carousel ─── */
 function MobileCarousel({ products }: { products: Product[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef(null);
   const isInView = useInView(trackRef, { once: true, margin: '-40px' });
+  const isUserScrolling = useRef(false);
   const itemCount = Math.min(products.length, 8);
   const items = products.slice(0, itemCount);
 
-  // Per-card visibility state: 0 = fully blurred/scaled, 1 = center/focused
+  // Per-card focus: 0 = side, 1 = center
   const [cardFocus, setCardFocus] = useState<number[]>([]);
 
-  // Seamless infinite loop: when user scrolls to 3rd set, silently jump back to 2nd
-  // We render 5 sets for smooth looping
-  const SETS = 5;
+  // 3 sets for looping
+  const SETS = 3;
   const allItems = Array.from({ length: SETS }, () => items).flat();
 
-  const getCardMetrics = useCallback(() => {
+  const getStride = useCallback(() => {
     const el = scrollRef.current;
-    if (!el || !el.children.length) return null;
+    if (!el || !el.children.length) return 0;
     const card = el.children[0] as HTMLElement;
-    const cardWidth = card.offsetWidth;
-    const gap = 16;
-    return { cardWidth, gap, stride: cardWidth + gap };
+    return card.offsetWidth + 16; // card width + gap
   }, []);
 
-  // Start at set 2 (middle) for bidirectional scrolling
+  // Start at set 1 (middle) — NO scroll-behavior so it's instant & invisible
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || itemCount === 0) return;
-    const t = requestAnimationFrame(() => {
-      const metrics = getCardMetrics();
-      if (!metrics) return;
-      el.scrollLeft = metrics.stride * itemCount * 2;
+    // Use double rAF to ensure layout is done
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const stride = getStride();
+        if (!stride) return;
+        // Temporarily disable smooth scroll for the silent jump
+        el.style.scrollBehavior = 'auto';
+        el.scrollLeft = stride * itemCount;
+        // Restore after jump
+        requestAnimationFrame(() => {
+          el.style.scrollBehavior = '';
+        });
+      });
     });
-    return () => cancelAnimationFrame(t);
-  }, [itemCount, getCardMetrics]);
+  }, [itemCount, getStride]);
 
-  // Infinite loop reset + curved focus calculation
+  // Track user touch to prevent loop-reset during active swipe
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onTouchStart = () => { isUserScrolling.current = true; };
+    const onTouchEnd = () => { 
+      // Small delay to let momentum finish
+      setTimeout(() => { isUserScrolling.current = false; }, 300);
+    };
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
+
+  // Focus calculation on scroll
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -156,28 +179,34 @@ function MobileCarousel({ products }: { products: Product[] }) {
       ticking = true;
       requestAnimationFrame(() => {
         ticking = false;
-        const metrics = getCardMetrics();
-        if (!metrics) return;
+        if (!el) return;
+        const stride = getStride();
+        if (!stride) return;
 
-        const { stride } = metrics;
         const setWidth = stride * itemCount;
         const centerX = el.scrollLeft + el.clientWidth / 2;
 
-        // Silent jump for seamless loop
-        if (el.scrollLeft >= setWidth * 4) {
-          el.scrollLeft -= setWidth * 2;
-        } else if (el.scrollLeft <= setWidth * 0.5) {
-          el.scrollLeft += setWidth * 2;
+        // Silent infinite loop reset — only when user is NOT touching
+        if (!isUserScrolling.current) {
+          if (el.scrollLeft > setWidth * 2.2) {
+            el.style.scrollBehavior = 'auto';
+            el.scrollLeft -= setWidth;
+            el.style.scrollBehavior = '';
+          } else if (el.scrollLeft < setWidth * 0.3) {
+            el.style.scrollBehavior = 'auto';
+            el.scrollLeft += setWidth;
+            el.style.scrollBehavior = '';
+          }
         }
 
-        // Calculate per-card focus (0..1) based on distance from center
+        // Calculate per-card focus
         const focuses: number[] = [];
         for (let i = 0; i < el.children.length; i++) {
           const child = el.children[i] as HTMLElement;
           const childCenter = child.offsetLeft + child.offsetWidth / 2;
           const dist = Math.abs(centerX - childCenter);
-          const maxDist = el.clientWidth * 0.6;
-          const focus = Math.max(0, 1 - dist / maxDist);
+          const maxDist = el.clientWidth * 0.55;
+          const focus = Math.max(0, Math.min(1, 1 - dist / maxDist));
           focuses.push(focus);
         }
         setCardFocus(focuses);
@@ -185,10 +214,10 @@ function MobileCarousel({ products }: { products: Product[] }) {
     };
 
     el.addEventListener('scroll', onScroll, { passive: true });
-    // Initial calc
-    onScroll();
+    // Initial
+    requestAnimationFrame(onScroll);
     return () => el.removeEventListener('scroll', onScroll);
-  }, [itemCount, getCardMetrics]);
+  }, [itemCount, getStride]);
 
   return (
     <div ref={trackRef} className="relative">
@@ -200,32 +229,32 @@ function MobileCarousel({ products }: { products: Product[] }) {
       >
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto px-4 pb-4 pt-1 items-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-4 overflow-x-auto px-4 pb-4 pt-1 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           style={{
-            maskImage:
-              'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
-            WebkitMaskImage:
-              'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
+            maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
           }}
         >
           {allItems.map((product, i) => {
-            const focus = cardFocus[i] ?? 0;
-            // Curved depth: center card is scale 1, sharp, lifted
-            // Side cards shrink, blur, and drop
-            const scale = 0.88 + focus * 0.12; // 0.88 → 1.0
-            const blur = (1 - focus) * 2.5; // 2.5px → 0
-            const translateY = (1 - focus) * 8; // 8px down → 0
-            const opacity = 0.5 + focus * 0.5; // 0.5 → 1.0
+            const focus = cardFocus[i] ?? 0.5;
+
+            // Subtle curved effect:
+            // Center: scale 1, no blur, no Y shift, full opacity
+            // Sides: scale 0.94, tiny blur, slight Y shift, slightly dimmed
+            const scale = 0.94 + focus * 0.06;
+            const blur = (1 - focus) * 1.2;
+            const translateY = (1 - focus) * 4;
+            const opacity = 0.65 + focus * 0.35;
 
             return (
               <div
-                key={`${product.id}-${i}`}
-                className="w-[46vw] flex-shrink-0 will-change-transform"
+                key={`bs-${product.id}-${i}`}
+                className="w-[60vw] flex-shrink-0 will-change-transform"
                 style={{
                   transform: `scale(${scale}) translateY(${translateY}px)`,
-                  filter: blur > 0.2 ? `blur(${blur}px)` : 'none',
+                  filter: blur > 0.15 ? `blur(${blur}px)` : 'none',
                   opacity,
-                  transition: 'transform 0.15s ease-out, filter 0.2s ease-out, opacity 0.2s ease-out',
+                  transition: 'transform 0.12s linear, filter 0.18s linear, opacity 0.18s linear',
                 }}
               >
                 <ProductCard product={product} index={i % itemCount} />
@@ -235,7 +264,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
         </div>
       </motion.div>
 
-      {/* Progress indicator */}
+      {/* Progress dots */}
       <ScrollDots scrollRef={scrollRef} itemCount={itemCount} />
     </div>
   );
@@ -261,7 +290,7 @@ function ScrollDots({
       if (!card) return;
       const stride = card.offsetWidth + 16;
       const rawIndex = Math.round(el.scrollLeft / stride);
-      setActiveIndex(rawIndex % itemCount);
+      setActiveIndex(((rawIndex % itemCount) + itemCount) % itemCount);
     };
 
     el.addEventListener('scroll', onScroll, { passive: true });
@@ -275,11 +304,11 @@ function ScrollDots({
           key={i}
           className="h-1 rounded-full"
           style={{
-            width: activeIndex % dotCount === i ? 20 : 6,
+            width: activeIndex % dotCount === i ? 18 : 5,
             backgroundColor:
               activeIndex % dotCount === i
                 ? 'rgba(212, 175, 55, 0.9)'
-                : 'rgba(255, 255, 255, 0.15)',
+                : 'rgba(255, 255, 255, 0.12)',
             transition: 'width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s ease',
           }}
         />
