@@ -227,25 +227,11 @@ function MobileCarousel({ products }: { products: Product[] }) {
         transition={{ duration: 0.5 }}
         className="relative -mx-4"
       >
-        {/* Rainbow aurora edge glows */}
-        <div className="absolute left-0 top-0 bottom-0 w-12 z-20 pointer-events-none"
-          style={{
-            background: 'linear-gradient(to right, rgba(168,85,247,0.25), rgba(59,130,246,0.15), rgba(236,72,153,0.1), transparent)',
-            filter: 'blur(8px)',
-          }}
-        />
-        <div className="absolute right-0 top-0 bottom-0 w-12 z-20 pointer-events-none"
-          style={{
-            background: 'linear-gradient(to left, rgba(251,146,60,0.25), rgba(234,179,8,0.15), rgba(168,85,247,0.1), transparent)',
-            filter: 'blur(8px)',
-          }}
-        />
-
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-[15vw] pb-6 pt-2 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-2 overflow-x-auto snap-x snap-mandatory px-[25vw] pb-6 pt-2 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           style={{
-            scrollPaddingInline: '15vw',
+            scrollPaddingInline: '25vw',
           }}
         >
           {allItems.map((product, i) => {
@@ -260,7 +246,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
             return (
               <div
                 key={`bs-${product.id}-${i}`}
-                className="w-[55vw] flex-shrink-0 snap-center will-change-transform"
+                className="w-[50vw] flex-shrink-0 snap-center will-change-transform"
                 style={{
                   transform: `scale(${scale}) translateY(${translateY}px)`,
                   filter: blur > 0.1 ? `blur(${blur}px)` : 'none',
