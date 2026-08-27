@@ -171,47 +171,71 @@ function MobileCarousel({ products }: { products: Product[] }) {
     const el = scrollRef.current;
     if (!el) return;
     const onDown = () => { isUserScrolling.current = true; };
-    const onUp = () => { setTimeout(() => { isUserScrolling.current = false; }, 400); };
+    const onUp = () => { setTimeout(() => { isUserScrolling.current = false; }, 600); };
     el.addEventListener('touchstart', onDown, { passive: true });
     el.addEventListener('touchend', onUp, { passive: true });
     return () => { el.removeEventListener('touchstart', onDown); el.removeEventListener('touchend', onUp); };
   }, []);
 
-  // Scroll handler — direct DOM only, no setState
+  // Scroll handler — direct DOM, debounced loop reset
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     let ticking = false;
+    let resetTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const doReset = () => {
+      if (!el || isUserScrolling.current) return;
+      const stride = getStride();
+      if (!stride) return;
+      const setWidth = stride * itemCount;
+
+      let needsReset = false;
+      let newScroll = el.scrollLeft;
+
+      if (el.scrollLeft > setWidth * 2) {
+        newScroll = el.scrollLeft - setWidth;
+        needsReset = true;
+      } else if (el.scrollLeft < setWidth * 0.5) {
+        newScroll = el.scrollLeft + setWidth;
+        needsReset = true;
+      }
+
+      if (needsReset) {
+        // Temporarily kill snap so the jump is invisible
+        el.style.scrollSnapType = 'none';
+        el.style.scrollBehavior = 'auto';
+        el.scrollLeft = newScroll;
+        // Restore snap after the jump settles
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            el.style.scrollSnapType = '';
+            el.style.scrollBehavior = '';
+          });
+        });
+      }
+    };
 
     const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        if (!el) return;
-        const stride = getStride();
-        if (!stride) return;
-        const setWidth = stride * itemCount;
+      // Always apply focus on every frame
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          applyFocus();
+        });
+      }
 
-        // Silent loop reset only after touch ends
-        if (!isUserScrolling.current) {
-          if (el.scrollLeft > setWidth * 2.2) {
-            el.style.scrollBehavior = 'auto';
-            el.scrollLeft -= setWidth;
-            el.style.scrollBehavior = '';
-          } else if (el.scrollLeft < setWidth * 0.3) {
-            el.style.scrollBehavior = 'auto';
-            el.scrollLeft += setWidth;
-            el.style.scrollBehavior = '';
-          }
-        }
-
-        applyFocus();
-      });
+      // Debounce the loop reset — only fire after scroll fully stops
+      if (resetTimer) clearTimeout(resetTimer);
+      resetTimer = setTimeout(doReset, 600);
     };
 
     el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      if (resetTimer) clearTimeout(resetTimer);
+    };
   }, [itemCount, getStride, applyFocus]);
 
   return (
