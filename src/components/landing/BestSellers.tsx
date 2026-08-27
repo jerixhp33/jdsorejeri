@@ -260,22 +260,22 @@ function MobileCarousel({ products }: { products: Product[] }) {
                 className="w-[50vw] flex-shrink-0 snap-center will-change-transform relative"
                 style={{ transition: 'transform 0.08s linear, filter 0.12s linear, opacity 0.12s linear' }}
               >
-                {/* Ambient color glow — blurred product image behind the card */}
+                {/* Subtle edge light — tight blurred image behind the card */}
                 {img && (
                   <div
-                    className="absolute -inset-2 z-0 rounded-3xl overflow-hidden pointer-events-none"
+                    className="absolute -inset-1 z-0 rounded-[1.25rem] overflow-hidden pointer-events-none opacity-40 mix-blend-screen"
                     aria-hidden="true"
                   >
                     <img
                       src={img}
                       alt=""
-                      className="w-full h-full object-cover opacity-40"
-                      style={{ filter: 'blur(20px) saturate(1.8)' }}
+                      className="w-full h-full object-cover"
+                      style={{ filter: 'blur(8px) saturate(1.5)' }}
                       loading="lazy"
                     />
                   </div>
                 )}
-                <div className="relative z-10">
+                <div className="relative z-10 h-full">
                   <ProductCard product={product} index={i % itemCount} />
                 </div>
               </div>
