@@ -30,3 +30,17 @@ ON public.whatsapp_chat_messages
 FOR SELECT 
 TO authenticated
 USING (true);
+
+-- Allow Anon / API Key to insert and read chat messages
+CREATE POLICY "Anon Insert whatsapp_chat_messages" 
+ON public.whatsapp_chat_messages
+FOR INSERT 
+TO anon
+WITH CHECK (true);
+
+CREATE POLICY "Anon Select whatsapp_chat_messages" 
+ON public.whatsapp_chat_messages
+FOR SELECT 
+TO anon
+USING (true);
+

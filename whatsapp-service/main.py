@@ -121,9 +121,11 @@ chat_store = {}  # phone -> {"phone": str, "messages": list, "last_activity": st
 processed_msg_ids = set()
 
 def log_chat_message(phone: str, sender: str, text: str):
-    clean_phone = ''.join(c for c in phone if c.isdigit())
+    phone_str = str(phone)
+    clean_phone = ''.join(c for c in phone_str if c.isdigit())
     if not clean_phone:
-        return
+        clean_phone = phone_str if phone_str and phone_str != "None" else "unknown"
+
     from datetime import datetime
     now_iso = datetime.utcnow().isoformat() + "Z"
     
@@ -159,8 +161,10 @@ def log_chat_message(phone: str, sender: str, text: str):
                 "message_text": text,
                 "created_at": now_iso
             }
-            res = httpx.post(url, headers=headers, json=payload, timeout=5)
+            res = httpx.post(url, headers=headers, json=payload, timeout=10)
             print(f"💾 Logged message to Supabase ({clean_phone}, {sender}): status {res.status_code}")
+            if res.status_code >= 400:
+                print(f"❌ Supabase insert error ({res.status_code}): {res.text}")
         except Exception as e:
             print(f"⚠️ Supabase chat persist error: {e}")
 
