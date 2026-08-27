@@ -169,8 +169,10 @@ export async function POST(req: NextRequest) {
     );
     if (itemsErr) throw itemsErr;
 
-    // 7. Insert Notification into Admin Notification Center if Custom Photo Order
+    // 7. Fetch Customer Name for Notifications
     const customItem = validatedItems.find(i => i.custom_upload_id);
+    let customerName = 'Customer';
+    
     try {
       const { data: addressObj } = await supabase
         .from('delivery_addresses')
@@ -178,7 +180,9 @@ export async function POST(req: NextRequest) {
         .eq('id', finalAddressId)
         .maybeSingle();
 
-      const customerName = addressObj?.full_name || 'Customer';
+      if (addressObj?.full_name) {
+        customerName = addressObj.full_name;
+      }
 
       await supabase.from('notifications').insert({
         type: customItem ? 'custom_order' : 'order',
