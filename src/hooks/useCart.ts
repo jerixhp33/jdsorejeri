@@ -108,7 +108,8 @@ export function useCart() {
             id, name, slug, product_type, stock,
             images:product_images(url, is_primary, display_order)
           ),
-          poster_size:poster_sizes(*)
+          poster_size:poster_sizes(*),
+          custom_upload:custom_uploads(preview_url)
         `
         )
         .eq('cart_id', cartData.id)

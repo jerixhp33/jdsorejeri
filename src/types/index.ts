@@ -177,6 +177,8 @@ export interface CartItem {
   product?: Product;
   poster_size_id?: string;
   poster_size?: PosterSize;
+  custom_upload_id?: string;
+  custom_upload?: { preview_url: string };
   quantity: number;
   unit_price: number;
   created_at: string;
@@ -230,6 +232,8 @@ export interface OrderItem {
   product?: Product;
   poster_size_id?: string;
   poster_size?: PosterSize;
+  custom_upload_id?: string;
+  custom_upload?: { preview_url: string };
   quantity: number;
   unit_price: number;
   total_price: number;

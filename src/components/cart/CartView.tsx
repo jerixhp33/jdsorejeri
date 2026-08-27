@@ -157,10 +157,12 @@ export function CartView() {
             <AnimatePresence>
               {items.map((item, index) => {
                 const primaryImage =
-                  (item.product?.images as { url: string; is_primary: boolean }[])?.find(
-                    (img) => img.is_primary
-                  ) ||
-                  (item.product?.images as { url: string }[])?.[0];
+                  item.custom_upload?.preview_url 
+                    ? { url: item.custom_upload.preview_url }
+                    : (item.product?.images as { url: string; is_primary: boolean }[])?.find(
+                        (img) => img.is_primary
+                      ) ||
+                      (item.product?.images as { url: string }[])?.[0];
 
                 return (
                   <motion.div
