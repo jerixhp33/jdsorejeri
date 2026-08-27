@@ -7,7 +7,7 @@ import { JDLogo } from '@/components/shared/JDLogo';
 import {
   LayoutDashboard, Package, ShoppingBag, Users, BarChart3,
   Image as ImageIcon, Layers, Mail, Settings, FileText, LogOut,
-  Star, HelpCircle, Menu, X, Ticket, ChevronLeft, Type, Bell, Tag, Truck, ShoppingCart, Sparkles
+  Star, HelpCircle, Menu, X, Ticket, ChevronLeft, Type, Bell, Tag, Truck, ShoppingCart, Sparkles, MessageCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -58,6 +58,7 @@ const NAV_GROUPS = [
     title: 'SYSTEM',
     items: [
       { href: '/admin/settings', label: 'Settings', icon: Settings },
+      { href: '/admin/whatsapp', label: 'WhatsApp Bot', icon: MessageCircle },
     ],
   },
 ];

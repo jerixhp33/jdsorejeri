@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { notifyAdmins } from '@/lib/web-push-helper';
+import { sendWhatsApp } from '@/lib/whatsapp';
 import { formatCurrency } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
@@ -20,6 +21,9 @@ export async function POST(request: NextRequest) {
       url: `/admin/orders/${orderId}`,
       icon: '/icon-192x192.png'
     });
+
+    // Also send WhatsApp to admin
+    await sendWhatsApp('9360490974', `🎉 New Order Received!\n\n${bodyText}\n\nView Order: /admin/orders/${orderId}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

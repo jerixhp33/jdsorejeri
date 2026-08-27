@@ -162,9 +162,9 @@ export async function POST(req: NextRequest) {
     // 7. Prevent duplicate abandoned cart processing for this order
     // Update local setting logic is handled in the cron job by stopping if cart orders exist
 
-    // 8. Send WhatsApp order confirmation
+    // 8. Send WhatsApp order confirmation and Invoice
     try {
-      const { sendWhatsApp } = await import('@/lib/whatsapp');
+      const { sendWhatsApp, generateAndSendInvoice } = await import('@/lib/whatsapp');
       const { data: address } = await supabase
         .from('delivery_addresses')
         .select('phone, full_name')
@@ -180,6 +180,11 @@ export async function POST(req: NextRequest) {
           `📦 We'll notify you when it ships.\n\n` +
           `Thank you for shopping with JD Store! 🎨`
         );
+        
+        // Let the invoice generation happen asynchronously in the background so it doesn't block the checkout response
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
+        const invoiceUrl = `${siteUrl}/dashboard/orders/${order.id}/invoice`;
+        generateAndSendInvoice(address.phone, invoiceUrl).catch(err => console.error('Failed to async generate invoice', err));
       }
     } catch (waErr) {
       console.error('[whatsapp] Order confirmation failed:', waErr);

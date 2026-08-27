@@ -1,65 +1,98 @@
-/**
- * WhatsApp AI Service
- *
- * Sends WhatsApp messages via the WhatsApp AI Bot API.
- * Used for order confirmations, status updates, and shipping notifications.
- */
+const WHATSAPP_API_URL = process.env.NEXT_PUBLIC_WHATSAPP_API_URL || 'http://localhost:8000';
 
-const WHATSAPP_API_URL = process.env.WHATSAPP_API_URL || 'http://localhost:8001';
-const WHATSAPP_API_KEY = process.env.WHATSAPP_API_KEY || '';
-const WHATSAPP_ACCOUNT_ID = process.env.WHATSAPP_ACCOUNT_ID || '';
+export async function sendWhatsApp(phoneNumber: string, message: string) {
+  try {
+    const cleanPhone = String(phoneNumber).replace(/[^0-9]/g, '');
+    let finalPhone = cleanPhone;
+    if (finalPhone.length === 10) {
+      finalPhone = '91' + finalPhone; // Default to India if 10 digits
+    }
+    
+    console.log(`[whatsapp] Sending text to ${finalPhone}`);
+    
+    const res = await fetch(`${WHATSAPP_API_URL}/api/whatsapp/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        phone_number: finalPhone,
+        message: message,
+      }),
+    });
 
-/**
- * Send a WhatsApp message to a phone number.
- *
- * @param phone - Phone number with country code (e.g. "919444709686")
- * @param message - The message text to send
- * @returns The API response data
- * @throws If the API call fails
- */
-export async function sendWhatsApp(phone: string, message: string) {
-  console.log(`[whatsapp] Attempting to send message to ${phone}`);
-  console.log(`[whatsapp] URL: ${WHATSAPP_API_URL}`);
-  console.log(`[whatsapp] Key exists: ${!!WHATSAPP_API_KEY}, Account exists: ${!!WHATSAPP_ACCOUNT_ID}`);
-
-  if (!WHATSAPP_API_KEY || !WHATSAPP_ACCOUNT_ID) {
-    console.warn('[whatsapp] Missing WHATSAPP_API_KEY or WHATSAPP_ACCOUNT_ID env vars, skipping');
+    if (!res.ok) {
+      console.error('[whatsapp] Failed to send', await res.text());
+      return null;
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('[whatsapp] Error:', error);
     return null;
   }
+}
 
-  // Normalize: strip +, spaces, dashes — keep only digits
-  let normalized = String(phone).replace(/[+\s\-()]/g, '');
+export async function sendWhatsAppDocument(phoneNumber: string, fileBuffer: Buffer, filename: string) {
+  try {
+    const cleanPhone = String(phoneNumber).replace(/[^0-9]/g, '');
+    let finalPhone = cleanPhone;
+    if (finalPhone.length === 10) {
+      finalPhone = '91' + finalPhone;
+    }
+    
+    console.log(`[whatsapp] Sending document ${filename} to ${finalPhone}`);
+    
+    const formData = new FormData();
+    formData.append('phone_number', finalPhone);
+    formData.append('file', new Blob([fileBuffer]), filename);
 
-  // Automatically prepend India country code if user only entered 10 digits
-  if (normalized.length === 10) {
-    normalized = '91' + normalized;
-  }
+    const res = await fetch(`${WHATSAPP_API_URL}/api/whatsapp/send-document`, {
+      method: 'POST',
+      body: formData as any,
+    });
 
-  if (!normalized || normalized.length < 10) {
-    console.warn(`[whatsapp] Invalid phone number: ${phone}`);
+    if (!res.ok) {
+      console.error('[whatsapp] Failed to send document', await res.text());
+      return null;
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('[whatsapp] Error sending document:', error);
     return null;
   }
+}
 
-  const res = await fetch(`${WHATSAPP_API_URL}/api/v1/messages/send`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${WHATSAPP_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      account_id: WHATSAPP_ACCOUNT_ID,
-      phone: normalized,
-      message,
-    }),
-  });
+export async function generateAndSendInvoice(phoneNumber: string, invoiceUrl: string) {
+  try {
+    const cleanPhone = String(phoneNumber).replace(/[^0-9]/g, '');
+    let finalPhone = cleanPhone;
+    if (finalPhone.length === 10) {
+      finalPhone = '91' + finalPhone;
+    }
+    
+    console.log(`[whatsapp] Requesting backend to generate and send invoice to ${finalPhone}`);
+    
+    const res = await fetch(`${WHATSAPP_API_URL}/api/whatsapp/generate-and-send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        phone_number: finalPhone,
+        invoice_url: invoiceUrl,
+      }),
+    });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    console.error('[whatsapp] Send failed:', err);
-    throw new Error(`WhatsApp send failed: ${(err as any).detail || res.statusText}`);
+    if (!res.ok) {
+      console.error('[whatsapp] Failed to generate/send invoice', await res.text());
+      return null;
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('[whatsapp] Error:', error);
+    return null;
   }
-
-  const data = await res.json();
-  console.log(`[whatsapp] Message sent to ${normalized}`);
-  return data;
 }

@@ -22,6 +22,14 @@ export async function POST(req: NextRequest) {
   // Handle order notification
   if (body._notify) {
     await admin.from('notifications').insert({ user_id: body.user_id, title: `Order #${body.order_number} Update`, body: body.message, type: 'order', action_url: '/dashboard/orders' });
+    
+    // Also send WhatsApp to customer
+    const { data: userProfile } = await admin.from('user_profiles').select('phone').eq('id', body.user_id).single();
+    if (userProfile?.phone) {
+      const { sendWhatsApp } = await import('@/lib/whatsapp');
+      await sendWhatsApp(userProfile.phone, `🚚 *Order #${body.order_number} Update*\n\n${body.message}\n\nTrack your order: /dashboard/orders`);
+    }
+
     return NextResponse.json({ success: true });
   }
   const { data, error } = await admin.from('banners').insert(body).select().single();

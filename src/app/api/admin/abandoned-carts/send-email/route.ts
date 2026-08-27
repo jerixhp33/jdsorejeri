@@ -100,6 +100,21 @@ export async function POST(req: NextRequest) {
       html: emailHtml
     });
 
+    // Also send a WhatsApp reminder if phone number is available
+    if (cart.phone_number) {
+      const { sendWhatsApp } = await import('@/lib/whatsapp');
+      
+      let itemsList = '';
+      cart.cart_data.forEach((item: any) => {
+        const productName = item.product?.name || 'Unknown Product';
+        itemsList += `- ${productName} (Qty: ${item.quantity})\n`;
+      });
+
+      const waMessage = `Hi ${cart.customer_name || 'there'}! 👋\n\nWe noticed you left some amazing items in your JD Store cart:\n\n${itemsList}\nTotal: ${formatCurrency(total)}\n\nDon't miss out! Click here to complete your order: ${checkoutUrl}`;
+      
+      await sendWhatsApp(cart.phone_number, waMessage);
+    }
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('[Send Cart Email API] Error:', error);

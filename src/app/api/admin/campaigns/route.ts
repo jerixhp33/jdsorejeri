@@ -30,14 +30,14 @@ export async function POST(req: NextRequest) {
     created_by,
   } = body;
 
-  // ── 1. Resolve recipient email addresses ─────────────────────────────────
+  // ── 1. Resolve recipient email addresses and phone numbers ───────────────
   let recipientEmails: string[] = [];
+  let recipientPhones: string[] = [];
 
   if (target_all) {
     const { data: users, error: usersErr } = await admin
       .from('user_profiles')
-      .select('email')
-      .not('email', 'is', null);
+      .select('email, phone');
 
     if (usersErr) {
       console.error('[campaigns] Failed to fetch users:', usersErr.message);
@@ -48,12 +48,12 @@ export async function POST(req: NextRequest) {
     }
 
     recipientEmails = (users ?? []).map((u: any) => u.email).filter(Boolean);
+    recipientPhones = (users ?? []).map((u: any) => u.phone).filter(Boolean);
   } else if (Array.isArray(target_user_ids) && target_user_ids.length > 0) {
     const { data: users, error: usersErr } = await admin
       .from('user_profiles')
-      .select('email')
-      .in('id', target_user_ids)
-      .not('email', 'is', null);
+      .select('email, phone')
+      .in('id', target_user_ids);
 
     if (usersErr) {
       console.error('[campaigns] Failed to fetch selected users:', usersErr.message);
@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     recipientEmails = (users ?? []).map((u: any) => u.email).filter(Boolean);
+    recipientPhones = (users ?? []).map((u: any) => u.phone).filter(Boolean);
   }
 
   if (recipientEmails.length === 0) {
@@ -95,6 +96,18 @@ export async function POST(req: NextRequest) {
       { error: `Failed to connect to email server: ${err.message}` },
       { status: 502 }
     );
+  }
+
+  // ── 3.5 Send WhatsApp Broadcasts ──────────────────────────────────────────
+  if (recipientPhones.length > 0) {
+    const { sendWhatsApp } = await import('@/lib/whatsapp');
+    const waText = html_body.replace(/<[^>]*>?/gm, ''); // Strip HTML tags
+    const waMessage = `📢 *${subject}*\n\n${waText}`;
+    
+    // Fire and forget WhatsApp broadcasts
+    recipientPhones.forEach(phone => {
+      sendWhatsApp(phone, waMessage).catch(err => console.error('WA Broadcast err:', err));
+    });
   }
 
   // ── 4. Save campaign record with real counts ──────────────────────────────
