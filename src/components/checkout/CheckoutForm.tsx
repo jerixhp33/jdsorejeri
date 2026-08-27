@@ -601,7 +601,7 @@ export function CheckoutForm() {
                         {item.image && (
                           <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={item.image} alt={item.name} width={64} height={64} className="w-full h-full object-cover" crossOrigin="anonymous" />
+                            <img src={item.image} alt={item.name} width={64} height={64} className="w-full h-full object-cover" />
                           </div>
                         )}
                         <div>

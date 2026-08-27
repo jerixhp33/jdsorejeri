@@ -33,7 +33,6 @@ export function OrderTable({ items }: OrderTableProps) {
                       src={primaryImage} 
                       alt={productName} 
                       className="w-full h-full object-cover" 
-                      crossOrigin="anonymous" 
                     />
                   </div>
                 ) : (
