@@ -5,7 +5,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File, F
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 from neonize.client import NewClient
 from neonize.events import ConnectedEv, MessageEv, DisconnectedEv, event
 from playwright.async_api import async_playwright
@@ -13,10 +13,9 @@ from playwright.async_api import async_playwright
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    gemini_client = genai.Client(api_key=api_key)
 else:
-    model = None
+    gemini_client = None
 
 app = FastAPI(title="WhatsApp Bot Service")
 
@@ -68,10 +67,13 @@ def on_message(client: NewClient, ev: MessageEv):
     elif ev.Message.extendedTextMessage and ev.Message.extendedTextMessage.text:
         incoming_text = ev.Message.extendedTextMessage.text
 
-    if incoming_text and model:
+    if incoming_text and gemini_client:
         print(f"📥 Received: {incoming_text}")
         try:
-            response = model.generate_content(incoming_text)
+            response = gemini_client.models.generate_content(
+                model='gemini-1.5-flash',
+                contents=incoming_text
+            )
             reply_text = response.text
             print(f"📤 Replying: {reply_text}")
             client.reply_message(reply_text, ev)
