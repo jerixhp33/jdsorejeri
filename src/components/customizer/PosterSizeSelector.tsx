@@ -29,7 +29,7 @@ export function PosterSizeSelector({
       <label className="block text-xs font-semibold uppercase tracking-wider text-white/70">
         1. Select Poster Size
       </label>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {sizes.map((s) => {
           const isSelected = selectedSize === s.id;
           return (

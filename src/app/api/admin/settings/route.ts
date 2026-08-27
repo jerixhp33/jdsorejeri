@@ -34,11 +34,41 @@ export async function PATCH(req: NextRequest) {
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
   const { id, key, ...updates } = body;
+  
+  if (!key && !id) {
+    return NextResponse.json({ error: 'Missing key or id' }, { status: 400 });
+  }
+
   const col = id ? 'id' : 'key';
   const val = id ?? key;
-  const { data, error } = await admin.from('settings').update(updates).eq(col, val).select().single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+
+  // First try to update
+  const { data: updateData, error: updateError } = await admin
+    .from('settings')
+    .update(updates)
+    .eq(col, val)
+    .select()
+    .maybeSingle();
+
+  if (updateError) {
+    return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  // If it didn't exist and we have a key, insert it (upsert behavior)
+  if (!updateData && key) {
+    const { data: insertData, error: insertError } = await admin
+      .from('settings')
+      .insert({ key, ...updates })
+      .select()
+      .single();
+      
+    if (insertError) {
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
+    return NextResponse.json(insertData);
+  }
+
+  return NextResponse.json(updateData);
 }
 
 export async function DELETE(req: NextRequest) {

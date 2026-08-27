@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { analyzeImageQuality } from '@/lib/image-quality';
 
 export async function POST(req: NextRequest) {
@@ -14,7 +14,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    const admin = await createAdminClient();
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
 
     // 1. Check if bucket 'custom_user_uploads' exists, if not create it
     const { data: buckets } = await admin.storage.listBuckets();
