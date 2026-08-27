@@ -1,7 +1,7 @@
 'use client';
 
 export interface PosterSizeOption {
-  id: 'A5' | 'A4' | 'A3';
+  id: string;
   name: string;
   dimensionsMm: string;
   price: number;
@@ -14,15 +14,15 @@ const DEFAULT_SIZES: PosterSizeOption[] = [
 ];
 
 interface PosterSizeSelectorProps {
-  selectedSize: 'A5' | 'A4' | 'A3';
-  onSelectSize: (size: 'A5' | 'A4' | 'A3') => void;
-  sizes?: PosterSizeOption[];
+  selectedSize: string;
+  onSelectSize: (size: string) => void;
+  sizes: PosterSizeOption[];
 }
 
 export function PosterSizeSelector({
   selectedSize,
   onSelectSize,
-  sizes = DEFAULT_SIZES
+  sizes
 }: PosterSizeSelectorProps) {
   return (
     <div className="space-y-2">

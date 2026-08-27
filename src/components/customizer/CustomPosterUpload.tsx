@@ -10,10 +10,10 @@ import type { ImageQualityAnalysis } from '@/lib/image-quality';
 
 interface CustomPosterUploadProps {
   userId: string | null;
-  selectedSize: 'A5' | 'A4' | 'A3';
+  selectedSize: string;
   onUploadSuccess: (record: CustomUploadRecord, previewUrl: string, analysis: ImageQualityAnalysis) => void;
   onClearUpload?: () => void;
-  onSelectRecommendedSize?: (size: 'A5' | 'A4' | 'A3') => void;
+  onSelectRecommendedSize?: (size: string) => void;
 }
 
 export function CustomPosterUpload({

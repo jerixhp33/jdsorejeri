@@ -202,6 +202,33 @@ export async function POST(req: NextRequest) {
       console.error('Failed to insert admin notification:', notifErr);
     }
 
+    // 6.5 Send Email Notification to Admin
+    try {
+      const { sendEmail } = await import('@/lib/email');
+      const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+      if (adminEmail) {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
+        const htmlMsg = customItem
+          ? `<h2>New Custom Photo Order #${ordNum}</h2>
+             <p><strong>Customer:</strong> ${customerName}</p>
+             <p><strong>Size:</strong> ${customItem.poster_size_id || 'A4'}</p>
+             <p><strong>Frame:</strong> ${customItem.frame_choice || 'No Frame'}</p>
+             <p><a href="${siteUrl}/admin/orders/${order.id}">View Order in Admin</a></p>`
+          : `<h2>New Order #${ordNum}</h2>
+             <p><strong>Customer:</strong> ${customerName}</p>
+             <p><strong>Total:</strong> ₹${calculatedTotal}</p>
+             <p><a href="${siteUrl}/admin/orders/${order.id}">View Order in Admin</a></p>`;
+
+        await sendEmail({
+          to: adminEmail,
+          subject: customItem ? `🎨 New Custom Photo Order #${ordNum}` : `📦 New Order #${ordNum}`,
+          html: htmlMsg
+        });
+      }
+    } catch (emailErr) {
+      console.error('Failed to send admin email notification:', emailErr);
+    }
+
     // 7. Prevent duplicate abandoned cart processing for this order
     // Update local setting logic is handled in the cron job by stopping if cart orders exist
 

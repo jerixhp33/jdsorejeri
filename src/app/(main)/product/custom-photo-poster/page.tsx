@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Sparkles, ShieldCheck, Truck, RefreshCw, Star } from 'lucide-react';
+import { ShoppingCart, Sparkles, ShieldCheck, Truck, RefreshCw, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCart } from '@/hooks/useCart';
 import { CustomPosterUpload } from '@/components/customizer/CustomPosterUpload';
 import { WallPlacementDetector } from '@/components/customizer/WallPlacementDetector';
-import { PosterSizeSelector } from '@/components/customizer/PosterSizeSelector';
-import { FrameSelector } from '@/components/customizer/FrameSelector';
+import { PosterSizeSelector, PosterSizeOption } from '@/components/customizer/PosterSizeSelector';
+import { FrameSelector, FrameOption } from '@/components/customizer/FrameSelector';
 import { createClient } from '@/lib/supabase/client';
 import type { CustomUploadRecord } from '@/lib/custom-poster';
 import type { ImageQualityAnalysis } from '@/lib/image-quality';
@@ -16,22 +16,22 @@ export default function CustomPhotoPosterPage() {
   const { addItem } = useCart();
   const [userId, setUserId] = useState<string | null>(null);
 
-  const [selectedSize, setSelectedSize] = useState<'A5' | 'A4' | 'A3'>('A4');
-  const [selectedFrame, setSelectedFrame] = useState<'none' | 'black' | 'white' | 'wood'>('none');
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Dynamic Options state
+  const [dynamicSizes, setDynamicSizes] = useState<PosterSizeOption[]>([]);
+  const [dynamicFrames, setDynamicFrames] = useState<FrameOption[]>([]);
+
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedFrame, setSelectedFrame] = useState<string>('');
+  const [totalPrice, setTotalPrice] = useState<number>(0);
   
   const [uploadRecord, setUploadRecord] = useState<CustomUploadRecord | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<ImageQualityAnalysis | null>(null);
 
   const [isAdding, setIsAdding] = useState(false);
-
-  const [sizePrices, setSizePrices] = useState({ A5: 199, A4: 299, A3: 449 });
-  const [frameAddons, setFrameAddons] = useState({ none: 0, black: 150, white: 150, wood: 200 });
-  const [paperSpecs, setPaperSpecs] = useState({
-    gsm: '300 GSM Gallery Paper',
-    finish: 'Ultra-Matte Archival Finish',
-    dispatch: 'Dispatched in 24h'
-  });
 
   useEffect(() => {
     async function init() {
@@ -40,51 +40,142 @@ export default function CustomPhotoPosterPage() {
       if (user) setUserId(user.id);
 
       try {
-        const res = await fetch('/api/store-settings');
-        const data = await res.json();
-        if (res.ok && data) {
-          setSizePrices({
-            A5: Number(data.custom_poster_price_a5) || 199,
-            A4: Number(data.custom_poster_price_a4) || 299,
-            A3: Number(data.custom_poster_price_a3) || 449
-          });
-          setFrameAddons({
-            none: 0,
-            black: Number(data.custom_poster_frame_black_price) || 150,
-            white: Number(data.custom_poster_frame_white_price) || 150,
-            wood: Number(data.custom_poster_frame_wood_price) || 200
-          });
-          setPaperSpecs({
-            gsm: data.custom_poster_paper_gsm || '300 GSM Gallery Paper',
-            finish: data.custom_poster_paper_finish || 'Ultra-Matte Archival Finish',
-            dispatch: data.custom_poster_dispatch_time || 'Dispatched in 24h'
-          });
+        // Fetch the dynamic product
+        const { data: pData, error } = await supabase
+          .from('products')
+          .select('*, sizes:poster_sizes(*)')
+          .eq('slug', 'custom-photo-poster')
+          .single();
+
+        if (error || !pData) {
+          console.error('Failed to load product:', error);
+          setLoading(false);
+          return;
+        }
+
+        setProduct(pData);
+
+        // Parse _v2_variants
+        const v2Variants = pData.attributes?._v2_variants;
+        if (v2Variants && v2Variants.options) {
+          const sizeOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('size'));
+          const frameOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('frame'));
+
+          // Initialize selections
+          const defaultSize = sizeOption?.values[0] || '';
+          const defaultFrame = frameOption?.values[0] || '';
+          setSelectedSize(defaultSize);
+          setSelectedFrame(defaultFrame);
+
+          // Build dynamic Sizes
+          if (sizeOption) {
+            const parsedSizes: PosterSizeOption[] = sizeOption.values.map((sz: string) => {
+              // Find the combo for this size with the default frame to get base price
+              const combo = v2Variants.combinations.find(
+                (c: any) => c.options[sizeOption.name] === sz && (!frameOption || c.options[frameOption.name] === defaultFrame)
+              );
+              return {
+                id: sz,
+                name: `${sz} Size`,
+                dimensionsMm: sz === 'A5' ? '148 × 210 mm' : sz === 'A4' ? '210 × 297 mm' : 'See details',
+                price: combo?.price || 0
+              };
+            });
+            setDynamicSizes(parsedSizes);
+          }
+
+          // Build dynamic Frames
+          if (frameOption) {
+            const parsedFrames: FrameOption[] = frameOption.values.map((fr: string) => {
+              // Find the difference in price vs the default frame
+              const baseCombo = v2Variants.combinations.find(
+                (c: any) => c.options[sizeOption?.name || 'Size'] === defaultSize && c.options[frameOption.name] === defaultFrame
+              );
+              const thisCombo = v2Variants.combinations.find(
+                (c: any) => c.options[sizeOption?.name || 'Size'] === defaultSize && c.options[frameOption.name] === fr
+              );
+              
+              const addonPrice = (thisCombo?.price || 0) - (baseCombo?.price || 0);
+
+              let colorClass = 'bg-transparent border-dashed border-white/30';
+              if (fr.toLowerCase().includes('black')) colorClass = 'bg-neutral-900 border-neutral-950';
+              if (fr.toLowerCase().includes('white')) colorClass = 'bg-stone-100 border-stone-300';
+              if (fr.toLowerCase().includes('wood')) colorClass = 'bg-[#8B5A2B] border-[#5c3a1b]';
+
+              return {
+                id: fr,
+                name: fr === 'None' ? 'No Frame (Print Only)' : `${fr} Frame`,
+                priceAddon: addonPrice > 0 ? addonPrice : 0,
+                colorClass
+              };
+            });
+            setDynamicFrames(parsedFrames);
+          }
         }
       } catch (e) {
-        console.error('Failed to load store settings:', e);
+        console.error('Exception loading product:', e);
+      } finally {
+        setLoading(false);
       }
     }
     init();
   }, []);
 
-  const basePrice = sizePrices[selectedSize];
-  const framePrice = frameAddons[selectedFrame];
-  const totalPrice = basePrice + framePrice;
+  // Update total price when selection changes
+  useEffect(() => {
+    if (product && selectedSize) {
+      const v2Variants = product.attributes?._v2_variants;
+      if (v2Variants && v2Variants.options) {
+        const sizeOptionName = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('size'))?.name || 'Size';
+        const frameOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('frame'));
+        
+        const combo = v2Variants.combinations.find(
+          (c: any) => c.options[sizeOptionName] === selectedSize && (!frameOption || c.options[frameOption.name] === selectedFrame)
+        );
+        if (combo) {
+          setTotalPrice(combo.price);
+        }
+      }
+    }
+  }, [selectedSize, selectedFrame, product]);
 
   const handleAddToCart = async () => {
     if (!uploadRecord || !previewUrl) {
       toast.error('Please upload your photo before adding to cart.');
       return;
     }
+    if (!product) return;
 
     setIsAdding(true);
     try {
-      // Add custom item to cart
+      const v2Variants = product.attributes?._v2_variants;
+      let comboLabel = `${selectedSize} / ${selectedFrame}`;
+
+      if (v2Variants && v2Variants.options) {
+        const sizeOptionName = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('size'))?.name || 'Size';
+        const frameOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('frame'));
+        
+        const combo = v2Variants.combinations.find(
+          (c: any) => c.options[sizeOptionName] === selectedSize && (!frameOption || c.options[frameOption.name] === selectedFrame)
+        );
+        if (combo) {
+          comboLabel = Object.values(combo.options).join(' / ');
+        }
+      }
+
+      // Find the specific poster_size.id for this variant combo
+      const matchedVariant = product.sizes.find((s: any) => s.label === comboLabel);
+
+      if (!matchedVariant) {
+        throw new Error('Variant not found in database for label: ' + comboLabel);
+      }
+
+      // Add custom item to cart using REAL database UUIDs
       await addItem(
-        'custom-poster-product',
-        totalPrice,
+        product.id,
+        matchedVariant.price,
         1,
-        selectedSize,
+        matchedVariant.id, // posterSizeId is now the variant UUID!
         false,
         uploadRecord.id
       );
@@ -98,18 +189,19 @@ export default function CustomPhotoPosterPage() {
     }
   };
 
-  const dynamicSizes = [
-    { id: 'A5' as const, name: 'A5 Small', dimensionsMm: '148 × 210 mm', price: sizePrices.A5 },
-    { id: 'A4' as const, name: 'A4 Standard', dimensionsMm: '210 × 297 mm', price: sizePrices.A4 },
-    { id: 'A3' as const, name: 'A3 Large', dimensionsMm: '297 × 420 mm', price: sizePrices.A3 }
-  ];
+  if (loading) {
+    return <div className="min-h-screen bg-luxe-black flex items-center justify-center text-white/50">Loading customizer...</div>;
+  }
 
-  const dynamicFrames = [
-    { id: 'none' as const, name: 'No Frame (Print Only)', priceAddon: frameAddons.none, colorClass: 'bg-transparent border-dashed border-white/30' },
-    { id: 'black' as const, name: 'Black Wooden Frame', priceAddon: frameAddons.black, colorClass: 'bg-neutral-900 border-neutral-950' },
-    { id: 'white' as const, name: 'White Wooden Frame', priceAddon: frameAddons.white, colorClass: 'bg-stone-100 border-stone-300' },
-    { id: 'wood' as const, name: 'Natural Oak Frame', priceAddon: frameAddons.wood, colorClass: 'bg-[#8B5A2B] border-[#5c3a1b]' }
-  ];
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-luxe-black flex flex-col items-center justify-center text-white space-y-4">
+        <AlertTriangle className="w-12 h-12 text-amber-400" />
+        <h1 className="text-2xl font-bold">Product Unavailable</h1>
+        <p className="text-white/50">The custom photo poster is not configured in the store yet.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-luxe-black text-white pt-24 pb-16 px-4 sm:px-6 lg:px-8">
@@ -121,10 +213,10 @@ export default function CustomPhotoPosterPage() {
             <Sparkles className="w-3.5 h-3.5" /> High-Clarity Custom Printing
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            Create Your Custom Photo Poster
+            {product.name || 'Create Your Custom Photo Poster'}
           </h1>
           <p className="text-sm sm:text-base text-white/60">
-            Upload your personal memories or photos. Printed on premium <strong>{paperSpecs.gsm}</strong> ({paperSpecs.finish}) with museum-grade precision.
+            {product.description || 'Upload your personal memories or photos. Printed on premium 300 GSM Gallery Paper (Ultra-Matte Archival Finish) with museum-grade precision.'}
           </p>
         </div>
 
@@ -170,11 +262,13 @@ export default function CustomPhotoPosterPage() {
                 sizes={dynamicSizes}
               />
 
-              <FrameSelector
-                selectedFrame={selectedFrame}
-                onSelectFrame={(f) => setSelectedFrame(f)}
-                frames={dynamicFrames}
-              />
+              {dynamicFrames.length > 0 && (
+                <FrameSelector
+                  selectedFrame={selectedFrame}
+                  onSelectFrame={(f) => setSelectedFrame(f)}
+                  frames={dynamicFrames}
+                />
+              )}
             </div>
           </div>
 
@@ -203,7 +297,9 @@ export default function CustomPhotoPosterPage() {
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-white">Custom Photo Poster</h3>
-                  <p className="text-xs text-white/50">{selectedSize} • {selectedFrame === 'none' ? 'No Frame' : `${selectedFrame.toUpperCase()} Frame`}</p>
+                  <p className="text-xs text-white/50">
+                    {selectedSize} {dynamicFrames.length > 0 && `• ${selectedFrame === 'None' ? 'No Frame' : `${selectedFrame.toUpperCase()} Frame`}`}
+                  </p>
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-extrabold text-amber-400">₹{totalPrice}</span>
@@ -252,3 +348,4 @@ export default function CustomPhotoPosterPage() {
     </div>
   );
 }
+

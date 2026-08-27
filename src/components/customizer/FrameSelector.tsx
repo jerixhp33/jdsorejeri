@@ -1,7 +1,7 @@
 'use client';
 
 export interface FrameOption {
-  id: 'none' | 'black' | 'white' | 'wood';
+  id: string;
   name: string;
   priceAddon: number;
   colorClass: string;
@@ -15,15 +15,15 @@ const DEFAULT_FRAMES: FrameOption[] = [
 ];
 
 interface FrameSelectorProps {
-  selectedFrame: 'none' | 'black' | 'white' | 'wood';
-  onSelectFrame: (frame: 'none' | 'black' | 'white' | 'wood') => void;
-  frames?: FrameOption[];
+  selectedFrame: string;
+  onSelectFrame: (frame: string) => void;
+  frames: FrameOption[];
 }
 
 export function FrameSelector({
   selectedFrame,
   onSelectFrame,
-  frames = DEFAULT_FRAMES
+  frames
 }: FrameSelectorProps) {
   return (
     <div className="space-y-2">

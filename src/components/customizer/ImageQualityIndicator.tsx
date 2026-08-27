@@ -5,8 +5,8 @@ import type { ImageQualityAnalysis } from '@/lib/image-quality';
 
 interface ImageQualityIndicatorProps {
   analysis: ImageQualityAnalysis;
-  selectedSize: 'A5' | 'A4' | 'A3';
-  onSelectRecommendedSize?: (size: 'A5' | 'A4' | 'A3') => void;
+  selectedSize: string;
+  onSelectRecommendedSize?: (size: string) => void;
 }
 
 export function ImageQualityIndicator({
@@ -14,7 +14,7 @@ export function ImageQualityIndicator({
   selectedSize,
   onSelectRecommendedSize
 }: ImageQualityIndicatorProps) {
-  const currentRating = analysis.sizeRatings[selectedSize];
+  const currentRating = analysis.sizeRatings[selectedSize as keyof typeof analysis.sizeRatings] || analysis.sizeRatings['A4'];
 
   const getStatusBg = (status: string) => {
     switch (status) {

@@ -6,8 +6,8 @@ import { ROOM_PRESETS, RoomPreset, WallPresetSelector } from './WallPresetSelect
 
 interface WallPlacementDetectorProps {
   customImagePreview: string;
-  selectedSize: 'A5' | 'A4' | 'A3';
-  selectedFrame: 'none' | 'black' | 'white' | 'wood';
+  selectedSize: string;
+  selectedFrame: string;
 }
 
 export function WallPlacementDetector({
@@ -22,15 +22,15 @@ export function WallPlacementDetector({
   const sizeScale = selectedSize === 'A5' ? 0.8 : selectedSize === 'A4' ? 1.0 : 1.25;
 
   const getFrameStyles = () => {
-    switch (selectedFrame) {
-      case 'black':
-        return 'border-[10px] border-neutral-950 shadow-[0_20px_50px_rgba(0,0,0,0.7)]';
-      case 'white':
-        return 'border-[10px] border-stone-100 shadow-[0_20px_45px_rgba(0,0,0,0.5)]';
-      case 'wood':
-        return 'border-[10px] border-[#8B5A2B] shadow-[0_20px_45px_rgba(0,0,0,0.6)]';
-      default:
-        return 'shadow-[0_15px_40px_rgba(0,0,0,0.5)]';
+    const f = selectedFrame.toLowerCase();
+    if (f.includes('black')) {
+      return 'border-[10px] border-neutral-950 shadow-[0_20px_50px_rgba(0,0,0,0.7)]';
+    } else if (f.includes('white')) {
+      return 'border-[10px] border-stone-100 shadow-[0_20px_45px_rgba(0,0,0,0.5)]';
+    } else if (f.includes('wood')) {
+      return 'border-[10px] border-[#8B5A2B] shadow-[0_20px_45px_rgba(0,0,0,0.6)]';
+    } else {
+      return 'shadow-[0_15px_40px_rgba(0,0,0,0.5)]';
     }
   };
 
