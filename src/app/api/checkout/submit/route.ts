@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
 
     // 8. Send WhatsApp order confirmation and Invoice
     try {
-      const { sendWhatsApp, generateAndSendInvoice } = await import('@/lib/whatsapp');
+      const { sendWhatsApp, sendWhatsAppImage, generateAndSendInvoice } = await import('@/lib/whatsapp');
       const { data: address } = await supabase
         .from('delivery_addresses')
         .select('phone, full_name')
@@ -174,8 +174,9 @@ export async function POST(req: NextRequest) {
       if (address?.phone) {
         const name = address.full_name?.split(' ')[0] || 'Customer';
         
-        // Build product list for the message with links & images
+        // Build product list for the message with clean clickable links & native images
         const productLines = [];
+        const productImagesToSend = [];
         for (const item of validatedItems) {
           const { data: prod } = await supabase
             .from('products')
@@ -184,13 +185,16 @@ export async function POST(req: NextRequest) {
             .maybeSingle();
 
           const prodName = prod?.name || 'Product';
-          const prodUrl = prod?.slug ? `https://jdstorejeri.vercel.app/products/${prod.slug}` : '';
+          const prodUrl = prod?.slug ? `https://jdstorejeri.vercel.app/product/${prod.slug}` : '';
           const imgUrl = prod?.images?.find((img: any) => img.is_primary)?.url || prod?.images?.[0]?.url || '';
 
           let line = `🛍️ *${prodName}* × ${item.quantity} — ₹${item.total_price}`;
           if (prodUrl) line += `\n   🔗 Link: ${prodUrl}`;
-          if (imgUrl) line += `\n   🖼️ Image: ${imgUrl}`;
           productLines.push(line);
+
+          if (imgUrl) {
+            productImagesToSend.push({ url: imgUrl, caption: `${prodName} (Qty: ${item.quantity})` });
+          }
         }
         const itemsList = productLines.join('\n\n');
 
@@ -207,6 +211,11 @@ export async function POST(req: NextRequest) {
           `📦 We'll notify you at every step — from packing to delivery!\n\n` +
           `_JD Store — Art for every space_ 🎨`
         );
+
+        // Send native product pictures directly to WhatsApp
+        for (const pImg of productImagesToSend) {
+          await sendWhatsAppImage(address.phone, pImg.url, pImg.caption).catch(err => console.error('Failed to send product image', err));
+        }
         
         // Let the invoice generation happen asynchronously in the background so it doesn't block the checkout response
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';

@@ -116,14 +116,19 @@ export async function PATCH(req: NextRequest) {
         .select('quantity, unit_price, product:products(name, slug, images:product_images(url, is_primary))')
         .eq('order_id', data.id);
 
+      const statusProductImages: { url: string; caption: string }[] = [];
+
       const itemsList = (orderItems || [])
         .map((item: any) => {
           const prodName = item.product?.name || 'Product';
-          const prodUrl = item.product?.slug ? `https://jdstorejeri.vercel.app/products/${item.product.slug}` : '';
+          const prodUrl = item.product?.slug ? `https://jdstorejeri.vercel.app/product/${item.product.slug}` : '';
           const imgUrl = item.product?.images?.find((img: any) => img.is_primary)?.url || item.product?.images?.[0]?.url || '';
+          
           let line = `🛍️ *${prodName}* × ${item.quantity} — ₹${item.unit_price * item.quantity}`;
           if (prodUrl) line += `\n   🔗 Link: ${prodUrl}`;
-          if (imgUrl) line += `\n   🖼️ Image: ${imgUrl}`;
+          if (imgUrl) {
+            statusProductImages.push({ url: imgUrl, caption: `${prodName} (Qty: ${item.quantity})` });
+          }
           return line;
         })
         .join('\n\n');
@@ -227,8 +232,13 @@ export async function PATCH(req: NextRequest) {
           .single();
 
         if (addr?.phone) {
-          const { sendWhatsApp } = await import('@/lib/whatsapp');
+          const { sendWhatsApp, sendWhatsAppImage } = await import('@/lib/whatsapp');
           await sendWhatsApp(addr.phone, waMsg || msg);
+          
+          // Send native product images directly to WhatsApp
+          for (const imgItem of statusProductImages) {
+            await sendWhatsAppImage(addr.phone, imgItem.url, imgItem.caption).catch(() => {});
+          }
         }
       } catch (waErr) {
         console.error('[whatsapp] Status notification failed:', waErr);

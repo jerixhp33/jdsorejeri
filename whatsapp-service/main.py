@@ -37,11 +37,7 @@ def fetch_products_context() -> str:
                 name = p.get("name", "Product")
                 slug = p.get("slug", "")
                 price = p.get("price", 0)
-                img = ""
-                images = p.get("images", [])
-                if images and isinstance(images, list) and len(images) > 0:
-                    img = images[0].get("url", "")
-                lines.append(f"- Name: {name} | Price: ₹{price} | Product Link: https://jdstorejeri.vercel.app/products/{slug} | Image: {img}")
+                lines.append(f"- Name: {name} | Price: ₹{price} | Link: https://jdstorejeri.vercel.app/product/{slug}")
             return "\n".join(lines)
     except Exception as e:
         print(f"⚠️ Error fetching products for AI: {e}")
@@ -59,9 +55,10 @@ def ask_gemini(prompt: str) -> str:
         "Your goal is to assist customers, answer questions, and recommend products from the store catalog.\n\n"
         f"AVAILABLE STORE PRODUCTS:\n{catalog_info}\n\n"
         "CRITICAL RULES:\n"
-        "1. When customers ask what products exist, what you sell, or ask for recommendations, list the products with their exact Name (in bold *Name*), Price (in ₹), Direct Product Link (https://jdstorejeri.vercel.app/products/slug), and Image URL (🖼️ Image: url).\n"
-        "2. ALWAYS include the main store app link at the end of product listings: '📱 *Shop on our App:* https://jdstorejeri.vercel.app'\n"
-        "3. Keep responses warm, attractive, well-formatted, and filled with appropriate emojis.\n"
+        "1. When customers ask what products exist, what you sell, or ask for recommendations, list the products with their exact Name (in bold *Name*), Price (in ₹), and Direct Product Link (https://jdstorejeri.vercel.app/product/slug).\n"
+        "2. Note: The product detail URL pattern is strictly https://jdstorejeri.vercel.app/product/slug (singular product).\n"
+        "3. ALWAYS include the main store app link at the end of product listings: '📱 *Shop on our App:* https://jdstorejeri.vercel.app'\n"
+        "4. Keep responses warm, attractive, well-formatted, and filled with appropriate emojis.\n"
     )
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={GEMINI_API_KEY}"
@@ -276,6 +273,39 @@ def send_message(req: SendMessageReq):
         log_chat_message(req.phone_number, "admin", req.message)
         return {"success": True}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class SendImageReq(BaseModel):
+    phone_number: str
+    image_url: str
+    caption: str = ""
+
+@app.post("/api/whatsapp/send-image")
+def send_image_route(req: SendImageReq):
+    if whatsapp_status != "connected":
+        raise HTTPException(status_code=400, detail="WhatsApp is not connected")
+    
+    jid = build_jid(req.phone_number)
+    try:
+        ext = "jpg"
+        if ".png" in req.image_url.lower():
+            ext = "png"
+        temp_img_path = f"/tmp/product_{abs(hash(req.image_url))}.{ext}"
+        resp = httpx.get(req.image_url, timeout=15)
+        if resp.status_code == 200:
+            with open(temp_img_path, "wb") as f:
+                f.write(resp.content)
+            try:
+                client.send_image(jid, temp_img_path, caption=req.caption)
+            except AttributeError:
+                print("send_image not directly available on client, sending text instead")
+                client.send_message(jid, f"{req.caption}\n{req.image_url}")
+            log_chat_message(req.phone_number, "admin", f"[Image] {req.caption}")
+            return {"success": True}
+        else:
+            raise HTTPException(status_code=400, detail=f"Failed to fetch image: status {resp.status_code}")
+    except Exception as e:
+        print(f"⚠️ send_image error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/whatsapp/send-document")

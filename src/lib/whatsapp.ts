@@ -66,3 +66,37 @@ export async function generateAndSendInvoice(phoneNumber: string, invoiceUrl: st
     return null;
   }
 }
+
+export async function sendWhatsAppImage(phoneNumber: string, imageUrl: string, caption: string = '') {
+  try {
+    const cleanPhone = String(phoneNumber).replace(/[^0-9]/g, '');
+    let finalPhone = cleanPhone;
+    if (finalPhone.length === 10) {
+      finalPhone = '91' + finalPhone;
+    }
+    
+    console.log(`[whatsapp] Sending image to ${finalPhone}`);
+    
+    const res = await fetch(`${WHATSAPP_API_URL}/api/whatsapp/send-image`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        phone_number: finalPhone,
+        image_url: imageUrl,
+        caption: caption,
+      }),
+    });
+
+    if (!res.ok) {
+      console.error('[whatsapp] Failed to send image', await res.text());
+      return null;
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('[whatsapp] Image Error:', error);
+    return null;
+  }
+}

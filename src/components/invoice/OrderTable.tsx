@@ -20,7 +20,7 @@ export function OrderTable({ items }: OrderTableProps) {
         {items?.map((item: any, index: number) => {
           const productName = item.product?.name || item.product_name || 'Unknown Product';
           const productSlug = item.product?.slug || item.slug;
-          const productUrl = productSlug ? `https://jdstorejeri.vercel.app/products/${productSlug}` : null;
+          const productUrl = productSlug ? `https://jdstorejeri.vercel.app/product/${productSlug}` : null;
           const primaryImage = item.product?.images?.find((img: any) => img.is_primary)?.url || item.product?.images?.[0]?.url || item.image_url;
           return (
             <tr key={index}>
