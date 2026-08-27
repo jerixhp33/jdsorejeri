@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Parse Request
-    const { prompt, type, model = 'gpt-oss-120b' } = await req.json();
+    const { prompt, type, model = 'openai/gpt-oss-120b' } = await req.json();
     requestType = type;
 
     if (!prompt) {

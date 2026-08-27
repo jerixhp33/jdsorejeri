@@ -36,7 +36,7 @@ export function useAIGeneration(
         body: JSON.stringify({
           prompt: promptFn(formData),
           type,
-          model: 'gpt-oss-120b' // Using recommended model
+          model: 'openai/gpt-oss-120b' // Using recommended model
         }),
       });
 
