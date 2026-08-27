@@ -192,8 +192,15 @@ async def generate_and_send_invoice(req: SendInvoiceReq):
         async with async_playwright() as p:
             browser = await p.chromium.launch()
             page = await browser.new_page()
-            # Navigate to the invoice page
+            # Navigate to the invoice page and wait for full render
             await page.goto(req.invoice_url, wait_until="networkidle")
+            # Wait extra time for React/Next.js client-side rendering to complete
+            await page.wait_for_timeout(5000)
+            # Try to wait for the invoice content to appear (e.g., order number text)
+            try:
+                await page.wait_for_selector('text=Invoice', timeout=10000)
+            except:
+                pass  # If no "Invoice" text found, proceed anyway
             # Save as PDF
             await page.pdf(path=pdf_path, format="A4", print_background=True)
             await browser.close()
