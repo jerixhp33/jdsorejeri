@@ -157,8 +157,8 @@ export function CartView() {
             <AnimatePresence>
               {items.map((item, index) => {
                 const primaryImage =
-                  item.custom_upload?.preview_url 
-                    ? { url: item.custom_upload.preview_url }
+                  item.custom_upload_id 
+                    ? { url: `/api/custom-upload/${item.custom_upload_id}` }
                     : (item.product?.images as { url: string; is_primary: boolean }[])?.find(
                         (img) => img.is_primary
                       ) ||
