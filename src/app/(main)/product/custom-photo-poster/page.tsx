@@ -152,8 +152,11 @@ export default function CustomPhotoPosterPage() {
           return Object.entries(selectedOptions).every(([k, v]) => c.options[k] === v);
         });
         if (combo) {
-          const comboLabel = Object.values(combo.options).join(' / ');
-          matchedVariant = product.sizes.find((s: any) => s.label === comboLabel);
+          const optionValues = Object.values(combo.options).map(v => String(v).toLowerCase());
+          matchedVariant = product.sizes.find((s: any) => {
+            const labelLower = s.label.toLowerCase();
+            return optionValues.every(val => labelLower.includes(val));
+          });
         }
       }
 
@@ -205,8 +208,12 @@ export default function CustomPhotoPosterPage() {
     if (v2Variants && v2Variants.combinations) {
       const combo = v2Variants.combinations.find((c: any) => Object.entries(selectedOptions).every(([k, v]) => c.options[k] === v));
       if (combo) {
-        const comboLabel = Object.values(combo.options).join(' / ');
-        const matched = product.sizes.find((s: any) => s.label === comboLabel);
+        // Create an array of selected option values and check if all of them are present in the label (case insensitive)
+        const optionValues = Object.values(combo.options).map(v => String(v).toLowerCase());
+        const matched = product.sizes.find((s: any) => {
+          const labelLower = s.label.toLowerCase();
+          return optionValues.every(val => labelLower.includes(val));
+        });
         if (matched) matchedVariantId = matched.id;
       }
     }
