@@ -36,7 +36,7 @@ export function useAIGeneration(
         body: JSON.stringify({
           prompt: promptFn(formData),
           type,
-          model: 'llama-3.1-70b-versatile' // Using recommended model
+          model: 'gpt-oss-120b' // Using recommended model
         }),
       });
 
