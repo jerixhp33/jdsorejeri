@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Sparkles, ShieldCheck, Truck, RefreshCw, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, Sparkles, ShieldCheck, Truck, RefreshCw, AlertTriangle, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCart } from '@/hooks/useCart';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { CustomPosterUpload } from '@/components/customizer/CustomPosterUpload';
 import { WallPlacementDetector } from '@/components/customizer/WallPlacementDetector';
 import { PosterSizeSelector, PosterSizeOption } from '@/components/customizer/PosterSizeSelector';
@@ -13,7 +15,8 @@ import type { CustomUploadRecord } from '@/lib/custom-poster';
 import type { ImageQualityAnalysis } from '@/lib/image-quality';
 
 export default function CustomPhotoPosterPage() {
-  const { addItem } = useCart();
+  const { addItem, updateQuantity, items: cartItems } = useCart();
+  const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
 
   const [product, setProduct] = useState<any>(null);
@@ -23,8 +26,8 @@ export default function CustomPhotoPosterPage() {
   const [dynamicSizes, setDynamicSizes] = useState<PosterSizeOption[]>([]);
   const [dynamicFrames, setDynamicFrames] = useState<FrameOption[]>([]);
 
-  const [selectedSize, setSelectedSize] = useState<string>('');
-  const [selectedFrame, setSelectedFrame] = useState<string>('');
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [productOptions, setProductOptions] = useState<any[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   
   const [uploadRecord, setUploadRecord] = useState<CustomUploadRecord | null>(null);
@@ -58,59 +61,13 @@ export default function CustomPhotoPosterPage() {
         // Parse _v2_variants
         const v2Variants = pData.attributes?._v2_variants;
         if (v2Variants && v2Variants.options) {
-          const sizeOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('size'));
-          const frameOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('frame'));
-
-          // Initialize selections
-          const defaultSize = sizeOption?.values[0] || '';
-          const defaultFrame = frameOption?.values[0] || '';
-          setSelectedSize(defaultSize);
-          setSelectedFrame(defaultFrame);
-
-          // Build dynamic Sizes
-          if (sizeOption) {
-            const parsedSizes: PosterSizeOption[] = sizeOption.values.map((sz: string) => {
-              // Find the combo for this size with the default frame to get base price
-              const combo = v2Variants.combinations.find(
-                (c: any) => c.options[sizeOption.name] === sz && (!frameOption || c.options[frameOption.name] === defaultFrame)
-              );
-              return {
-                id: sz,
-                name: `${sz} Size`,
-                dimensionsMm: sz === 'A5' ? '148 × 210 mm' : sz === 'A4' ? '210 × 297 mm' : 'See details',
-                price: combo?.price || 0
-              };
-            });
-            setDynamicSizes(parsedSizes);
-          }
-
-          // Build dynamic Frames
-          if (frameOption) {
-            const parsedFrames: FrameOption[] = frameOption.values.map((fr: string) => {
-              // Find the difference in price vs the default frame
-              const baseCombo = v2Variants.combinations.find(
-                (c: any) => c.options[sizeOption?.name || 'Size'] === defaultSize && c.options[frameOption.name] === defaultFrame
-              );
-              const thisCombo = v2Variants.combinations.find(
-                (c: any) => c.options[sizeOption?.name || 'Size'] === defaultSize && c.options[frameOption.name] === fr
-              );
-              
-              const addonPrice = (thisCombo?.price || 0) - (baseCombo?.price || 0);
-
-              let colorClass = 'bg-transparent border-dashed border-white/30';
-              if (fr.toLowerCase().includes('black')) colorClass = 'bg-neutral-900 border-neutral-950';
-              if (fr.toLowerCase().includes('white')) colorClass = 'bg-stone-100 border-stone-300';
-              if (fr.toLowerCase().includes('wood')) colorClass = 'bg-[#8B5A2B] border-[#5c3a1b]';
-
-              return {
-                id: fr,
-                name: fr === 'None' ? 'No Frame (Print Only)' : `${fr} Frame`,
-                priceAddon: addonPrice > 0 ? addonPrice : 0,
-                colorClass
-              };
-            });
-            setDynamicFrames(parsedFrames);
-          }
+          setProductOptions(v2Variants.options);
+          
+          const initialSelections: Record<string, string> = {};
+          v2Variants.options.forEach((opt: any) => {
+            initialSelections[opt.name] = opt.values[0] || '';
+          });
+          setSelectedOptions(initialSelections);
         }
       } catch (e) {
         console.error('Exception loading product:', e);
@@ -121,23 +78,62 @@ export default function CustomPhotoPosterPage() {
     init();
   }, []);
 
-  // Update total price when selection changes
+  // Update total price and dynamic options when selection changes
   useEffect(() => {
-    if (product && selectedSize) {
+    if (product && Object.keys(selectedOptions).length > 0) {
       const v2Variants = product.attributes?._v2_variants;
-      if (v2Variants && v2Variants.options) {
-        const sizeOptionName = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('size'))?.name || 'Size';
-        const frameOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('frame'));
-        
-        const combo = v2Variants.combinations.find(
-          (c: any) => c.options[sizeOptionName] === selectedSize && (!frameOption || c.options[frameOption.name] === selectedFrame)
-        );
+      if (v2Variants && v2Variants.combinations) {
+        const combo = v2Variants.combinations.find((c: any) => {
+          return Object.entries(selectedOptions).every(([k, v]) => c.options[k] === v);
+        });
         if (combo) {
           setTotalPrice(combo.price);
         }
+
+        // Rebuild dynamicSizes
+        const sizeOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('size'));
+        if (sizeOption) {
+          const parsedSizes: PosterSizeOption[] = sizeOption.values.map((sz: string) => {
+            const tempOpts = { ...selectedOptions, [sizeOption.name]: sz };
+            const tempCombo = v2Variants.combinations.find((c: any) => Object.entries(tempOpts).every(([k, v]) => c.options[k] === v));
+            return {
+              id: sz,
+              name: `${sz} Size`,
+              dimensionsMm: sz === 'A5' ? '148 × 210 mm' : sz === 'A4' ? '210 × 297 mm' : 'See details',
+              price: tempCombo?.price || 0
+            };
+          });
+          setDynamicSizes(parsedSizes);
+        }
+
+        // Rebuild dynamicFrames
+        const frameOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('frame'));
+        if (frameOption) {
+          const baseOpts = { ...selectedOptions, [frameOption.name]: frameOption.values[0] };
+          const baseCombo = v2Variants.combinations.find((c: any) => Object.entries(baseOpts).every(([k, v]) => c.options[k] === v));
+          
+          const parsedFrames: FrameOption[] = frameOption.values.map((fr: string) => {
+            const tempOpts = { ...selectedOptions, [frameOption.name]: fr };
+            const tempCombo = v2Variants.combinations.find((c: any) => Object.entries(tempOpts).every(([k, v]) => c.options[k] === v));
+            const addonPrice = (tempCombo?.price || 0) - (baseCombo?.price || 0);
+
+            let colorClass = 'bg-transparent border-dashed border-white/30';
+            if (fr.toLowerCase().includes('black')) colorClass = 'bg-neutral-900 border-neutral-950';
+            if (fr.toLowerCase().includes('white')) colorClass = 'bg-stone-100 border-stone-300';
+            if (fr.toLowerCase().includes('wood')) colorClass = 'bg-[#8B5A2B] border-[#5c3a1b]';
+
+            return {
+              id: fr,
+              name: fr === 'None' ? 'No Frame (Print Only)' : `${fr} Frame`,
+              priceAddon: addonPrice > 0 ? addonPrice : 0,
+              colorClass
+            };
+          });
+          setDynamicFrames(parsedFrames);
+        }
       }
     }
-  }, [selectedSize, selectedFrame, product]);
+  }, [selectedOptions, product]);
 
   const handleAddToCart = async () => {
     if (!uploadRecord || !previewUrl) {
@@ -149,38 +145,33 @@ export default function CustomPhotoPosterPage() {
     setIsAdding(true);
     try {
       const v2Variants = product.attributes?._v2_variants;
-      let comboLabel = `${selectedSize} / ${selectedFrame}`;
+      let matchedVariant = null;
 
-      if (v2Variants && v2Variants.options) {
-        const sizeOptionName = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('size'))?.name || 'Size';
-        const frameOption = v2Variants.options.find((o: any) => o.name?.toLowerCase().includes('frame'));
-        
-        const combo = v2Variants.combinations.find(
-          (c: any) => c.options[sizeOptionName] === selectedSize && (!frameOption || c.options[frameOption.name] === selectedFrame)
-        );
+      if (v2Variants && v2Variants.combinations) {
+        const combo = v2Variants.combinations.find((c: any) => {
+          return Object.entries(selectedOptions).every(([k, v]) => c.options[k] === v);
+        });
         if (combo) {
-          comboLabel = Object.values(combo.options).join(' / ');
+          const comboLabel = Object.values(combo.options).join(' / ');
+          matchedVariant = product.sizes.find((s: any) => s.label === comboLabel);
         }
       }
 
-      // Find the specific poster_size.id for this variant combo
-      const matchedVariant = product.sizes.find((s: any) => s.label === comboLabel);
-
       if (!matchedVariant) {
-        throw new Error('Variant not found in database for label: ' + comboLabel);
+        throw new Error('Variant not found in database for selected options.');
       }
 
       // Add custom item to cart using REAL database UUIDs
+      // We pass silent=true to prevent double toast
       await addItem(
         product.id,
         matchedVariant.price,
         1,
-        matchedVariant.id, // posterSizeId is now the variant UUID!
-        false,
+        matchedVariant.id,
+        true, // silent
         uploadRecord.id
       );
 
-      toast.success('Custom Photo Poster added to cart!');
     } catch (err: any) {
       console.error(err);
       toast.error('Failed to add custom poster to cart');
@@ -202,6 +193,34 @@ export default function CustomPhotoPosterPage() {
       </div>
     );
   }
+
+  const sizeOptionName = productOptions.find(o => o.name?.toLowerCase().includes('size'))?.name || 'Size';
+  const frameOptionName = productOptions.find(o => o.name?.toLowerCase().includes('frame'))?.name || 'Frame';
+  const genericOptions = productOptions.filter(o => !o.name?.toLowerCase().includes('size') && !o.name?.toLowerCase().includes('frame'));
+
+  // Find existing cart item for current selection
+  let matchedVariantId: string | null = null;
+  if (product && product.sizes) {
+    const v2Variants = product.attributes?._v2_variants;
+    if (v2Variants && v2Variants.combinations) {
+      const combo = v2Variants.combinations.find((c: any) => Object.entries(selectedOptions).every(([k, v]) => c.options[k] === v));
+      if (combo) {
+        const comboLabel = Object.values(combo.options).join(' / ');
+        const matched = product.sizes.find((s: any) => s.label === comboLabel);
+        if (matched) matchedVariantId = matched.id;
+      }
+    }
+  }
+
+  const existingCartItem = matchedVariantId && uploadRecord 
+    ? cartItems.find(i => 
+        i.product_id === product?.id && 
+        i.poster_size_id === matchedVariantId && 
+        i.custom_upload_id === uploadRecord.id
+      ) 
+    : null;
+  
+  const cartQuantity = existingCartItem?.quantity || 0;
 
   return (
     <div className="min-h-screen bg-luxe-black text-white pt-24 pb-16 px-4 sm:px-6 lg:px-8">
@@ -234,7 +253,7 @@ export default function CustomPhotoPosterPage() {
               </h2>
               <CustomPosterUpload
                 userId={userId}
-                selectedSize={selectedSize}
+                selectedSize={selectedOptions[sizeOptionName] || 'A4'}
                 onUploadSuccess={(rec, prev, ana) => {
                   setUploadRecord(rec);
                   setPreviewUrl(prev);
@@ -245,7 +264,7 @@ export default function CustomPhotoPosterPage() {
                   setPreviewUrl(null);
                   setAnalysis(null);
                 }}
-                onSelectRecommendedSize={(sz) => setSelectedSize(sz)}
+                onSelectRecommendedSize={(sz) => setSelectedOptions(prev => ({ ...prev, [sizeOptionName]: sz }))}
               />
             </div>
 
@@ -253,22 +272,45 @@ export default function CustomPhotoPosterPage() {
             <div className="bg-luxe-gray/60 border border-white/10 rounded-2xl p-6 space-y-6">
               <h2 className="text-base font-semibold text-white flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-amber-400 text-black font-bold text-xs flex items-center justify-center">2</span>
-                Choose Size{frames.length > 0 ? ' & Framing' : ''}
+                Choose Size{dynamicFrames.length > 0 ? ' & Framing' : ''}
               </h2>
 
               <PosterSizeSelector
-                selectedSize={selectedSize}
-                onSelectSize={(s) => setSelectedSize(s)}
+                selectedSize={selectedOptions[sizeOptionName] || ''}
+                onSelectSize={(s) => setSelectedOptions(prev => ({ ...prev, [sizeOptionName]: s }))}
                 sizes={dynamicSizes}
               />
 
               {dynamicFrames.length > 0 && (
                 <FrameSelector
-                  selectedFrame={selectedFrame}
-                  onSelectFrame={(f) => setSelectedFrame(f)}
+                  selectedFrame={selectedOptions[frameOptionName] || ''}
+                  onSelectFrame={(f) => setSelectedOptions(prev => ({ ...prev, [frameOptionName]: f }))}
                   frames={dynamicFrames}
                 />
               )}
+
+              {genericOptions.map((opt, idx) => (
+                <div key={opt.name} className="space-y-2 pt-4 border-t border-white/5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-white/70">
+                    {3 + idx}. Select {opt.name}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {opt.values.map((val: string) => (
+                      <button
+                        key={val}
+                        onClick={() => setSelectedOptions(prev => ({ ...prev, [opt.name]: val }))}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
+                          selectedOptions[opt.name] === val
+                            ? 'bg-amber-400 text-black border-amber-400'
+                            : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                        }`}
+                      >
+                        {val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -279,8 +321,8 @@ export default function CustomPhotoPosterPage() {
             {previewUrl ? (
               <WallPlacementDetector
                 customImagePreview={previewUrl}
-                selectedSize={selectedSize}
-                selectedFrame={selectedFrame}
+                selectedSize={selectedOptions[sizeOptionName] || ''}
+                selectedFrame={selectedOptions[frameOptionName] || ''}
               />
             ) : (
               <div className="bg-luxe-gray/60 border border-white/10 rounded-2xl p-8 text-center space-y-3">
@@ -297,8 +339,8 @@ export default function CustomPhotoPosterPage() {
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-white">Custom Photo Poster</h3>
-                  <p className="text-xs text-white/50">
-                    {selectedSize} {dynamicFrames.length > 0 && `• ${selectedFrame === 'None' ? 'No Frame' : `${selectedFrame.toUpperCase()} Frame`}`}
+                  <p className="text-xs text-white/50 mt-1">
+                    {Object.values(selectedOptions).join(' • ')}
                   </p>
                 </div>
                 <div className="text-right">
@@ -311,7 +353,7 @@ export default function CustomPhotoPosterPage() {
               <div className="grid grid-cols-2 gap-3 text-xs text-white/70">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>300 GSM Gallery Paper</span>
+                  <span>Premium Quality</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Truck className="w-4 h-4 text-amber-400" />
@@ -319,25 +361,57 @@ export default function CustomPhotoPosterPage() {
                 </div>
               </div>
 
-              {/* Add to Cart Button */}
-              <button
-                onClick={handleAddToCart}
-                disabled={!uploadRecord || isAdding}
-                className={`w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg ${
-                  uploadRecord
-                    ? 'bg-amber-400 text-black hover:bg-amber-300 shadow-amber-400/20 active:scale-[0.99]'
-                    : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10'
-                }`}
-              >
-                {isAdding ? (
-                  <RefreshCw className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    <ShoppingCart className="w-5 h-5" />
-                    {uploadRecord ? 'Add Custom Poster to Cart' : 'Upload Photo to Continue'}
-                  </>
-                )}
-              </button>
+              {/* Add to Cart Section */}
+              {cartQuantity === 0 ? (
+                <button
+                  onClick={handleAddToCart}
+                  disabled={!uploadRecord || isAdding}
+                  className={`w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg ${
+                    uploadRecord
+                      ? 'bg-amber-400 text-black hover:bg-amber-300 shadow-amber-400/20 active:scale-[0.99]'
+                      : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/10'
+                  }`}
+                >
+                  {isAdding ? (
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-5 h-5" />
+                      {uploadRecord ? 'Add Custom Poster to Cart' : 'Upload Photo to Continue'}
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="flex gap-4">
+                  {/* Quantity Selector */}
+                  <div className="flex-1 flex items-center justify-between rounded-xl overflow-hidden border border-amber-400/50 bg-amber-400/10 h-[52px]">
+                    <button
+                      onClick={() => existingCartItem && updateQuantity(existingCartItem.id, cartQuantity - 1)}
+                      className="h-full px-6 text-white hover:text-amber-400 hover:bg-white/5 active:scale-95 transition-all text-xl"
+                    >
+                      −
+                    </button>
+                    <div className="flex flex-col items-center justify-center pointer-events-none">
+                      <span className="text-white text-base font-bold">{cartQuantity}</span>
+                      <span className="text-amber-400/80 text-[10px] uppercase tracking-wider font-semibold -mt-1">In Cart</span>
+                    </div>
+                    <button
+                      onClick={() => existingCartItem && updateQuantity(existingCartItem.id, cartQuantity + 1)}
+                      className="h-full px-6 text-white hover:text-amber-400 hover:bg-white/5 active:scale-95 transition-all text-xl"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Go to Cart (Desktop Only) */}
+                  <button
+                    onClick={() => router.push('/cart')}
+                    className="hidden md:flex flex-1 items-center justify-center gap-2 h-[52px] rounded-xl font-bold text-sm bg-amber-400 text-black hover:bg-amber-300 transition-all shadow-lg shadow-amber-400/20"
+                  >
+                    Go to Cart <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
 
           </div>
@@ -348,4 +422,3 @@ export default function CustomPhotoPosterPage() {
     </div>
   );
 }
-

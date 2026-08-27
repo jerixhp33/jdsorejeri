@@ -121,12 +121,14 @@ export function ProfileView({ profile, loginLogs, orderCount, recentOrders, reco
           </div>
           <div className="space-y-4">
             {recentOrders.map((order) => {
-              const firstItem = order.items?.[0];
-              const img = (firstItem?.product?.images as any[])?.find(i => i.is_primary) || (firstItem?.product?.images as any[])?.[0];
+              const firstItem = order.items?.[0] as any;
+              const img = firstItem?.custom_upload_id 
+                ? { url: `/api/custom-upload/${firstItem.custom_upload_id}` }
+                : (firstItem?.product?.images as any[])?.find(i => i.is_primary) || (firstItem?.product?.images as any[])?.[0];
               return (
                 <div key={order.id} className="flex items-center gap-4 p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="w-12 h-12 rounded-lg bg-luxe-dark overflow-hidden flex-shrink-0">
-                    {img && <Image src={img.url} alt={firstItem?.product?.name || ''} width={48} height={48} className="object-cover w-full h-full" />}
+                    {img && <Image src={img.url} alt={firstItem?.product?.name || 'Custom Photo'} width={48} height={48} className="object-cover w-full h-full" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-medium truncate">Order #{order.order_number}</p>

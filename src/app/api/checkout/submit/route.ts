@@ -69,6 +69,25 @@ export async function POST(req: NextRequest) {
       const customMeta = item.metadata || {};
       const customUploadId = item.custom_upload_id || customMeta.custom_upload_id || null;
 
+      let customMetaObj = {
+        custom_image_path: customMeta.custom_image_path || null,
+        custom_width: customMeta.custom_width || null,
+        custom_height: customMeta.custom_height || null,
+        custom_file_size: customMeta.custom_file_size || null,
+        custom_resolution: customMeta.custom_resolution || null
+      };
+
+      if (customUploadId) {
+        const { data: uploadData } = await supabase.from('custom_uploads').select('storage_path, width, height, file_size').eq('id', customUploadId).single();
+        if (uploadData) {
+          customMetaObj.custom_image_path = uploadData.storage_path;
+          customMetaObj.custom_width = uploadData.width;
+          customMetaObj.custom_height = uploadData.height;
+          customMetaObj.custom_file_size = uploadData.file_size;
+          customMetaObj.custom_resolution = uploadData.width && uploadData.height ? `${uploadData.width}x${uploadData.height}` : null;
+        }
+      }
+
       validatedItems.push({
         product_id: product?.id || (targetId !== 'custom-poster-product' ? targetId : null),
         poster_size_id: item.poster_size_id || customMeta.poster_size_id || item.size || null,
@@ -76,11 +95,7 @@ export async function POST(req: NextRequest) {
         unit_price: finalPrice,
         total_price: finalPrice * item.quantity,
         custom_upload_id: customUploadId,
-        custom_image_path: customMeta.custom_image_path || null,
-        custom_width: customMeta.custom_width || null,
-        custom_height: customMeta.custom_height || null,
-        custom_file_size: customMeta.custom_file_size || null,
-        custom_resolution: customMeta.custom_resolution || null,
+        ...customMetaObj,
         frame_choice: item.frame || customMeta.frame_choice || null
       });
     }

@@ -21,7 +21,9 @@ export function OrderTable({ items }: OrderTableProps) {
           const productName = item.product?.name || item.product_name || 'Unknown Product';
           const productSlug = item.product?.slug || item.slug;
           const productUrl = productSlug ? `https://jdstorejeri.vercel.app/product/${productSlug}` : null;
-          const primaryImage = item.product?.images?.find((img: any) => img.is_primary)?.url || item.product?.images?.[0]?.url || item.image_url;
+          const primaryImage = item.custom_upload_id 
+            ? `/api/custom-upload/${item.custom_upload_id}`
+            : item.product?.images?.find((img: any) => img.is_primary)?.url || item.product?.images?.[0]?.url || item.image_url;
           return (
             <tr key={index}>
               <td className="py-4 px-2">

@@ -31,7 +31,14 @@ export function OrderItemRow({ item, className = '' }: Props) {
     <div className={`flex gap-4 py-4 ${className}`}>
       {/* Product Image */}
       <div className="relative w-20 h-20 bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800 flex-shrink-0">
-        {item.product?.images?.[0] ? (
+        {(item as any).custom_upload_id ? (
+          <Image
+            src={`/api/custom-upload/${(item as any).custom_upload_id}`}
+            alt="Custom Uploaded Photo"
+            fill
+            className="object-cover"
+          />
+        ) : item.product?.images?.[0] ? (
           <Image
             src={item.product.images[0].url}
             alt={item.product.name}
