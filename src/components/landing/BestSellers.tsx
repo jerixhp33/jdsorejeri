@@ -227,34 +227,45 @@ function MobileCarousel({ products }: { products: Product[] }) {
         transition={{ duration: 0.5 }}
         className="relative -mx-4"
       >
+        {/* Rainbow aurora edge glows */}
+        <div className="absolute left-0 top-0 bottom-0 w-12 z-20 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to right, rgba(168,85,247,0.25), rgba(59,130,246,0.15), rgba(236,72,153,0.1), transparent)',
+            filter: 'blur(8px)',
+          }}
+        />
+        <div className="absolute right-0 top-0 bottom-0 w-12 z-20 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to left, rgba(251,146,60,0.25), rgba(234,179,8,0.15), rgba(168,85,247,0.1), transparent)',
+            filter: 'blur(8px)',
+          }}
+        />
+
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto px-4 pb-4 pt-1 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-[15vw] pb-6 pt-2 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           style={{
-            maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+            scrollPaddingInline: '15vw',
           }}
         >
           {allItems.map((product, i) => {
             const focus = cardFocus[i] ?? 0.5;
 
-            // Subtle curved effect:
-            // Center: scale 1, no blur, no Y shift, full opacity
-            // Sides: scale 0.94, tiny blur, slight Y shift, slightly dimmed
-            const scale = 0.94 + focus * 0.06;
-            const blur = (1 - focus) * 1.2;
-            const translateY = (1 - focus) * 4;
-            const opacity = 0.65 + focus * 0.35;
+            // Curved depth: center is full, sides gently recede
+            const scale = 0.92 + focus * 0.08;
+            const blur = (1 - focus) * 1.5;
+            const translateY = (1 - focus) * 6;
+            const opacity = 0.55 + focus * 0.45;
 
             return (
               <div
                 key={`bs-${product.id}-${i}`}
-                className="w-[60vw] flex-shrink-0 will-change-transform"
+                className="w-[70vw] flex-shrink-0 snap-center will-change-transform"
                 style={{
                   transform: `scale(${scale}) translateY(${translateY}px)`,
-                  filter: blur > 0.15 ? `blur(${blur}px)` : 'none',
+                  filter: blur > 0.1 ? `blur(${blur}px)` : 'none',
                   opacity,
-                  transition: 'transform 0.12s linear, filter 0.18s linear, opacity 0.18s linear',
+                  transition: 'transform 0.1s linear, filter 0.15s linear, opacity 0.15s linear',
                 }}
               >
                 <ProductCard product={product} index={i % itemCount} />
