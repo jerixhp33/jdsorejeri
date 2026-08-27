@@ -2,8 +2,8 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { motion, useMotionValue, useTransform, useSpring, useInView } from 'framer-motion';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { motion, useInView } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 import { ProductCard } from '@/components/product/ProductCard';
 import type { Product } from '@/types';
 
@@ -18,19 +18,19 @@ interface BestSellersProps {
 export function BestSellers({
   products,
   title = 'Best Sellers',
-  subtitle = 'Most Loved',
+  subtitle,
   viewAllLink = '/best-sellers',
   noContainer = false,
 }: BestSellersProps) {
   if (!products.length) return null;
 
   return (
-    <section className="py-6 md:py-2">
+    <section className="py-1 md:py-2">
       <div className={noContainer ? '' : 'page-container'}>
         {/* Header */}
         <SectionHeader title={title} subtitle={subtitle} viewAllLink={viewAllLink} />
 
-        {/* Desktop: Grid — Mobile: Premium horizontal scroll */}
+        {/* Desktop: Grid — Mobile: Premium carousel */}
         <div className="hidden md:block">
           <DesktopGrid products={products} />
         </div>
@@ -43,21 +43,23 @@ export function BestSellers({
 }
 
 /* ─── Section Header ─── */
-function SectionHeader({ title, subtitle, viewAllLink }: { title: string; subtitle: string; viewAllLink: string }) {
+function SectionHeader({ title, subtitle, viewAllLink }: { title: string; subtitle?: string; viewAllLink: string }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-60px' });
 
   return (
-    <div ref={ref} className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 md:mb-12">
+    <div ref={ref} className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-5 md:mb-10">
       <div>
-        <motion.p
-          initial={false}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="text-luxe-accent text-sm tracking-widest uppercase mb-3"
-        >
-          {subtitle}
-        </motion.p>
+        {subtitle && (
+          <motion.p
+            initial={false}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="text-luxe-accent text-sm tracking-widest uppercase mb-2"
+          >
+            {subtitle}
+          </motion.p>
+        )}
         <motion.h2
           initial={false}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
@@ -85,7 +87,7 @@ function SectionHeader({ title, subtitle, viewAllLink }: { title: string; subtit
   );
 }
 
-/* ─── Desktop Grid (unchanged behavior) ─── */
+/* ─── Desktop Grid ─── */
 function DesktopGrid({ products }: { products: Product[] }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
@@ -105,103 +107,136 @@ function DesktopGrid({ products }: { products: Product[] }) {
   );
 }
 
-/* ─── Mobile Carousel ─── */
+/* ─── Mobile Carousel with Curved Depth + Infinite Loop ─── */
 function MobileCarousel({ products }: { products: Product[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef(null);
   const isInView = useInView(trackRef, { once: true, margin: '-40px' });
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const itemCount = Math.min(products.length, 8);
+  const items = products.slice(0, itemCount);
 
-  // Tripled items for infinite feel
-  const items = [...products.slice(0, 8), ...products.slice(0, 8), ...products.slice(0, 8)];
+  // Per-card visibility state: 0 = fully blurred/scaled, 1 = center/focused
+  const [cardFocus, setCardFocus] = useState<number[]>([]);
 
-  const checkScroll = useCallback(() => {
+  // Seamless infinite loop: when user scrolls to 3rd set, silently jump back to 2nd
+  // We render 5 sets for smooth looping
+  const SETS = 5;
+  const allItems = Array.from({ length: SETS }, () => items).flat();
+
+  const getCardMetrics = useCallback(() => {
     const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 20);
+    if (!el || !el.children.length) return null;
+    const card = el.children[0] as HTMLElement;
+    const cardWidth = card.offsetWidth;
+    const gap = 16;
+    return { cardWidth, gap, stride: cardWidth + gap };
   }, []);
 
+  // Start at set 2 (middle) for bidirectional scrolling
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || itemCount === 0) return;
+    const t = requestAnimationFrame(() => {
+      const metrics = getCardMetrics();
+      if (!metrics) return;
+      el.scrollLeft = metrics.stride * itemCount * 2;
+    });
+    return () => cancelAnimationFrame(t);
+  }, [itemCount, getCardMetrics]);
+
+  // Infinite loop reset + curved focus calculation
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.addEventListener('scroll', checkScroll, { passive: true });
-    checkScroll();
-    return () => el.removeEventListener('scroll', checkScroll);
-  }, [checkScroll]);
 
-  // Start scroll at the second set so user can scroll both directions
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el || products.length === 0) return;
-    const timer = setTimeout(() => {
-      const cardWidth = el.firstElementChild?.getBoundingClientRect().width || 200;
-      const gap = 16;
-      el.scrollLeft = (cardWidth + gap) * Math.min(products.length, 8);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [products.length]);
+    let ticking = false;
 
-  const scrollNext = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const cardWidth = el.firstElementChild?.getBoundingClientRect().width || 200;
-    el.scrollBy({ left: cardWidth + 16, behavior: 'smooth' });
-  };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        const metrics = getCardMetrics();
+        if (!metrics) return;
+
+        const { stride } = metrics;
+        const setWidth = stride * itemCount;
+        const centerX = el.scrollLeft + el.clientWidth / 2;
+
+        // Silent jump for seamless loop
+        if (el.scrollLeft >= setWidth * 4) {
+          el.scrollLeft -= setWidth * 2;
+        } else if (el.scrollLeft <= setWidth * 0.5) {
+          el.scrollLeft += setWidth * 2;
+        }
+
+        // Calculate per-card focus (0..1) based on distance from center
+        const focuses: number[] = [];
+        for (let i = 0; i < el.children.length; i++) {
+          const child = el.children[i] as HTMLElement;
+          const childCenter = child.offsetLeft + child.offsetWidth / 2;
+          const dist = Math.abs(centerX - childCenter);
+          const maxDist = el.clientWidth * 0.6;
+          const focus = Math.max(0, 1 - dist / maxDist);
+          focuses.push(focus);
+        }
+        setCardFocus(focuses);
+      });
+    };
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    // Initial calc
+    onScroll();
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [itemCount, getCardMetrics]);
 
   return (
     <div ref={trackRef} className="relative">
-      {/* Scroll container with CSS mask for seamless edge blending */}
       <motion.div
         initial={false}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 35 }}
-        transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.5 }}
         className="relative -mx-4"
       >
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto px-4 pb-6 pt-2 scroll-smooth items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-4 overflow-x-auto px-4 pb-4 pt-1 items-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           style={{
             maskImage:
-              'linear-gradient(to right, transparent, black 5%, black 93%, transparent)',
+              'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
             WebkitMaskImage:
-              'linear-gradient(to right, transparent, black 5%, black 93%, transparent)',
+              'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
           }}
         >
-          {items.map((product, i) => (
-            <motion.div
-              key={`${product.id}-${i}`}
-              initial={false}
-              animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
-              transition={{
-                duration: 0.5,
-                ease: [0.25, 0.46, 0.45, 0.94],
-                delay: Math.min(i * 0.06, 0.4),
-              }}
-              className="w-[48vw] flex-shrink-0"
-            >
-              <ProductCard product={product} index={i % 8} />
-            </motion.div>
-          ))}
-        </div>
+          {allItems.map((product, i) => {
+            const focus = cardFocus[i] ?? 0;
+            // Curved depth: center card is scale 1, sharp, lifted
+            // Side cards shrink, blur, and drop
+            const scale = 0.88 + focus * 0.12; // 0.88 → 1.0
+            const blur = (1 - focus) * 2.5; // 2.5px → 0
+            const translateY = (1 - focus) * 8; // 8px down → 0
+            const opacity = 0.5 + focus * 0.5; // 0.5 → 1.0
 
-        {/* Next arrow indicator */}
-        {canScrollRight && (
-          <button
-            onClick={scrollNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 active:scale-90 transition-transform"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        )}
+            return (
+              <div
+                key={`${product.id}-${i}`}
+                className="w-[46vw] flex-shrink-0 will-change-transform"
+                style={{
+                  transform: `scale(${scale}) translateY(${translateY}px)`,
+                  filter: blur > 0.2 ? `blur(${blur}px)` : 'none',
+                  opacity,
+                  transition: 'transform 0.15s ease-out, filter 0.2s ease-out, opacity 0.2s ease-out',
+                }}
+              >
+                <ProductCard product={product} index={i % itemCount} />
+              </div>
+            );
+          })}
+        </div>
       </motion.div>
 
-      {/* Scroll progress dots */}
-      <ScrollDots
-        scrollRef={scrollRef}
-        totalSets={3}
-        itemsPerSet={Math.min(products.length, 8)}
-      />
+      {/* Progress indicator */}
+      <ScrollDots scrollRef={scrollRef} itemCount={itemCount} />
     </div>
   );
 }
@@ -209,44 +244,43 @@ function MobileCarousel({ products }: { products: Product[] }) {
 /* ─── Scroll Progress Dots ─── */
 function ScrollDots({
   scrollRef,
-  totalSets,
-  itemsPerSet,
+  itemCount,
 }: {
   scrollRef: React.RefObject<HTMLDivElement | null>;
-  totalSets: number;
-  itemsPerSet: number;
+  itemCount: number;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const dotCount = Math.min(itemsPerSet, 6);
+  const dotCount = Math.min(itemCount, 6);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
     const onScroll = () => {
-      const cardWidth = el.firstElementChild?.getBoundingClientRect().width || 200;
-      const gap = 16;
-      const scrollPerCard = cardWidth + gap;
-      const rawIndex = Math.round(el.scrollLeft / scrollPerCard);
-      setActiveIndex(rawIndex % itemsPerSet);
+      const card = el.children[0] as HTMLElement | undefined;
+      if (!card) return;
+      const stride = card.offsetWidth + 16;
+      const rawIndex = Math.round(el.scrollLeft / stride);
+      setActiveIndex(rawIndex % itemCount);
     };
 
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
-  }, [scrollRef, itemsPerSet]);
+  }, [scrollRef, itemCount]);
 
   return (
-    <div className="flex justify-center gap-1.5 mt-2">
+    <div className="flex justify-center gap-1.5 mt-3">
       {Array.from({ length: dotCount }).map((_, i) => (
         <div
           key={i}
-          className="h-1 rounded-full transition-all duration-500 ease-out"
+          className="h-1 rounded-full"
           style={{
             width: activeIndex % dotCount === i ? 20 : 6,
             backgroundColor:
               activeIndex % dotCount === i
                 ? 'rgba(212, 175, 55, 0.9)'
                 : 'rgba(255, 255, 255, 0.15)',
+            transition: 'width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s ease',
           }}
         />
       ))}

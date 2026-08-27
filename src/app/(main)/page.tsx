@@ -67,7 +67,7 @@ export default async function HomePage() {
         </div>
 
       {/* Top banners */}
-      <div className="mb-4 lg:mb-6">
+      <div className="mb-1 lg:mb-2">
         <BannersSection banners={topBanners} />
       </div>
 
