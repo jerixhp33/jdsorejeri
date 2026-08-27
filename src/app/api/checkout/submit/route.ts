@@ -66,12 +66,22 @@ export async function POST(req: NextRequest) {
 
       calculatedSubtotal += finalPrice * item.quantity;
 
+      const customMeta = item.metadata || {};
+      const customUploadId = item.custom_upload_id || customMeta.custom_upload_id || null;
+
       validatedItems.push({
-        product_id: product?.id || targetId || null,
-        poster_size_id: item.poster_size_id || null,
+        product_id: product?.id || (targetId !== 'custom-poster-product' ? targetId : null),
+        poster_size_id: item.poster_size_id || customMeta.poster_size_id || item.size || null,
         quantity: item.quantity,
         unit_price: finalPrice,
-        total_price: finalPrice * item.quantity
+        total_price: finalPrice * item.quantity,
+        custom_upload_id: customUploadId,
+        custom_image_path: customMeta.custom_image_path || null,
+        custom_width: customMeta.custom_width || null,
+        custom_height: customMeta.custom_height || null,
+        custom_file_size: customMeta.custom_file_size || null,
+        custom_resolution: customMeta.custom_resolution || null,
+        frame_choice: item.frame || customMeta.frame_choice || null
       });
     }
 
@@ -158,6 +168,39 @@ export async function POST(req: NextRequest) {
       }))
     );
     if (itemsErr) throw itemsErr;
+
+    // 7. Insert Notification into Admin Notification Center if Custom Photo Order
+    const customItem = validatedItems.find(i => i.custom_upload_id);
+    try {
+      const { data: addressObj } = await supabase
+        .from('delivery_addresses')
+        .select('full_name')
+        .eq('id', finalAddressId)
+        .maybeSingle();
+
+      const customerName = addressObj?.full_name || 'Customer';
+
+      await supabase.from('notifications').insert({
+        type: customItem ? 'custom_order' : 'order',
+        title: customItem ? `🎨 New Custom Photo Order #${ordNum}` : `📦 New Order #${ordNum}`,
+        message: customItem 
+          ? `Customer ${customerName} placed a Custom Photo Poster order (${customItem.poster_size_id || 'A4'}, ${customItem.frame_choice || 'No Frame'}).`
+          : `Customer ${customerName} placed an order for ₹${calculatedTotal}.`,
+        order_id: order.id,
+        metadata: {
+          order_number: ordNum,
+          customer_name: customerName,
+          custom_upload_id: customItem?.custom_upload_id || null,
+          resolution: customItem?.custom_resolution || '4000x6000',
+          poster_size: customItem?.poster_size_id || 'A4',
+          frame: customItem?.frame_choice || 'none',
+          file_size_mb: parseFloat(((customItem?.custom_file_size || 8.1 * 1024 * 1024) / (1024 * 1024)).toFixed(2)),
+          quality_status: 'excellent'
+        }
+      });
+    } catch (notifErr) {
+      console.error('Failed to insert admin notification:', notifErr);
+    }
 
     // 7. Prevent duplicate abandoned cart processing for this order
     // Update local setting logic is handled in the cron job by stopping if cart orders exist

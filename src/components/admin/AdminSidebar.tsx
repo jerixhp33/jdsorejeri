@@ -34,6 +34,7 @@ const NAV_GROUPS = [
   {
     title: 'COMMERCE & ORDERS',
     items: [
+      { href: '/admin/notifications', label: 'Notifications Inbox', icon: Bell },
       { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
       { href: '/admin/abandoned-carts', label: 'Abandoned Carts', icon: ShoppingCart },
       { href: '/admin/shipping', label: 'Shipping', icon: Truck },
