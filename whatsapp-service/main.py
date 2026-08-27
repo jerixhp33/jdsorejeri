@@ -80,8 +80,17 @@ def on_message(client: NewClient, ev: MessageEv):
             client.reply_message("Sorry, I encountered an error.", ev)
 
 def start_neonize():
-    client.connect()
-    event.wait()
+    import time
+    while True:
+        try:
+            print("🔄 Attempting to connect Neonize...")
+            client.connect()
+            # If connect() is non-blocking in this version and event.wait() is needed:
+            # event.wait() 
+        except Exception as e:
+            print(f"⚠️ Neonize crashed or timed out: {e}")
+        print("⏳ Waiting 5 seconds before restarting WhatsApp client...")
+        time.sleep(5)
 
 # Start Neonize in a background thread so it doesn't block FastAPI
 threading.Thread(target=start_neonize, daemon=True).start()
