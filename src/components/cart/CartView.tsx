@@ -217,6 +217,7 @@ export function CartView() {
                         >
                           {primaryImage ? (
                             <Image
+                              unoptimized={!!item.custom_upload_id}
                               src={primaryImage.url}
                               alt={item.product?.name || 'Product'}
                               width={96}

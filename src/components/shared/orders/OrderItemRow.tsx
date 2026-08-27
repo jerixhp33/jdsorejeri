@@ -33,6 +33,7 @@ export function OrderItemRow({ item, className = '' }: Props) {
       <div className="relative w-20 h-20 bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800 flex-shrink-0">
         {(item as any).custom_upload_id ? (
           <Image
+            unoptimized
             src={`/api/custom-upload/${(item as any).custom_upload_id}`}
             alt="Custom Uploaded Photo"
             fill
