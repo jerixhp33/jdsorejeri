@@ -16,8 +16,8 @@ from playwright.async_api import async_playwright
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 print(f"🔑 Gemini API Key loaded: {'Yes (' + GEMINI_API_KEY[:8] + '...)' if GEMINI_API_KEY else 'No'}")
-SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL") or "https://hxeayujekyexdpljzdpe.supabase.co"
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANON_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") or "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4ZWF5dWpla3lleGRwbGp6ZHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNDUwNDIsImV4cCI6MjA5ODgyMTA0Mn0.mYt6Ct6hogrVuLU6cief5NPDHvoMStqN71OhWHXPCsE"
 
 def fetch_products_context() -> str:
     """Fetch active products directly from the live Vercel API (guarantees real store items)."""
@@ -150,7 +150,8 @@ def log_chat_message(phone: str, sender: str, text: str):
             headers = {
                 "apikey": SUPABASE_KEY,
                 "Authorization": f"Bearer {SUPABASE_KEY}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal"
             }
             payload = {
                 "phone_number": clean_phone,
@@ -158,7 +159,8 @@ def log_chat_message(phone: str, sender: str, text: str):
                 "message_text": text,
                 "created_at": now_iso
             }
-            httpx.post(url, headers=headers, json=payload, timeout=5)
+            res = httpx.post(url, headers=headers, json=payload, timeout=5)
+            print(f"💾 Logged message to Supabase ({clean_phone}, {sender}): status {res.status_code}")
         except Exception as e:
             print(f"⚠️ Supabase chat persist error: {e}")
 
