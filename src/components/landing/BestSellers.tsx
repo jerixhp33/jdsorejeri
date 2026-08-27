@@ -55,12 +55,29 @@ export function BestSellers({ products, title = "Best Sellers", subtitle = "Most
           </motion.div>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
-          {products.slice(0, 8).map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} />
-          ))}
-        </div>
+        {/* Grid / Horizontal Scroll */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="relative -mx-4 px-4 md:mx-0 md:px-0"
+        >
+          {/* Subtle fade edges for mobile */}
+          <div className="absolute left-0 top-0 bottom-8 w-4 bg-gradient-to-r from-black to-transparent z-10 md:hidden pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-8 w-8 bg-gradient-to-l from-black to-transparent z-10 md:hidden pointer-events-none" />
+          
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-6 md:pb-0 scroll-smooth items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {products.slice(0, 8).map((product, i) => (
+              <div 
+                key={product.id} 
+                className="w-[75vw] sm:w-[45vw] flex-shrink-0 snap-start md:w-auto md:flex-shrink-1"
+              >
+                <ProductCard product={product} index={i} />
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );
