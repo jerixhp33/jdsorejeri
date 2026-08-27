@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Parse Request
-    const { prompt, type, model = 'llama-3.3-70b-versatile' } = await req.json();
+    const { prompt, type, model = 'llama-3.1-70b-versatile' } = await req.json();
     requestType = type;
 
     if (!prompt) {
