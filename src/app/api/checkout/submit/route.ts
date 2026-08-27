@@ -173,12 +173,27 @@ export async function POST(req: NextRequest) {
 
       if (address?.phone) {
         const name = address.full_name?.split(' ')[0] || 'Customer';
+        
+        // Build product list for the message
+        const productNames = [];
+        for (const item of validatedItems) {
+          const { data: prod } = await supabase.from('products').select('name').eq('id', item.product_id).maybeSingle();
+          productNames.push(`  🛍️ ${prod?.name || 'Product'} × ${item.quantity} — ₹${item.total_price}`);
+        }
+        const itemsList = productNames.join('\n');
+
         await sendWhatsApp(
           address.phone,
-          `Hi ${name}! ✅ Your JD Store order #${ordNum} has been placed successfully!\n\n` +
-          `💰 Total: ₹${calculatedTotal}\n` +
-          `📦 We'll notify you when it ships.\n\n` +
-          `Thank you for shopping with JD Store! 🎨`
+          `🎉 *Order Placed Successfully!*\n\n` +
+          `Hey ${name}! 👋\n\n` +
+          `Thank you for your order at *JD Store*! ✨\n\n` +
+          `🧾 *Order Number:* #${ordNum}\n\n` +
+          `📋 *Your Items:*\n${itemsList}\n\n` +
+          (discountAmount > 0 ? `🏷️ *Discount:* -₹${discountAmount}\n` : '') +
+          (deliveryCharge > 0 ? `🚚 *Delivery:* ₹${deliveryCharge}\n` : `🚚 *Delivery:* FREE ✨\n`) +
+          `💵 *Total:* ₹${calculatedTotal}\n\n` +
+          `📦 We'll notify you at every step — from packing to delivery!\n\n` +
+          `_JD Store — Art for every space_ 🎨`
         );
         
         // Let the invoice generation happen asynchronously in the background so it doesn't block the checkout response

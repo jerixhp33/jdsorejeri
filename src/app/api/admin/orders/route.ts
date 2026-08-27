@@ -109,13 +109,87 @@ export async function PATCH(req: NextRequest) {
       
       const customerName = addressData?.full_name?.split(' ')[0] || profile?.name?.split(' ')[0] || 'Customer';
       const customerEmail = profile?.email;
-      
+
+      // Fetch order items with product details for rich WhatsApp messages
+      const { data: orderItems } = await admin
+        .from('order_items')
+        .select('quantity, unit_price, product:products(name)')
+        .eq('order_id', data.id);
+
+      const itemsList = (orderItems || [])
+        .map((item: any) => `  🛍️ ${item.product?.name || 'Product'} × ${item.quantity} — ₹${item.unit_price * item.quantity}`)
+        .join('\n');
+
       let msg = '';
+      let waMsg = '';
+      
       if (updates.payment_status === 'paid') {
         msg = `Hey ${customerName}, 🎉 great news! The payment for your order #${data.order_number} has been received successfully.`;
+        waMsg = `✅ *Payment Confirmed!*\n\n` +
+          `Hey ${customerName}! 🎉\n\n` +
+          `Your payment for order *#${data.order_number}* has been received successfully! 💰\n\n` +
+          `📋 *Order Summary:*\n${itemsList}\n\n` +
+          `💵 *Total Paid:* ₹${data.total}\n\n` +
+          `We're getting your order ready! Stay tuned for shipping updates 📦\n\n` +
+          `Thank you for shopping with *JD Store* 🎨✨`;
       } else if (updates.status) {
         const statusText = updates.status.replace(/_/g, ' ');
         msg = `Hey ${customerName}, 📦 your order #${data.order_number} status is now ${statusText}.`;
+        
+        const statusMessages: Record<string, string> = {
+          'processing': `⏳ *Order Processing!*\n\n` +
+            `Hey ${customerName}! 👋\n\n` +
+            `Your order *#${data.order_number}* is now being processed! 🔄\n\n` +
+            `📋 *Your Items:*\n${itemsList}\n\n` +
+            `💵 *Order Total:* ₹${data.total}\n\n` +
+            `Our team is preparing your order with care! 💝\n\n` +
+            `_JD Store — Art for every space_ 🎨`,
+
+          'packed': `📦 *Order Packed!*\n\n` +
+            `Hey ${customerName}! 🎉\n\n` +
+            `Great news! Your order *#${data.order_number}* has been carefully packed and is ready to ship! 🎁\n\n` +
+            `📋 *What's in your package:*\n${itemsList}\n\n` +
+            `💵 *Order Total:* ₹${data.total}\n\n` +
+            `📮 Shipping details coming soon!\n\n` +
+            `_JD Store — Art for every space_ 🎨`,
+
+          'shipped': `🚚 *Order Shipped!*\n\n` +
+            `Hey ${customerName}! 🎊\n\n` +
+            `Your order *#${data.order_number}* is on its way to you! 📬\n\n` +
+            `📋 *Items Shipped:*\n${itemsList}\n\n` +
+            `💵 *Order Total:* ₹${data.total}\n\n` +
+            `You'll receive tracking details shortly! 📍\n\n` +
+            `_JD Store — Art for every space_ 🎨`,
+
+          'out_for_delivery': `🏃 *Out for Delivery!*\n\n` +
+            `Hey ${customerName}! 🤩\n\n` +
+            `Your order *#${data.order_number}* is out for delivery and will reach you soon! 🎁\n\n` +
+            `📋 *Arriving Today:*\n${itemsList}\n\n` +
+            `💵 *Order Total:* ₹${data.total}\n\n` +
+            `Please keep your phone handy! 📱\n\n` +
+            `_JD Store — Art for every space_ 🎨`,
+
+          'delivered': `🎉 *Order Delivered!*\n\n` +
+            `Hey ${customerName}! 🥳\n\n` +
+            `Your order *#${data.order_number}* has been delivered successfully! ✅\n\n` +
+            `📋 *What you received:*\n${itemsList}\n\n` +
+            `💵 *Order Total:* ₹${data.total}\n\n` +
+            `We hope you love your purchase! 💖\n` +
+            `If you have any issues, just reply to this message.\n\n` +
+            `⭐ Don't forget to leave a review on our store!\n\n` +
+            `_JD Store — Art for every space_ 🎨`,
+
+          'cancelled': `❌ *Order Cancelled*\n\n` +
+            `Hey ${customerName},\n\n` +
+            `Your order *#${data.order_number}* has been cancelled.\n\n` +
+            `📋 *Cancelled Items:*\n${itemsList}\n\n` +
+            `💵 *Refund Amount:* ₹${data.total}\n\n` +
+            `If you didn't request this cancellation, please contact us immediately.\n\n` +
+            `_JD Store — Art for every space_ 🎨`,
+        };
+        
+        waMsg = statusMessages[updates.status] || 
+          `📢 *Order Update*\n\nHey ${customerName}! Your order *#${data.order_number}* status is now *${statusText}*.\n\n📋 *Items:*\n${itemsList}\n\n💵 *Total:* ₹${data.total}\n\n_JD Store — Art for every space_ 🎨`;
       }
 
       // In-App Notification
@@ -136,7 +210,7 @@ export async function PATCH(req: NextRequest) {
         icon: '/icon-192x192.png'
       }).catch(() => {});
 
-      // WhatsApp Notification
+      // WhatsApp Notification (rich message)
       try {
         const { data: addr } = await admin
           .from('delivery_addresses')
@@ -146,7 +220,7 @@ export async function PATCH(req: NextRequest) {
 
         if (addr?.phone) {
           const { sendWhatsApp } = await import('@/lib/whatsapp');
-          await sendWhatsApp(addr.phone, msg);
+          await sendWhatsApp(addr.phone, waMsg || msg);
         }
       } catch (waErr) {
         console.error('[whatsapp] Status notification failed:', waErr);
