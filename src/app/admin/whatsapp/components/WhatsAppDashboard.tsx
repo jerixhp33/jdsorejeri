@@ -284,7 +284,7 @@ export function WhatsAppDashboard() {
                       <h4 className="text-sm font-semibold text-white">+{activeChat.phone}</h4>
                       <p className="text-[11px] text-green-400 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                        Connected &amp; AI Auto-Responding
+                        Connected &amp; Auto-Responding
                       </p>
                     </div>
                   </div>
@@ -302,7 +302,7 @@ export function WhatsAppDashboard() {
                       >
                         <div className="flex items-center gap-1.5 mb-1 text-[10px] text-white/40">
                           {isCustomer && <span className="flex items-center gap-1 text-blue-400 font-medium"><User className="w-3 h-3" /> Customer</span>}
-                          {isAI && <span className="flex items-center gap-1 text-purple-400 font-medium"><Bot className="w-3 h-3" /> Gemini AI</span>}
+                          {isAI && <span className="flex items-center gap-1 text-purple-400 font-medium"><Bot className="w-3 h-3" /> Store Assistant</span>}
                           {msg.sender === 'admin' && <span className="flex items-center gap-1 text-green-400 font-medium"><ShieldAlert className="w-3 h-3" /> Admin</span>}
                           <span>• {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>

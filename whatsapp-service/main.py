@@ -193,6 +193,10 @@ def on_message(client: NewClient, ev: MessageEv):
     if ev.Info.MessageSource.IsFromMe:
         return
 
+    # Ignore group messages to prevent spam & bans
+    if hasattr(ev.Info.MessageSource, 'IsGroup') and ev.Info.MessageSource.IsGroup:
+        return
+
     # Message deduplication check to prevent double responses
     msg_id = str(ev.Info.ID) if hasattr(ev.Info, 'ID') else None
     if msg_id:
@@ -209,9 +213,13 @@ def on_message(client: NewClient, ev: MessageEv):
     elif ev.Message.extendedTextMessage and ev.Message.extendedTextMessage.text:
         incoming_text = ev.Message.extendedTextMessage.text
 
-    sender_jid = str(ev.Info.MessageSource.Sender.User if hasattr(ev.Info.MessageSource.Sender, 'User') else ev.Info.MessageSource.Chat.User)
-    if not sender_jid:
-        sender_jid = "unknown"
+    # Extract clean sender phone number (avoid LID or group IDs)
+    chat_user = getattr(ev.Info.MessageSource.Chat, 'User', '')
+    sender_user = getattr(ev.Info.MessageSource.Sender, 'User', '')
+    
+    sender_jid = str(chat_user if (chat_user and len(str(chat_user)) <= 12) else sender_user)
+    if not sender_jid or sender_jid == "None":
+        sender_jid = str(chat_user or sender_user or "unknown")
 
     if incoming_text:
         log_chat_message(sender_jid, "customer", incoming_text)
@@ -219,45 +227,22 @@ def on_message(client: NewClient, ev: MessageEv):
     if incoming_text and GEMINI_API_KEY:
         print(f"📥 Received from {sender_jid}: {incoming_text}")
         reply_text = ask_gemini(incoming_text)
-        print(f"📤 Replying: {reply_text[:100]}...")
+        print(f"📤 Replying to {sender_jid}: {reply_text[:100]}...")
         log_chat_message(sender_jid, "ai", reply_text)
         
-        # Send standard direct message to avoid bot quote context and AI badge
+        # Add human-like 1.5s delay to protect account from WhatsApp anti-spam detection
+        import time
+        time.sleep(1.5)
+
+        # Send standard direct message
         jid_obj = build_jid(sender_jid)
         client.send_message(jid_obj, reply_text)
-
-        # If user asked about products, automatically send native product photo cards!
-        if any(w in incoming_text.lower() for w in ["product", "item", "sell", "buy", "store", "collection", "catalog", "what"]):
-            try:
-                prod_resp = httpx.get("https://jdstorejeri.vercel.app/api/products?limit=3", timeout=10)
-                if prod_resp.status_code == 200:
-                    prods = prod_resp.json().get("data", [])
-                    for p in prods:
-                        p_name = p.get("name", "Product")
-                        p_price = p.get("price", 0)
-                        p_slug = p.get("slug", "")
-                        p_images = p.get("images", [])
-                        p_img = p_images[0].get("url") if (p_images and isinstance(p_images, list) and len(p_images) > 0) else None
-                        if p_img:
-                            caption = f"🛍️ *{p_name}* — ₹{p_price}\n🔗 https://jdstorejeri.vercel.app/product/{p_slug}"
-                            jid_obj = build_jid(sender_jid)
-                            ext = "png" if ".png" in p_img.lower() else "jpg"
-                            temp_path = f"/tmp/prod_{abs(hash(p_img))}.{ext}"
-                            r = httpx.get(p_img, timeout=10)
-                            if r.status_code == 200:
-                                with open(temp_path, "wb") as f:
-                                    f.write(r.content)
-                                try:
-                                    client.send_image(jid_obj, temp_path, caption=caption)
-                                except AttributeError:
-                                    pass
-            except Exception as img_err:
-                print(f"⚠️ Error sending product photo cards: {img_err}")
     elif incoming_text:
         print(f"📥 Received from {sender_jid}: {incoming_text} (no API key, skipping AI)")
         reply_text = "Bot is running but AI is not configured yet."
         log_chat_message(sender_jid, "ai", reply_text)
-        client.reply_message(reply_text, ev)
+        jid_obj = build_jid(sender_jid)
+        client.send_message(jid_obj, reply_text)
 
 def start_neonize():
     import time
