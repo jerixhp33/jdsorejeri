@@ -98,6 +98,33 @@ export async function GET(req: NextRequest) {
             subject: targetSequence === 3 ? 'Final Reminder: Your JD Store Cart' : 'You left something behind!',
             react: emailComponent,
           });
+
+          // Also send WhatsApp reminder if phone number exists (NO offers/discounts per user instructions)
+          try {
+            const { sendWhatsApp } = await import('@/lib/whatsapp');
+            const { data: address } = await supabase
+              .from('delivery_addresses')
+              .select('phone')
+              .eq('user_id', cart.user_id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (address?.phone) {
+              const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jdstorejeri.vercel.app';
+              await sendWhatsApp(
+                address.phone,
+                `🛒 *You left items in your cart!*\n\n` +
+                `Hey ${customerName}! 🎨 You have items waiting in your JD Store cart.\n\n` +
+                `Complete your order now before items run out of stock! ✨\n\n` +
+                `🛒 *Complete Order:* ${siteUrl}/checkout\n\n` +
+                `📱 *Shop on our App:* ${siteUrl}`
+              );
+            }
+          } catch (waErr) {
+            console.error('[whatsapp] Abandoned cart reminder failed:', waErr);
+          }
+
           processedCount++;
         }
       }

@@ -16,15 +16,63 @@ from playwright.async_api import async_playwright
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 print(f"🔑 Gemini API Key loaded: {'Yes (' + GEMINI_API_KEY[:8] + '...)' if GEMINI_API_KEY else 'No'}")
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL", "")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+
+def fetch_products_context() -> str:
+    """Fetch active products from Supabase to inform Gemini AI assistant."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return ""
+    try:
+        url = f"{SUPABASE_URL}/rest/v1/products?select=name,slug,price,product_type,images:product_images(url)&is_active=eq.true&limit=15"
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}"
+        }
+        resp = httpx.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            products = resp.json()
+            lines = []
+            for p in products:
+                name = p.get("name", "Product")
+                slug = p.get("slug", "")
+                price = p.get("price", 0)
+                img = ""
+                images = p.get("images", [])
+                if images and isinstance(images, list) and len(images) > 0:
+                    img = images[0].get("url", "")
+                lines.append(f"- Name: {name} | Price: ₹{price} | Product Link: https://jdstorejeri.vercel.app/products/{slug} | Image: {img}")
+            return "\n".join(lines)
+    except Exception as e:
+        print(f"⚠️ Error fetching products for AI: {e}")
+    return ""
 
 def ask_gemini(prompt: str) -> str:
-    """Call Gemini API directly via HTTP to avoid SDK incompatibilities with AQ. keys."""
+    """Call Gemini API directly via HTTP with live catalog context as AI Shopping Assistant."""
     if not GEMINI_API_KEY:
         return "Gemini API key is not configured."
 
+    catalog_info = fetch_products_context()
+
+    system_instruction = (
+        "You are the official AI Shopping Assistant for JD Store (https://jdstorejeri.vercel.app).\n"
+        "Your goal is to assist customers, answer questions, and recommend products from the store catalog.\n\n"
+        f"AVAILABLE STORE PRODUCTS:\n{catalog_info}\n\n"
+        "CRITICAL RULES:\n"
+        "1. When customers ask what products exist, what you sell, or ask for recommendations, list the products with their exact Name (in bold *Name*), Price (in ₹), Direct Product Link (https://jdstorejeri.vercel.app/products/slug), and Image URL (🖼️ Image: url).\n"
+        "2. ALWAYS include the main store app link at the end of product listings: '📱 *Shop on our App:* https://jdstorejeri.vercel.app'\n"
+        "3. Keep responses warm, attractive, well-formatted, and filled with appropriate emojis.\n"
+    )
+
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={GEMINI_API_KEY}"
     payload = {
-        "contents": [{"parts": [{"text": prompt}]}]
+        "contents": [
+            {
+                "parts": [
+                    {"text": f"{system_instruction}\n\nCustomer Message: {prompt}"}
+                ]
+            }
+        ]
     }
     try:
         resp = httpx.post(url, json=payload, timeout=30)
@@ -33,7 +81,6 @@ def ask_gemini(prompt: str) -> str:
             print(f"❌ Gemini API error body: {resp.text}")
             return f"AI service error (status {resp.status_code}). Please check API key."
         data = resp.json()
-        # Extract text from the response
         candidates = data.get("candidates", [])
         if candidates:
             parts = candidates[0].get("content", {}).get("parts", [])
@@ -64,14 +111,16 @@ def log_chat_message(phone: str, sender: str, text: str):
     clean_phone = ''.join(c for c in phone if c.isdigit())
     if not clean_phone:
         return
+    from datetime import datetime
+    now_iso = datetime.utcnow().isoformat() + "Z"
+    
     if clean_phone not in chat_store:
         chat_store[clean_phone] = {
             "phone": clean_phone,
             "messages": [],
             "last_activity": ""
         }
-    from datetime import datetime
-    now_iso = datetime.utcnow().isoformat() + "Z"
+    
     chat_store[clean_phone]["messages"].append({
         "sender": sender,
         "text": text,
@@ -80,6 +129,25 @@ def log_chat_message(phone: str, sender: str, text: str):
     if len(chat_store[clean_phone]["messages"]) > 50:
         chat_store[clean_phone]["messages"] = chat_store[clean_phone]["messages"][-50:]
     chat_store[clean_phone]["last_activity"] = now_iso
+
+    # Persist to Supabase if configured
+    if SUPABASE_URL and SUPABASE_KEY:
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/whatsapp_chat_messages"
+            headers = {
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "phone_number": clean_phone,
+                "sender": sender,
+                "message_text": text,
+                "created_at": now_iso
+            }
+            httpx.post(url, headers=headers, json=payload, timeout=5)
+        except Exception as e:
+            print(f"⚠️ Supabase chat persist error: {e}")
 
 # Initialize Neonize Client
 client = NewClient("whatsapp_session.sqlite3")
@@ -167,7 +235,33 @@ def get_qr():
 
 @app.get("/api/whatsapp/chats")
 def get_chats():
-    # Return list of chats sorted by last activity
+    if SUPABASE_URL and SUPABASE_KEY:
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/whatsapp_chat_messages?select=phone_number,sender,message_text,created_at&order=created_at.asc&limit=200"
+            headers = {
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}"
+            }
+            resp = httpx.get(url, headers=headers, timeout=5)
+            if resp.status_code == 200:
+                rows = resp.json()
+                sb_store = {}
+                for r in rows:
+                    p = r.get("phone_number")
+                    if not p: continue
+                    if p not in sb_store:
+                        sb_store[p] = {"phone": p, "messages": [], "last_activity": r.get("created_at")}
+                    sb_store[p]["messages"].append({
+                        "sender": r.get("sender"),
+                        "text": r.get("message_text"),
+                        "timestamp": r.get("created_at")
+                    })
+                    sb_store[p]["last_activity"] = r.get("created_at")
+                if sb_store:
+                    return {"chats": sorted(sb_store.values(), key=lambda c: c["last_activity"], reverse=True)}
+        except Exception as e:
+            print(f"⚠️ Error pulling chats from Supabase: {e}")
+
     sorted_chats = sorted(chat_store.values(), key=lambda c: c["last_activity"], reverse=True)
     return {"chats": sorted_chats}
 
