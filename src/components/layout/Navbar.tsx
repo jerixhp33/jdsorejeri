@@ -321,6 +321,14 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
                 <Link prefetch={true} href="/" className={cn("nav-link", pathname === '/' && "active")}>
                   Home
                 </Link>
+                <Link 
+                  prefetch={true} 
+                  href="/product/custom-photo-poster" 
+                  className={cn("nav-link text-amber-400 font-semibold flex items-center gap-1", pathname === '/product/custom-photo-poster' && "active")}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                  Custom Poster
+                </Link>
                 {dynamicCategoryLinks.map((link) => {
                   const isMain = link.href.includes('poster') || link.href.includes('earring');
                   if (isMain) {
@@ -357,19 +365,7 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
                       )}
                     </AnimatePresence>
                   </div>
-            <nav className="hidden lg:flex items-center space-[#1.5rem] space-x-6 text-sm">
-                <Link prefetch={true} href="/" className={cn("nav-link", pathname === '/' && "active")}>
-                  Home
-                </Link>
-
-                <Link 
-                  prefetch={true} 
-                  href="/product/custom-photo-poster" 
-                  className={cn("nav-link text-amber-400 font-semibold flex items-center gap-1", pathname === '/product/custom-photo-poster' && "active")}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                  Custom Poster
-                </Link>
+                )}
 
                 <Link prefetch={true} href="/collections" className={cn("nav-link", pathname === '/collections' && "active")}>
                   Collections

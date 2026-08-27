@@ -25,18 +25,48 @@ export default function CustomPhotoPosterPage() {
 
   const [isAdding, setIsAdding] = useState(false);
 
+  const [sizePrices, setSizePrices] = useState({ A5: 199, A4: 299, A3: 449 });
+  const [frameAddons, setFrameAddons] = useState({ none: 0, black: 150, white: 150, wood: 200 });
+  const [paperSpecs, setPaperSpecs] = useState({
+    gsm: '300 GSM Gallery Paper',
+    finish: 'Ultra-Matte Archival Finish',
+    dispatch: 'Dispatched in 24h'
+  });
+
   useEffect(() => {
-    async function getUser() {
+    async function init() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) setUserId(user.id);
+
+      try {
+        const res = await fetch('/api/store-settings');
+        const data = await res.json();
+        if (res.ok && data) {
+          setSizePrices({
+            A5: Number(data.custom_poster_price_a5) || 199,
+            A4: Number(data.custom_poster_price_a4) || 299,
+            A3: Number(data.custom_poster_price_a3) || 449
+          });
+          setFrameAddons({
+            none: 0,
+            black: Number(data.custom_poster_frame_black_price) || 150,
+            white: Number(data.custom_poster_frame_white_price) || 150,
+            wood: Number(data.custom_poster_frame_wood_price) || 200
+          });
+          setPaperSpecs({
+            gsm: data.custom_poster_paper_gsm || '300 GSM Gallery Paper',
+            finish: data.custom_poster_paper_finish || 'Ultra-Matte Archival Finish',
+            dispatch: data.custom_poster_dispatch_time || 'Dispatched in 24h'
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load store settings:', e);
+      }
     }
-    getUser();
+    init();
   }, []);
 
-  // Pricing calculation
-  const sizePrices = { A5: 199, A4: 299, A3: 449 };
-  const frameAddons = { none: 0, black: 150, white: 150, wood: 200 };
   const basePrice = sizePrices[selectedSize];
   const framePrice = frameAddons[selectedFrame];
   const totalPrice = basePrice + framePrice;
@@ -68,6 +98,19 @@ export default function CustomPhotoPosterPage() {
     }
   };
 
+  const dynamicSizes = [
+    { id: 'A5' as const, name: 'A5 Small', dimensionsMm: '148 × 210 mm', price: sizePrices.A5 },
+    { id: 'A4' as const, name: 'A4 Standard', dimensionsMm: '210 × 297 mm', price: sizePrices.A4 },
+    { id: 'A3' as const, name: 'A3 Large', dimensionsMm: '297 × 420 mm', price: sizePrices.A3 }
+  ];
+
+  const dynamicFrames = [
+    { id: 'none' as const, name: 'No Frame (Print Only)', priceAddon: frameAddons.none, colorClass: 'bg-transparent border-dashed border-white/30' },
+    { id: 'black' as const, name: 'Black Wooden Frame', priceAddon: frameAddons.black, colorClass: 'bg-neutral-900 border-neutral-950' },
+    { id: 'white' as const, name: 'White Wooden Frame', priceAddon: frameAddons.white, colorClass: 'bg-stone-100 border-stone-300' },
+    { id: 'wood' as const, name: 'Natural Oak Frame', priceAddon: frameAddons.wood, colorClass: 'bg-[#8B5A2B] border-[#5c3a1b]' }
+  ];
+
   return (
     <div className="min-h-screen bg-luxe-black text-white pt-24 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -81,7 +124,7 @@ export default function CustomPhotoPosterPage() {
             Create Your Custom Photo Poster
           </h1>
           <p className="text-sm sm:text-base text-white/60">
-            Upload your personal memories, artwork, or photos. We print on premium 300 GSM gallery paper with museum-grade precision.
+            Upload your personal memories or photos. Printed on premium <strong>{paperSpecs.gsm}</strong> ({paperSpecs.finish}) with museum-grade precision.
           </p>
         </div>
 
@@ -124,11 +167,13 @@ export default function CustomPhotoPosterPage() {
               <PosterSizeSelector
                 selectedSize={selectedSize}
                 onSelectSize={(s) => setSelectedSize(s)}
+                sizes={dynamicSizes}
               />
 
               <FrameSelector
                 selectedFrame={selectedFrame}
                 onSelectFrame={(f) => setSelectedFrame(f)}
+                frames={dynamicFrames}
               />
             </div>
           </div>
