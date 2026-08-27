@@ -318,8 +318,8 @@ function ScrollDots({
             width: activeIndex % dotCount === i ? 18 : 5,
             backgroundColor:
               activeIndex % dotCount === i
-                ? 'rgba(212, 175, 55, 0.9)'
-                : 'rgba(255, 255, 255, 0.12)',
+                ? 'rgba(255, 255, 255, 0.9)'
+                : 'rgba(255, 255, 255, 0.15)',
             transition: 'width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s ease',
           }}
         />
