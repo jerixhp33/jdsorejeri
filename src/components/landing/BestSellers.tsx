@@ -188,31 +188,30 @@ function MobileCarousel({ products }: { products: Product[] }) {
       if (!el || isUserScrolling.current) return;
       const stride = getStride();
       if (!stride) return;
-      const setWidth = stride * itemCount;
 
+      const currentSnapIndex = Math.round(el.scrollLeft / stride);
+      let newSnapIndex = currentSnapIndex;
       let needsReset = false;
-      let newScroll = el.scrollLeft;
 
-      if (el.scrollLeft > setWidth * 2) {
-        newScroll = el.scrollLeft - setWidth;
+      // If we scrolled past the 2nd set, jump back exactly 1 set
+      if (currentSnapIndex >= itemCount * 2) {
+        newSnapIndex = currentSnapIndex - itemCount;
         needsReset = true;
-      } else if (el.scrollLeft < setWidth * 0.5) {
-        newScroll = el.scrollLeft + setWidth;
+      } 
+      // If we scrolled before the 1st set, jump forward exactly 1 set
+      else if (currentSnapIndex < itemCount) {
+        newSnapIndex = currentSnapIndex + itemCount;
         needsReset = true;
       }
 
       if (needsReset) {
-        // Temporarily kill snap so the jump is invisible
-        el.style.scrollSnapType = 'none';
+        // Jump to the exact mathematical snap point, bypassing smooth scroll
         el.style.scrollBehavior = 'auto';
-        el.scrollLeft = newScroll;
-        // Restore snap after the jump settles
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            el.style.scrollSnapType = '';
-            el.style.scrollBehavior = '';
-          });
-        });
+        el.scrollLeft = newSnapIndex * stride;
+        // Force synchronous reflow so browser applies the jump immediately
+        void el.offsetHeight;
+        el.style.scrollBehavior = '';
+        applyFocus();
       }
     };
 
