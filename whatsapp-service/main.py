@@ -58,6 +58,28 @@ app.add_middleware(
 # Global state
 whatsapp_status = "disconnected"
 qr_code_data = ""
+chat_store = {}  # phone -> {"phone": str, "messages": list, "last_activity": str}
+
+def log_chat_message(phone: str, sender: str, text: str):
+    clean_phone = ''.join(c for c in phone if c.isdigit())
+    if not clean_phone:
+        return
+    if clean_phone not in chat_store:
+        chat_store[clean_phone] = {
+            "phone": clean_phone,
+            "messages": [],
+            "last_activity": ""
+        }
+    from datetime import datetime
+    now_iso = datetime.utcnow().isoformat() + "Z"
+    chat_store[clean_phone]["messages"].append({
+        "sender": sender,
+        "text": text,
+        "timestamp": now_iso
+    })
+    if len(chat_store[clean_phone]["messages"]) > 50:
+        chat_store[clean_phone]["messages"] = chat_store[clean_phone]["messages"][-50:]
+    chat_store[clean_phone]["last_activity"] = now_iso
 
 # Initialize Neonize Client
 client = NewClient("whatsapp_session.sqlite3")
@@ -94,14 +116,24 @@ def on_message(client: NewClient, ev: MessageEv):
     elif ev.Message.extendedTextMessage and ev.Message.extendedTextMessage.text:
         incoming_text = ev.Message.extendedTextMessage.text
 
+    sender_jid = str(ev.Info.MessageSource.Sender.User if hasattr(ev.Info.MessageSource.Sender, 'User') else ev.Info.MessageSource.Chat.User)
+    if not sender_jid:
+        sender_jid = "unknown"
+
+    if incoming_text:
+        log_chat_message(sender_jid, "customer", incoming_text)
+
     if incoming_text and GEMINI_API_KEY:
-        print(f"📥 Received: {incoming_text}")
+        print(f"📥 Received from {sender_jid}: {incoming_text}")
         reply_text = ask_gemini(incoming_text)
         print(f"📤 Replying: {reply_text[:100]}...")
+        log_chat_message(sender_jid, "ai", reply_text)
         client.reply_message(reply_text, ev)
     elif incoming_text:
-        print(f"📥 Received: {incoming_text} (no API key, skipping AI)")
-        client.reply_message("Bot is running but AI is not configured yet.", ev)
+        print(f"📥 Received from {sender_jid}: {incoming_text} (no API key, skipping AI)")
+        reply_text = "Bot is running but AI is not configured yet."
+        log_chat_message(sender_jid, "ai", reply_text)
+        client.reply_message(reply_text, ev)
 
 def start_neonize():
     import time
@@ -133,6 +165,12 @@ def get_qr():
         return {"qr": None, "message": "Already connected"}
     return {"qr": qr_code_data}
 
+@app.get("/api/whatsapp/chats")
+def get_chats():
+    # Return list of chats sorted by last activity
+    sorted_chats = sorted(chat_store.values(), key=lambda c: c["last_activity"], reverse=True)
+    return {"chats": sorted_chats}
+
 @app.post("/api/whatsapp/send")
 def send_message(req: SendMessageReq):
     if whatsapp_status != "connected":
@@ -141,6 +179,7 @@ def send_message(req: SendMessageReq):
     jid = build_jid(req.phone_number)
     try:
         client.send_message(jid, req.message)
+        log_chat_message(req.phone_number, "admin", req.message)
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

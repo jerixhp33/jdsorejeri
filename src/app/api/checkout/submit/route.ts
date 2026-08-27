@@ -174,13 +174,25 @@ export async function POST(req: NextRequest) {
       if (address?.phone) {
         const name = address.full_name?.split(' ')[0] || 'Customer';
         
-        // Build product list for the message
-        const productNames = [];
+        // Build product list for the message with links & images
+        const productLines = [];
         for (const item of validatedItems) {
-          const { data: prod } = await supabase.from('products').select('name').eq('id', item.product_id).maybeSingle();
-          productNames.push(`  🛍️ ${prod?.name || 'Product'} × ${item.quantity} — ₹${item.total_price}`);
+          const { data: prod } = await supabase
+            .from('products')
+            .select('name, slug, images:product_images(url, is_primary)')
+            .eq('id', item.product_id)
+            .maybeSingle();
+
+          const prodName = prod?.name || 'Product';
+          const prodUrl = prod?.slug ? `https://jdstorejeri.vercel.app/products/${prod.slug}` : '';
+          const imgUrl = prod?.images?.find((img: any) => img.is_primary)?.url || prod?.images?.[0]?.url || '';
+
+          let line = `🛍️ *${prodName}* × ${item.quantity} — ₹${item.total_price}`;
+          if (prodUrl) line += `\n   🔗 Link: ${prodUrl}`;
+          if (imgUrl) line += `\n   🖼️ Image: ${imgUrl}`;
+          productLines.push(line);
         }
-        const itemsList = productNames.join('\n');
+        const itemsList = productLines.join('\n\n');
 
         await sendWhatsApp(
           address.phone,

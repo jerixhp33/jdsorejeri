@@ -113,12 +113,20 @@ export async function PATCH(req: NextRequest) {
       // Fetch order items with product details for rich WhatsApp messages
       const { data: orderItems } = await admin
         .from('order_items')
-        .select('quantity, unit_price, product:products(name)')
+        .select('quantity, unit_price, product:products(name, slug, images:product_images(url, is_primary))')
         .eq('order_id', data.id);
 
       const itemsList = (orderItems || [])
-        .map((item: any) => `  🛍️ ${item.product?.name || 'Product'} × ${item.quantity} — ₹${item.unit_price * item.quantity}`)
-        .join('\n');
+        .map((item: any) => {
+          const prodName = item.product?.name || 'Product';
+          const prodUrl = item.product?.slug ? `https://jdstorejeri.vercel.app/products/${item.product.slug}` : '';
+          const imgUrl = item.product?.images?.find((img: any) => img.is_primary)?.url || item.product?.images?.[0]?.url || '';
+          let line = `🛍️ *${prodName}* × ${item.quantity} — ₹${item.unit_price * item.quantity}`;
+          if (prodUrl) line += `\n   🔗 Link: ${prodUrl}`;
+          if (imgUrl) line += `\n   🖼️ Image: ${imgUrl}`;
+          return line;
+        })
+        .join('\n\n');
 
       let msg = '';
       let waMsg = '';

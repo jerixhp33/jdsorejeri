@@ -19,13 +19,14 @@ export function OrderTable({ items }: OrderTableProps) {
       <tbody className="divide-y divide-gray-100">
         {items?.map((item: any, index: number) => {
           const productName = item.product?.name || item.product_name || 'Unknown Product';
-          const primaryImage = item.product?.images?.find((img: any) => img.is_primary)?.url || item.product?.images?.[0]?.url;
+          const productSlug = item.product?.slug || item.slug;
+          const productUrl = productSlug ? `https://jdstorejeri.vercel.app/products/${productSlug}` : null;
+          const primaryImage = item.product?.images?.find((img: any) => img.is_primary)?.url || item.product?.images?.[0]?.url || item.image_url;
           return (
             <tr key={index}>
               <td className="py-4 px-2">
                 {primaryImage ? (
-                  <div className="w-12 h-12 rounded border border-gray-200 overflow-hidden bg-gray-50 flex-shrink-0">
-                    {/* Image is kept in color as requested */}
+                  <div className="w-14 h-14 rounded border border-gray-200 overflow-hidden bg-gray-50 flex-shrink-0">
                     <img 
                       src={primaryImage} 
                       alt={productName} 
@@ -34,13 +35,19 @@ export function OrderTable({ items }: OrderTableProps) {
                     />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
-                    <span className="text-gray-300 text-[8px] uppercase">No img</span>
+                  <div className="w-14 h-14 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                    <span className="text-gray-400 text-[9px] uppercase font-bold">No img</span>
                   </div>
                 )}
               </td>
               <td className="py-4 px-2">
-                <div className="font-bold text-gray-900 text-sm mb-1">{productName}</div>
+                {productUrl ? (
+                  <a href={productUrl} target="_blank" rel="noreferrer" className="font-bold text-blue-700 underline text-sm mb-1 block hover:text-black">
+                    {productName} ↗
+                  </a>
+                ) : (
+                  <div className="font-bold text-gray-900 text-sm mb-1">{productName}</div>
+                )}
                 <div className="flex flex-wrap gap-2 mt-1">
                   {item.selected_size && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium border border-gray-200">Size: {item.selected_size}</span>}
                   {item.selected_color && <span className="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-600 font-medium border border-gray-200">Color: {item.selected_color}</span>}

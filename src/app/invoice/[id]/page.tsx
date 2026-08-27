@@ -20,7 +20,7 @@ export default async function PublicInvoicePage({ params }: PageProps) {
   const { data: order, error } = await admin.from('orders')
     .select(`
       *,
-      items:order_items(*, product:products(name, images:product_images(url, is_primary))),
+      items:order_items(*, product:products(name, slug, images:product_images(url, is_primary))),
       delivery_address:delivery_addresses(*),
       payments(*),
       shipments(*)
