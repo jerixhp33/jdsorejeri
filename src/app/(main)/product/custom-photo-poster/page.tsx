@@ -50,28 +50,14 @@ export default function CustomPhotoPosterPage() {
     setIsAdding(true);
     try {
       // Add custom item to cart
-      await addItem({
-        id: `custom-${uploadRecord.id}`,
-        product_id: 'custom-poster-product',
-        title: `Custom Photo Poster (${selectedSize})`,
-        price: totalPrice,
-        quantity: 1,
-        image_url: previewUrl,
-        size: selectedSize,
-        frame: selectedFrame,
-        custom_upload_id: uploadRecord.id,
-        metadata: {
-          custom_upload_id: uploadRecord.id,
-          custom_image_url: previewUrl,
-          custom_width: uploadRecord.width,
-          custom_height: uploadRecord.height,
-          custom_resolution: `${uploadRecord.width}x${uploadRecord.height}`,
-          custom_file_size: uploadRecord.file_size,
-          poster_size_id: selectedSize,
-          frame_choice: selectedFrame,
-          quality_status: uploadRecord.quality_status
-        }
-      } as any);
+      await addItem(
+        'custom-poster-product',
+        totalPrice,
+        1,
+        selectedSize,
+        false,
+        uploadRecord.id
+      );
 
       toast.success('Custom Photo Poster added to cart!');
     } catch (err: any) {

@@ -202,7 +202,8 @@ export function useCart() {
     unitPrice: number,
     quantity = 1,
     posterSizeId?: string,
-    silent: boolean = false
+    silent: boolean = false,
+    customUploadId?: string
   ) => {
     if (!profile) {
       if (!silent) toast.error('Please sign in to add items to cart');
@@ -232,6 +233,12 @@ export function useCart() {
       } else {
         existingQuery = existingQuery.is('poster_size_id', null);
       }
+      if (customUploadId) {
+        existingQuery = existingQuery.eq('custom_upload_id', customUploadId);
+      } else {
+        existingQuery = existingQuery.is('custom_upload_id', null);
+      }
+      
       const { data: existing } = await existingQuery.single();
 
       const currentCartQty = existing?.quantity ?? 0;
@@ -249,8 +256,8 @@ export function useCart() {
       } else {
         // Optimistic temporary item
         const tempId = 'temp-' + Date.now();
-        addLocalItem({ id: tempId, cart_id: cartId, product_id: productId, quantity, unit_price: unitPrice, poster_size_id: posterSizeId || null } as any);
-        await supabase.from('cart_items').insert({ cart_id: cartId, product_id: productId, poster_size_id: posterSizeId || null, quantity, unit_price: unitPrice });
+        addLocalItem({ id: tempId, cart_id: cartId, product_id: productId, quantity, unit_price: unitPrice, poster_size_id: posterSizeId || null, custom_upload_id: customUploadId || null } as any);
+        await supabase.from('cart_items').insert({ cart_id: cartId, product_id: productId, poster_size_id: posterSizeId || null, custom_upload_id: customUploadId || null, quantity, unit_price: unitPrice });
       }
 
       await supabase.from('carts').update({ updated_at: new Date().toISOString() }).eq('id', cartId);
