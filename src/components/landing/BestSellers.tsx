@@ -227,16 +227,36 @@ function MobileCarousel({ products }: { products: Product[] }) {
           className="flex gap-2 overflow-x-auto snap-x snap-mandatory px-[25vw] pb-6 pt-2 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           style={{ scrollPaddingInline: '25vw' }}
         >
-          {allItems.map((product, i) => (
-            <div
-              key={`bs-${product.id}-${i}`}
-              data-card
-              className="w-[50vw] flex-shrink-0 snap-center will-change-transform"
-              style={{ transition: 'transform 0.08s linear, filter 0.12s linear, opacity 0.12s linear' }}
-            >
-              <ProductCard product={product} index={i % itemCount} />
-            </div>
-          ))}
+          {allItems.map((product, i) => {
+            const img = product.images?.find((im: any) => im.is_primary)?.url || product.images?.[0]?.url;
+            return (
+              <div
+                key={`bs-${product.id}-${i}`}
+                data-card
+                className="w-[50vw] flex-shrink-0 snap-center will-change-transform relative"
+                style={{ transition: 'transform 0.08s linear, filter 0.12s linear, opacity 0.12s linear' }}
+              >
+                {/* Ambient color glow — blurred product image behind the card */}
+                {img && (
+                  <div
+                    className="absolute -inset-2 z-0 rounded-3xl overflow-hidden pointer-events-none"
+                    aria-hidden="true"
+                  >
+                    <img
+                      src={img}
+                      alt=""
+                      className="w-full h-full object-cover opacity-40"
+                      style={{ filter: 'blur(20px) saturate(1.8)' }}
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+                <div className="relative z-10">
+                  <ProductCard product={product} index={i % itemCount} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </motion.div>
 
