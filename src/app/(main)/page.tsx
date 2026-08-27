@@ -154,7 +154,7 @@ export default async function HomePage() {
 
 async function BestSellersData() {
   const supabase = createPublicClient();
-  const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_best_seller', true).order('created_at', { ascending: false }).limit(4);
+  const { data } = await supabase.from('products').select('*, images:product_images(*), category:product_categories(*), sizes:poster_sizes(*)').eq('is_active', true).eq('is_best_seller', true).order('created_at', { ascending: false });
   return <BestSellers products={data || []} />;
 }
 

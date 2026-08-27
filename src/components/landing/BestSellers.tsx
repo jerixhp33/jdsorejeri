@@ -100,7 +100,7 @@ function DesktopGrid({ products }: { products: Product[] }) {
       transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="grid grid-cols-3 lg:grid-cols-4 gap-6 items-start"
     >
-      {products.slice(0, 8).map((product, i) => (
+      {products.map((product, i) => (
         <ProductCard key={product.id} product={product} index={i} />
       ))}
     </motion.div>
@@ -113,8 +113,8 @@ function MobileCarousel({ products }: { products: Product[] }) {
   const trackRef = useRef(null);
   const isInView = useInView(trackRef, { once: true, margin: '-40px' });
   const isUserScrolling = useRef(false);
-  const itemCount = Math.min(products.length, 8);
-  const items = products.slice(0, itemCount);
+  const itemCount = products.length;
+  const items = products;
 
   // Per-card focus: 0 = side, 1 = center
   const [cardFocus, setCardFocus] = useState<number[]>([]);
