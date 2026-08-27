@@ -259,17 +259,23 @@ function MobileCarousel({ products }: { products: Product[] }) {
                 className="w-[50vw] flex-shrink-0 snap-center will-change-transform relative"
                 style={{ transition: 'transform 0.08s linear, filter 0.12s linear, opacity 0.12s linear' }}
               >
-                {/* Subtle edge light — tight blurred image behind the card */}
+                {/* Neon edge light — perfectly masks out the center to leave a thin 2px glowing rim */}
                 {img && (
                   <div
-                    className="absolute -inset-1 z-0 rounded-[1.25rem] overflow-hidden pointer-events-none opacity-40 mix-blend-screen"
+                    className="absolute -inset-[2px] z-20 rounded-[1.125rem] pointer-events-none opacity-80 mix-blend-screen"
                     aria-hidden="true"
+                    style={{
+                      WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                      WebkitMaskComposite: 'xor',
+                      maskComposite: 'exclude',
+                      padding: '2px', // neon border thickness
+                    }}
                   >
                     <img
                       src={img}
                       alt=""
-                      className="w-full h-full object-cover"
-                      style={{ filter: 'blur(8px) saturate(1.5)' }}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ filter: 'blur(3px) saturate(2)' }}
                       loading="lazy"
                     />
                   </div>
