@@ -15,7 +15,7 @@ import type { CustomUploadRecord } from '@/lib/custom-poster';
 import type { ImageQualityAnalysis } from '@/lib/image-quality';
 
 export default function CustomPhotoPosterPage() {
-  const { addItem, updateQuantity, items: cartItems } = useCart();
+  const { addItem, updateQuantity, items: cartItems, deliverySettings } = useCart();
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -352,7 +352,9 @@ export default function CustomPhotoPosterPage() {
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-extrabold text-amber-400">₹{totalPrice}</span>
-                  <span className="text-[10px] text-white/40 block">Free Shipping</span>
+                  <span className="text-[10px] text-white/40 block">
+                    {totalPrice >= deliverySettings.threshold ? 'Free Shipping' : `+ ₹${deliverySettings.charge} Shipping`}
+                  </span>
                 </div>
               </div>
 
