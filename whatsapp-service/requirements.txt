@@ -1,7 +1,7 @@
 fastapi==0.111.0
 uvicorn==0.30.1
-neonize==0.4.3.post0
-google-generativeai==0.7.1
+neonize
+google-generativeai
 python-dotenv==1.0.1
 python-multipart==0.0.9
 playwright==1.44.0
