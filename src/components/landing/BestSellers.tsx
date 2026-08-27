@@ -260,7 +260,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
             return (
               <div
                 key={`bs-${product.id}-${i}`}
-                className="w-[70vw] flex-shrink-0 snap-center will-change-transform"
+                className="w-[55vw] flex-shrink-0 snap-center will-change-transform"
                 style={{
                   transform: `scale(${scale}) translateY(${translateY}px)`,
                   filter: blur > 0.1 ? `blur(${blur}px)` : 'none',
