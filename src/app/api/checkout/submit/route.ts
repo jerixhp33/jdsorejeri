@@ -207,8 +207,7 @@ export async function POST(req: NextRequest) {
           (discountAmount > 0 ? `🏷️ *Discount:* -₹${discountAmount}\n` : '') +
           (deliveryCharge > 0 ? `🚚 *Delivery:* ₹${deliveryCharge}\n` : `🚚 *Delivery:* FREE ✨\n`) +
           `💵 *Total:* ₹${calculatedTotal}\n\n` +
-          `📦 We'll notify you at every step — from packing to delivery!\n\n` +
-          `_JD Store — Art for every space_ 🎨`;
+          `📦 We'll notify you at every step — from packing to delivery!`;
 
         if (productImagesToSend.length > 0) {
           // Send single merged card: Product photo on top, Order Confirmation as caption

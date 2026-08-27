@@ -155,32 +155,28 @@ export async function PATCH(req: NextRequest) {
             `Your order *#${data.order_number}* is now being processed! 🔄\n\n` +
             `📋 *Your Items:*\n${itemsList}\n\n` +
             `💵 *Order Total:* ₹${data.total}\n\n` +
-            `Our team is preparing your order with care! 💝\n\n` +
-            `_JD Store — Art for every space_ 🎨`,
+            `Our team is preparing your order with care! 💝`,
 
           'packed': `📦 *Order Packed!*\n\n` +
             `Hey ${customerName}! 🎉\n\n` +
             `Great news! Your order *#${data.order_number}* has been carefully packed and is ready to ship! 🎁\n\n` +
             `📋 *What's in your package:*\n${itemsList}\n\n` +
             `💵 *Order Total:* ₹${data.total}\n\n` +
-            `📮 Shipping details coming soon!\n\n` +
-            `_JD Store — Art for every space_ 🎨`,
+            `📮 Shipping details coming soon!`,
 
           'shipped': `🚚 *Order Shipped!*\n\n` +
             `Hey ${customerName}! 🎊\n\n` +
             `Your order *#${data.order_number}* is on its way to you! 📬\n\n` +
             `📋 *Items Shipped:*\n${itemsList}\n\n` +
             `💵 *Order Total:* ₹${data.total}\n\n` +
-            `You'll receive tracking details shortly! 📍\n\n` +
-            `_JD Store — Art for every space_ 🎨`,
+            `You'll receive tracking details shortly! 📍`,
 
           'out_for_delivery': `🏃 *Out for Delivery!*\n\n` +
             `Hey ${customerName}! 🤩\n\n` +
             `Your order *#${data.order_number}* is out for delivery and will reach you soon! 🎁\n\n` +
             `📋 *Arriving Today:*\n${itemsList}\n\n` +
             `💵 *Order Total:* ₹${data.total}\n\n` +
-            `Please keep your phone handy! 📱\n\n` +
-            `_JD Store — Art for every space_ 🎨`,
+            `Please keep your phone handy! 📱`,
 
           'delivered': `🎉 *Order Delivered!*\n\n` +
             `Hey ${customerName}! 🥳\n\n` +
@@ -188,21 +184,18 @@ export async function PATCH(req: NextRequest) {
             `📋 *What you received:*\n${itemsList}\n\n` +
             `💵 *Order Total:* ₹${data.total}\n\n` +
             `We hope you love your purchase! 💖\n` +
-            `If you have any issues, just reply to this message.\n\n` +
-            `⭐ Don't forget to leave a review on our store!\n\n` +
-            `_JD Store — Art for every space_ 🎨`,
+            `If you have any issues, just reply to this message.`,
 
           'cancelled': `❌ *Order Cancelled*\n\n` +
             `Hey ${customerName},\n\n` +
             `Your order *#${data.order_number}* has been cancelled.\n\n` +
             `📋 *Cancelled Items:*\n${itemsList}\n\n` +
             `💵 *Refund Amount:* ₹${data.total}\n\n` +
-            `If you didn't request this cancellation, please contact us immediately.\n\n` +
-            `_JD Store — Art for every space_ 🎨`,
+            `If you didn't request this cancellation, please contact us immediately.`,
         };
         
         waMsg = statusMessages[updates.status] || 
-          `📢 *Order Update*\n\nHey ${customerName}! Your order *#${data.order_number}* status is now *${statusText}*.\n\n📋 *Items:*\n${itemsList}\n\n💵 *Total:* ₹${data.total}\n\n_JD Store — Art for every space_ 🎨`;
+          `📢 *Order Update*\n\nHey ${customerName}! Your order *#${data.order_number}* status is now *${statusText}*.\n\n📋 *Items:*\n${itemsList}\n\n💵 *Total:* ₹${data.total}`;
       }
 
       // In-App Notification
