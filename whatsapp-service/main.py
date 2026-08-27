@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from neonize.client import NewClient
 from neonize.events import ConnectedEv, MessageEv, DisconnectedEv, event
+from neonize.utils import build_jid
 from playwright.async_api import async_playwright
 
 load_dotenv()
@@ -137,10 +138,8 @@ def send_message(req: SendMessageReq):
     if whatsapp_status != "connected":
         raise HTTPException(status_code=400, detail="WhatsApp is not connected")
     
-    # Neonize requires JID format: phonenumber@s.whatsapp.net
-    jid = f"{req.phone_number}@s.whatsapp.net"
+    jid = build_jid(req.phone_number)
     try:
-        # client.send_message is synchronous in neonize standard client
         client.send_message(jid, req.message)
         return {"success": True}
     except Exception as e:
@@ -154,7 +153,7 @@ async def send_document(
     if whatsapp_status != "connected":
         raise HTTPException(status_code=400, detail="WhatsApp is not connected")
     
-    jid = f"{phone_number}@s.whatsapp.net"
+    jid = build_jid(phone_number)
     try:
         # Save file temporarily
         temp_path = f"/tmp/{file.filename}"
@@ -186,7 +185,7 @@ async def generate_and_send_invoice(req: SendInvoiceReq):
     if whatsapp_status != "connected":
         raise HTTPException(status_code=400, detail="WhatsApp is not connected")
     
-    jid = f"{req.phone_number}@s.whatsapp.net"
+    jid = build_jid(req.phone_number)
     try:
         pdf_path = f"/tmp/Invoice_{req.phone_number}.pdf"
         
