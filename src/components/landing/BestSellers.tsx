@@ -256,10 +256,10 @@ function MobileCarousel({ products }: { products: Product[] }) {
   }, [itemCount, getStride, applyFocus]);
 
   return (
-    <div ref={trackRef} className="relative overflow-hidden">
+    <div ref={trackRef} className="relative">
       {/* Dynamic Ambient Background Aura — extends from top of navbar down to bottom of BestSellers */}
       <div
-        className="absolute -top-[550px] -bottom-16 left-1/2 -translate-x-1/2 w-[160vw] z-0 pointer-events-none overflow-hidden"
+        className="absolute -top-[600px] -bottom-[200px] left-1/2 -translate-x-1/2 w-[160vw] z-0 pointer-events-none"
         aria-hidden="true"
       >
         {products.map((product, i) => {
