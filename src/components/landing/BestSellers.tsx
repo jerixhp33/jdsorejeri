@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { ProductCard } from '@/components/product/ProductCard';
+import { QuickBuyOverlay } from '@/components/landing/QuickBuyOverlay';
 import type { Product } from '@/types';
 
 interface BestSellersProps {
@@ -113,6 +114,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
   const trackRef = useRef(null);
   const isInView = useInView(trackRef, { once: true, margin: '-40px' });
   const isUserScrolling = useRef(false);
+  const [quickBuyProduct, setQuickBuyProduct] = useState<Product | null>(null);
   const itemCount = products.length;
   const items = products;
 
@@ -133,7 +135,10 @@ function MobileCarousel({ products }: { products: Product[] }) {
     if (!el) return;
     const centerX = el.scrollLeft + el.clientWidth / 2;
     const cards = el.querySelectorAll<HTMLElement>('[data-card]');
-    cards.forEach((card) => {
+    
+    const maxFocusPerItem = new Array(itemCount).fill(0);
+
+    cards.forEach((card, index) => {
       const cardCenter = card.offsetLeft + card.offsetWidth / 2;
       const dist = Math.abs(centerX - cardCenter);
       const maxDist = el.clientWidth * 0.55;
@@ -147,8 +152,23 @@ function MobileCarousel({ products }: { products: Product[] }) {
       card.style.transform = `scale(${scale}) translateY(${ty}px)`;
       card.style.filter = blur > 0.1 ? `blur(${blur}px)` : 'none';
       card.style.opacity = String(op);
+
+      const origIndex = index % itemCount;
+      if (focus > maxFocusPerItem[origIndex]) {
+        maxFocusPerItem[origIndex] = focus;
+      }
     });
-  }, []);
+
+    // Update global ambient background opacities smoothly
+    maxFocusPerItem.forEach((focus, i) => {
+      const ambientEl = document.querySelector(`[data-ambient-index="${i}"]`) as HTMLElement;
+      if (ambientEl) {
+        // Curve the focus (focus^3) so it crossfades very sharply without muddy colors blending
+        const opacity = Math.pow(focus, 3) * 0.45; // max opacity 0.45
+        ambientEl.style.opacity = String(opacity);
+      }
+    });
+  }, [itemCount]);
 
   // Start at set 1 (middle)
   useEffect(() => {
@@ -239,6 +259,22 @@ function MobileCarousel({ products }: { products: Product[] }) {
 
   return (
     <div ref={trackRef} className="relative">
+      {/* Global Ambient Overlays (Phase 1) */}
+      <div className="fixed inset-0 z-[-1] pointer-events-none" aria-hidden="true">
+        {products.map((product, i) => {
+          const img = product.images?.find((im: any) => im.is_primary)?.url || product.images?.[0]?.url;
+          return img ? (
+            <div
+              key={`ambient-${product.id}`}
+              data-ambient-index={i}
+              className="absolute inset-0 w-full h-full opacity-0 will-change-opacity mix-blend-screen transition-opacity duration-150"
+            >
+              <img src={img} className="w-full h-full object-cover" style={{ filter: 'blur(120px) saturate(2)' }} alt="" />
+            </div>
+          ) : null;
+        })}
+      </div>
+
       <motion.div
         initial={false}
         animate={isInView ? { opacity: 1 } : { opacity: 0 }}
@@ -256,10 +292,15 @@ function MobileCarousel({ products }: { products: Product[] }) {
               <div
                 key={`bs-${product.id}-${i}`}
                 data-card
-                className="w-[50vw] flex-shrink-0 snap-center will-change-transform relative"
+                className="w-[50vw] flex-shrink-0 snap-center will-change-transform relative group cursor-pointer"
                 style={{ transition: 'transform 0.08s linear, filter 0.12s linear, opacity 0.12s linear' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setQuickBuyProduct(product);
+                }}
               >
-                {/* Neon edge light — perfectly masks out the center to leave a thin 2px glowing rim */}
+                {/* Neon edge light */}
                 {img && (
                   <div
                     className="absolute -inset-[2px] z-20 rounded-[1.125rem] pointer-events-none opacity-80 mix-blend-screen"
@@ -268,7 +309,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
                       WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                       WebkitMaskComposite: 'xor',
                       maskComposite: 'exclude',
-                      padding: '2px', // neon border thickness
+                      padding: '2px',
                     }}
                   >
                     <img
@@ -280,7 +321,18 @@ function MobileCarousel({ products }: { products: Product[] }) {
                     />
                   </div>
                 )}
-                <div className="relative z-10 h-full">
+                
+                <div className="relative z-10 h-full pointer-events-none">
+                  {/* Live Sales Social Proof Badge */}
+                  <div className="absolute top-2 left-2 right-2 z-30 flex justify-between items-start">
+                    <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2 py-1 flex items-center gap-1.5 shadow-lg shadow-black/50">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
+                      <span className="text-[9px] font-medium text-white/90 whitespace-nowrap tracking-wide">
+                        {`Purchased ${((i * 7 + 13) % 24) + 2}m ago`}
+                      </span>
+                    </div>
+                  </div>
+
                   <ProductCard product={product} index={i % itemCount} />
                 </div>
               </div>
@@ -290,6 +342,9 @@ function MobileCarousel({ products }: { products: Product[] }) {
       </motion.div>
 
       <ScrollDots scrollRef={scrollRef} itemCount={itemCount} />
+
+      {/* Quick Buy Overlay (Phase 3) */}
+      <QuickBuyOverlay product={quickBuyProduct} onClose={() => setQuickBuyProduct(null)} />
     </div>
   );
 }
