@@ -108,21 +108,7 @@ function DesktopGrid({ products }: { products: Product[] }) {
   );
 }
 
-/* ─── Skeleton Card ─── */
-function SkeletonCard() {
-  return (
-    <div className="w-[50vw] flex-shrink-0 snap-center">
-      <div className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden animate-pulse">
-        <div className="aspect-[3/4] bg-white/5" />
-        <div className="p-3 space-y-2">
-          <div className="h-2 bg-white/10 rounded w-1/3" />
-          <div className="h-3 bg-white/10 rounded w-3/4" />
-          <div className="h-4 bg-white/10 rounded w-1/2 mt-2" />
-        </div>
-      </div>
-    </div>
-  );
-}
+
 
 /* ─── Mobile Carousel ─── */
 function MobileCarousel({ products }: { products: Product[] }) {
@@ -131,7 +117,6 @@ function MobileCarousel({ products }: { products: Product[] }) {
   const isInView = useInView(trackRef, { once: true, margin: '-40px' });
   const isUserScrolling = useRef(false);
   const [quickBuyProduct, setQuickBuyProduct] = useState<Product | null>(null);
-  const [ready, setReady] = useState(false);
   const itemCount = products.length;
 
   // 3 sets for seamless looping
@@ -169,21 +154,18 @@ function MobileCarousel({ products }: { products: Product[] }) {
     });
   }, []);
 
-  // Initialize scroll position to set 1 (middle) and show
+  // Initialize scroll position to set 1 (middle)
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || itemCount === 0) return;
     requestAnimationFrame(() => {
+      const stride = getStride();
+      if (!stride) return;
+      el.style.scrollBehavior = 'auto';
+      el.scrollLeft = stride * itemCount;
+      applyFocus();
       requestAnimationFrame(() => {
-        const stride = getStride();
-        if (!stride) return;
-        el.style.scrollBehavior = 'auto';
-        el.scrollLeft = stride * itemCount;
-        applyFocus();
-        requestAnimationFrame(() => {
-          el.style.scrollBehavior = '';
-          setReady(true);
-        });
+        el.style.scrollBehavior = '';
       });
     });
   }, [itemCount, getStride, applyFocus]);
@@ -256,19 +238,6 @@ function MobileCarousel({ products }: { products: Product[] }) {
       if (resetTimer) clearTimeout(resetTimer);
     };
   }, [itemCount, getStride, applyFocus]);
-
-  // Show skeleton while initializing
-  if (!ready) {
-    return (
-      <div ref={trackRef} className="relative -mx-4">
-        <div className="flex gap-2 px-[25vw] pb-6 pt-2 items-end overflow-hidden">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div ref={trackRef} className="relative overflow-hidden">
