@@ -108,6 +108,22 @@ function DesktopGrid({ products }: { products: Product[] }) {
   );
 }
 
+/* ─── Skeleton Card ─── */
+function SkeletonCard() {
+  return (
+    <div className="w-[50vw] flex-shrink-0 snap-center">
+      <div className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden animate-pulse">
+        <div className="aspect-[3/4] bg-white/5" />
+        <div className="p-3 space-y-2">
+          <div className="h-2 bg-white/10 rounded w-1/3" />
+          <div className="h-3 bg-white/10 rounded w-3/4" />
+          <div className="h-4 bg-white/10 rounded w-1/2 mt-2" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Mobile Carousel ─── */
 function MobileCarousel({ products }: { products: Product[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -115,30 +131,28 @@ function MobileCarousel({ products }: { products: Product[] }) {
   const isInView = useInView(trackRef, { once: true, margin: '-40px' });
   const isUserScrolling = useRef(false);
   const [quickBuyProduct, setQuickBuyProduct] = useState<Product | null>(null);
+  const [ready, setReady] = useState(false);
   const itemCount = products.length;
-  const items = products;
 
-  // 3 sets for looping
+  // 3 sets for seamless looping
   const SETS = 3;
-  const allItems = Array.from({ length: SETS }, () => items).flat();
+  const allItems = Array.from({ length: SETS }, () => products).flat();
 
   const getStride = useCallback(() => {
     const el = scrollRef.current;
     if (!el || !el.children.length) return 0;
     const card = el.children[0] as HTMLElement;
-    return card.offsetWidth + 8; // card width + gap-2
+    return card.offsetWidth + 8; // gap-2 = 8px
   }, []);
 
-  // Apply curved focus styles directly to DOM — zero React re-renders
+  // Apply curved focus styles directly to DOM — no React re-renders
   const applyFocus = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
     const centerX = el.scrollLeft + el.clientWidth / 2;
     const cards = el.querySelectorAll<HTMLElement>('[data-card]');
-    
-    const maxFocusPerItem = new Array(itemCount).fill(0);
 
-    cards.forEach((card, index) => {
+    cards.forEach((card) => {
       const cardCenter = card.offsetLeft + card.offsetWidth / 2;
       const dist = Math.abs(centerX - cardCenter);
       const maxDist = el.clientWidth * 0.55;
@@ -152,25 +166,10 @@ function MobileCarousel({ products }: { products: Product[] }) {
       card.style.transform = `scale(${scale}) translateY(${ty}px)`;
       card.style.filter = blur > 0.1 ? `blur(${blur}px)` : 'none';
       card.style.opacity = String(op);
-
-      const origIndex = index % itemCount;
-      if (focus > maxFocusPerItem[origIndex]) {
-        maxFocusPerItem[origIndex] = focus;
-      }
     });
+  }, []);
 
-    // Update global ambient background opacities smoothly
-    maxFocusPerItem.forEach((focus, i) => {
-      const ambientEl = document.querySelector(`[data-ambient-index="${i}"]`) as HTMLElement;
-      if (ambientEl) {
-        // Curve the focus (focus^3) so it crossfades very sharply without muddy colors blending
-        const opacity = Math.pow(focus, 3) * 0.45; // max opacity 0.45
-        ambientEl.style.opacity = String(opacity);
-      }
-    });
-  }, [itemCount]);
-
-  // Start at set 1 (middle)
+  // Initialize scroll position to set 1 (middle) and show
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || itemCount === 0) return;
@@ -181,23 +180,26 @@ function MobileCarousel({ products }: { products: Product[] }) {
         el.style.scrollBehavior = 'auto';
         el.scrollLeft = stride * itemCount;
         applyFocus();
-        requestAnimationFrame(() => { el.style.scrollBehavior = ''; });
+        requestAnimationFrame(() => {
+          el.style.scrollBehavior = '';
+          setReady(true);
+        });
       });
     });
   }, [itemCount, getStride, applyFocus]);
 
-  // Track touch state
+  // Track touch state to prevent reset during swipe
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const onDown = () => { isUserScrolling.current = true; };
-    const onUp = () => { setTimeout(() => { isUserScrolling.current = false; }, 600); };
+    const onUp = () => { setTimeout(() => { isUserScrolling.current = false; }, 800); };
     el.addEventListener('touchstart', onDown, { passive: true });
     el.addEventListener('touchend', onUp, { passive: true });
     return () => { el.removeEventListener('touchstart', onDown); el.removeEventListener('touchend', onUp); };
   }, []);
 
-  // Scroll handler — direct DOM, debounced loop reset
+  // Scroll handler — debounced loop reset, per-frame focus
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -213,30 +215,30 @@ function MobileCarousel({ products }: { products: Product[] }) {
       let newSnapIndex = currentSnapIndex;
       let needsReset = false;
 
-      // If we scrolled past the 2nd set, jump back exactly 1 set
       if (currentSnapIndex >= itemCount * 2) {
         newSnapIndex = currentSnapIndex - itemCount;
         needsReset = true;
-      } 
-      // If we scrolled before the 1st set, jump forward exactly 1 set
-      else if (currentSnapIndex < itemCount) {
+      } else if (currentSnapIndex < itemCount) {
         newSnapIndex = currentSnapIndex + itemCount;
         needsReset = true;
       }
 
       if (needsReset) {
-        // Jump to the exact mathematical snap point, bypassing smooth scroll
+        el.style.scrollSnapType = 'none';
         el.style.scrollBehavior = 'auto';
         el.scrollLeft = newSnapIndex * stride;
-        // Force synchronous reflow so browser applies the jump immediately
         void el.offsetHeight;
         el.style.scrollBehavior = '';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            el.style.scrollSnapType = '';
+          });
+        });
         applyFocus();
       }
     };
 
     const onScroll = () => {
-      // Always apply focus on every frame
       if (!ticking) {
         ticking = true;
         requestAnimationFrame(() => {
@@ -244,10 +246,8 @@ function MobileCarousel({ products }: { products: Product[] }) {
           applyFocus();
         });
       }
-
-      // Debounce the loop reset — only fire after scroll fully stops
       if (resetTimer) clearTimeout(resetTimer);
-      resetTimer = setTimeout(doReset, 600);
+      resetTimer = setTimeout(doReset, 800);
     };
 
     el.addEventListener('scroll', onScroll, { passive: true });
@@ -257,34 +257,45 @@ function MobileCarousel({ products }: { products: Product[] }) {
     };
   }, [itemCount, getStride, applyFocus]);
 
-  return (
-    <div ref={trackRef} className="relative">
-      {/* Global Ambient Overlays (Phase 1) */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none" aria-hidden="true">
-        {products.map((product, i) => {
-          const img = product.images?.find((im: any) => im.is_primary)?.url || product.images?.[0]?.url;
-          return img ? (
-            <div
-              key={`ambient-${product.id}`}
-              data-ambient-index={i}
-              className="absolute inset-0 w-full h-full opacity-0 will-change-opacity mix-blend-screen transition-opacity duration-150"
-            >
-              <img src={img} className="w-full h-full object-cover" style={{ filter: 'blur(120px) saturate(2)' }} alt="" />
-            </div>
-          ) : null;
-        })}
+  // Show skeleton while initializing
+  if (!ready) {
+    return (
+      <div ref={trackRef} className="relative -mx-4">
+        <div className="flex gap-2 px-[25vw] pb-6 pt-2 items-end overflow-hidden">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div ref={trackRef} className="relative overflow-hidden">
+      {/* Ambient glow — scoped to this section, behind content */}
+      <div
+        className="absolute inset-x-0 -top-32 h-[400px] z-0 pointer-events-none opacity-30"
+        aria-hidden="true"
+        style={{
+          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, var(--luxe-accent, rgba(200,169,110,0.4)) 0%, transparent 70%)',
+          maskImage: 'linear-gradient(to bottom, black 30%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 30%, transparent 100%)',
+        }}
+      />
 
       <motion.div
         initial={false}
         animate={isInView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative -mx-4"
+        className="relative z-10 -mx-4"
       >
         <div
           ref={scrollRef}
-          className="flex gap-2 overflow-x-auto snap-x snap-mandatory px-[25vw] pb-6 pt-2 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-          style={{ scrollPaddingInline: '25vw' }}
+          className="flex gap-2 overflow-x-auto snap-x snap-proximity px-[25vw] pb-6 pt-2 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          style={{
+            scrollPaddingInline: '25vw',
+            WebkitOverflowScrolling: 'touch',
+          }}
         >
           {allItems.map((product, i) => {
             const img = product.images?.find((im: any) => im.is_primary)?.url || product.images?.[0]?.url;
@@ -292,7 +303,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
               <div
                 key={`bs-${product.id}-${i}`}
                 data-card
-                className="w-[50vw] flex-shrink-0 snap-center will-change-transform relative group cursor-pointer"
+                className="w-[50vw] flex-shrink-0 snap-center will-change-transform relative cursor-pointer"
                 style={{ transition: 'transform 0.08s linear, filter 0.12s linear, opacity 0.12s linear' }}
                 onClick={(e) => {
                   e.preventDefault();
@@ -343,7 +354,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
 
       <ScrollDots scrollRef={scrollRef} itemCount={itemCount} />
 
-      {/* Quick Buy Overlay (Phase 3) */}
+      {/* Quick Buy Overlay */}
       <QuickBuyOverlay product={quickBuyProduct} onClose={() => setQuickBuyProduct(null)} />
     </div>
   );
@@ -367,7 +378,7 @@ function ScrollDots({
     const onScroll = () => {
       const card = el.children[0] as HTMLElement | undefined;
       if (!card) return;
-      const stride = card.offsetWidth + 16;
+      const stride = card.offsetWidth + 8;
       const rawIndex = Math.round(el.scrollLeft / stride);
       setActiveIndex(((rawIndex % itemCount) + itemCount) % itemCount);
     };
@@ -377,7 +388,7 @@ function ScrollDots({
   }, [scrollRef, itemCount]);
 
   return (
-    <div className="flex justify-center gap-1.5 mt-3">
+    <div className="flex justify-center gap-1.5 mt-3 relative z-10">
       {Array.from({ length: dotCount }).map((_, i) => (
         <div
           key={i}
