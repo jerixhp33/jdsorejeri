@@ -111,7 +111,7 @@ export function QuickBuyOverlay({ product, onClose }: QuickBuyOverlayProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center"
+          className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-3 sm:p-4"
           onClick={onClose}
         >
           {/* Backdrop */}
@@ -124,7 +124,7 @@ export function QuickBuyOverlay({ product, onClose }: QuickBuyOverlayProps) {
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative z-10 w-full max-w-md mx-auto rounded-t-3xl sm:rounded-3xl bg-[#111]/95 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/60 overflow-hidden max-h-[90vh] flex flex-col"
+            className="relative z-10 w-full max-w-md mx-auto rounded-3xl bg-[#111]/95 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/60 overflow-hidden max-h-[78vh] sm:max-h-[90vh] flex flex-col mb-20 sm:mb-0"
           >
             {/* Close button */}
             <button

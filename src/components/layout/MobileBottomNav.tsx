@@ -62,7 +62,7 @@ export function MobileBottomNav() {
   return (
     <div 
       className={cn(
-        "mobile-bottom-nav-container md:hidden fixed bottom-6 left-0 right-0 z-[100] flex justify-center transition-all duration-300 ease-in-out pointer-events-none",
+        "mobile-bottom-nav-container md:hidden fixed bottom-6 left-0 right-0 z-[120] flex justify-center transition-all duration-300 ease-in-out pointer-events-none",
         isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
       )}
     >
