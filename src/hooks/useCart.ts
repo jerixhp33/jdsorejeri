@@ -177,6 +177,23 @@ export function useCart() {
     }
   }, [profile, hasFetched, fetchCart, resetStore]);
 
+  // Realtime subscription for cart items
+  useEffect(() => {
+    if (!profile || !cart?.id) return;
+    
+    const channel = supabase
+      .channel(`cart-${cart.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cart_items', filter: `cart_id=eq.${cart.id}` }, () => {
+        // Silently fetch in background to sync state without flickering
+        fetchCart();
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile, cart?.id, supabase, fetchCart]);
+
   // Generate or retrieve a session ID for abandoned cart tracking
   useEffect(() => {
     if (typeof window !== 'undefined') {

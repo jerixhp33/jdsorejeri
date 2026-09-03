@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
@@ -22,6 +22,20 @@ export function useWishlist(): WishlistState {
   const queryClient = useQueryClient();
 
   const queryKey = ['wishlist', profile?.id];
+
+  useEffect(() => {
+    if (!profile) return;
+    const channel = supabase
+      .channel(`wishlists-${profile.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wishlists', filter: `user_id=eq.${profile.id}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ['wishlist', profile.id] });
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile, supabase, queryClient]);
 
   // React Query for fetching — automatic caching, deduplication, background refetch
   const { data: items = [], isLoading } = useQuery<WishlistItem[]>({
