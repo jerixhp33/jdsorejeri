@@ -283,7 +283,7 @@ export function CheckoutForm() {
     : 0;
   
   const isGift = watch('is_gift');
-  const giftWrapFee = (isGift && storeSettings?.gift_wrapping_enabled === 'true') 
+  const giftWrapFee = (isGift && (storeSettings?.gift_wrapping_enabled === 'true' || storeSettings?.gift_wrapping_enabled === true)) 
     ? Number(storeSettings.gift_wrapping_fee || 0) 
     : 0;
 
@@ -948,7 +948,7 @@ export function CheckoutForm() {
           <div className="glass-card p-6">
             <h2 className="text-white font-semibold text-sm mb-5">Additional Services & Notes</h2>
             
-            {storeSettings?.gift_wrapping_enabled === 'true' && (
+            {(storeSettings?.gift_wrapping_enabled === 'true' || storeSettings?.gift_wrapping_enabled === true) && (
               <div className="mb-6 p-4 rounded-xl border border-luxe-accent/20 bg-luxe-accent/5">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <div className="relative flex items-center justify-center mt-1">

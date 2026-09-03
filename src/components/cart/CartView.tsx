@@ -382,12 +382,12 @@ export function CartView() {
               <div className="border-t border-white/10 pt-4 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-white font-semibold">Total</span>
-                  <span className="text-white font-bold text-lg">{formatCurrency(finalTotal + (isGift && storeSettings?.gift_wrapping_enabled === 'true' ? Number(storeSettings.gift_wrapping_fee || 0) : 0))}</span>
+                  <span className="text-white font-bold text-lg">{formatCurrency(finalTotal + (isGift && (storeSettings?.gift_wrapping_enabled === 'true' || storeSettings?.gift_wrapping_enabled === true) ? Number(storeSettings.gift_wrapping_fee || 0) : 0))}</span>
                 </div>
               </div>
 
               {/* Gift Wrapping Toggle */}
-              {storeSettings?.gift_wrapping_enabled === 'true' && (
+              {(storeSettings?.gift_wrapping_enabled === 'true' || storeSettings?.gift_wrapping_enabled === true) && (
                 <div className="mb-6 p-4 rounded-xl border border-luxe-accent/20 bg-luxe-accent/5">
                   <label className="flex items-start gap-3 cursor-pointer">
                     <div className="relative flex items-center justify-center mt-1">
