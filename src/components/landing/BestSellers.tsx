@@ -99,7 +99,7 @@ function DesktopGrid({ products }: { products: Product[] }) {
       initial={false}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="grid grid-cols-3 lg:grid-cols-4 gap-6 items-start"
+      className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 lg:gap-8 items-start"
     >
       {products.map((product, i) => (
         <ProductCard key={product.id} product={product} index={i} />

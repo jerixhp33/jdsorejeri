@@ -311,13 +311,13 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
             {/* Logo */}
             <Link prefetch={true} href="/" className="flex items-center gap-2 group" aria-label="JD Store home">
               <JDLogo size={32} />
-              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-white group-hover:text-luxe-accent transition-colors">
+              <span className="font-display text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-white group-hover:text-luxe-accent transition-colors">
                 JD Store
               </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1 lg:gap-10">
                 <Link prefetch={true} href="/" className={cn("nav-link", pathname === '/' && "active")}>
                   Home
                 </Link>
@@ -369,7 +369,7 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
             <div className="flex items-center gap-2">
               <Link
                 href="/product/custom-photo-poster"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold text-xs shadow-md shadow-amber-400/20 hover:scale-105 transition-transform"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-black lg:bg-none lg:bg-transparent lg:border lg:border-luxe-accent lg:text-luxe-accent lg:hover:bg-luxe-accent lg:hover:text-luxe-black lg:px-5 lg:py-2 lg:text-sm lg:font-bold lg:shadow-none font-extrabold text-xs shadow-md shadow-amber-400/20 hover:scale-105 transition-transform"
               >
                 <Sparkles className="w-3.5 h-3.5 text-black" />
                 Custom Poster
@@ -598,13 +598,13 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
           scrolled ? "opacity-0 -translate-y-8 pointer-events-none" : "opacity-100 translate-y-0"
         )}
       >
-        <div className="w-[90%] bg-white/30 backdrop-blur-xl border border-white/40 text-black rounded-b-2xl sm:rounded-b-3xl overflow-hidden py-1.5 sm:py-2 shadow-[0_10px_30px_rgba(0,0,0,0.1)] relative -mt-3 pt-4 -z-10">
+        <div className="w-[90%] bg-white/30 backdrop-blur-xl border border-white/40 text-black rounded-b-2xl sm:rounded-b-3xl overflow-hidden py-1.5 sm:py-2 lg:py-3 shadow-[0_10px_30px_rgba(0,0,0,0.1)] relative -mt-3 pt-4 -z-10">
           <div className="flex whitespace-nowrap animate-marquee w-max" style={{ animationDuration: '40s' }}>
             <div className="flex shrink-0">
               {itemsToRender.map((item, i) => (
                 <span
                   key={`h1-${i}`}
-                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/90 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase font-bold"
+                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/90 text-[10px] sm:text-[11px] lg:text-sm tracking-[0.15em] lg:tracking-[0.2em] uppercase font-bold"
                 >
                   <Sparkles className="w-2.5 h-2.5 text-black/60" />
                   {item}
@@ -615,7 +615,7 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
               {itemsToRender.map((item, i) => (
                 <span
                   key={`h2-${i}`}
-                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/90 text-[10px] sm:text-[11px] tracking-[0.15em] uppercase font-bold"
+                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/90 text-[10px] sm:text-[11px] lg:text-sm tracking-[0.15em] lg:tracking-[0.2em] uppercase font-bold"
                 >
                   <Sparkles className="w-2.5 h-2.5 text-black/60" />
                   {item}

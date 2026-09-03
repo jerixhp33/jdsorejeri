@@ -16,7 +16,7 @@ export function FAQSection({ faqs }: FAQSectionProps) {
   if (!faqs.length) return null;
 
   return (
-    <section id="faq" className="py-2">
+    <section id="faq" className="py-2 lg:py-20">
       <div className="page-container">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
@@ -48,7 +48,7 @@ export function FAQSection({ faqs }: FAQSectionProps) {
             </motion.p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 lg:max-w-3xl lg:mx-auto">
             {faqs.map((faq, i) => (
               <motion.div
                 key={faq.id}
@@ -68,7 +68,7 @@ export function FAQSection({ faqs }: FAQSectionProps) {
                 >
                   <span
                     className={cn(
-                      'text-sm font-medium transition-colors',
+                      'text-sm font-medium transition-colors lg:text-lg',
                       openIndex === i ? 'text-white' : 'text-white/70'
                     )}
                   >

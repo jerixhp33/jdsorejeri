@@ -46,9 +46,9 @@ export default async function HomePage() {
             <div className="w-full overflow-hidden bg-white/10 backdrop-blur-xl text-white border-t border-x border-white/20 rounded-t-3xl md:rounded-t-[2.5rem] py-2 shadow-lg">
               <div className="flex w-max animate-marquee">
                 {[1, 2].map((blockId) => (
-                  <div key={blockId} className="flex shrink-0 items-center whitespace-nowrap text-[10px] sm:text-xs font-extrabold tracking-widest uppercase">
+                  <div key={blockId} className="flex shrink-0 items-center whitespace-nowrap text-[10px] sm:text-xs lg:text-sm font-extrabold tracking-widest uppercase lg:tracking-[0.2em]">
                     {Array(6).fill(0).map((_, i) => (
-                      <div key={`${blockId}-${i}`} className="flex items-center mx-6 gap-6">
+                      <div key={`${blockId}-${i}`} className="flex items-center mx-6 gap-6 lg:mx-8 lg:gap-8">
                         <span className="text-yellow-400 animate-pulse text-sm">⚡</span>
                         <span>{flashSale.title} • {flashSale.discount_percentage}% OFF</span>
                         <FlashSaleTimerClient endAt={flashSale.end_at} />

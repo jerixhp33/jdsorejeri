@@ -90,7 +90,7 @@ function SingleBanner({ banner, priority, isAttachedTop }: { banner: Banner; pri
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] group z-10",
+        "relative w-full aspect-[21/7] lg:aspect-auto lg:h-[85vh] min-h-[200px] max-h-[400px] lg:max-h-none group z-10",
         isAttachedTop ? "rounded-b-3xl md:rounded-b-[2.5rem]" : "rounded-3xl md:rounded-[2.5rem]"
       )}
       style={activeGlow ? {
@@ -150,17 +150,17 @@ function SingleBanner({ banner, priority, isAttachedTop }: { banner: Banner; pri
 
         {/* Content overlay */}
         <motion.div 
-          className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20 will-change-transform"
+          className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20 will-change-transform lg:justify-center lg:text-center"
           style={{ y: textY }}
         >
-          <div className="max-w-xl">
+          <div className="max-w-xl lg:max-w-4xl lg:flex lg:flex-col lg:items-center">
             {banner.title && (
               <motion.h3
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.25 }}
-                className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
+                className="font-display text-2xl md:text-4xl lg:text-7xl font-bold text-white leading-tight mb-2"
                 style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
               >
                 {banner.title}
@@ -173,7 +173,7 @@ function SingleBanner({ banner, priority, isAttachedTop }: { banner: Banner; pri
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.35 }}
-                className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
+                className="text-white/80 text-xs md:text-base lg:text-lg mb-6 lg:mb-10 lg:max-w-2xl leading-relaxed"
               >
                 {banner.subtitle}
               </motion.p>
@@ -187,7 +187,7 @@ function SingleBanner({ banner, priority, isAttachedTop }: { banner: Banner; pri
                 transition={{ duration: 0.5, delay: 0.45 }}
               >
                 <Link prefetch={true} href={banner.cta_url}
-                  className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300 bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 hover:scale-105"
+                  className="group/btn inline-flex items-center gap-2.5 px-6 py-3 lg:px-10 lg:py-4 rounded-full font-medium text-sm lg:text-lg transition-all duration-300 bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 hover:scale-105"
                 >
                   {banner.cta_text}
                   <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
@@ -256,7 +256,7 @@ function SliderBanners({ banners, isAttachedTop }: { banners: Banner[]; isAttach
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "relative w-full aspect-[21/7] min-h-[200px] max-h-[400px] group z-10",
+        "relative w-full aspect-[21/7] lg:aspect-auto lg:h-[85vh] min-h-[200px] max-h-[400px] lg:max-h-none group z-10",
         isAttachedTop ? "rounded-b-3xl md:rounded-b-[2.5rem]" : "rounded-3xl md:rounded-[2.5rem]"
       )}
       style={activeGlow ? {
@@ -320,16 +320,16 @@ function SliderBanners({ banners, isAttachedTop }: { banners: Banner[]; isAttach
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
             
             <motion.div 
-              className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20 will-change-transform"
+              className="absolute inset-0 flex items-center px-8 md:px-16 lg:px-20 z-20 will-change-transform lg:justify-center lg:text-center"
               style={{ y: textY }}
             >
-              <div className="max-w-xl">
+              <div className="max-w-xl lg:max-w-4xl lg:flex lg:flex-col lg:items-center">
                 {banners[current].title && (
                   <motion.h3
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, delay: 0.25 }}
-                    className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-2"
+                    className="font-display text-2xl md:text-4xl lg:text-7xl font-bold text-white leading-tight mb-2"
                     style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
                   >
                     {banners[current].title}
@@ -340,7 +340,7 @@ function SliderBanners({ banners, isAttachedTop }: { banners: Banner[]; isAttach
                     initial={{ opacity: 0, x: -16 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.35 }}
-                    className="text-white/80 text-xs md:text-base mb-6 leading-relaxed"
+                    className="text-white/80 text-xs md:text-base lg:text-lg mb-6 lg:mb-10 lg:max-w-2xl leading-relaxed"
                   >
                     {banners[current].subtitle}
                   </motion.p>
@@ -352,7 +352,7 @@ function SliderBanners({ banners, isAttachedTop }: { banners: Banner[]; isAttach
                     transition={{ duration: 0.5, delay: 0.45 }}
                   >
                     <Link prefetch={true} href={banners[current].cta_url}
-                      className="group/btn inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300 bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 hover:scale-105"
+                      className="group/btn inline-flex items-center gap-2.5 px-6 py-3 lg:px-10 lg:py-4 rounded-full font-medium text-sm lg:text-lg transition-all duration-300 bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 hover:scale-105"
                     >
                       {banners[current].cta_text}
                       <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />

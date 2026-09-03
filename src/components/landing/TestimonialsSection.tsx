@@ -15,7 +15,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
   if (!testimonials.length) return null;
 
   return (
-    <section className="py-2 overflow-hidden">
+    <section className="py-2 overflow-hidden lg:py-20">
       <div className="page-container">
         <div className="text-center mb-16">
           <motion.p
@@ -38,7 +38,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
         </div>
 
         {/* Testimonials grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 lg:grid-cols-3 lg:gap-8">
           {testimonials.slice(0, 6).map((testimonial, i) => (
             <motion.div
               key={testimonial.id}
@@ -47,7 +47,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
               viewport={{ once: true }}
               transition={{ delay: i * 0.07 }}
               className={cn(
-                'rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group',
+                'rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group lg:p-8',
                 i === 0 && 'md:col-span-2 lg:col-span-1'
               )}
             >
@@ -70,7 +70,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
               <Quote className="w-4 h-4 md:w-6 md:h-6 text-luxe-accent/30 mb-2 md:mb-3" />
 
               {/* Body */}
-              <p className="text-white/70 text-[11px] md:text-sm leading-relaxed mb-3 md:mb-5 line-clamp-4">
+              <p className="text-white/70 text-[11px] md:text-sm leading-relaxed mb-3 md:mb-5 line-clamp-4 lg:text-base">
                 {testimonial.body}
               </p>
 

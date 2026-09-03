@@ -29,9 +29,9 @@ export function Footer() {
     <footer className="relative z-10 bg-transparent border-t border-white/10">
       {/* Main footer */}
       <div className="page-container py-16 lg:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-20">
           {/* Brand */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-16">
             <div className="flex items-center gap-2.5 mb-4">
               <JDLogo size={36} />
               <span className="font-display text-xl font-bold text-white">JD Store</span>
@@ -90,11 +90,11 @@ export function Footer() {
           {Object.entries(FOOTER_LINKS).map(([section, links]) => (
             <div key={section}>
               <h3 className="text-white font-semibold text-sm mb-4">{section}</h3>
-              <ul className="space-y-3">
+              <ul className="space-y-3 lg:space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
                     <Link prefetch={true} href={link.href}
-                      className="text-white/40 text-sm hover:text-white transition-colors"
+                      className="text-white/40 text-sm lg:text-sm hover:text-white transition-colors"
                     >
                       {link.label}
                     </Link>

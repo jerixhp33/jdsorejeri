@@ -38,7 +38,7 @@ const FEATURES = [
 
 export function WhyChooseUs() {
   return (
-    <section className="py-2">
+    <section className="py-2 lg:py-20">
       <div className="page-container">
         <div className="text-center mb-16">
           <motion.p
@@ -54,7 +54,7 @@ export function WhyChooseUs() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="section-title mb-4"
+            className="section-title mb-4 lg:text-4xl lg:font-display"
           >
             Crafted for the discerning
           </motion.h2>
@@ -70,7 +70,7 @@ export function WhyChooseUs() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">
           {FEATURES.map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -78,7 +78,7 @@ export function WhyChooseUs() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group"
+              className="rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group lg:p-8 lg:border-l-2 lg:border-luxe-accent lg:pl-6"
             >
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex items-center justify-center mb-3 md:mb-5 group-hover:bg-luxe-accent/20 transition-colors">
                 <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-luxe-accent" />

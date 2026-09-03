@@ -106,11 +106,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       ref={inViewRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative h-full flex flex-col rounded-2xl bg-luxe-card border border-white/10 hover:border-luxe-accent/40 transition-all duration-300 overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-luxe-accent/5"
+      className="group relative h-full flex flex-col rounded-2xl bg-luxe-card border border-white/10 hover:border-luxe-accent/40 transition-all duration-500 overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-luxe-accent/5 lg:hover:-translate-y-2 lg:hover:border-luxe-accent/60"
     >
       <Link prefetch={true} href={`/product/${product.slug}`} className="flex flex-col h-full">
         {/* Image Container */}
-        <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#111]">
+        <div className="relative aspect-[3/4] lg:aspect-[4/5] w-full overflow-hidden bg-[#111]">
           {inView && currentImage ? (
             <Image
               src={currentImage.url}

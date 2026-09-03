@@ -5,9 +5,9 @@ import { Phone, Mail, MapPin, MessageCircle, Clock } from 'lucide-react';
 
 export function ContactSection() {
   return (
-    <section id="contact" className="py-2">
+    <section id="contact" className="py-2 lg:py-20">
       <div className="page-container">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
           {/* Left: Info */}
           <div>
             <motion.p
@@ -136,7 +136,7 @@ export function ContactSection() {
             <a
               href="https://wa.me/919360490974?text=Hi%20JD%20Store!%20I%20have%20a%20question."
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-green-500 text-white font-semibold px-8 py-3.5 rounded-full hover:bg-green-400 transition-colors w-full justify-center"
+              className="inline-flex items-center gap-2 bg-green-500 text-white font-semibold px-8 py-3.5 rounded-full hover:bg-green-400 transition-colors w-full justify-center lg:text-lg lg:py-4 lg:px-10"
             >
               <MessageCircle className="w-4 h-4" />
               Start a Conversation
