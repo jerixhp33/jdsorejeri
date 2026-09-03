@@ -466,16 +466,6 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
                     </AnimatePresence>
                   </div>
 
-                  {/* Wishlist — desktop only */}
-                  <Tooltip content="Wishlist">
-                    <Link prefetch={true} href="/wishlist"
-                      className="hidden sm:flex p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all min-w-[40px] min-h-[40px] items-center justify-center"
-                      aria-label="Wishlist"
-                    >
-                      <Heart className="w-5 h-5" />
-                    </Link>
-                  </Tooltip>
-
                   {/* Cart */}
                   <Tooltip content="Cart">
                     <Link prefetch={true} href="/cart"

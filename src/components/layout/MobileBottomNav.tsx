@@ -8,6 +8,7 @@ import { Home, ShoppingCart, User, Heart } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { createClient } from '@/lib/supabase/client';
 
 export function MobileBottomNav() {
   const pathname = usePathname();
@@ -16,6 +17,16 @@ export function MobileBottomNav() {
   
   const [isVisible, setIsVisible] = useState(true);
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [wishlistEnabled, setWishlistEnabled] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.from('settings').select('value').eq('key', 'wishlist_enabled').single().then(({ data }) => {
+      if (data) {
+        setWishlistEnabled(data.value === 'true' || data.value === true);
+      }
+    });
+  }, [supabase]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -82,16 +93,18 @@ export function MobileBottomNav() {
         </Link>
 
         {/* Wishlist */}
-        <Link 
-          prefetch={true}
-          href="/wishlist" 
-          className={cn(
-            "flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 active:scale-95", 
-            pathname === '/wishlist' ? 'bg-white/20 text-red-500' : 'text-white/70 hover:text-red-400'
-          )}
-        >
-          <Heart className={cn("w-5 h-5", pathname === '/wishlist' && "fill-current text-red-500")} strokeWidth={pathname === '/wishlist' ? 2.5 : 2} />
-        </Link>
+        {wishlistEnabled && (
+          <Link 
+            prefetch={true}
+            href="/wishlist" 
+            className={cn(
+              "flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 active:scale-95", 
+              pathname === '/wishlist' ? 'bg-white/20 text-red-500' : 'text-white/70 hover:text-red-400'
+            )}
+          >
+            <Heart className={cn("w-5 h-5", pathname === '/wishlist' && "fill-current text-red-500")} strokeWidth={pathname === '/wishlist' ? 2.5 : 2} />
+          </Link>
+        )}
 
         {/* Cart */}
         <Link 
