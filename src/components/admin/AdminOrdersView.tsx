@@ -35,7 +35,7 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
   React.useEffect(() => {
     const supabase = createClient();
     const channel = supabase
-      .channel('admin-orders-live')
+      .channel(`admin-orders-live-${Math.random()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders' },

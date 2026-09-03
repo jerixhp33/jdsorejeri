@@ -54,7 +54,7 @@ export function AdminNotificationPanel() {
     // Subscribe to Supabase Realtime for new notifications
     const supabase = createClient();
     const channel = supabase
-      .channel('admin-notifications-realtime')
+      .channel(`admin-notifications-realtime-${Math.random()}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications' },

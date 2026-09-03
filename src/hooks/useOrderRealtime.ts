@@ -12,7 +12,7 @@ export function useOrderRealtime(orderId: string) {
     if (!orderId) return;
 
     const channel = supabase
-      .channel(`order:${orderId}`)
+      .channel(`order:${orderId}-${Math.random()}`)
       .on(
         'postgres_changes',
         {

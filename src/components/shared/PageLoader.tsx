@@ -23,11 +23,11 @@ export function PageLoader() {
     const delay = (i * 0.13) % 2;
     const duration = 2 + ((i * 7) % 3);
     
-    // Polar to Cartesian
-    const x = Math.cos((angle * Math.PI) / 180) * radius;
-    const y = Math.sin((angle * Math.PI) / 180) * radius;
+    // Polar to Cartesian (rounded to 2 decimal places to prevent hydration mismatches)
+    const x = Number((Math.cos((angle * Math.PI) / 180) * radius).toFixed(2));
+    const y = Number((Math.sin((angle * Math.PI) / 180) * radius).toFixed(2));
 
-    return { x, y, size, delay, duration };
+    return { x, y, size, delay: Number(delay.toFixed(2)), duration };
   });
 
   return (
@@ -73,8 +73,8 @@ export function PageLoader() {
                 key={i}
                 className="absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
                 style={{
-                  width: p.size,
-                  height: p.size,
+                  width: `${p.size}px`,
+                  height: `${p.size}px`,
                   '--x': `${p.x}px`,
                   '--y': `${p.y}px`,
                   transform: `translate(${p.x}px, ${p.y}px)`,

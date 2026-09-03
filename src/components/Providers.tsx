@@ -29,7 +29,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       if (!session) return; // Only subscribe if there's an authenticated user
 
       // Global Realtime Sync: Automatically invalidate caches when DB changes
-      channel = supabase.channel('global-sync')
+      channel = supabase.channel(`global-sync-${Math.random()}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
           queryClient.invalidateQueries({ queryKey: ['orders'] });
         })

@@ -26,7 +26,7 @@ export function useWishlist(): WishlistState {
   useEffect(() => {
     if (!profile) return;
     const channel = supabase
-      .channel(`wishlists-${profile.id}`)
+      .channel(`wishlists-${profile.id}-${Math.random()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wishlists', filter: `user_id=eq.${profile.id}` }, () => {
         queryClient.invalidateQueries({ queryKey: ['wishlist', profile.id] });
       });
