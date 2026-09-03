@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { ORDER_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from '@/lib/orders';
 import { OrderStatusBadge, PaymentStatusBadge } from '@/components/shared/orders';
 import { StatusSelect } from './StatusSelect';
+import { createClient } from '@/lib/supabase/client';
 import type { Order, OrderStatus, PaymentStatus } from '@/types';
 
 const STATUSES = [
@@ -29,6 +30,38 @@ export function AdminOrdersView({ initialOrders }: { initialOrders: Order[] }) {
   const [bulkActionStatus, setBulkActionStatus] = useState<OrderStatus | ''>('');
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
+
+  // Supabase Realtime Subscription for Live Admin Orders
+  React.useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel('admin-orders-live')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newOrder = payload.new as Order;
+            toast.info(`🔔 New Order #${newOrder.order_number || newOrder.id.slice(0, 8)} placed!`, {
+              duration: 6000,
+            });
+            setOrders((prev) => [newOrder, ...prev.filter((o) => o.id !== newOrder.id)]);
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = payload.new as Order;
+            setOrders((prev) =>
+              prev.map((o) => (o.id === updated.id ? { ...o, ...updated } : o))
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setOrders((prev) => prev.filter((o) => o.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Individual update functions
   const updateInlineStatus = async (id: string, newStatus: string, type: 'status' | 'payment_status') => {
