@@ -49,7 +49,7 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919360490974';
 
 export function CheckoutForm() {
-  const { items, subtotal, deliveryCharge, total, clearCart, syncAbandonedCart } = useCart();
+  const { items, subtotal, deliveryCharge, total, clearCart, syncAbandonedCart, isGift, giftMessage } = useCart();
   const { profile } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -128,6 +128,8 @@ export function CheckoutForm() {
     defaultValues: {
       full_name: profile?.name || '',
       email: profile?.email || '',
+      is_gift: isGift,
+      gift_message: giftMessage,
     },
   });
 
@@ -383,6 +385,8 @@ export function CheckoutForm() {
         discount_amount: discountAmount,
         coupon_code: appliedCoupon?.code,
         total: finalTotal,
+        is_gift: data.is_gift,
+        gift_message: data.gift_message,
         notes: data.delivery_notes,
       });
 

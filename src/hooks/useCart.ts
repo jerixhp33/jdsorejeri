@@ -20,6 +20,9 @@ interface GlobalCartState {
   updateLocalQuantity: (cartItemId: string, quantity: number) => void;
   removeLocalItem: (cartItemId: string) => void;
   addLocalItem: (item: CartItem) => void;
+  isGift: boolean;
+  giftMessage: string;
+  setGiftOptions: (isGift: boolean, giftMessage: string) => void;
   resetStore: () => void;
 }
 
@@ -49,12 +52,17 @@ export const useCartStore = create<GlobalCartState>((set) => ({
     }
     return { items: [...state.items, item] };
   }),
+  isGift: false,
+  giftMessage: '',
+  setGiftOptions: (isGift, giftMessage) => set({ isGift, giftMessage }),
   resetStore: () => set({
     cart: null,
     items: [],
     deliverySettings: { charge: 60, threshold: 999 },
     loading: false,
     hasFetched: false,
+    isGift: false,
+    giftMessage: '',
   }),
 }));
 
@@ -72,7 +80,10 @@ export function useCart() {
     setHasFetched,
     updateLocalQuantity, 
     removeLocalItem,
-    addLocalItem
+    addLocalItem,
+    isGift,
+    giftMessage,
+    setGiftOptions
   } = useCartStore();
   
   const supabase = createClient();
@@ -341,5 +352,8 @@ export function useCart() {
     clearCart: clearCartItems,
     refresh: fetchCart,
     syncAbandonedCart,
+    isGift,
+    giftMessage,
+    setGiftOptions,
   };
 }

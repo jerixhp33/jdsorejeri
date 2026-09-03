@@ -647,6 +647,8 @@ export interface WhatsAppOrderPayload {
   discount_amount?: number;
   coupon_code?: string;
   total: number;
+  is_gift?: boolean;
+  gift_message?: string;
   notes?: string;
 }
 

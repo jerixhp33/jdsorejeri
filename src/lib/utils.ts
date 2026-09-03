@@ -109,7 +109,7 @@ ${itemsList}
 
 💰 *GRAND TOTAL: ${formatCurrency(payload.total)}*
 ━━━━━━━━━━━━━━━━━━━━━━━━
-${payload.notes ? `\n📝 *SPECIAL INSTRUCTIONS*\n_${payload.notes}_\n━━━━━━━━━━━━━━━━━━━━━━━━\n` : ''}
+${payload.is_gift ? `\n🎁 *GIFT ORDER*\n▪️ Gift Wrapping Requested\n${payload.gift_message ? `▪️ Message: _"${payload.gift_message}"_\n` : ''}━━━━━━━━━━━━━━━━━━━━━━━━\n` : ''}${payload.notes ? `\n📝 *SPECIAL INSTRUCTIONS*\n_${payload.notes}_\n━━━━━━━━━━━━━━━━━━━━━━━━\n` : ''}
 ⚠️ *PAYMENT INSTRUCTIONS*
 1️⃣ We accept UPI payments only (No COD).
 2️⃣ Send this message to us.

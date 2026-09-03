@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, X, ChevronLeft } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Tag, X, ChevronLeft, Gift, Check } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useHaptic } from '@/hooks/useHaptic';
 import { useCouponStore } from '@/hooks/useCouponStore';
@@ -13,8 +13,21 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 export function CartView() {
-  const { items, itemCount, subtotal, deliveryCharge, total, loading, updateQuantity, removeItem, deliverySettings } =
-    useCart();
+  const { 
+    items, 
+    itemCount, 
+    subtotal, 
+    deliveryCharge, 
+    total, 
+    loading, 
+    updateQuantity, 
+    removeItem, 
+    deliverySettings,
+    isGift,
+    giftMessage,
+    setGiftOptions
+  } = useCart();
+  
   const haptic = useHaptic();
     
   const { appliedCoupon, setAppliedCoupon } = useCouponStore();
@@ -337,6 +350,12 @@ export function CartView() {
                     more for free delivery
                   </p>
                 )}
+                {isGift && storeSettings?.gift_wrapping_enabled === 'true' && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/50">Gift Wrapping</span>
+                    <span className="text-white">{formatCurrency(Number(storeSettings.gift_wrapping_fee || 0))}</span>
+                  </div>
+                )}
               </div>
               
               {appliedCoupon && (
@@ -352,9 +371,45 @@ export function CartView() {
               <div className="border-t border-white/10 pt-4 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-white font-semibold">Total</span>
-                  <span className="text-white font-bold text-lg">{formatCurrency(finalTotal)}</span>
+                  <span className="text-white font-bold text-lg">{formatCurrency(finalTotal + (isGift && storeSettings?.gift_wrapping_enabled === 'true' ? Number(storeSettings.gift_wrapping_fee || 0) : 0))}</span>
                 </div>
               </div>
+
+              {/* Gift Wrapping Toggle */}
+              {storeSettings?.gift_wrapping_enabled === 'true' && (
+                <div className="mb-6 p-4 rounded-xl border border-luxe-accent/20 bg-luxe-accent/5">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <div className="relative flex items-center justify-center mt-1">
+                      <input 
+                        type="checkbox" 
+                        checked={isGift}
+                        onChange={(e) => setGiftOptions(e.target.checked, giftMessage)}
+                        className="peer sr-only" 
+                      />
+                      <div className="w-5 h-5 rounded border-2 border-white/30 peer-checked:bg-luxe-accent peer-checked:border-luxe-accent transition-all flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5 text-black opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white text-sm font-medium">Make it a Gift</p>
+                      <p className="text-white/60 text-xs mt-1">Premium gold-foil wrapping (+{formatCurrency(Number(storeSettings.gift_wrapping_fee || 0))})</p>
+                    </div>
+                  </label>
+
+                  {isGift && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4 pt-4 border-t border-white/10">
+                      <label className="text-white/50 text-xs uppercase tracking-wide mb-1.5 block">Gift Message (Optional)</label>
+                      <textarea 
+                        value={giftMessage}
+                        onChange={(e) => setGiftOptions(isGift, e.target.value)}
+                        className="input-luxe resize-none" 
+                        rows={2} 
+                        placeholder="Write a sweet message for the recipient..." 
+                      />
+                    </motion.div>
+                  )}
+                </div>
+              )}
               
               {/* Checkout Button for Desktop */}
               <Link prefetch={true} href="/checkout"
