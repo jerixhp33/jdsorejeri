@@ -29,8 +29,9 @@ export function useWishlist(): WishlistState {
       .channel(`wishlists-${profile.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wishlists', filter: `user_id=eq.${profile.id}` }, () => {
         queryClient.invalidateQueries({ queryKey: ['wishlist', profile.id] });
-      })
-      .subscribe();
+      });
+      
+    channel.subscribe();
       
     return () => {
       supabase.removeChannel(channel);

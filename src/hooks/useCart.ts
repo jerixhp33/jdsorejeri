@@ -186,8 +186,9 @@ export function useCart() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'cart_items', filter: `cart_id=eq.${cart.id}` }, () => {
         // Silently fetch in background to sync state without flickering
         fetchCart();
-      })
-      .subscribe();
+      });
+      
+    channel.subscribe();
       
     return () => {
       supabase.removeChannel(channel);
