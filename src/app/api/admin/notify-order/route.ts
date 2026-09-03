@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { notifyAdmins } from '@/lib/web-push-helper';
 import { sendWhatsApp } from '@/lib/whatsapp';
 import { formatCurrency } from '@/lib/utils';
+import { requireAdmin } from '@/lib/admin-api';
 
 export async function POST(request: NextRequest) {
   try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const body = await request.json();
     const { orderId, orderNumber, total, customerName } = body;
 

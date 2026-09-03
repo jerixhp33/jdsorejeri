@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import type { User } from '@supabase/supabase-js';
+import { useCartStore } from './useCart';
 import type { UserProfile } from '@/types';
 
 interface AuthState {
@@ -49,12 +50,14 @@ export function useAuth(): AuthState {
       async (_event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          if (_event === 'SIGNED_IN') {
-            // Web toast removed as requested
-          }
           await fetchProfile();
         } else {
           setProfile(null);
+          // Clear all Zustand stores and persisted state on logout
+          useCartStore.getState().resetStore();
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('coupon-storage');
+          }
         }
         setLoading(false);
       }

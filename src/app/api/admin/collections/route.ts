@@ -2,63 +2,79 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-api';
 
 export async function GET() {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { data, error } = await admin.from('collections').select('*').order('created_at', { ascending: false });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { data, error } = await admin.from('collections').select('*').order('created_at', { ascending: false });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const body = await req.json();
-  // Handle collection_products insert
-  if (body._type === 'collection_products') {
-    const { error } = await admin.from('collection_products').insert(body.items);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ success: true });
-  }
-  // Handle order notification
-  if (body._notify) {
-    await admin.from('notifications').insert({ user_id: body.user_id, title: `Order #${body.order_number} Update`, body: body.message, type: 'order', action_url: '/dashboard/orders' });
-    
-    // Also send WhatsApp to customer
-    const { data: userProfile } = await admin.from('user_profiles').select('phone').eq('id', body.user_id).single();
-    if (userProfile?.phone) {
-      const { sendWhatsApp } = await import('@/lib/whatsapp');
-      await sendWhatsApp(userProfile.phone, `🚚 *Order #${body.order_number} Update*\n\n${body.message}\n\nTrack your order: /dashboard/orders`);
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await req.json();
+    // Handle collection_products insert
+    if (body._type === 'collection_products') {
+      const { error } = await admin.from('collection_products').insert(body.items);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true });
     }
+    // Handle order notification
+    if (body._notify) {
+      await admin.from('notifications').insert({ user_id: body.user_id, title: `Order #${body.order_number} Update`, body: body.message, type: 'order', action_url: '/dashboard/orders' });
+      
+      // Also send WhatsApp to customer
+      const { data: userProfile } = await admin.from('user_profiles').select('phone').eq('id', body.user_id).single();
+      if (userProfile?.phone) {
+        const { sendWhatsApp } = await import('@/lib/whatsapp');
+        await sendWhatsApp(userProfile.phone, `🚚 *Order #${body.order_number} Update*\n\n${body.message}\n\nTrack your order: /dashboard/orders`);
+      }
 
-    return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true });
+    }
+    const { data, error } = await admin.from('collections').insert(body).select().single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
-  const { data, error } = await admin.from('collections').insert(body).select().single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
 }
 
 export async function PATCH(req: NextRequest) {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const body = await req.json();
-  const { id, key, ...updates } = body;
-  const col = id ? 'id' : 'key';
-  const val = id ?? key;
-  const { data, error } = await admin.from('collections').update(updates).eq(col, val).select().single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await req.json();
+    const { id, key, ...updates } = body;
+    const col = id ? 'id' : 'key';
+    const val = id ?? key;
+    const { data, error } = await admin.from('collections').update(updates).eq(col, val).select().single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest) {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const body = await req.json();
-  if (body._type === 'products') {
-    const { error } = await admin.from('collection_products').delete().eq('collection_id', body.collection_id);
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await req.json();
+    if (body._type === 'products') {
+      const { error } = await admin.from('collection_products').delete().eq('collection_id', body.collection_id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true });
+    }
+    const { error } = await admin.from('collections').delete().eq('id', body.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
-  const { error } = await admin.from('collections').delete().eq('id', body.id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ success: true });
 }

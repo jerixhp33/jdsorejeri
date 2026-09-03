@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Home, ShoppingCart, User, Heart } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
@@ -119,7 +120,7 @@ export function MobileBottomNav() {
           )}
         >
           {profileImg ? (
-            <img src={profileImg} alt="Profile" className="w-6 h-6 object-cover rounded-full border border-white/20" />
+            <Image src={profileImg} alt="Profile" width={24} height={24} className="w-6 h-6 object-cover rounded-full border border-white/20" />
           ) : (
             <User className="w-5 h-5" strokeWidth={pathname.includes('/dashboard') ? 2.5 : 2} />
           )}

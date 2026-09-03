@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/admin-api';
 
 export async function GET(req: NextRequest) {
   try {
-    const admin = await createAdminClient();
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { data: notifications, error } = await admin
       .from('notifications')

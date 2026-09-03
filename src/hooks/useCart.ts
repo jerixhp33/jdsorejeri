@@ -20,9 +20,10 @@ interface GlobalCartState {
   updateLocalQuantity: (cartItemId: string, quantity: number) => void;
   removeLocalItem: (cartItemId: string) => void;
   addLocalItem: (item: CartItem) => void;
+  resetStore: () => void;
 }
 
-const useCartStore = create<GlobalCartState>((set) => ({
+export const useCartStore = create<GlobalCartState>((set) => ({
   cart: null,
   items: [],
   deliverySettings: { charge: 60, threshold: 999 },
@@ -47,6 +48,13 @@ const useCartStore = create<GlobalCartState>((set) => ({
       return { items: state.items.map(i => i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i) };
     }
     return { items: [...state.items, item] };
+  }),
+  resetStore: () => set({
+    cart: null,
+    items: [],
+    deliverySettings: { charge: 60, threshold: 999 },
+    loading: false,
+    hasFetched: false,
   }),
 }));
 
@@ -147,14 +155,16 @@ export function useCart() {
     }
   }, [profile, supabase, setCartData, setLoading, setHasFetched]);
 
+  const resetStore = useCartStore((s) => s.resetStore);
+
   useEffect(() => {
-    // Only fetch on mount if we haven't fetched yet or if profile changes
     if (profile && !hasFetched) {
       fetchCart();
-    } else if (!profile && loading) {
-      setLoading(false);
+    } else if (!profile) {
+      // Clear all cart state on logout to prevent session leaks
+      resetStore();
     }
-  }, [profile, hasFetched, fetchCart, loading, setLoading]);
+  }, [profile, hasFetched, fetchCart, resetStore]);
 
   // Generate or retrieve a session ID for abandoned cart tracking
   useEffect(() => {
@@ -276,16 +286,32 @@ export function useCart() {
 
   const updateQuantity = async (cartItemId: string, quantity: number) => {
     if (quantity <= 0) return removeItem(cartItemId);
+    const previousItem = items.find(i => i.id === cartItemId);
     updateLocalQuantity(cartItemId, quantity);
-    await supabase.from('cart_items').update({ quantity }).eq('id', cartItemId);
-    fetchCart();
+    try {
+      await supabase.from('cart_items').update({ quantity }).eq('id', cartItemId);
+      fetchCart();
+    } catch (err) {
+      // Rollback on failure
+      if (previousItem) updateLocalQuantity(cartItemId, previousItem.quantity);
+      toast.error('Failed to update quantity');
+      console.error(err);
+    }
   };
 
   const removeItem = async (cartItemId: string) => {
+    const previousItems = [...items];
     removeLocalItem(cartItemId);
-    await supabase.from('cart_items').delete().eq('id', cartItemId);
-    fetchCart();
-    toast.success('Removed from cart');
+    try {
+      await supabase.from('cart_items').delete().eq('id', cartItemId);
+      fetchCart();
+      toast.success('Removed from cart');
+    } catch (err) {
+      // Rollback on failure
+      useCartStore.setState({ items: previousItems });
+      toast.error('Failed to remove item');
+      console.error(err);
+    }
   };
 
   const clearCartItems = async () => {

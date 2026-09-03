@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/admin-api';
 
-async function requireAdmin() {
+async function getAdminProfile() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -14,8 +15,11 @@ async function requireAdmin() {
 
 // Admin analytics API
 export async function GET(request: NextRequest) {
-  const result = await requireAdmin();
-  if (!result) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const result = await getAdminProfile();
+    if (!result) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   const { adminClient } = result;
 
   const { searchParams } = new URL(request.url);
@@ -52,12 +56,18 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ error: 'Unknown type' }, { status: 400 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+  }
 }
 
 // Admin update order status
 export async function PATCH(request: NextRequest) {
-  const result = await requireAdmin();
-  if (!result) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const result = await getAdminProfile();
+    if (!result) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   const { profile, adminClient } = result;
 
   const body = await request.json();
@@ -93,4 +103,7 @@ export async function PATCH(request: NextRequest) {
   });
 
   return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+  }
 }

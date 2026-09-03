@@ -2,18 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-api';
 
 export async function GET() {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { data, error } = await admin.from('products').select('*').order('created_at', { ascending: false });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { data, error } = await admin.from('products').select('*').order('created_at', { ascending: false });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const body = await req.json();
-  // Handle collection_products insert
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await req.json();
+    // Handle collection_products insert
   if (body._type === 'collection_products') {
     const { error } = await admin.from('collection_products').insert(body.items);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -66,12 +71,16 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json(data);
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function PATCH(req: NextRequest) {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const body = await req.json();
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await req.json();
 
   if (body._type === 'bulk_update') {
     if (body.items && body.items.length > 0) {
@@ -128,12 +137,16 @@ export async function PATCH(req: NextRequest) {
   }
 
   return NextResponse.json(data);
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest) {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const body = await req.json();
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await req.json();
 
   // Delete all collection_products entries for a given collection
   if (body._type === 'products') {
@@ -186,4 +199,7 @@ export async function DELETE(req: NextRequest) {
   }
 
   return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+  }
 }
