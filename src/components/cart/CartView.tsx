@@ -38,6 +38,17 @@ export function CartView() {
   
   const [showSwipeTip, setShowSwipeTip] = useState(true);
 
+  const [storeSettings, setStoreSettings] = useState<any>(null);
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.from('settings').select('key, value').in('key', ['gift_wrapping_enabled', 'gift_wrapping_fee']).then(({ data }) => {
+      if (data) {
+        const config = data.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
+        setStoreSettings(config);
+      }
+    });
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSwipeTip(false);
