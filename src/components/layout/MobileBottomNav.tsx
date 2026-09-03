@@ -8,7 +8,6 @@ import { Home, ShoppingCart, User, Heart } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { createClient } from '@/lib/supabase/client';
 
 export function MobileBottomNav() {
   const pathname = usePathname();
@@ -18,15 +17,17 @@ export function MobileBottomNav() {
   const [isVisible, setIsVisible] = useState(true);
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
   const [wishlistEnabled, setWishlistEnabled] = useState(true);
-  const supabase = createClient();
 
   useEffect(() => {
-    supabase.from('settings').select('value').eq('key', 'wishlist_enabled').single().then(({ data }) => {
-      if (data) {
-        setWishlistEnabled(data.value === 'true' || data.value === true);
-      }
-    });
-  }, [supabase]);
+    fetch('/api/store-settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.wishlist_enabled !== undefined) {
+          setWishlistEnabled(data.wishlist_enabled === 'true' || data.wishlist_enabled === true);
+        }
+      })
+      .catch((err) => console.error('Failed to fetch store settings:', err));
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
