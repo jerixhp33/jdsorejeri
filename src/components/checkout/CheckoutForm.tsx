@@ -49,7 +49,7 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919360490974';
 
 export function CheckoutForm() {
-  const { items, subtotal, deliveryCharge, total, clearCart, syncAbandonedCart, isGift, giftMessage } = useCart();
+  const { items, subtotal, deliveryCharge, total, clearCart, syncAbandonedCart, isGift: cartIsGift, giftMessage: cartGiftMessage } = useCart();
   const { profile } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -128,8 +128,8 @@ export function CheckoutForm() {
     defaultValues: {
       full_name: profile?.name || '',
       email: profile?.email || '',
-      is_gift: isGift,
-      gift_message: giftMessage,
+      is_gift: cartIsGift,
+      gift_message: cartGiftMessage,
     },
   });
 
