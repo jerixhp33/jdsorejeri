@@ -12,7 +12,7 @@ export function DiwaliDecorations() {
       
       {/* Background Rangoli */}
       <motion.div 
-        className="absolute -right-20 -bottom-20 w-96 h-96 text-[#f59e0b] pointer-events-none z-0 opacity-50"
+        className="absolute -right-20 -bottom-20 w-96 h-96 text-[#f59e0b] pointer-events-none z-0 opacity-50 will-change-transform"
         initial={{ opacity: 0, rotate: -20, scale: 0.9 }}
         animate={{ opacity: 0.5, rotate: 0, scale: 1 }}
         transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}

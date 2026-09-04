@@ -13,7 +13,7 @@ export function DiwaliParticles() {
 
     // Generate different amount based on screen size
     const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 12 : 25;
+    const particleCount = isMobile ? 8 : 25;
 
     const newParticles = Array.from({ length: particleCount }).map((_, i) => ({
       id: i,
@@ -32,7 +32,7 @@ export function DiwaliParticles() {
       {particles.map((p) => (
         <motion.div
           key={p.id}
-          className="absolute bg-[#fcd34d] rounded-full shadow-[0_0_8px_rgba(252,211,77,0.8)]"
+          className="absolute bg-[#fcd34d] rounded-full shadow-[0_0_8px_rgba(252,211,77,0.8)] will-change-transform"
           style={{
             left: `${p.left}%`,
             top: `${p.top}%`,
