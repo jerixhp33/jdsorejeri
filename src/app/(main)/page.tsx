@@ -23,14 +23,17 @@ export default async function HomePage() {
   const supabase = createPublicClient();
   
   // Fetch ONLY fast, layout-blocking data here to ensure rapid First Contentful Paint
-  const [banners, collections, marqueeLabels, flashSale, homeTheme, featuredProducts] = await Promise.all([
+  const [banners, collections, marqueeLabels, flashSale, homeTheme, featuredProducts, festivalSetting] = await Promise.all([
     supabase.from('banners').select('*').eq('is_active', true).order('display_order').then(({ data }) => data || []),
     supabase.from('collections').select('*').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
     supabase.from('marquee_labels').select('*').eq('is_active', true).order('order_index').then(({ data }) => data || []),
     getActiveFlashSale(),
     getActiveHomeTheme(),
     getFeaturedProducts(3),
+    supabase.from('settings').select('*').eq('key', 'festival_theme_enabled').maybeSingle().then(({ data }) => data),
   ]);
+
+  const isFestivalEnabled = festivalSetting ? (festivalSetting.value === true || festivalSetting.value === 'true') : false;
 
   const heroBanners    = banners.filter((b: any) => b.position === 'hero');
   const topBanners     = banners.filter((b: any) => b.position === 'top');
@@ -40,16 +43,23 @@ export default async function HomePage() {
 
   return (
     <>
-      <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} themeConfig={homeTheme} />
+      {!isFestivalEnabled && (
+        <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} themeConfig={homeTheme} />
+      )}
       
       {/* Diwali Festive Theme Wrapper (Navbar to Best Sellers) */}
-      <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] border-b border-[#f59e0b]/20 pb-4 lg:pb-8">
+      <div className={`relative w-full overflow-hidden pb-4 lg:pb-8 ${isFestivalEnabled ? 'bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12]' : ''}`}>
         
         {/* Diwali Background & Decorations */}
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.15)_0%,rgba(0,0,0,0)_60%)]" />
-          <DiwaliDecorations />
-        </div>
+        {isFestivalEnabled && (
+          <div 
+            className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+            style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}
+          >
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.15)_0%,rgba(0,0,0,0)_60%)]" />
+            <DiwaliDecorations />
+          </div>
+        )}
 
         <div className="relative z-10">
         {flashSale && (
