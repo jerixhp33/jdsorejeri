@@ -13,9 +13,13 @@ export function DiwaliDecorations() {
       {/* Background Rangoli — smaller on mobile */}
       <motion.div 
         className="absolute -right-10 -bottom-10 w-48 h-48 md:w-96 md:h-96 text-[#f59e0b] pointer-events-none z-0 opacity-30 md:opacity-50 will-change-transform"
-        initial={{ opacity: 0, rotate: -20, scale: 0.9 }}
-        animate={{ opacity: 0.3, rotate: 0, scale: 1 }}
-        transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 0.3, rotate: 360, scale: 1 }}
+        transition={{ 
+          opacity: { duration: 1.5, ease: "easeOut", delay: 0.5 },
+          scale: { duration: 1.5, ease: "easeOut", delay: 0.5 },
+          rotate: { duration: 60, repeat: Infinity, ease: "linear" } 
+        }}
       >
         <Rangoli className="w-full h-full" />
       </motion.div>

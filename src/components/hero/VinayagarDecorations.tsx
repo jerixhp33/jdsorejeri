@@ -14,8 +14,8 @@ export function VinayagarDecorations() {
       <motion.div
         className="absolute -right-10 -bottom-10 w-48 h-48 md:w-80 md:h-80 text-[#f97316] pointer-events-none z-0 opacity-20 md:opacity-30 will-change-transform"
         initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 0.25, scale: 1 }}
-        transition={{ duration: 1.8, ease: 'easeOut', delay: 0.3 }}
+        animate={{ opacity: [0.15, 0.35, 0.15], scale: [0.95, 1.05, 0.95] }}
+        transition={{ duration: 8, ease: 'easeInOut', repeat: Infinity }}
       >
         <Ganesha className="w-full h-full" />
       </motion.div>
@@ -53,9 +53,9 @@ export function VinayagarDecorations() {
       {/* Small Ganesha silhouette — top left, visible on mobile now */}
       <motion.div
         className="absolute left-[2%] top-[12%] w-16 h-16 md:w-24 md:h-24 text-[#f97316] pointer-events-none z-0 opacity-15 md:opacity-12"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.5, ease: 'easeOut', delay: 0.6 }}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: [0.1, 0.25, 0.1], y: [-10, 10, -10], rotate: [-2, 2, -2] }}
+        transition={{ duration: 10, ease: 'easeInOut', repeat: Infinity, delay: 1 }}
       >
         <Ganesha className="w-full h-full opacity-30" />
       </motion.div>
