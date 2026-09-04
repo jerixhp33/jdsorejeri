@@ -19,6 +19,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
+import { MagneticButton } from '@/components/ui/MagneticButton';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useHaptic } from '@/hooks/useHaptic';
@@ -580,18 +581,20 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
                     {waitlistJoined ? 'You\'re on the list!' : 'Notify Me When Available'}
                   </button>
                 ) : cartQuantity === 0 ? (
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={addingToCart}
-                    className="w-full h-full flex items-center justify-center gap-2 rounded-xl font-semibold text-sm bg-white text-black hover:bg-luxe-accent transition-all"
-                  >
-                    {addingToCart ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
-                    ) : (
-                      <ShoppingCart className="w-4 h-4" />
-                    )}
-                    {addingToCart ? 'Adding...' : 'Add to Cart'}
-                  </button>
+                  <MagneticButton className="flex-1 h-12">
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={addingToCart}
+                      className="w-full h-full flex items-center justify-center gap-2 rounded-xl font-semibold text-sm bg-white text-black hover:bg-luxe-accent transition-all relative z-20"
+                    >
+                      {addingToCart ? (
+                        <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+                      ) : (
+                        <ShoppingCart className="w-4 h-4" />
+                      )}
+                      {addingToCart ? 'Adding...' : 'Add to Cart'}
+                    </button>
+                  </MagneticButton>
                 ) : (
                   <div className="w-full h-full flex items-center justify-between glass-card rounded-xl overflow-hidden border border-luxe-accent/50 bg-luxe-accent/5 shadow-[0_0_15px_rgba(200,169,110,0.1)]">
                     <button

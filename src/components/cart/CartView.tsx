@@ -9,6 +9,7 @@ import { useHaptic } from '@/hooks/useHaptic';
 import { useCouponStore } from '@/hooks/useCouponStore';
 import { formatCurrency, cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
+import { MagneticButton } from '@/components/ui/MagneticButton';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -423,12 +424,14 @@ export function CartView() {
               )}
               
               {/* Checkout Button for Desktop */}
-              <Link prefetch={true} href="/checkout"
-                className="hidden lg:flex w-full btn-gold items-center justify-center gap-2 text-sm py-3 mb-6"
-              >
-                Checkout
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <MagneticButton className="w-full hidden lg:block mb-6">
+                <Link prefetch={true} href="/checkout"
+                  className="w-full btn-gold flex items-center justify-center gap-2 text-sm py-3"
+                >
+                  Checkout
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </MagneticButton>
               
               {/* Coupon Input */}
               <div className="pt-2">
@@ -505,11 +508,13 @@ export function CartView() {
                 <span className="text-white/60 text-[10px] uppercase tracking-wider block mb-0.5">Total</span>
                 <span className="text-white font-bold text-base">{formatCurrency(finalTotal)}</span>
               </div>
-              <Link prefetch={true} href="/checkout"
-                className="btn-gold !py-2.5 !px-6 text-sm flex gap-2 items-center rounded-xl font-medium"
-              >
-                Checkout <ArrowRight className="w-4 h-4" />
-              </Link>
+              <MagneticButton>
+                <Link prefetch={true} href="/checkout"
+                  className="btn-gold !py-2.5 !px-6 text-sm flex gap-2 items-center rounded-xl font-medium"
+                >
+                  Checkout <ArrowRight className="w-4 h-4" />
+                </Link>
+              </MagneticButton>
             </div>
           </div>
 

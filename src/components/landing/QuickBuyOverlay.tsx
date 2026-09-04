@@ -8,6 +8,7 @@ import { useCart } from '@/hooks/useCart';
 import { useHaptic } from '@/hooks/useHaptic';
 import { useFlashSale } from '@/hooks/useFlashSale';
 import { formatCurrency, cn } from '@/lib/utils';
+import { MagneticButton } from '@/components/ui/MagneticButton';
 import type { Product } from '@/types';
 
 interface QuickBuyOverlayProps {
@@ -274,10 +275,12 @@ export function QuickBuyOverlay({ product, onClose }: QuickBuyOverlayProps) {
                 ) : hasVariants && !selectedSizeId ? (
                   'Select a size'
                 ) : (
-                  <>
-                    <ShoppingCart size={16} />
-                    Add to Cart · {formatCurrency(displayPrice * quantity)}
-                  </>
+                  <MagneticButton className="w-full">
+                    <div className="flex items-center justify-center gap-2">
+                      <ShoppingCart size={16} />
+                      Add to Cart · {formatCurrency(displayPrice * quantity)}
+                    </div>
+                  </MagneticButton>
                 )}
               </button>
             </div>
