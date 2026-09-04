@@ -69,7 +69,7 @@ export const useCartStore = create<GlobalCartState>((set) => ({
 let cartFetchDebounceTimer: ReturnType<typeof setTimeout>;
 
 export function useCart() {
-  const { profile } = useAuth();
+  const { profile, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const { 
     cart, 
@@ -178,13 +178,16 @@ export function useCart() {
   const resetStore = useCartStore((s) => s.resetStore);
 
   useEffect(() => {
+    if (authLoading) return; // Wait for auth to initialize
+    
     if (profile && !hasFetched) {
+      setLoading(true); // Show skeleton while fetching
       fetchCart();
     } else if (!profile) {
       // Clear all cart state on logout to prevent session leaks
       resetStore();
     }
-  }, [profile, hasFetched, fetchCart, resetStore]);
+  }, [profile, authLoading, hasFetched, fetchCart, resetStore, setLoading]);
 
   // Realtime subscription for cart items
   useEffect(() => {
