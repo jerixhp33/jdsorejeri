@@ -67,7 +67,11 @@ export function AdminSettingsView({ settings: initial }: AdminSettingsViewProps)
         </div>
 
         <div className="space-y-5">
-          {settings.map((setting, i) => (
+          {settings.map((setting, i) => {
+            const valStr = getValue(setting);
+            const isBoolean = valStr === 'true' || valStr === 'false';
+            
+            return (
             <motion.div
               key={setting.id}
               initial={{ opacity: 0, y: 10 }}
@@ -82,33 +86,52 @@ export function AdminSettingsView({ settings: initial }: AdminSettingsViewProps)
                 )}
               </div>
               <div className="md:col-span-2 flex items-center gap-3">
-                <input
-                  defaultValue={getValue(setting)}
-                  onBlur={(e) => {
-                    if (e.target.value !== getValue(setting)) {
-                      updateSetting(setting.key, e.target.value);
-                    }
-                  }}
-                  className="input-luxe flex-1 text-sm font-mono"
-                />
-                <button
-                  onClick={(e) => {
-                    const input = (e.currentTarget.previousSibling as HTMLInputElement);
-                    updateSetting(setting.key, input.value);
-                  }}
-                  disabled={saving === setting.key}
-                  className="p-2.5 rounded-xl bg-luxe-accent/20 text-luxe-accent hover:bg-luxe-accent/30 transition-all disabled:opacity-50"
-                  title="Save"
-                >
-                  {saving === setting.key ? (
-                    <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                </button>
+                {isBoolean ? (
+                  <div className="flex-1 flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        const currentVal = valStr === 'true';
+                        updateSetting(setting.key, currentVal ? 'false' : 'true');
+                      }}
+                      disabled={saving === setting.key}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${valStr === 'true' ? 'bg-luxe-accent' : 'bg-white/20'} disabled:opacity-50`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full transition-transform ${valStr === 'true' ? 'translate-x-6 bg-black' : 'translate-x-1 bg-white'}`} />
+                    </button>
+                    <span className="text-sm font-mono text-white/50">{valStr === 'true' ? 'ON' : 'OFF'}</span>
+                    {saving === setting.key && <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin ml-2" />}
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      defaultValue={valStr}
+                      onBlur={(e) => {
+                        if (e.target.value !== valStr) {
+                          updateSetting(setting.key, e.target.value);
+                        }
+                      }}
+                      className="input-luxe flex-1 text-sm font-mono"
+                    />
+                    <button
+                      onClick={(e) => {
+                        const input = (e.currentTarget.previousSibling as HTMLInputElement);
+                        updateSetting(setting.key, input.value);
+                      }}
+                      disabled={saving === setting.key}
+                      className="p-2.5 rounded-xl bg-luxe-accent/20 text-luxe-accent hover:bg-luxe-accent/30 transition-all disabled:opacity-50"
+                      title="Save"
+                    >
+                      {saving === setting.key ? (
+                        <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin" />
+                      ) : (
+                        <Save className="w-4 h-4" />
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
             </motion.div>
-          ))}
+          )})}
         </div>
 
         <div className="mt-8 pt-6 border-t border-white/10">
