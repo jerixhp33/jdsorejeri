@@ -90,7 +90,8 @@ export default async function HomePage() {
           <BestSellersData />
         </Suspense>
       </div>
-      
+
+        </div> {/* End of content z-10 wrapper */}
       </div> {/* End of Diwali Festive Theme Wrapper */}
 
       {/* Sidebar layout — desktop only */}
@@ -158,7 +159,6 @@ export default async function HomePage() {
       </div>
 
       <ContactSection />
-      </div>
     </>
   );
 }
