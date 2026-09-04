@@ -695,6 +695,12 @@ html {
   animation-play-state: running;
 }
 
+/* Vinayagar Chaturthi variant: saffron orange edge glow */
+.nav-edge-light--vinayagar::before {
+  background: conic-gradient(from var(--border-angle) at 50% 50%, transparent 60%, rgba(249, 115, 22, 0.3), rgba(251, 146, 60, 0.6), #f97316 100%);
+  animation-play-state: running;
+}
+
 @keyframes scan-down {
   0% { top: -100%; }
   100% { top: 100%; }

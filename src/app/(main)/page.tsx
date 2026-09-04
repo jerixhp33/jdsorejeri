@@ -12,6 +12,8 @@ import { getFeaturedProducts } from '@/lib/products';
 import { createPublicClient } from '@/lib/supabase/server';
 import { JDStoreAmbientBackground } from '@/components/ui/JDStoreAmbientBackground';
 import { DiwaliDecorations } from '@/components/hero/DiwaliDecorations';
+import { VinayagarDecorations } from '@/components/hero/VinayagarDecorations';
+import { getFestivalTheme } from '@/lib/festival-config';
 
 import { getActiveFlashSale } from '@/lib/flash-sales';
 import { FlashSaleTimerClient } from '@/components/layout/FlashSaleTimerClient';
@@ -23,7 +25,7 @@ export default async function HomePage() {
   const supabase = createPublicClient();
   
   // Fetch ONLY fast, layout-blocking data here to ensure rapid First Contentful Paint
-  const [banners, collections, marqueeLabels, flashSale, homeTheme, featuredProducts, festivalSetting] = await Promise.all([
+  const [banners, collections, marqueeLabels, flashSale, homeTheme, featuredProducts, festivalSetting, festivalTypeSetting] = await Promise.all([
     supabase.from('banners').select('*').eq('is_active', true).order('display_order').then(({ data }) => data || []),
     supabase.from('collections').select('*').eq('is_active', true).order('display_order').limit(4).then(({ data }) => data || []),
     supabase.from('marquee_labels').select('*').eq('is_active', true).order('order_index').then(({ data }) => data || []),
@@ -31,9 +33,12 @@ export default async function HomePage() {
     getActiveHomeTheme(),
     getFeaturedProducts(3),
     supabase.from('settings').select('*').eq('key', 'festival_theme_enabled').maybeSingle().then(({ data }) => data),
+    supabase.from('settings').select('*').eq('key', 'festival_type').maybeSingle().then(({ data }) => data),
   ]);
 
   const isFestivalEnabled = festivalSetting ? (festivalSetting.value === true || festivalSetting.value === 'true') : false;
+  const festivalType = festivalTypeSetting?.value as string | undefined;
+  const theme = getFestivalTheme(festivalType);
 
   const heroBanners    = banners.filter((b: any) => b.position === 'hero');
   const topBanners     = banners.filter((b: any) => b.position === 'top');
@@ -47,17 +52,21 @@ export default async function HomePage() {
         <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} themeConfig={homeTheme} />
       )}
       
-      {/* Diwali Festive Theme Wrapper (Navbar to Best Sellers) */}
+      {/* Festive Theme Wrapper (Navbar to Best Sellers) */}
       <div className={`relative w-full pb-4 lg:pb-8 ${isFestivalEnabled ? '-mt-24 pt-24 sm:-mt-28 sm:pt-28 md:-mt-32 md:pt-32' : ''}`}>
         
-        {/* Diwali Background & Decorations */}
+        {/* Festival Background & Decorations */}
         {isFestivalEnabled && (
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
             {/* Multi-stop gradient that naturally fades to page black */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#1a0605] via-[#2a0e10] via-[60%] to-transparent" />
+            <div className={`absolute inset-0 bg-gradient-to-b ${theme.gradientFrom} ${theme.gradientVia} via-[60%] to-transparent`} />
             {/* Warm radial ambient glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.12)_0%,rgba(0,0,0,0)_55%)]" />
-            <DiwaliDecorations />
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%]"
+              style={{ background: `radial-gradient(ellipse at center, ${theme.radialGlow} 0%, rgba(0,0,0,0) 55%)` }}
+            />
+            
+            {festivalType === 'vinayagar_chaturthi' ? <VinayagarDecorations /> : <DiwaliDecorations />}
           </div>
         )}
 

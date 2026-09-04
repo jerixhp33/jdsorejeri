@@ -3,7 +3,16 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-export function DiwaliParticles() {
+interface FestivalParticlesProps {
+  color?: string;
+  glow?: string;
+}
+
+/** Reusable particle engine — accepts custom color/glow for any festival */
+export function FestivalParticles({
+  color = '#fcd34d',
+  glow = 'rgba(252, 211, 77, 0.8)',
+}: FestivalParticlesProps) {
   const [particles, setParticles] = useState<Array<{ id: number; left: number; top: number; size: number; delay: number; duration: number }>>([]);
 
   useEffect(() => {
@@ -32,12 +41,14 @@ export function DiwaliParticles() {
       {particles.map((p) => (
         <motion.div
           key={p.id}
-          className="absolute bg-[#fcd34d] rounded-full shadow-[0_0_8px_rgba(252,211,77,0.8)] will-change-transform"
+          className="absolute rounded-full will-change-transform"
           style={{
             left: `${p.left}%`,
             top: `${p.top}%`,
             width: p.size,
             height: p.size,
+            backgroundColor: color,
+            boxShadow: `0 0 8px ${glow}`,
           }}
           initial={{ opacity: 0, y: 0 }}
           animate={{
@@ -55,4 +66,9 @@ export function DiwaliParticles() {
       ))}
     </div>
   );
+}
+
+/** Backwards-compatible Diwali-specific wrapper */
+export function DiwaliParticles() {
+  return <FestivalParticles color="#fcd34d" glow="rgba(252, 211, 77, 0.8)" />;
 }
