@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import type { Product } from '@/types';
 import { DiwaliHeroContent } from './DiwaliHeroContent';
 import { DiwaliHeroArtwork } from './DiwaliHeroArtwork';
+
+import { DiwaliDecorations } from './DiwaliDecorations';
 
 interface DiwaliHeroProps {
   products: Product[];
@@ -20,6 +23,15 @@ export const diwaliConfig = {
 
 export function DiwaliHero({ products }: DiwaliHeroProps) {
   const [mounted, setMounted] = useState(false);
+  const containerRef = useRef<HTMLElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+  const artworkY = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
 
   useEffect(() => {
     setMounted(true);
@@ -30,9 +42,13 @@ export function DiwaliHero({ products }: DiwaliHeroProps) {
   }
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#1a0b0c] min-h-[500px] lg:min-h-[600px] flex items-center py-12 lg:py-20">
-      {/* Background container for later */}
-      <div className="absolute inset-0 z-0 pointer-events-none" />
+    <section ref={containerRef} className="relative w-full overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] min-h-[500px] lg:min-h-[600px] flex items-center py-12 lg:py-20 border-b border-[#f59e0b]/20">
+      
+      {/* Background & Decorations with Parallax */}
+      <motion.div style={{ y: backgroundY }} className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.15)_0%,rgba(0,0,0,0)_60%)]" />
+        <DiwaliDecorations />
+      </motion.div>
 
       <div className="page-container relative z-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
@@ -42,10 +58,10 @@ export function DiwaliHero({ products }: DiwaliHeroProps) {
             <DiwaliHeroContent config={diwaliConfig} />
           </div>
 
-          {/* Right: Artwork */}
-          <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square flex items-center justify-center order-1 lg:order-2">
+          {/* Right: Artwork with Parallax */}
+          <motion.div style={{ y: artworkY }} className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square flex items-center justify-center order-1 lg:order-2">
             <DiwaliHeroArtwork products={products} />
-          </div>
+          </motion.div>
 
         </div>
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import type { Product } from '@/types';
 
 interface DiwaliHeroArtworkProps {
@@ -19,11 +20,21 @@ export function DiwaliHeroArtwork({ products }: DiwaliHeroArtworkProps) {
     <div className="relative w-full h-full min-h-[400px] flex items-center justify-center">
       
       {/* Decorative Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-[#f59e0b]/20 blur-[100px] rounded-full pointer-events-none" />
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2 }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-[#f59e0b]/20 blur-[100px] rounded-full pointer-events-none" 
+      />
 
       {/* Left Product */}
       {leftProduct && (
-        <div className="absolute z-10 w-[45%] lg:w-[50%] aspect-[3/4] -translate-x-[40%] -translate-y-[10%] -rotate-6 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#111]">
+        <motion.div 
+          initial={{ opacity: 0, x: -50, y: 50, rotate: 0 }}
+          animate={{ opacity: 1, x: 0, y: 0, rotate: -6 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+          className="absolute z-10 w-[45%] lg:w-[50%] aspect-[3/4] -translate-x-[40%] -translate-y-[10%] rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#111]"
+        >
           <Image
             src={leftProduct.images?.[0]?.url || ''}
             alt={leftProduct.name}
@@ -31,12 +42,17 @@ export function DiwaliHeroArtwork({ products }: DiwaliHeroArtworkProps) {
             className="object-cover opacity-80"
             sizes="(max-width: 768px) 30vw, 20vw"
           />
-        </div>
+        </motion.div>
       )}
 
       {/* Right Product */}
       {rightProduct && (
-        <div className="absolute z-10 w-[45%] lg:w-[50%] aspect-[3/4] translate-x-[40%] translate-y-[10%] rotate-6 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#111]">
+        <motion.div 
+          initial={{ opacity: 0, x: 50, y: 50, rotate: 0 }}
+          animate={{ opacity: 1, x: 0, y: 0, rotate: 6 }}
+          transition={{ duration: 0.8, delay: 0.75, ease: "easeOut" }}
+          className="absolute z-10 w-[45%] lg:w-[50%] aspect-[3/4] translate-x-[40%] translate-y-[10%] rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#111]"
+        >
           <Image
             src={rightProduct.images?.[0]?.url || ''}
             alt={rightProduct.name}
@@ -44,11 +60,16 @@ export function DiwaliHeroArtwork({ products }: DiwaliHeroArtworkProps) {
             className="object-cover opacity-80"
             sizes="(max-width: 768px) 30vw, 20vw"
           />
-        </div>
+        </motion.div>
       )}
 
       {/* Main Product */}
-      <div className="absolute z-20 w-[55%] lg:w-[60%] aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 bg-[#111]">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.88, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        className="absolute z-20 w-[55%] lg:w-[60%] aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 bg-[#111]"
+      >
         <Image
           src={mainProduct.images?.[0]?.url || ''}
           alt={mainProduct.name}
@@ -57,7 +78,7 @@ export function DiwaliHeroArtwork({ products }: DiwaliHeroArtworkProps) {
           className="object-cover"
           sizes="(max-width: 768px) 50vw, 30vw"
         />
-      </div>
+      </motion.div>
 
     </div>
   );
