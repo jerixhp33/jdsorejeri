@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import type { HomeThemeConfig } from '@/lib/theme';
 
 interface Props {
@@ -250,7 +251,7 @@ export function JDStoreAmbientBackground({
               className="w-full h-full object-cover"
             />
           ) : (
-            <img src={bgMediaUrl} alt="Background" className="w-full h-full object-cover" />
+            <Image src={bgMediaUrl} alt="Background" fill priority sizes="100vw" className="object-cover" />
           )}
           <div className="absolute inset-0 bg-black/40" />
         </div>

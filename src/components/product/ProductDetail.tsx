@@ -26,8 +26,10 @@ import { formatCurrency, cn } from '@/lib/utils';
 import { useFlashSale } from '@/hooks/useFlashSale';
 import type { Product, PosterSize, Review } from '@/types';
 import { toast } from 'sonner';
-import { VirtualTryOnModal } from './VirtualTryOnModal';
-import { ReviewFormModal } from './ReviewFormModal';
+import dynamic from 'next/dynamic';
+
+const VirtualTryOnModal = dynamic(() => import('./VirtualTryOnModal').then(mod => mod.VirtualTryOnModal), { ssr: false });
+const ReviewFormModal = dynamic(() => import('./ReviewFormModal').then(mod => mod.ReviewFormModal), { ssr: false });
 
 interface ProductDetailProps {
   product: Product;

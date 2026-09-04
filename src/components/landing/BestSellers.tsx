@@ -2,10 +2,12 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { ProductCard } from '@/components/product/ProductCard';
-import { QuickBuyOverlay } from '@/components/landing/QuickBuyOverlay';
+import dynamic from 'next/dynamic';
+const QuickBuyOverlay = dynamic(() => import('@/components/landing/QuickBuyOverlay').then(mod => mod.QuickBuyOverlay), { ssr: false });
 import type { Product } from '@/types';
 
 interface BestSellersProps {
@@ -285,11 +287,13 @@ function MobileCarousel({ products }: { products: Product[] }) {
                   {/* Product Image */}
                   <div className="relative aspect-[3/4] w-full bg-[#111]">
                     {img ? (
-                      <img
+                      <Image
                         src={img}
                         alt={product.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
+                        fill
+                        sizes="(max-width: 768px) 40vw, 30vw"
+                        priority={i < 4}
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full bg-white/5" />
