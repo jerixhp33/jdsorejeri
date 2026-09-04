@@ -48,12 +48,12 @@ export default async function HomePage() {
       )}
       
       {/* Diwali Festive Theme Wrapper (Navbar to Best Sellers) */}
-      <div className={`relative w-full overflow-hidden pb-4 lg:pb-8 ${isFestivalEnabled ? 'bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] -mt-24 pt-24 sm:-mt-28 sm:pt-28 md:-mt-32 md:pt-32' : ''}`}>
+      <div className={`relative w-full pb-4 lg:pb-8 ${isFestivalEnabled ? '-mt-24 pt-24 sm:-mt-28 sm:pt-28 md:-mt-32 md:pt-32' : ''}`}>
         
         {/* Diwali Background & Decorations */}
         {isFestivalEnabled && (
           <div 
-            className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+            className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12]"
             style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}
           >
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.15)_0%,rgba(0,0,0,0)_60%)]" />
