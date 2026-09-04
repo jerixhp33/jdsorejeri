@@ -1,4 +1,4 @@
-'use client';
+  'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
@@ -109,7 +109,7 @@ function DesktopGrid({ products }: { products: Product[] }) {
 }
 
 
-/* ─── Mobile Carousel (Auto-scrolling, lag-free) ─── */
+/* ─── Mobile Carousel (Auto-scrolling with center spotlight) ─── */
 function MobileCarousel({ products }: { products: Product[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef(null);
@@ -123,6 +123,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
   const isPausedRef = useRef(false);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollVelocityRef = useRef(0.5); // pixels per frame
+  const lastActiveRef = useRef(-1);
 
   // Get the stride (card width + gap)
   const getStride = useCallback(() => {
@@ -130,6 +131,34 @@ function MobileCarousel({ products }: { products: Product[] }) {
     if (!el || !el.children.length) return 0;
     const card = el.children[0] as HTMLElement;
     return card.offsetWidth + 8; // gap-2 = 8px
+  }, []);
+
+  // Apply center spotlight — GPU-only properties (transform, opacity, zIndex)
+  const applySpotlight = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const centerX = el.scrollLeft + el.clientWidth / 2;
+    const cards = el.children;
+
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i] as HTMLElement;
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const dist = Math.abs(centerX - cardCenter);
+      const maxDist = el.clientWidth * 0.6;
+
+      // 0 = far away, 1 = dead center
+      const focus = Math.max(0, Math.min(1, 1 - dist / maxDist));
+
+      // Center card: scale 1.08, lift up -14px, full opacity, z-50
+      // Side cards: scale 0.88, push down +6px, dim to 0.5 opacity, z-0
+      const scale = 0.88 + focus * 0.2;
+      const ty = (1 - focus) * 6 - focus * 14;
+      const op = 0.5 + focus * 0.5;
+
+      card.style.transform = `scale(${scale}) translateY(${ty}px)`;
+      card.style.opacity = String(op);
+      card.style.zIndex = focus > 0.5 ? '50' : '0';
+    }
   }, []);
 
   // Smoothly auto-scroll using rAF — no jank, no layout thrash
@@ -143,6 +172,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
     // Start in the middle set
     el.style.scrollBehavior = 'auto';
     el.scrollLeft = stride * itemCount;
+    applySpotlight();
 
     const tick = () => {
       if (!isPausedRef.current && el) {
@@ -153,12 +183,19 @@ function MobileCarousel({ products }: { products: Product[] }) {
         if (el.scrollLeft >= maxScroll) {
           el.scrollLeft -= stride * itemCount;
         }
+      }
 
-        // Update active dot (throttled via rounding)
-        const rawIndex = Math.round(el.scrollLeft / stride);
-        const normalizedIndex = ((rawIndex % itemCount) + itemCount) % itemCount;
+      // Always apply spotlight (even when paused, user might be swiping)
+      applySpotlight();
+
+      // Update active dot (only on change to avoid re-renders)
+      const rawIndex = Math.round(el.scrollLeft / stride);
+      const normalizedIndex = ((rawIndex % itemCount) + itemCount) % itemCount;
+      if (lastActiveRef.current !== normalizedIndex) {
+        lastActiveRef.current = normalizedIndex;
         setActiveIndex(normalizedIndex);
       }
+
       autoScrollRef.current = requestAnimationFrame(tick);
     };
 
@@ -169,7 +206,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
         cancelAnimationFrame(autoScrollRef.current);
       }
     };
-  }, [itemCount, getStride]);
+  }, [itemCount, getStride, applySpotlight]);
 
   // Pause auto-scroll on user interaction, resume after delay
   const pauseAutoScroll = useCallback(() => {
@@ -221,11 +258,11 @@ function MobileCarousel({ products }: { products: Product[] }) {
       >
         <div
           ref={scrollRef}
-          className="flex gap-2 overflow-x-auto px-[25vw] pb-6 pt-2 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-2 overflow-x-auto px-[25vw] pb-10 pt-6 items-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           style={{
             scrollPaddingInline: '25vw',
             WebkitOverflowScrolling: 'touch',
-            scrollSnapType: 'none', // Disable snap to prevent fighting with auto-scroll
+            scrollSnapType: 'none',
           }}
         >
           {allItems.map((product, i) => {
@@ -233,7 +270,10 @@ function MobileCarousel({ products }: { products: Product[] }) {
             return (
               <div
                 key={`bs-${product.id}-${i}`}
-                className="w-[50vw] flex-shrink-0 relative cursor-pointer"
+                className="w-[50vw] flex-shrink-0 relative cursor-pointer will-change-transform"
+                style={{
+                  transition: 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.25s ease',
+                }}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -283,11 +323,11 @@ function MobileCarousel({ products }: { products: Product[] }) {
       </motion.div>
 
       {/* Progress Dots */}
-      <div className="flex justify-center gap-1.5 mt-3 relative z-10">
+      <div className="flex justify-center gap-1.5 mt-1 relative z-10">
         {Array.from({ length: dotCount }).map((_, i) => (
           <div
             key={i}
-            className="h-1 rounded-full transition-all duration-400"
+            className="h-1 rounded-full"
             style={{
               width: activeIndex % dotCount === i ? 18 : 5,
               backgroundColor:
