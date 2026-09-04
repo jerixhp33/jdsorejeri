@@ -48,7 +48,7 @@ export default async function HomePage() {
       )}
       
       {/* Diwali Festive Theme Wrapper (Navbar to Best Sellers) */}
-      <div className={`relative w-full overflow-hidden pb-4 lg:pb-8 ${isFestivalEnabled ? 'bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12]' : ''}`}>
+      <div className={`relative w-full overflow-hidden pb-4 lg:pb-8 ${isFestivalEnabled ? 'bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] -mt-24 pt-24 sm:-mt-28 sm:pt-28 md:-mt-32 md:pt-32' : ''}`}>
         
         {/* Diwali Background & Decorations */}
         {isFestivalEnabled && (
