@@ -270,7 +270,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
             return (
               <div
                 key={`bs-${product.id}-${i}`}
-                className="w-[50vw] flex-shrink-0 relative cursor-pointer will-change-transform"
+                className="w-[38vw] flex-shrink-0 relative cursor-pointer will-change-transform"
                 style={{
                   transition: 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.25s ease',
                 }}
