@@ -22,7 +22,7 @@ export function DiwaliDecorations() {
 
       {/* Floating Diyas */}
       <motion.div
-        className="absolute left-[10%] bottom-[20%] w-16 h-16 pointer-events-none z-30"
+        className="absolute left-[10%] bottom-[20%] w-16 h-16 pointer-events-none z-0"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.8 }}
@@ -36,7 +36,7 @@ export function DiwaliDecorations() {
       </motion.div>
 
       <motion.div
-        className="absolute right-[15%] top-[15%] w-12 h-12 pointer-events-none z-30 hidden md:block"
+        className="absolute right-[15%] top-[15%] w-12 h-12 pointer-events-none z-0 hidden md:block"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.9 }}
@@ -50,7 +50,7 @@ export function DiwaliDecorations() {
       </motion.div>
 
       <motion.div
-        className="absolute right-[5%] bottom-[10%] w-24 h-24 pointer-events-none z-30"
+        className="absolute right-[5%] bottom-[10%] w-24 h-24 pointer-events-none z-0"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 1 }}
