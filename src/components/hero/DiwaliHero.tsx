@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import type { Product } from '@/types';
 import { DiwaliHeroContent } from './DiwaliHeroContent';
 import { DiwaliHeroArtwork } from './DiwaliHeroArtwork';
+import { DiwaliHeroMobileBlinkit } from './DiwaliHeroMobileBlinkit';
 
 import { DiwaliDecorations } from './DiwaliDecorations';
 
@@ -42,7 +43,9 @@ export function DiwaliHero({ products }: DiwaliHeroProps) {
   }
 
   return (
-    <section ref={containerRef} className="relative w-full overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] min-h-[500px] lg:min-h-[600px] flex items-center py-12 lg:py-20 border-b border-[#f59e0b]/20">
+    <>
+      <DiwaliHeroMobileBlinkit products={products} />
+      <section ref={containerRef} className="hidden md:flex relative w-full overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] min-h-[500px] lg:min-h-[600px] items-center py-12 lg:py-20 border-b border-[#f59e0b]/20">
       
       {/* Background & Decorations with Parallax */}
       <motion.div style={{ y: backgroundY }} className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -66,6 +69,7 @@ export function DiwaliHero({ products }: DiwaliHeroProps) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
