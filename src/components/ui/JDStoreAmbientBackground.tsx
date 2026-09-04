@@ -77,7 +77,7 @@ export function JDStoreAmbientBackground({
     // Preload & filter background pixels for ALL uploaded element images
     const loadPromises = rawUrls.map((url) => {
       return new Promise<HTMLCanvasElement | null>((resolve) => {
-        const rawImg = new Image();
+        const rawImg = new window.Image();
         rawImg.crossOrigin = 'anonymous';
         rawImg.src = url;
 
