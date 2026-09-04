@@ -270,7 +270,7 @@ function MobileCarousel({ products }: { products: Product[] }) {
             return (
               <div
                 key={`bs-${product.id}-${i}`}
-                className="w-[38vw] flex-shrink-0 relative cursor-pointer will-change-transform"
+                className="w-[40vw] flex-shrink-0 relative cursor-pointer will-change-transform"
                 style={{
                   transition: 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.25s ease',
                 }}
@@ -281,40 +281,27 @@ function MobileCarousel({ products }: { products: Product[] }) {
                   setQuickBuyProduct(product);
                 }}
               >
-                {/* Neon edge light */}
-                {img && (
-                  <div
-                    className="absolute -inset-[2px] z-20 rounded-[1.125rem] pointer-events-none opacity-80 mix-blend-screen"
-                    aria-hidden="true"
-                    style={{
-                      WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                      WebkitMaskComposite: 'xor',
-                      maskComposite: 'exclude',
-                      padding: '2px',
-                    }}
-                  >
-                    <img
-                      src={img}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover"
-                      style={{ filter: 'blur(3px) saturate(2)' }}
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-                
-                <div className="relative z-10 h-full pointer-events-none">
-                  {/* Live Sales Social Proof Badge */}
-                  <div className="absolute top-2 left-2 right-2 z-30 flex justify-between items-start">
-                    <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2 py-1 flex items-center gap-1.5 shadow-lg shadow-black/50">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
-                      <span className="text-[9px] font-medium text-white/90 whitespace-nowrap tracking-wide">
-                        {`Purchased ${((i * 7 + 13) % 24) + 2}m ago`}
-                      </span>
-                    </div>
+                <div className="rounded-2xl overflow-hidden bg-luxe-card border border-white/10 shadow-lg">
+                  {/* Product Image */}
+                  <div className="relative aspect-[3/4] w-full bg-[#111]">
+                    {img ? (
+                      <img
+                        src={img}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-white/5" />
+                    )}
                   </div>
 
-                  <ProductCard product={product} index={i % itemCount} />
+                  {/* Product Name Only */}
+                  <div className="px-3 py-2.5">
+                    <p className="text-white text-xs font-medium leading-snug line-clamp-1">
+                      {product.name}
+                    </p>
+                  </div>
                 </div>
               </div>
             );
