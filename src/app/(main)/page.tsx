@@ -11,7 +11,7 @@ import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
 import { getFeaturedProducts } from '@/lib/products';
 import { createPublicClient } from '@/lib/supabase/server';
 import { JDStoreAmbientBackground } from '@/components/ui/JDStoreAmbientBackground';
-import { DiwaliHero } from '@/components/hero/DiwaliHero';
+import { DiwaliDecorations } from '@/components/hero/DiwaliDecorations';
 
 import { getActiveFlashSale } from '@/lib/flash-sales';
 import { FlashSaleTimerClient } from '@/components/layout/FlashSaleTimerClient';
@@ -42,7 +42,16 @@ export default async function HomePage() {
     <>
       <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} themeConfig={homeTheme} />
       
-      <div className="relative z-10">
+      {/* Diwali Festive Theme Wrapper (Navbar to Best Sellers) */}
+      <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] border-b border-[#f59e0b]/20 pb-4 lg:pb-8">
+        
+        {/* Diwali Background & Decorations */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.15)_0%,rgba(0,0,0,0)_60%)]" />
+          <DiwaliDecorations />
+        </div>
+
+        <div className="relative z-10">
         {flashSale && (
           <div className="px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto w-full relative z-20 -mb-6 mt-4">
             <div className="w-full overflow-hidden bg-white/10 backdrop-blur-xl text-white border-t border-x border-white/20 rounded-t-3xl md:rounded-t-[2.5rem] py-2 shadow-lg">
@@ -62,9 +71,10 @@ export default async function HomePage() {
             </div>
           </div>
         )}
-        {/* Diwali Hero */}
-        <div className="relative z-10 w-full mb-1 lg:mb-2 mt-4 lg:mt-6">
-          <DiwaliHero products={featuredProducts.slice(0, 3)} />
+
+        {/* Hero-position banners */}
+        <div className="relative z-10">
+          <BannersSection banners={heroBanners} isAttachedTop={!!flashSale} />
         </div>
 
       {/* Top banners */}
@@ -80,6 +90,8 @@ export default async function HomePage() {
           <BestSellersData />
         </Suspense>
       </div>
+      
+      </div> {/* End of Diwali Festive Theme Wrapper */}
 
       {/* Sidebar layout — desktop only */}
       <div className="page-container lg:flex lg:gap-6 mb-4 lg:mb-6">
