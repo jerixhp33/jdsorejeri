@@ -66,6 +66,8 @@ export const useCartStore = create<GlobalCartState>((set) => ({
   }),
 }));
 
+let cartFetchDebounceTimer: ReturnType<typeof setTimeout>;
+
 export function useCart() {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
@@ -166,6 +168,13 @@ export function useCart() {
     }
   }, [profile, supabase, setCartData, setLoading, setHasFetched]);
 
+  const debouncedFetchCart = useCallback(() => {
+    clearTimeout(cartFetchDebounceTimer);
+    cartFetchDebounceTimer = setTimeout(() => {
+      fetchCart();
+    }, 800);
+  }, [fetchCart]);
+
   const resetStore = useCartStore((s) => s.resetStore);
 
   useEffect(() => {
@@ -185,7 +194,7 @@ export function useCart() {
       .channel(`cart-${cart.id}-${Math.random()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'cart_items', filter: `cart_id=eq.${cart.id}` }, () => {
         // Silently fetch in background to sync state without flickering
-        fetchCart();
+        debouncedFetchCart();
       });
       
     channel.subscribe();
@@ -303,13 +312,13 @@ export function useCart() {
       await supabase.from('carts').update({ updated_at: new Date().toISOString() }).eq('id', cartId);
       
       // Re-sync background silently
-      fetchCart();
+      debouncedFetchCart();
       queryClient.invalidateQueries({ queryKey: ['cart'] });
       if (!silent) toast.success('Added to cart');
     } catch (err) {
       if (!silent) toast.error('Failed to add to cart');
       console.error(err);
-      fetchCart(); // Revert optimistic changes on error
+      debouncedFetchCart(); // Revert optimistic changes on error
     }
   };
 
@@ -319,7 +328,7 @@ export function useCart() {
     updateLocalQuantity(cartItemId, quantity);
     try {
       await supabase.from('cart_items').update({ quantity }).eq('id', cartItemId);
-      fetchCart();
+      debouncedFetchCart();
     } catch (err) {
       // Rollback on failure
       if (previousItem) updateLocalQuantity(cartItemId, previousItem.quantity);
@@ -333,7 +342,7 @@ export function useCart() {
     removeLocalItem(cartItemId);
     try {
       await supabase.from('cart_items').delete().eq('id', cartItemId);
-      fetchCart();
+      debouncedFetchCart();
       toast.success('Removed from cart');
     } catch (err) {
       // Rollback on failure
@@ -347,7 +356,7 @@ export function useCart() {
     if (!cart?.id) return;
     setCartData(cart, []);
     await supabase.from('cart_items').delete().eq('cart_id', cart.id);
-    fetchCart();
+    debouncedFetchCart();
   };
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);

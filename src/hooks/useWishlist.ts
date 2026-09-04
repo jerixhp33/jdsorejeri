@@ -25,15 +25,21 @@ export function useWishlist(): WishlistState {
 
   useEffect(() => {
     if (!profile) return;
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    
     const channel = supabase
       .channel(`wishlists-${profile.id}-${Math.random()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wishlists', filter: `user_id=eq.${profile.id}` }, () => {
-        queryClient.invalidateQueries({ queryKey: ['wishlist', profile.id] });
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['wishlist', profile.id] });
+        }, 800);
       });
       
     channel.subscribe();
       
     return () => {
+      clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
     };
   }, [profile, supabase, queryClient]);
