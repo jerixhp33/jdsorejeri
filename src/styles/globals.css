@@ -689,6 +689,12 @@ html {
   animation-play-state: running;
 }
 
+/* Festival variant: warm amber edge glow, always animating */
+.nav-edge-light--festival::before {
+  background: conic-gradient(from var(--border-angle) at 50% 50%, transparent 60%, rgba(245, 158, 11, 0.3), rgba(251, 191, 36, 0.6), #f59e0b 100%);
+  animation-play-state: running;
+}
+
 @keyframes scan-down {
   0% { top: -100%; }
   100% { top: 100%; }

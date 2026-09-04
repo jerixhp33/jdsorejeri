@@ -97,9 +97,10 @@ function NotifItem({
 interface NavbarProps {
   categories?: Category[];
   hasBanner?: boolean;
+  isFestival?: boolean;
 }
 
-export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
+export function Navbar({ categories = [], hasBanner = false, isFestival = false }: NavbarProps) {
   // Get unique product types from active categories, filtering out undefined/null
   const uniqueTypes = Array.from(new Set(categories.map(c => c?.product_type).filter(Boolean)));
   
@@ -298,13 +299,17 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
         <header
           className={cn(
             'w-full pointer-events-auto relative z-20 rounded-[2rem] transition-all duration-500',
-            scrolled
-              ? 'bg-white/[0.08] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-white/20'
-              : 'bg-black/40 backdrop-blur-md border border-white/[0.05] shadow-lg hover:bg-black/60 hover:border-white/10'
+            isFestival
+              ? scrolled
+                ? 'bg-[#1a0b0c]/70 backdrop-blur-2xl border border-amber-500/20 shadow-[0_8px_32px_rgba(245,158,11,0.15)] hover:bg-[#1a0b0c]/80 hover:border-amber-500/30'
+                : 'bg-[#1a0b0c]/50 backdrop-blur-md border border-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.1)] hover:bg-[#1a0b0c]/60 hover:border-amber-500/20'
+              : scrolled
+                ? 'bg-white/[0.08] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-white/20'
+                : 'bg-black/40 backdrop-blur-md border border-white/[0.05] shadow-lg hover:bg-black/60 hover:border-white/10'
           )}
         >
         {/* 1-minute sweeping edge light effect starting from left (270deg) */}
-        <div className="nav-edge-light" />
+        <div className={cn('nav-edge-light', isFestival && 'nav-edge-light--festival')} />
         
         <div className="px-4 sm:px-6 relative z-10">
           <div className="flex items-center justify-between h-12 sm:h-14 md:h-16">
@@ -588,15 +593,23 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
           scrolled ? "opacity-0 -translate-y-8 pointer-events-none" : "opacity-100 translate-y-0"
         )}
       >
-        <div className="w-[90%] bg-white/30 backdrop-blur-xl border border-white/40 text-black rounded-b-2xl sm:rounded-b-3xl overflow-hidden py-1.5 sm:py-2 lg:py-3 shadow-[0_10px_30px_rgba(0,0,0,0.1)] relative -mt-3 pt-4 -z-10">
+        <div className={cn(
+          'w-[90%] backdrop-blur-xl border rounded-b-2xl sm:rounded-b-3xl overflow-hidden py-1.5 sm:py-2 lg:py-3 relative -mt-3 pt-4 -z-10',
+          isFestival
+            ? 'bg-amber-900/40 border-amber-500/20 text-amber-100 shadow-[0_10px_30px_rgba(245,158,11,0.08)]'
+            : 'bg-white/30 border-white/40 text-black shadow-[0_10px_30px_rgba(0,0,0,0.1)]'
+        )}>
           <div className="flex whitespace-nowrap animate-marquee w-max" style={{ animationDuration: '40s' }}>
             <div className="flex shrink-0">
               {itemsToRender.map((item, i) => (
                 <span
                   key={`h1-${i}`}
-                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/90 text-[10px] sm:text-[11px] lg:text-sm tracking-[0.15em] lg:tracking-[0.2em] uppercase font-bold"
+                  className={cn(
+                    'inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-[10px] sm:text-[11px] lg:text-sm tracking-[0.15em] lg:tracking-[0.2em] uppercase font-bold',
+                    isFestival ? 'text-amber-100/90' : 'text-black/90'
+                  )}
                 >
-                  <Sparkles className="w-2.5 h-2.5 text-black/60" />
+                  <Sparkles className={cn('w-2.5 h-2.5', isFestival ? 'text-amber-400' : 'text-black/60')} />
                   {item}
                 </span>
               ))}
@@ -605,9 +618,12 @@ export function Navbar({ categories = [], hasBanner = false }: NavbarProps) {
               {itemsToRender.map((item, i) => (
                 <span
                   key={`h2-${i}`}
-                  className="inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-black/90 text-[10px] sm:text-[11px] lg:text-sm tracking-[0.15em] lg:tracking-[0.2em] uppercase font-bold"
+                  className={cn(
+                    'inline-flex items-center gap-4 sm:gap-5 px-4 sm:px-5 text-[10px] sm:text-[11px] lg:text-sm tracking-[0.15em] lg:tracking-[0.2em] uppercase font-bold',
+                    isFestival ? 'text-amber-100/90' : 'text-black/90'
+                  )}
                 >
-                  <Sparkles className="w-2.5 h-2.5 text-black/60" />
+                  <Sparkles className={cn('w-2.5 h-2.5', isFestival ? 'text-amber-400' : 'text-black/60')} />
                   {item}
                 </span>
               ))}

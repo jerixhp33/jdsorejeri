@@ -13,7 +13,7 @@ export function DiwaliParticles() {
 
     // Generate different amount based on screen size
     const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 8 : 25;
+    const particleCount = isMobile ? 5 : 25;
 
     const newParticles = Array.from({ length: particleCount }).map((_, i) => ({
       id: i,

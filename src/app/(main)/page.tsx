@@ -52,11 +52,11 @@ export default async function HomePage() {
         
         {/* Diwali Background & Decorations */}
         {isFestivalEnabled && (
-          <div 
-            className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12]"
-            style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}
-          >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.15)_0%,rgba(0,0,0,0)_60%)]" />
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            {/* Multi-stop gradient that naturally fades to page black */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#1a0605] via-[#2a0e10] via-[60%] to-transparent" />
+            {/* Warm radial ambient glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.12)_0%,rgba(0,0,0,0)_55%)]" />
             <DiwaliDecorations />
           </div>
         )}
