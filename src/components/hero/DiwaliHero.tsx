@@ -5,7 +5,6 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import type { Product } from '@/types';
 import { DiwaliHeroContent } from './DiwaliHeroContent';
 import { DiwaliHeroArtwork } from './DiwaliHeroArtwork';
-import { DiwaliHeroMobileBlinkit } from './DiwaliHeroMobileBlinkit';
 
 import { DiwaliDecorations } from './DiwaliDecorations';
 
@@ -43,9 +42,7 @@ export function DiwaliHero({ products }: DiwaliHeroProps) {
   }
 
   return (
-    <>
-      <DiwaliHeroMobileBlinkit products={products} />
-      <section ref={containerRef} className="hidden md:flex relative w-full overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] min-h-[500px] lg:min-h-[600px] items-center py-12 lg:py-20 border-b border-[#f59e0b]/20">
+    <section ref={containerRef} className="relative w-full overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] min-h-[500px] lg:min-h-[600px] flex items-center py-12 lg:py-20 border-b border-[#f59e0b]/20">
       
       {/* Background & Decorations with Parallax */}
       <motion.div style={{ y: backgroundY }} className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -69,13 +66,12 @@ export function DiwaliHero({ products }: DiwaliHeroProps) {
         </div>
       </div>
     </section>
-    </>
   );
 }
 
 function DiwaliHeroSkeleton() {
   return (
-    <section className="relative w-full bg-[#111] min-h-[500px] lg:min-h-[600px] flex items-center py-12 lg:py-20">
+    <section className="relative w-full overflow-hidden bg-gradient-to-br from-[#1a0b0c] to-[#2a0e12] min-h-[500px] lg:min-h-[600px] flex items-center py-12 lg:py-20 border-b border-[#f59e0b]/20">
       <div className="page-container relative z-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           
