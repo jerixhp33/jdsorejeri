@@ -20,9 +20,9 @@ export function VinayagarDecorations() {
         <Ganesha className="w-full h-full" />
       </motion.div>
 
-      {/* Floating Modak — left side */}
+      {/* Floating Modak — left side (Moved higher for header visibility on mobile) */}
       <motion.div
-        className="absolute left-[5%] md:left-[10%] bottom-[25%] w-8 h-8 md:w-14 md:h-14 pointer-events-none z-0 opacity-40 md:opacity-70"
+        className="absolute left-[5%] md:left-[10%] top-[25%] w-8 h-8 md:w-14 md:h-14 pointer-events-none z-0 opacity-40 md:opacity-70"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 0.5, y: 0 }}
         transition={{ duration: 1, delay: 0.8 }}
@@ -35,9 +35,9 @@ export function VinayagarDecorations() {
         </motion.div>
       </motion.div>
 
-      {/* Desktop-only Modak — top right */}
+      {/* Modak — top right (Made visible on mobile too) */}
       <motion.div
-        className="absolute right-[12%] top-[18%] w-10 h-10 pointer-events-none z-0 hidden md:block"
+        className="absolute right-[8%] top-[15%] w-8 h-8 md:w-10 md:h-10 pointer-events-none z-0 opacity-50 md:opacity-60"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 0.6, y: 0 }}
         transition={{ duration: 1, delay: 1 }}
@@ -48,6 +48,16 @@ export function VinayagarDecorations() {
         >
           <Modak className="w-full h-full drop-shadow-[0_0_15px_rgba(249,115,22,0.5)]" />
         </motion.div>
+      </motion.div>
+
+      {/* Small Ganesha silhouette — top left, visible on mobile now */}
+      <motion.div
+        className="absolute left-[2%] top-[12%] w-16 h-16 md:w-24 md:h-24 text-[#f97316] pointer-events-none z-0 opacity-15 md:opacity-12"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, ease: 'easeOut', delay: 0.6 }}
+      >
+        <Ganesha className="w-full h-full opacity-30" />
       </motion.div>
 
       {/* Bottom-right floating Modak — smaller on mobile */}
@@ -63,16 +73,6 @@ export function VinayagarDecorations() {
         >
           <Modak className="w-full h-full drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]" />
         </motion.div>
-      </motion.div>
-
-      {/* Small Ganesha silhouette — top left, desktop only */}
-      <motion.div
-        className="absolute left-[3%] top-[10%] w-24 h-24 text-[#f97316] pointer-events-none z-0 hidden lg:block"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 0.12, scale: 1 }}
-        transition={{ duration: 1.5, ease: 'easeOut', delay: 0.6 }}
-      >
-        <Ganesha className="w-full h-full" />
       </motion.div>
     </>
   );
