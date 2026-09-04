@@ -109,20 +109,22 @@ function DesktopGrid({ products }: { products: Product[] }) {
 }
 
 
-
-/* ─── Mobile Carousel ─── */
+/* ─── Mobile Carousel (Auto-scrolling, lag-free) ─── */
 function MobileCarousel({ products }: { products: Product[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef(null);
   const isInView = useInView(trackRef, { once: true, margin: '-40px' });
-  const isUserScrolling = useRef(false);
   const [quickBuyProduct, setQuickBuyProduct] = useState<Product | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const itemCount = products.length;
 
-  // 3 sets for seamless looping
-  const SETS = 3;
-  const allItems = Array.from({ length: SETS }, () => products).flat();
+  // Auto-scroll state refs (no re-renders)
+  const autoScrollRef = useRef<number | null>(null);
+  const isPausedRef = useRef(false);
+  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollVelocityRef = useRef(0.5); // pixels per frame
 
+  // Get the stride (card width + gap)
   const getStride = useCallback(() => {
     const el = scrollRef.current;
     if (!el || !el.children.length) return 0;
@@ -130,114 +132,84 @@ function MobileCarousel({ products }: { products: Product[] }) {
     return card.offsetWidth + 8; // gap-2 = 8px
   }, []);
 
-  // Apply curved focus styles directly to DOM — no React re-renders
-  const applyFocus = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const centerX = el.scrollLeft + el.clientWidth / 2;
-    const cards = el.querySelectorAll<HTMLElement>('[data-card]');
-
-    cards.forEach((card) => {
-      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-      const dist = Math.abs(centerX - cardCenter);
-      const maxDist = el.clientWidth * 0.55;
-      const focus = Math.max(0, Math.min(1, 1 - dist / maxDist));
-
-      const scale = 0.92 + focus * 0.08;
-      const blur = (1 - focus) * 1.5;
-      const ty = (1 - focus) * 6;
-      const op = 0.55 + focus * 0.45;
-
-      card.style.transform = `scale(${scale}) translateY(${ty}px)`;
-      card.style.filter = blur > 0.1 ? `blur(${blur}px)` : 'none';
-      card.style.opacity = String(op);
-    });
-  }, []);
-
-  // Initialize scroll position to set 1 (middle)
+  // Smoothly auto-scroll using rAF — no jank, no layout thrash
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || itemCount === 0) return;
-    requestAnimationFrame(() => {
-      const stride = getStride();
-      if (!stride) return;
-      el.style.scrollBehavior = 'auto';
-      el.scrollLeft = stride * itemCount;
-      applyFocus();
-      requestAnimationFrame(() => {
-        el.style.scrollBehavior = '';
-      });
-    });
-  }, [itemCount, getStride, applyFocus]);
 
-  // Track touch state to prevent reset during swipe
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onDown = () => { isUserScrolling.current = true; };
-    const onUp = () => { setTimeout(() => { isUserScrolling.current = false; }, 800); };
-    el.addEventListener('touchstart', onDown, { passive: true });
-    el.addEventListener('touchend', onUp, { passive: true });
-    return () => { el.removeEventListener('touchstart', onDown); el.removeEventListener('touchend', onUp); };
+    const stride = getStride();
+    if (!stride) return;
+
+    // Start in the middle set
+    el.style.scrollBehavior = 'auto';
+    el.scrollLeft = stride * itemCount;
+
+    const tick = () => {
+      if (!isPausedRef.current && el) {
+        el.scrollLeft += scrollVelocityRef.current;
+
+        // Loop reset: if we've scrolled past set 2, jump back to set 1
+        const maxScroll = stride * itemCount * 2;
+        if (el.scrollLeft >= maxScroll) {
+          el.scrollLeft -= stride * itemCount;
+        }
+
+        // Update active dot (throttled via rounding)
+        const rawIndex = Math.round(el.scrollLeft / stride);
+        const normalizedIndex = ((rawIndex % itemCount) + itemCount) % itemCount;
+        setActiveIndex(normalizedIndex);
+      }
+      autoScrollRef.current = requestAnimationFrame(tick);
+    };
+
+    autoScrollRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (autoScrollRef.current) {
+        cancelAnimationFrame(autoScrollRef.current);
+      }
+    };
+  }, [itemCount, getStride]);
+
+  // Pause auto-scroll on user interaction, resume after delay
+  const pauseAutoScroll = useCallback(() => {
+    isPausedRef.current = true;
+    if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+    pauseTimerRef.current = setTimeout(() => {
+      isPausedRef.current = false;
+    }, 3000); // Resume after 3s of inactivity
   }, []);
 
-  // Scroll handler — debounced loop reset, per-frame focus
+  // Touch handlers
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    let ticking = false;
-    let resetTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const doReset = () => {
-      if (!el || isUserScrolling.current) return;
-      const stride = getStride();
-      if (!stride) return;
-
-      const currentSnapIndex = Math.round(el.scrollLeft / stride);
-      let newSnapIndex = currentSnapIndex;
-      let needsReset = false;
-
-      if (currentSnapIndex >= itemCount * 2) {
-        newSnapIndex = currentSnapIndex - itemCount;
-        needsReset = true;
-      } else if (currentSnapIndex < itemCount) {
-        newSnapIndex = currentSnapIndex + itemCount;
-        needsReset = true;
-      }
-
-      if (needsReset) {
-        el.style.scrollSnapType = 'none';
-        el.style.scrollBehavior = 'auto';
-        el.scrollLeft = newSnapIndex * stride;
-        void el.offsetHeight;
-        el.style.scrollBehavior = '';
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            el.style.scrollSnapType = '';
-          });
-        });
-        applyFocus();
-      }
+    const onTouchStart = () => pauseAutoScroll();
+    const onTouchEnd = () => {
+      // Update active index after user swipe settles
+      setTimeout(() => {
+        const stride = getStride();
+        if (!stride) return;
+        const rawIndex = Math.round(el.scrollLeft / stride);
+        const normalizedIndex = ((rawIndex % itemCount) + itemCount) % itemCount;
+        setActiveIndex(normalizedIndex);
+      }, 150);
     };
 
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(() => {
-          ticking = false;
-          applyFocus();
-        });
-      }
-      if (resetTimer) clearTimeout(resetTimer);
-      resetTimer = setTimeout(doReset, 800);
-    };
-
-    el.addEventListener('scroll', onScroll, { passive: true });
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
     return () => {
-      el.removeEventListener('scroll', onScroll);
-      if (resetTimer) clearTimeout(resetTimer);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
     };
-  }, [itemCount, getStride, applyFocus]);
+  }, [pauseAutoScroll, getStride, itemCount]);
+
+  // 3 sets for seamless looping
+  const allItems = [...products, ...products, ...products];
+
+  const dotCount = Math.min(itemCount, 6);
 
   return (
     <div ref={trackRef} className="relative">
@@ -249,10 +221,11 @@ function MobileCarousel({ products }: { products: Product[] }) {
       >
         <div
           ref={scrollRef}
-          className="flex gap-2 overflow-x-auto snap-x snap-proximity px-[25vw] pb-6 pt-2 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-2 overflow-x-auto px-[25vw] pb-6 pt-2 items-end [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           style={{
             scrollPaddingInline: '25vw',
             WebkitOverflowScrolling: 'touch',
+            scrollSnapType: 'none', // Disable snap to prevent fighting with auto-scroll
           }}
         >
           {allItems.map((product, i) => {
@@ -260,12 +233,11 @@ function MobileCarousel({ products }: { products: Product[] }) {
             return (
               <div
                 key={`bs-${product.id}-${i}`}
-                data-card
-                className="w-[50vw] flex-shrink-0 snap-center will-change-transform relative cursor-pointer"
-                style={{ transition: 'transform 0.08s linear, filter 0.12s linear, opacity 0.12s linear' }}
+                className="w-[50vw] flex-shrink-0 relative cursor-pointer"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  pauseAutoScroll();
                   setQuickBuyProduct(product);
                 }}
               >
@@ -310,57 +282,26 @@ function MobileCarousel({ products }: { products: Product[] }) {
         </div>
       </motion.div>
 
-      <ScrollDots scrollRef={scrollRef} itemCount={itemCount} />
+      {/* Progress Dots */}
+      <div className="flex justify-center gap-1.5 mt-3 relative z-10">
+        {Array.from({ length: dotCount }).map((_, i) => (
+          <div
+            key={i}
+            className="h-1 rounded-full transition-all duration-400"
+            style={{
+              width: activeIndex % dotCount === i ? 18 : 5,
+              backgroundColor:
+                activeIndex % dotCount === i
+                  ? 'rgba(255, 255, 255, 0.9)'
+                  : 'rgba(255, 255, 255, 0.15)',
+              transition: 'width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s ease',
+            }}
+          />
+        ))}
+      </div>
 
       {/* Quick Buy Overlay */}
       <QuickBuyOverlay product={quickBuyProduct} onClose={() => setQuickBuyProduct(null)} />
-    </div>
-  );
-}
-
-/* ─── Scroll Progress Dots ─── */
-function ScrollDots({
-  scrollRef,
-  itemCount,
-}: {
-  scrollRef: React.RefObject<HTMLDivElement | null>;
-  itemCount: number;
-}) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const dotCount = Math.min(itemCount, 6);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const onScroll = () => {
-      const card = el.children[0] as HTMLElement | undefined;
-      if (!card) return;
-      const stride = card.offsetWidth + 8;
-      const rawIndex = Math.round(el.scrollLeft / stride);
-      setActiveIndex(((rawIndex % itemCount) + itemCount) % itemCount);
-    };
-
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
-  }, [scrollRef, itemCount]);
-
-  return (
-    <div className="flex justify-center gap-1.5 mt-3 relative z-10">
-      {Array.from({ length: dotCount }).map((_, i) => (
-        <div
-          key={i}
-          className="h-1 rounded-full"
-          style={{
-            width: activeIndex % dotCount === i ? 18 : 5,
-            backgroundColor:
-              activeIndex % dotCount === i
-                ? 'rgba(255, 255, 255, 0.9)'
-                : 'rgba(255, 255, 255, 0.15)',
-            transition: 'width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s ease',
-          }}
-        />
-      ))}
     </div>
   );
 }
