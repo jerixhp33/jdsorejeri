@@ -81,28 +81,6 @@ export function VinayagarDecorations() {
       >
         <Modak className="w-full h-full drop-shadow-[0_4px_8px_rgba(46,30,18,0.2)]" />
       </motion.div>
-
-      {/* Decorative Poster Product Cards (Below Marquee) */}
-      <motion.div
-        className="absolute top-[260px] sm:top-[290px] md:top-[330px] left-[2%] sm:left-[8%] md:left-[10%] w-[70px] sm:w-[100px] md:w-[120px] aspect-[2/3] bg-white rounded-xl p-1 shadow-xl -rotate-12 opacity-80 sm:opacity-100 z-10 will-change-transform"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1, y: [-5, 5, -5] }}
-        transition={{ y: { duration: 7, repeat: Infinity, ease: 'easeInOut' }, opacity: { duration: 1 }, scale: { duration: 1 } }}
-      >
-        <div className="w-full h-full bg-[#E5D5C5] rounded-lg overflow-hidden relative">
-          <Image src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&q=80" alt="Poster" fill className="object-cover opacity-80 mix-blend-multiply" />
-        </div>
-      </motion.div>
-      <motion.div
-        className="absolute top-[240px] sm:top-[270px] md:top-[310px] right-[2%] sm:right-[8%] md:right-[10%] w-[65px] sm:w-[90px] md:w-[100px] aspect-square bg-white rounded-xl p-1 shadow-xl rotate-6 opacity-80 sm:opacity-100 z-10 will-change-transform"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1, y: [-4, 4, -4] }}
-        transition={{ y: { duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }, opacity: { duration: 1 }, scale: { duration: 1 } }}
-      >
-        <div className="w-full h-full bg-[#D9945B] rounded-lg overflow-hidden relative">
-          <Image src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=80" alt="Vinyl" fill className="object-cover opacity-90 mix-blend-multiply" />
-        </div>
-      </motion.div>
     </div>
   );
 }

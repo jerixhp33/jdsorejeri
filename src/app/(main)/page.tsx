@@ -52,8 +52,8 @@ export default async function HomePage() {
         <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} themeConfig={homeTheme} />
       )}
       
-      {/* Festive Theme Wrapper (Navbar to Best Sellers) */}
-      <div className={`relative w-full pb-4 lg:pb-8 ${isFestivalEnabled ? '-mt-24 pt-24 sm:-mt-28 sm:pt-28 md:-mt-32 md:pt-32' : ''}`}>
+      {/* Festive Theme Wrapper (Best Sellers area) */}
+      <div className="relative w-full pb-4 lg:pb-8">
         
         {/* Festival Background & Decorations */}
         {isFestivalEnabled && (
