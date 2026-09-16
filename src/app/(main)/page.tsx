@@ -11,10 +11,7 @@ import { ProductGridSkeleton } from '@/components/product/ProductGridSkeleton';
 import { getFeaturedProducts } from '@/lib/products';
 import { createPublicClient } from '@/lib/supabase/server';
 import { JDStoreAmbientBackground } from '@/components/ui/JDStoreAmbientBackground';
-import { DiwaliDecorations } from '@/components/hero/DiwaliDecorations';
-import { VinayagarDecorations } from '@/components/hero/VinayagarDecorations';
-import { getFestivalTheme } from '@/lib/festival-config';
-
+import { FestivalLayoutFramework } from '@/components/hero/FestivalLayoutFramework';
 import { getActiveFlashSale } from '@/lib/flash-sales';
 import { FlashSaleTimerClient } from '@/components/layout/FlashSaleTimerClient';
 import { getActiveHomeTheme } from '@/lib/theme';
@@ -38,7 +35,6 @@ export default async function HomePage() {
 
   const isFestivalEnabled = festivalSetting ? (festivalSetting.value === true || festivalSetting.value === 'true') : false;
   const festivalType = festivalTypeSetting?.value as string | undefined;
-  const theme = getFestivalTheme(festivalType);
 
   const heroBanners    = banners.filter((b: any) => b.position === 'hero');
   const topBanners     = banners.filter((b: any) => b.position === 'top');
@@ -52,28 +48,8 @@ export default async function HomePage() {
         <JDStoreAmbientBackground variant="home" intensity="medium" interactive={true} themeConfig={homeTheme} />
       )}
       
-      {/* Festive Theme Wrapper (Navbar Top to Best Sellers) */}
-      <div className={`relative w-full pb-4 lg:pb-8 ${isFestivalEnabled ? '-mt-24 pt-24 sm:-mt-28 sm:pt-28 md:-mt-32 md:pt-32' : ''}`}>
-        
-        {/* Festival Background & Decorations */}
-        {isFestivalEnabled && (
-          <div className="absolute inset-0 z-[5] pointer-events-none overflow-hidden">
-            {/* Multi-stop gradient that naturally fades to page black (inline style — hex colors can't be Tailwind classes) */}
-            <div 
-              className="absolute inset-0"
-              style={{ background: `linear-gradient(to bottom, ${theme.gradientFrom} 0%, ${theme.gradientVia} 60%, transparent 100%)` }}
-            />
-            {/* Warm radial ambient glow */}
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%]"
-              style={{ background: `radial-gradient(ellipse at center, ${theme.radialGlow} 0%, rgba(0,0,0,0) 55%)` }}
-            />
-            
-            {festivalType === 'vinayagar_chaturthi' ? <VinayagarDecorations /> : <DiwaliDecorations />}
-          </div>
-        )}
-
-        <div className="relative z-[6]">
+      {/* Festival Layout Framework (Slot 0 -> Slot 5) */}
+      <FestivalLayoutFramework isFestivalEnabled={isFestivalEnabled} festivalType={festivalType}>
         {flashSale && (
           <div className="px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto w-full relative z-20 -mb-6 mt-4">
             <div className="w-full overflow-hidden bg-white/10 backdrop-blur-xl text-white border-t border-x border-white/20 rounded-t-3xl md:rounded-t-[2.5rem] py-2 shadow-lg">
@@ -113,8 +89,7 @@ export default async function HomePage() {
         </Suspense>
       </div>
 
-        </div> {/* End of content z-10 wrapper */}
-      </div> {/* End of Diwali Festive Theme Wrapper */}
+      </FestivalLayoutFramework>
 
       {/* Sidebar layout — desktop only */}
       <div className="page-container lg:flex lg:gap-6 mb-4 lg:mb-6">

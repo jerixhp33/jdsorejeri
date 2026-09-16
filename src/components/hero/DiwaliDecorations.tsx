@@ -19,16 +19,16 @@ export function DiwaliDecorations() {
       <DiwaliSparklers />
       <PetalParticles />
 
-      {/* Traditional Toran Header Garland — BELOW Navbar & Marquee */}
-      <div className="absolute top-[115px] sm:top-[135px] md:top-[155px] left-0 right-0 z-20">
+      {/* Traditional Toran Header Garland — Dedicated Slot ABOVE Hero Banner */}
+      <div className="absolute top-[75px] sm:top-[85px] md:top-[95px] left-0 right-0 z-20">
         <ToranGarland />
       </div>
 
-      {/* Traditional Hanging Akash Kandil Lanterns (Left & Right) */}
-      <div className="absolute top-[135px] sm:top-[155px] md:top-[175px] left-[3%] sm:left-[8%] md:left-[12%] w-10 sm:w-16 md:w-24 h-auto z-10 opacity-90 will-change-transform">
+      {/* Traditional Hanging Akash Kandil Lanterns (Outer Margins) */}
+      <div className="absolute top-[85px] sm:top-[95px] md:top-[105px] left-[1%] sm:left-[2%] md:left-[3%] w-9 sm:w-14 md:w-20 h-auto z-10 opacity-90 will-change-transform">
         <AkashKandil id="kandil-l" className="w-full h-full drop-shadow-[0_8px_16px_rgba(245,158,11,0.3)]" />
       </div>
-      <div className="absolute top-[135px] sm:top-[155px] md:top-[175px] right-[3%] sm:right-[8%] md:right-[12%] w-10 sm:w-16 md:w-24 h-auto z-10 opacity-90 will-change-transform">
+      <div className="absolute top-[85px] sm:top-[95px] md:top-[105px] right-[1%] sm:right-[2%] md:right-[3%] w-9 sm:w-14 md:w-20 h-auto z-10 opacity-90 will-change-transform">
         <AkashKandil id="kandil-r" className="w-full h-full drop-shadow-[0_8px_16px_rgba(245,158,11,0.3)]" />
       </div>
 

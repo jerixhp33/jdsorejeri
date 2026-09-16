@@ -13,8 +13,8 @@ import Image from 'next/image';
 export function VinayagarDecorations() {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-      {/* Traditional Toran Header Garland — BELOW Navbar & Marquee */}
-      <div className="absolute top-[115px] sm:top-[135px] md:top-[155px] left-0 right-0 z-20">
+      {/* Traditional Toran Header Garland — Dedicated Slot ABOVE Hero Banner */}
+      <div className="absolute top-[75px] sm:top-[85px] md:top-[95px] left-0 right-0 z-20">
         <ToranGarland />
       </div>
 
