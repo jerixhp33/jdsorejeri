@@ -207,6 +207,13 @@ export function Navbar({ categories = [], hasBanner = false, isFestival = false,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+
+  // Reset selectedIndex when suggestions change
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [suggestions]);
+
   // Focus search input when modal opens
   useEffect(() => {
     if (searchOpen) {
@@ -214,21 +221,38 @@ export function Navbar({ categories = [], hasBanner = false, isFestival = false,
     } else {
       setSearchQuery('');
       setSuggestions([]);
+      setSelectedIndex(-1);
     }
   }, [searchOpen]);
 
-  // Escape key closes search
+  // Keyboard navigation & shortcuts (Escape, Ctrl+K, ArrowUp, ArrowDown, Enter)
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && searchOpen) setSearchOpen(false);
       if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setSearchOpen(prev => !prev);
+        return;
+      }
+      if (!searchOpen) return;
+
+      if (e.key === 'Escape') {
+        setSearchOpen(false);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex(prev => Math.min(prev + 1, suggestions.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex(prev => Math.max(prev - 1, -1));
+      } else if (e.key === 'Enter' && selectedIndex >= 0 && suggestions[selectedIndex]) {
+        e.preventDefault();
+        router.push(`/product/${suggestions[selectedIndex].slug}`);
+        setSearchOpen(false);
+        setSearchQuery('');
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [searchOpen]);
+  }, [searchOpen, suggestions, selectedIndex, router]);
 
   // Lock body scroll and add class when mobile menu is open
   useEffect(() => {
@@ -947,8 +971,9 @@ export function Navbar({ categories = [], hasBanner = false, isFestival = false,
                             </p>
                           </div>
                           <div className="px-2 pb-3">
-                            {suggestions.map((item) => {
+                            {suggestions.map((item, idx) => {
                               const primaryImg = item.images?.find((img: any) => img.is_primary) || item.images?.[0];
+                              const isSelected = idx === selectedIndex;
                               return (
                                 <Link
                                   key={item.slug}
@@ -957,7 +982,12 @@ export function Navbar({ categories = [], hasBanner = false, isFestival = false,
                                     setSearchOpen(false);
                                     setSearchQuery('');
                                   }}
-                                  className="flex items-center gap-3.5 px-3 py-3 rounded-xl hover:bg-white/[0.04] transition-all duration-200 group"
+                                  className={cn(
+                                    "flex items-center gap-3.5 px-3 py-3 rounded-xl transition-all duration-200 group border border-transparent",
+                                    isSelected
+                                      ? "bg-white/10 border-luxe-accent/40 shadow-lg text-white"
+                                      : "hover:bg-white/[0.04]"
+                                  )}
                                 >
                                   <div className="w-12 h-12 rounded-xl bg-white/5 overflow-hidden flex-shrink-0 relative ring-1 ring-white/5">
                                     {primaryImg ? (

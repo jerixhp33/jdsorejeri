@@ -28,6 +28,7 @@ import { useFlashSale } from '@/hooks/useFlashSale';
 import type { Product, PosterSize, Review } from '@/types';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
+import { StickyMobileBuyBar } from './StickyMobileBuyBar';
 
 const VirtualTryOnModal = dynamic(() => import('./VirtualTryOnModal').then(mod => mod.VirtualTryOnModal), { ssr: false });
 const ReviewFormModal = dynamic(() => import('./ReviewFormModal').then(mod => mod.ReviewFormModal), { ssr: false });
@@ -563,7 +564,7 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
             {/* Attributes - Moved to Accordion */}
 
             {/* Add to Cart / Quantity Selector */}
-            <div className="flex flex-col gap-2 mb-6">
+            <div id="main-buy-button" className="flex flex-col gap-2 mb-6">
               <div className="flex items-center gap-3 h-[52px]">
                 {dbStock === 0 ? (
                   <button 
@@ -1012,6 +1013,12 @@ export function ProductDetail({ product, reviews, initialBundleProduct }: Produc
             </motion.div>
           )}
         </AnimatePresence>
+
+        <StickyMobileBuyBar 
+          product={product} 
+          selectedSizePrice={selectedSize?.price} 
+          selectedSizeName={selectedSize?.label} 
+        />
       </div>
     );
   }

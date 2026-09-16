@@ -119,7 +119,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               onLoad={() => setImageLoaded(true)}
               className={cn(
-                'object-cover transition-all duration-500 group-hover:scale-105',
+                'object-cover transition-all duration-500 group-hover:scale-105 transform-gpu',
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               )}
             />
@@ -171,7 +171,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           <button
             onClick={handleWishlist}
             className={cn(
-              'absolute top-2 right-2 z-10 p-2 rounded-full border transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center shadow-lg',
+              'absolute top-2 right-2 z-10 p-2 rounded-full border transition-all duration-300 active:scale-125 min-w-[36px] min-h-[36px] flex items-center justify-center shadow-lg',
               wishlisted
                 ? 'bg-red-500/20 border-red-500/60 text-red-500 backdrop-blur-md opacity-100 scale-105'
                 : 'bg-black/60 border-white/20 text-white hover:bg-black/80 sm:opacity-80 sm:group-hover:opacity-100'
@@ -179,8 +179,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            <Heart className={cn('w-4 h-4', wishlisted && 'fill-current text-red-500')} />
-          </button>
+            <Heart className={cn('w-4 h-4 transition-transform duration-200', wishlisted && 'fill-current text-red-500 scale-110')} />
+          </button>"
 
           {/* Add to cart (Only visible on hover/focus to keep poster artwork 100% clean) */}
           <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 flex">
