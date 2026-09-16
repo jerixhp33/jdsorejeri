@@ -141,7 +141,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased overflow-x-hidden" suppressHydrationWarning>
+      <body className="font-sans antialiased overflow-x-hidden touch-pan-y select-none sm:select-auto" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
