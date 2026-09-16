@@ -25,17 +25,17 @@ export interface FestivalTheme {
 
 export const FESTIVAL_THEMES: Record<FestivalType, FestivalTheme> = {
   diwali: {
-    gradientFrom: '#1a0605',
-    gradientVia: '#2a0e10',
-    radialGlow: 'rgba(220, 38, 38, 0.12)',
-    navbarScrolledClasses: 'bg-[#1a0b0c]/70 backdrop-blur-2xl border border-amber-500/20 shadow-[0_8px_32px_rgba(245,158,11,0.15)] hover:bg-[#1a0b0c]/80 hover:border-amber-500/30',
-    navbarUnscrolledClasses: 'bg-[#1a0b0c]/50 backdrop-blur-md border border-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.1)] hover:bg-[#1a0b0c]/60 hover:border-amber-500/20',
+    gradientFrom: '#FDFBF7',
+    gradientVia: '#FDFBF7',
+    radialGlow: 'rgba(217, 119, 6, 0.06)',
+    navbarScrolledClasses: 'bg-[#3D1412]/85 backdrop-blur-2xl border border-[#D97706]/30 shadow-[0_8px_32px_rgba(217,119,6,0.15)] hover:bg-[#3D1412]/95 hover:border-[#D97706]/40',
+    navbarUnscrolledClasses: 'bg-[#3D1412]/60 backdrop-blur-md border border-[#D97706]/20 shadow-[0_4px_20px_rgba(217,119,6,0.1)] hover:bg-[#3D1412]/80 hover:border-[#D97706]/30',
     marqueeClasses: 'bg-white/30 border-white/40 text-black shadow-[0_10px_30px_rgba(0,0,0,0.1)]',
     marqueeText: 'text-black/90',
     sparkleColor: 'text-black/60',
     edgeLightClass: 'nav-edge-light--festival',
-    particleColor: '#fcd34d',
-    particleGlow: 'rgba(252, 211, 77, 0.8)',
+    particleColor: '#F59E0B',
+    particleGlow: 'rgba(245, 158, 11, 0.4)',
   },
   vinayagar_chaturthi: {
     gradientFrom: '#FDFBF7',
