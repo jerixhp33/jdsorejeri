@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 export function SolidDiya({ className = "w-full h-full" }: { className?: string }) {
   return (
@@ -50,17 +51,28 @@ export function SolidDiya({ className = "w-full h-full" }: { className?: string 
       {/* Shadow Base */}
       <ellipse cx="100" cy="182" rx="65" ry="12" fill="#2E1E12" fillOpacity="0.25" />
 
-      {/* Flame Outer Shell */}
-      <path 
-        d="M100 20 C115 50 130 75 125 95 C120 115 108 122 100 122 C92 122 80 115 75 95 C70 75 85 50 100 20 Z" 
-        fill="url(#outerFlame)" 
-      />
+      {/* Flame Group with Organic Motion Flicker */}
+      <motion.g
+        style={{ transformOrigin: '100px 110px' }}
+        animate={{ 
+          scaleY: [1, 1.06, 0.97, 1.04, 0.98, 1],
+          skewX: [-1, 1.5, -1, 0.5, -0.5, -1],
+          opacity: [0.95, 1, 0.9, 1, 0.92, 0.95]
+        }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        {/* Flame Outer Shell */}
+        <path 
+          d="M100 20 C115 50 130 75 125 95 C120 115 108 122 100 122 C92 122 80 115 75 95 C70 75 85 50 100 20 Z" 
+          fill="url(#outerFlame)" 
+        />
 
-      {/* Flame Inner Core */}
-      <path 
-        d="M100 45 C108 65 116 80 112 95 C109 108 104 112 100 112 C96 112 91 108 88 95 C84 80 92 65 100 45 Z" 
-        fill="url(#innerFlame)" 
-      />
+        {/* Flame Inner Core */}
+        <path 
+          d="M100 45 C108 65 116 80 112 95 C109 108 104 112 100 112 C96 112 91 108 88 95 C84 80 92 65 100 45 Z" 
+          fill="url(#innerFlame)" 
+        />
+      </motion.g>
 
       {/* Diya Lamp Base - Solid Brass Bowl */}
       <path 
