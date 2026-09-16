@@ -7,6 +7,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Banner } from '@/types';
+import { Section3DTransition } from '@/components/shared/Section3DTransition';
 
 interface BannersSectionProps {
   banners: Banner[];
@@ -406,11 +407,13 @@ export function BannersSection({ banners, isAttachedTop }: BannersSectionProps) 
 
   return (
     <section className="px-4 md:px-8 lg:px-12 py-6 max-w-[1400px] mx-auto w-full">
-      {banners.length === 1 ? (
-        <SingleBanner banner={banners[0]} priority isAttachedTop={isAttachedTop} />
-      ) : (
-        <SliderBanners banners={banners} isAttachedTop={isAttachedTop} />
-      )}
+      <Section3DTransition preset="tilt-flip">
+        {banners.length === 1 ? (
+          <SingleBanner banner={banners[0]} priority isAttachedTop={isAttachedTop} />
+        ) : (
+          <SliderBanners banners={banners} isAttachedTop={isAttachedTop} />
+        )}
+      </Section3DTransition>
     </section>
   );
 }

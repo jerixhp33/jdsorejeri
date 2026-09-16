@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Shield, Truck, RefreshCw, Award, Headphones, Sparkles } from 'lucide-react';
+import { Section3DTransition } from '@/components/shared/Section3DTransition';
 
 const FEATURES = [
   {
@@ -39,56 +40,58 @@ const FEATURES = [
 export function WhyChooseUs() {
   return (
     <section className="py-2 lg:py-20">
-      <div className="page-container">
-        <div className="text-center mb-16">
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-luxe-accent text-sm tracking-widest uppercase mb-3"
-          >
-            Why JD
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="section-title mb-4 lg:text-4xl lg:font-display"
-          >
-            Crafted for the discerning
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="section-subtitle mx-auto"
-          >
-            We obsess over quality so you don't have to. From materials to packaging, every detail
-            is intentional.
-          </motion.p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">
-          {FEATURES.map((feature, i) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
+      <Section3DTransition preset="isometric-pillar">
+        <div className="page-container">
+          <div className="text-center mb-16">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className="rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group lg:p-8 lg:border-l-2 lg:border-luxe-accent lg:pl-6 will-change-transform transform-gpu"
+              className="text-luxe-accent text-sm tracking-widest uppercase mb-3"
             >
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex items-center justify-center mb-3 md:mb-5 group-hover:bg-luxe-accent/20 transition-colors">
-                <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-luxe-accent" />
-              </div>
-              <h3 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">{feature.title}</h3>
-              <p className="text-white/45 text-[11px] md:text-sm leading-relaxed">{feature.body}</p>
-            </motion.div>
-          ))}
+              Why JD
+            </motion.p>
+            <motion.h2
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="section-title mb-4 lg:text-4xl lg:font-display"
+            >
+              Crafted for the discerning
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="section-subtitle mx-auto"
+            >
+              We obsess over quality so you don't have to. From materials to packaging, every detail
+              is intentional.
+            </motion.p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10">
+            {FEATURES.map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group lg:p-8 lg:border-l-2 lg:border-luxe-accent lg:pl-6 will-change-transform transform-gpu"
+              >
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex items-center justify-center mb-3 md:mb-5 group-hover:bg-luxe-accent/20 transition-colors">
+                  <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-luxe-accent" />
+                </div>
+                <h3 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">{feature.title}</h3>
+                <p className="text-white/45 text-[11px] md:text-sm leading-relaxed">{feature.body}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
+      </Section3DTransition>
     </section>
   );
 }

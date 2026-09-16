@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { ProductCard } from '@/components/product/ProductCard';
 import type { Product } from '@/types';
+import { Section3DTransition } from '@/components/shared/Section3DTransition';
 
 interface DynamicShowcaseProps {
   products: Product[];
@@ -32,7 +33,8 @@ export function DynamicShowcase({ products }: DynamicShowcaseProps) {
     <>
       {Object.entries(grouped).map(([type, typeProducts]) => (
         <section key={type} className="py-2 mb-8 lg:mb-12">
-          <div>
+          <Section3DTransition preset="depth-arc">
+            <div>
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 md:mb-12">
               <div>
@@ -74,7 +76,8 @@ export function DynamicShowcase({ products }: DynamicShowcaseProps) {
                 <ProductCard key={product.id} product={product} index={i} />
               ))}
             </div>
-          </div>
+            </div>
+          </Section3DTransition>
         </section>
       ))}
     </>

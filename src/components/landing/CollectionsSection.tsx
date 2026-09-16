@@ -158,13 +158,15 @@ import { EffectCoverflow, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';
+import { Section3DTransition } from '@/components/shared/Section3DTransition';
 
 export function CollectionsSection({ collections }: CollectionsSectionProps) {
   if (!collections.length) return null;
 
   return (
     <section className="py-8 overflow-hidden">
-      <div className="page-container relative z-10">
+      <Section3DTransition preset="film-layer">
+        <div className="page-container relative z-10">
         <div className="text-center mb-10 md:mb-16">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -219,7 +221,8 @@ export function CollectionsSection({ collections }: CollectionsSectionProps) {
             View All Collections
           </Link>
         </div>
-      </div>
+        </div>
+      </Section3DTransition>
     </section>
   );
 }

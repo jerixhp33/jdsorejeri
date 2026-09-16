@@ -9,6 +9,7 @@ import { ProductCard } from '@/components/product/ProductCard';
 import dynamic from 'next/dynamic';
 const QuickBuyOverlay = dynamic(() => import('@/components/landing/QuickBuyOverlay').then(mod => mod.QuickBuyOverlay), { ssr: false });
 import type { Product } from '@/types';
+import { Section3DTransition } from '@/components/shared/Section3DTransition';
 
 interface BestSellersProps {
   products: Product[];
@@ -29,18 +30,20 @@ export function BestSellers({
 
   return (
     <section className="py-1 md:py-2">
-      <div className={noContainer ? '' : 'page-container'}>
-        {/* Header */}
-        <SectionHeader title={title} subtitle={subtitle} viewAllLink={viewAllLink} />
+      <Section3DTransition preset="card-fan">
+        <div className={noContainer ? '' : 'page-container'}>
+          {/* Header */}
+          <SectionHeader title={title} subtitle={subtitle} viewAllLink={viewAllLink} />
 
-        {/* Desktop: Grid — Mobile: Premium carousel */}
-        <div className="hidden md:block">
-          <DesktopGrid products={products} />
+          {/* Desktop: Grid — Mobile: Premium carousel */}
+          <div className="hidden md:block">
+            <DesktopGrid products={products} />
+          </div>
+          <div className="md:hidden">
+            <MobileCarousel products={products} />
+          </div>
         </div>
-        <div className="md:hidden">
-          <MobileCarousel products={products} />
-        </div>
-      </div>
+      </Section3DTransition>
     </section>
   );
 }

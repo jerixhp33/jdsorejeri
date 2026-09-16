@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { FAQ } from '@/types';
+import { Section3DTransition } from '@/components/shared/Section3DTransition';
 
 interface FAQSectionProps {
   faqs: FAQ[];
@@ -17,7 +18,8 @@ export function FAQSection({ faqs }: FAQSectionProps) {
 
   return (
     <section id="faq" className="py-2 lg:py-20">
-      <div className="page-container">
+      <Section3DTransition preset="unfold-fold">
+        <div className="page-container">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
             <motion.p
@@ -101,8 +103,9 @@ export function FAQSection({ faqs }: FAQSectionProps) {
               </motion.div>
             ))}
           </div>
+          </div>
         </div>
-      </div>
+      </Section3DTransition>
     </section>
   );
 }
