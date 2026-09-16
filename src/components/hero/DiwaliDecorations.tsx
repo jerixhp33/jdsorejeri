@@ -34,7 +34,7 @@ export function DiwaliDecorations() {
 
       {/* Large Background Rangoli — Centered via style (not Tailwind translate which Framer overrides) */}
       <motion.div 
-        className="absolute top-[170px] sm:top-[190px] md:top-[220px] w-[340px] sm:w-[700px] md:w-[980px] opacity-45 will-change-transform z-0"
+        className="absolute top-[170px] sm:top-[190px] md:top-[220px] w-[340px] sm:w-[700px] md:w-[980px] opacity-45 will-change-transform transform-gpu z-0"
         style={{ left: '50%', x: '-50%' }}
         animate={{ rotate: 360 }}
         transition={{ duration: 180, repeat: Infinity, ease: 'linear' }}
@@ -44,7 +44,7 @@ export function DiwaliDecorations() {
 
       {/* Main Brass Diya Focal Point — Centered via style */}
       <motion.div
-        className="absolute top-[210px] sm:top-[230px] md:top-[260px] w-[160px] sm:w-[240px] md:w-[320px] opacity-95 drop-shadow-[0_15px_30px_rgba(120,53,15,0.3)] z-10 will-change-transform"
+        className="absolute top-[210px] sm:top-[230px] md:top-[260px] w-[160px] sm:w-[240px] md:w-[320px] opacity-95 drop-shadow-[0_15px_30px_rgba(120,53,15,0.3)] z-10 will-change-transform transform-gpu"
         style={{ left: '50%', x: '-50%' }}
         animate={{ y: [-6, 6, -6], scale: [1, 1.02, 1] }}
         transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}

@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -16,20 +16,25 @@ export function Providers({ children }: { children: React.ReactNode }) {
     },
   }));
 
-  useEffect(() => {
-    let channel: any;
-    let supabaseClient: any;
+  const channelRef = useRef<any>(null);
+  const supabaseRef = useRef<any>(null);
 
-    // Dynamically import supabase client to avoid SSR issues
+  useEffect(() => {
+    let isCancelled = false;
+
     import('@/lib/supabase/client').then(async ({ createClient }) => {
+      if (isCancelled) return;
       const supabase = createClient();
-      supabaseClient = supabase;
+      supabaseRef.current = supabase;
 
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return; // Only subscribe if there's an authenticated user
+      if (!session || isCancelled) return;
 
-      // Global Realtime Sync: Automatically invalidate caches when DB changes
-      channel = supabase.channel(`global-sync-${Math.random()}`)
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+
+      const channel = supabase.channel('global-app-sync')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
           queryClient.invalidateQueries({ queryKey: ['orders'] });
         })
@@ -40,11 +45,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
           queryClient.invalidateQueries({ queryKey: ['notifications'] });
         })
         .subscribe();
+
+      channelRef.current = channel;
     });
 
     return () => {
-      if (supabaseClient && channel) {
-        supabaseClient.removeChannel(channel);
+      isCancelled = true;
+      if (supabaseRef.current && channelRef.current) {
+        supabaseRef.current.removeChannel(channelRef.current);
+        channelRef.current = null;
       }
     };
   }, [queryClient]);

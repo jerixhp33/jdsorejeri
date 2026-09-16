@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -14,11 +14,13 @@ export function MobileBottomNav() {
   const { itemCount } = useCart();
   const { user } = useAuth();
   
+  const [mounted, setMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
   const [wishlistEnabled, setWishlistEnabled] = useState(true);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     fetch('/api/store-settings')
       .then((res) => res.json())
       .then((data) => {
@@ -37,24 +39,24 @@ export function MobileBottomNav() {
       setIsVisible(false);
       
       // Clear existing timeout
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
       }
       
       // Show again after scrolling stops for 300ms
-      const timeout = setTimeout(() => {
+      scrollTimeoutRef.current = setTimeout(() => {
         setIsVisible(true);
       }, 300);
-      
-      setScrollTimeout(timeout);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
-  }, [scrollTimeout]);
+  }, []);
+
+  if (!mounted) return null;
 
   // Don't show bottom nav on checkout, admin, or dashboard routes
   if (pathname.includes('/checkout') || pathname.includes('/admin') || pathname.includes('/dashboard')) {
