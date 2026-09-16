@@ -9,6 +9,7 @@ import { useHaptic } from '@/hooks/useHaptic';
 import { useFlashSale } from '@/hooks/useFlashSale';
 import { formatCurrency, cn } from '@/lib/utils';
 import { MagneticButton } from '@/components/ui/MagneticButton';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import type { Product } from '@/types';
 
 interface QuickBuyOverlayProps {
@@ -69,13 +70,8 @@ export function QuickBuyOverlay({ product, onClose }: QuickBuyOverlayProps) {
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // Prevent body scroll when overlay is open
-  useEffect(() => {
-    if (product) {
-      document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = ''; };
-    }
-  }, [product]);
+  // Prevent body scroll when overlay is open (mobile position-fixed lock)
+  useScrollLock(!!product);
 
   const handleAddToCart = useCallback(async () => {
     if (!product || adding || !isInStock) return;
@@ -115,8 +111,11 @@ export function QuickBuyOverlay({ product, onClose }: QuickBuyOverlayProps) {
           className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-3 sm:p-4"
           onClick={onClose}
         >
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-xl" />
+          {/* Backdrop with touch lock */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-xl touch-none" 
+            onTouchMove={(e) => e.preventDefault()}
+          />
 
           {/* Panel */}
           <motion.div
@@ -125,14 +124,20 @@ export function QuickBuyOverlay({ product, onClose }: QuickBuyOverlayProps) {
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative z-10 w-full max-w-md mx-auto rounded-3xl bg-[#111]/95 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/60 overflow-hidden max-h-[78vh] sm:max-h-[90vh] flex flex-col mb-20 sm:mb-0"
+            className="relative z-10 w-full max-w-md mx-auto rounded-3xl bg-[#111] backdrop-blur-2xl border border-white/15 shadow-2xl shadow-black/80 overflow-hidden max-h-[82vh] sm:max-h-[90vh] flex flex-col mb-16 sm:mb-0"
           >
-            {/* Close button */}
+            {/* Mobile Sheet Drag Handle Pill */}
+            <div className="w-full flex justify-center pt-2.5 pb-1 sm:hidden bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-30 pointer-events-none">
+              <div className="w-12 h-1.5 rounded-full bg-white/40 shadow-sm" />
+            </div>
+
+            {/* High-Visibility Prominent Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-3 right-3 z-20 p-2 rounded-full bg-black/50 border border-white/10 text-white/70 hover:text-white transition-colors"
+              className="absolute top-3 right-3 z-40 w-10 h-10 rounded-full bg-black/80 border border-white/40 text-white shadow-2xl hover:bg-black active:scale-95 flex items-center justify-center transition-all"
+              aria-label="Close preview modal"
             >
-              <X size={18} />
+              <X size={20} strokeWidth={2.5} />
             </button>
 
             {/* Scrollable content */}
