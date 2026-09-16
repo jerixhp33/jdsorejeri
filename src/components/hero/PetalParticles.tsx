@@ -12,7 +12,7 @@ function PetalSVG({ color }: { color: string }) {
 }
 
 export function PetalParticles() {
-  const [petals, setPetals] = useState<Array<{ id: number; left: number; top: number; size: number; delay: number; duration: number; rotate: number; color: string }>>([]);
+  const [petals, setPetals] = useState<Array<{ id: number; left: number; top: number; size: number; delay: number; duration: number; rotate: number; color: string; xDrift: number; rotateEnd: number }>>([]);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -21,16 +21,21 @@ export function PetalParticles() {
     // The user requested "2-3 small floating flower petals" - let's render 4 or 5 max for subtlety
     const colors = ['#D96C32', '#E88B41', '#D9945B'];
     
-    const newPetals = Array.from({ length: 5 }).map((_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      top: 110 + Math.random() * 20, // start slightly below the screen
-      size: Math.random() * 8 + 12, // 12px to 20px
-      delay: Math.random() * 5,
-      duration: Math.random() * 5 + 8, // 8s to 13s (slow drift)
-      rotate: Math.random() * 360,
-      color: colors[Math.floor(Math.random() * colors.length)]
-    }));
+    const newPetals = Array.from({ length: 5 }).map((_, i) => {
+      const rotate = Math.random() * 360;
+      return {
+        id: i,
+        left: Math.random() * 100,
+        top: 110 + Math.random() * 20, // start slightly below the screen
+        size: Math.random() * 8 + 12, // 12px to 20px
+        delay: Math.random() * 5,
+        duration: Math.random() * 5 + 8, // 8s to 13s (slow drift)
+        rotate,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        xDrift: Math.random() > 0.5 ? 40 : -40,
+        rotateEnd: rotate + (Math.random() > 0.5 ? 180 : -180)
+      };
+    });
 
     setPetals(newPetals);
   }, []);
@@ -50,9 +55,9 @@ export function PetalParticles() {
           initial={{ opacity: 0, y: 0, rotate: p.rotate }}
           animate={{
             opacity: [0, 0.8, 0],
-            y: -300, // drift up slowly
-            x: Math.random() > 0.5 ? 40 : -40,
-            rotate: p.rotate + (Math.random() > 0.5 ? 180 : -180)
+            y: '-80vh', // drift up slowly
+            x: p.xDrift,
+            rotate: p.rotateEnd
           }}
           transition={{
             duration: p.duration,

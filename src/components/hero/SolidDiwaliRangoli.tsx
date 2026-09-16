@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function SolidDiwaliRangoli({ className = "w-full h-full" }: { className?: string }) {
+export function SolidDiwaliRangoli({ className = "w-full h-full", id = 'rangoli' }: { className?: string, id?: string }) {
   return (
     <svg 
       viewBox="0 0 600 600" 
@@ -9,26 +9,21 @@ export function SolidDiwaliRangoli({ className = "w-full h-full" }: { className?
       className={className}
     >
       <defs>
-        <radialGradient id="rangoliCenter" cx="300" cy="300" r="280" gradientUnits="userSpaceOnUse">
+        <radialGradient id={`${id}-rangoliCenter`} cx="300" cy="300" r="280" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#FBBF24" stopOpacity="0.4" />
           <stop offset="35%" stopColor="#F59E0B" stopOpacity="0.25" />
           <stop offset="70%" stopColor="#D97706" stopOpacity="0.1" />
           <stop offset="100%" stopColor="#78350F" stopOpacity="0" />
         </radialGradient>
 
-        <linearGradient id="petalTerracotta" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#B45309" />
-          <stop offset="100%" stopColor="#78350F" />
-        </linearGradient>
-
-        <linearGradient id="petalSaffron" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`${id}-petalSaffron`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#F59E0B" />
           <stop offset="100%" stopColor="#D97706" />
         </linearGradient>
       </defs>
 
       {/* Radial Background Tone */}
-      <circle cx="300" cy="300" r="280" fill="url(#rangoliCenter)" />
+      <circle cx="300" cy="300" r="280" fill={`url(#${id}-rangoliCenter)`} />
 
       {/* Outer Decorative Ring */}
       <circle cx="300" cy="300" r="260" stroke="#B45309" strokeWidth="2" strokeDasharray="6 6" opacity="0.4" />
@@ -42,7 +37,7 @@ export function SolidDiwaliRangoli({ className = "w-full h-full" }: { className?
           <g key={`outer-${i}`} transform={`rotate(${angle} 300 300)`}>
             <path 
               d="M300 50 C315 110 330 160 300 200 C270 160 285 110 300 50 Z" 
-              fill="url(#petalSaffron)" 
+              fill={`url(#${id}-petalSaffron)`} 
               opacity="0.3"
             />
             <circle cx="300" cy="65" r="5" fill="#B45309" opacity="0.6" />

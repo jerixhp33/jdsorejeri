@@ -5,12 +5,13 @@ import { motion } from 'framer-motion';
 
 export function ToranGarland() {
   return (
-    <div className="absolute top-0 left-0 right-0 w-full overflow-hidden z-20 pointer-events-none h-12 md:h-20">
+    <div className="w-full overflow-hidden z-20 pointer-events-none h-16 md:h-20">
       <motion.svg
         viewBox="0 0 1200 120"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full preserve-3d"
+        preserveAspectRatio="xMidYMin slice"
+        className="w-full h-full preserve-3d will-change-transform"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0, rotate: [-0.5, 0.5, -0.5] }}
         transition={{ 

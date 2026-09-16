@@ -57,9 +57,12 @@ export default async function HomePage() {
         
         {/* Festival Background & Decorations */}
         {isFestivalEnabled && (
-          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-            {/* Multi-stop gradient that naturally fades to page black */}
-            <div className={`absolute inset-0 bg-gradient-to-b ${theme.gradientFrom} ${theme.gradientVia} via-[60%] to-transparent`} />
+          <div className="absolute inset-0 z-[5] pointer-events-none overflow-hidden">
+            {/* Multi-stop gradient that naturally fades to page black (inline style — hex colors can't be Tailwind classes) */}
+            <div 
+              className="absolute inset-0"
+              style={{ background: `linear-gradient(to bottom, ${theme.gradientFrom} 0%, ${theme.gradientVia} 60%, transparent 100%)` }}
+            />
             {/* Warm radial ambient glow */}
             <div 
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%]"
@@ -70,7 +73,7 @@ export default async function HomePage() {
           </div>
         )}
 
-        <div className="relative z-10">
+        <div className="relative z-[6]">
         {flashSale && (
           <div className="px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto w-full relative z-20 -mb-6 mt-4">
             <div className="w-full overflow-hidden bg-white/10 backdrop-blur-xl text-white border-t border-x border-white/20 rounded-t-3xl md:rounded-t-[2.5rem] py-2 shadow-lg">

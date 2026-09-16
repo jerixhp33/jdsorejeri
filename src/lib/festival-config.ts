@@ -1,7 +1,7 @@
 export type FestivalType = 'diwali' | 'vinayagar_chaturthi';
 
 export interface FestivalTheme {
-  /** Background gradient classes (Tailwind) */
+  /** Background gradient hex color (used in inline CSS linear-gradient) */
   gradientFrom: string;
   gradientVia: string;
   /** Radial glow color for the ambient center */
@@ -25,11 +25,11 @@ export interface FestivalTheme {
 
 export const FESTIVAL_THEMES: Record<FestivalType, FestivalTheme> = {
   diwali: {
-    gradientFrom: '#FDFBF7',
-    gradientVia: '#FDFBF7',
-    radialGlow: 'rgba(217, 119, 6, 0.06)',
-    navbarScrolledClasses: 'bg-[#3D1412]/85 backdrop-blur-2xl border border-[#D97706]/30 shadow-[0_8px_32px_rgba(217,119,6,0.15)] hover:bg-[#3D1412]/95 hover:border-[#D97706]/40',
-    navbarUnscrolledClasses: 'bg-[#3D1412]/60 backdrop-blur-md border border-[#D97706]/20 shadow-[0_4px_20px_rgba(217,119,6,0.1)] hover:bg-[#3D1412]/80 hover:border-[#D97706]/30',
+    gradientFrom: '#FFF8F0',
+    gradientVia: '#FFF3E6',
+    radialGlow: 'rgba(217, 119, 6, 0.08)',
+    navbarScrolledClasses: 'bg-[#2C1810]/90 backdrop-blur-2xl border border-[#D97706]/30 shadow-[0_8px_32px_rgba(217,119,6,0.18)] hover:bg-[#2C1810]/95 hover:border-[#D97706]/40',
+    navbarUnscrolledClasses: 'bg-[#2C1810]/65 backdrop-blur-md border border-[#D97706]/20 shadow-[0_4px_20px_rgba(217,119,6,0.12)] hover:bg-[#2C1810]/80 hover:border-[#D97706]/30',
     marqueeClasses: 'bg-white/30 border-white/40 text-black shadow-[0_10px_30px_rgba(0,0,0,0.1)]',
     marqueeText: 'text-black/90',
     sparkleColor: 'text-black/60',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export function SolidDiya({ className = "w-full h-full" }: { className?: string }) {
+export function SolidDiya({ className = "w-full h-full", id = 'diya' }: { className?: string, id?: string }) {
   return (
     <svg 
       viewBox="0 0 200 200" 
@@ -11,7 +11,7 @@ export function SolidDiya({ className = "w-full h-full" }: { className?: string 
     >
       <defs>
         {/* Brass Diya Base Gradient */}
-        <linearGradient id="brassGradient" x1="20" y1="100" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${id}-brassGradient`} x1="20" y1="100" x2="180" y2="180" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#F59E0B" />
           <stop offset="40%" stopColor="#D97706" />
           <stop offset="70%" stopColor="#B45309" />
@@ -19,14 +19,14 @@ export function SolidDiya({ className = "w-full h-full" }: { className?: string 
         </linearGradient>
 
         {/* Diya Rim Highlight */}
-        <linearGradient id="brassHighlight" x1="30" y1="100" x2="170" y2="100" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${id}-brassHighlight`} x1="30" y1="100" x2="170" y2="100" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#FDE68A" />
           <stop offset="50%" stopColor="#F59E0B" />
           <stop offset="100%" stopColor="#92400E" />
         </linearGradient>
 
         {/* Outer Flame (Warm Saffron/Orange) */}
-        <linearGradient id="outerFlame" x1="100" y1="110" x2="100" y2="20" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${id}-outerFlame`} x1="100" y1="110" x2="100" y2="20" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#EF4444" />
           <stop offset="40%" stopColor="#F59E0B" />
           <stop offset="80%" stopColor="#FBBF24" />
@@ -34,14 +34,14 @@ export function SolidDiya({ className = "w-full h-full" }: { className?: string 
         </linearGradient>
 
         {/* Inner Flame (Pure Golden Yellow) */}
-        <linearGradient id="innerFlame" x1="100" y1="105" x2="100" y2="45" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${id}-innerFlame`} x1="100" y1="105" x2="100" y2="45" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#F59E0B" />
           <stop offset="60%" stopColor="#FDE047" />
           <stop offset="100%" stopColor="#FFFFFF" />
         </linearGradient>
 
         {/* Oil Pool Interior */}
-        <linearGradient id="oilPool" x1="40" y1="110" x2="160" y2="110" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${id}-oilPool`} x1="40" y1="110" x2="160" y2="110" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#78350F" />
           <stop offset="50%" stopColor="#B45309" />
           <stop offset="100%" stopColor="#451A03" />
@@ -53,7 +53,7 @@ export function SolidDiya({ className = "w-full h-full" }: { className?: string 
 
       {/* Flame Group with Organic Motion Flicker */}
       <motion.g
-        style={{ transformOrigin: '100px 110px' }}
+        style={{ transformOrigin: '100px 110px', transformBox: 'view-box' }}
         animate={{ 
           scaleY: [1, 1.06, 0.97, 1.04, 0.98, 1],
           skewX: [-1, 1.5, -1, 0.5, -0.5, -1],
@@ -64,31 +64,31 @@ export function SolidDiya({ className = "w-full h-full" }: { className?: string 
         {/* Flame Outer Shell */}
         <path 
           d="M100 20 C115 50 130 75 125 95 C120 115 108 122 100 122 C92 122 80 115 75 95 C70 75 85 50 100 20 Z" 
-          fill="url(#outerFlame)" 
+          fill={`url(#${id}-outerFlame)`} 
         />
 
         {/* Flame Inner Core */}
         <path 
           d="M100 45 C108 65 116 80 112 95 C109 108 104 112 100 112 C96 112 91 108 88 95 C84 80 92 65 100 45 Z" 
-          fill="url(#innerFlame)" 
+          fill={`url(#${id}-innerFlame)`} 
         />
       </motion.g>
 
       {/* Diya Lamp Base - Solid Brass Bowl */}
       <path 
         d="M25 110 C25 110 35 170 100 172 C165 170 175 110 175 110 C175 110 145 130 100 130 C55 130 25 110 25 110 Z" 
-        fill="url(#brassGradient)" 
+        fill={`url(#${id}-brassGradient)`} 
         stroke="#92400E" 
         strokeWidth="2" 
       />
 
       {/* Diya Inner Lip / Oil Well */}
-      <ellipse cx="100" cy="110" rx="75" ry="18" fill="url(#oilPool)" stroke="#D97706" strokeWidth="2" />
+      <ellipse cx="100" cy="110" rx="75" ry="18" fill={`url(#${id}-oilPool)`} stroke="#D97706" strokeWidth="2" />
 
       {/* Diya Rim Front Highlight */}
       <path 
         d="M25 110 C50 126 150 126 175 110 C155 122 45 122 25 110 Z" 
-        fill="url(#brassHighlight)" 
+        fill={`url(#${id}-brassHighlight)`} 
       />
 
       {/* Traditional Carved Pattern Detailing on Bowl */}
