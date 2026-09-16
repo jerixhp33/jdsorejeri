@@ -9,16 +9,11 @@ import { ToranGarland } from './ToranGarland';
 import { FloatingLotus } from './FloatingLotus';
 import { AkashKandil } from './AkashKandil';
 import { DiwaliSparklers } from './DiwaliSparklers';
-import { DiwaliAmbientSound } from './DiwaliAmbientSound';
 import Image from 'next/image';
 
 export function DiwaliDecorations() {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-      {/* Ambient Sound Toggle (pointer-events enabled on button itself) */}
-      <div className="pointer-events-auto">
-        <DiwaliAmbientSound />
-      </div>
 
       {/* Sparkler Embers & Floating Flower Petals */}
       <DiwaliSparklers />
