@@ -101,6 +101,21 @@ export function AdminSettingsView({ settings: initial }: AdminSettingsViewProps)
                     <span className="text-sm font-mono text-white/50">{valStr === 'true' ? 'ON' : 'OFF'}</span>
                     {saving === setting.key && <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin ml-2" />}
                   </div>
+                ) : setting.key === 'festival_type' ? (
+                  <div className="flex-1 flex items-center gap-3">
+                    <select
+                      value={valStr}
+                      onChange={(e) => updateSetting(setting.key, e.target.value)}
+                      disabled={saving === setting.key}
+                      className="input-luxe flex-1 text-sm font-mono cursor-pointer bg-[#1A1A1A] text-white border border-white/10 rounded-xl px-3 py-2 focus:outline-none focus:border-luxe-accent"
+                    >
+                      <option value="diwali" className="bg-[#1C1917] text-white">🪔 diwali (Diwali Theme)</option>
+                      <option value="vinayagar_chaturthi" className="bg-[#1C1917] text-white">🐘 vinayagar_chaturthi (Vinayagar Chaturthi)</option>
+                    </select>
+                    {saving === setting.key && (
+                      <div className="w-4 h-4 rounded-full border-2 border-luxe-accent/30 border-t-luxe-accent animate-spin ml-1" />
+                    )}
+                  </div>
                 ) : (
                   <>
                     <input
