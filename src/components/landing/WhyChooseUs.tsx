@@ -78,7 +78,7 @@ export function WhyChooseUs() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group lg:p-8 lg:border-l-2 lg:border-luxe-accent lg:pl-6"
+              className="rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group lg:p-8 lg:border-l-2 lg:border-luxe-accent lg:pl-6 will-change-transform transform-gpu"
             >
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-luxe-accent/10 border border-luxe-accent/20 flex items-center justify-center mb-3 md:mb-5 group-hover:bg-luxe-accent/20 transition-colors">
                 <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-luxe-accent" />

@@ -33,20 +33,22 @@ export function MobileBottomNav() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    let ticking = false;
     
     const handleScroll = () => {
-      // Hide on ANY scroll
-      setIsVisible(false);
-      
-      // Clear existing timeout
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsVisible(false);
+          if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+          }
+          scrollTimeoutRef.current = setTimeout(() => {
+            setIsVisible(true);
+          }, 300);
+          ticking = false;
+        });
+        ticking = true;
       }
-      
-      // Show again after scrolling stops for 300ms
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsVisible(true);
-      }, 300);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
