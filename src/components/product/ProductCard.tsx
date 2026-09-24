@@ -180,7 +180,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <Heart className={cn('w-4 h-4 transition-transform duration-200', wishlisted && 'fill-current text-red-500 scale-110')} />
-          </button>"
+          </button>
 
           {/* Add to cart (Only visible on hover/focus to keep poster artwork 100% clean) */}
           <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 flex">

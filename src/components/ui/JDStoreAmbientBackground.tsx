@@ -173,7 +173,7 @@ export function JDStoreAmbientBackground({
 
   if (prefersReducedMotion) {
     return (
-      <div className="fixed inset-0 z-0 bg-[#0a0a0a] pointer-events-none">
+      <div className="fixed inset-0 z-[-10] bg-[#0a0a0a] pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] to-[#0a0a0a]" />
       </div>
     );
@@ -233,12 +233,12 @@ export function JDStoreAmbientBackground({
       `}} />
 
       {/* Base Black Background */}
-      <div className="fixed inset-0 z-0 bg-[#0a0a0a] pointer-events-none" />
+      <div className="fixed inset-0 z-[-10] bg-[#0a0a0a] pointer-events-none" />
 
       {/* Full Home Background Media (Video or Image) */}
       {bgMediaUrl && (
         <div
-          className="fixed inset-0 z-[1] pointer-events-none overflow-hidden transition-opacity duration-1000"
+          className="fixed inset-0 z-[-9] pointer-events-none overflow-hidden transition-opacity duration-1000"
           style={{ opacity: bgOpacity }}
         >
           {bgMediaType === 'video' ? (
@@ -259,7 +259,7 @@ export function JDStoreAmbientBackground({
 
       {/* Full 4-Layer Dynamic Ambient Aura Glow */}
       <div 
-        className="absolute top-0 left-0 w-full h-[800px] z-[2] pointer-events-none transition-opacity duration-[2500ms] ease-out"
+        className="absolute top-0 left-0 w-full h-[800px] z-[-8] pointer-events-none transition-opacity duration-[2500ms] ease-out"
         style={{ opacity: mounted ? baseOpacity : 0 }}
       >
         {/* Layer 1: Color 1 (Default: Teal / Cyan) */}
@@ -300,7 +300,7 @@ export function JDStoreAmbientBackground({
       {hasElements && (
         <canvas
           ref={canvasRef}
-          className="fixed inset-0 z-[15] pointer-events-none overflow-hidden"
+          className="fixed inset-0 z-[-7] pointer-events-none overflow-hidden"
           style={{ opacity: mounted ? 1 : 0, transition: 'opacity 1s ease-in-out' }}
         />
       )}

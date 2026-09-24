@@ -301,6 +301,30 @@ function MobileCarousel({ products }: { products: Product[] }) {
                     ) : (
                       <div className="w-full h-full bg-white/5" />
                     )}
+
+                    {/* Badges / Tags */}
+                    <div className="absolute top-1.5 left-1.5 z-10 flex flex-col gap-1">
+                      {product.price > 0 && product.compare_at_price && product.price < product.compare_at_price && (
+                        <span className="inline-block px-1.5 py-0.5 rounded-full bg-luxe-accent text-black text-[9px] font-extrabold tracking-wider uppercase shadow-md">
+                          Sale
+                        </span>
+                      )}
+                      {product.is_best_seller && (
+                        <span className="inline-block px-1.5 py-0.5 rounded-full bg-[#1a150f]/90 border border-luxe-accent/30 text-luxe-accent text-[9px] font-semibold tracking-wider uppercase shadow-md">
+                          Best Seller
+                        </span>
+                      )}
+                      {product.is_trending && (
+                        <span className="inline-block px-1.5 py-0.5 rounded-full bg-black/70 border border-white/20 text-white text-[9px] font-semibold tracking-wider uppercase shadow-md">
+                          Trending
+                        </span>
+                      )}
+                      {(!product.stock || product.stock <= 0) && (
+                        <span className="inline-block px-1.5 py-0.5 rounded-full bg-[#200505]/90 border border-red-500/30 text-red-400 text-[9px] font-semibold tracking-wider uppercase">
+                          Out of Stock
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Product Name Only */}
