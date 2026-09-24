@@ -304,11 +304,6 @@ function MobileCarousel({ products }: { products: Product[] }) {
 
                     {/* Badges / Tags */}
                     <div className="absolute top-1.5 left-1.5 z-10 flex flex-col gap-1">
-                      {(product.price ?? 0) > 0 && product.compare_at_price && (product.price ?? 0) < product.compare_at_price && (
-                        <span className="inline-block px-1.5 py-0.5 rounded-full bg-luxe-accent text-black text-[9px] font-extrabold tracking-wider uppercase shadow-md">
-                          Sale
-                        </span>
-                      )}
                       {product.is_best_seller && (
                         <span className="inline-block px-1.5 py-0.5 rounded-full bg-[#1a150f]/90 border border-luxe-accent/30 text-luxe-accent text-[9px] font-semibold tracking-wider uppercase shadow-md">
                           Best Seller
